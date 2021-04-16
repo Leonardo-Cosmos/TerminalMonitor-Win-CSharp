@@ -1,1 +1,1 @@
-# TerminalMonitor-Win-CSharp
+# TerminalMonitor for Windows
