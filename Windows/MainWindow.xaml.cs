@@ -1,4 +1,5 @@
 ﻿/* 2021/4/16 */
+using Newtonsoft.Json;
 using Ookii.Dialogs.Wpf;
 using System;
 using System.Collections.Concurrent;
@@ -18,6 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using TerminalMonitor.Parsers;
 using TerminalMonitor.Settings;
 
 namespace TerminalMonitor.Windows
@@ -29,8 +31,8 @@ namespace TerminalMonitor.Windows
     {
         private TerminalMonitorSetting setting;
 
-        private readonly ConcurrentQueue<string> terminalLineQueue = new ();
-        private readonly ObservableCollection<string> terminalLines = new ();
+        private readonly ConcurrentQueue<string> terminalTextQueue = new ();
+        private readonly ObservableCollection<TerminalListItem> terminalLines = new ();
 
         public MainWindow()
         {
@@ -75,18 +77,18 @@ namespace TerminalMonitor.Windows
             var timer = new DispatcherTimer();
             timer.Tick += (sender, e) => { 
             
-                while (!terminalLineQueue.IsEmpty)
+                while (!terminalTextQueue.IsEmpty)
                 {
-                    if (terminalLineQueue.TryDequeue(out var line))
+                    if (terminalTextQueue.TryDequeue(out var text))
                     {
-                        terminalLines.Add(line);
+                        terminalLines.Add(JsonParser.ParseTerminalLine(text));
                     }
                 }
 
                 if (task.IsCompleted)
                 {
                     timer.Stop();
-                    terminalLines.Add("Task is completed");
+                    terminalLines.Add(new() { PlainText = "Task is completed" });
                 }
 
             };
@@ -125,7 +127,7 @@ namespace TerminalMonitor.Windows
 
                     if (!String.IsNullOrEmpty(e.Data))
                     {
-                        terminalLineQueue.Enqueue(e.Data);
+                        terminalTextQueue.Enqueue(e.Data);
                     }
 
                 };
