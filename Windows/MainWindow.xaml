@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TerminalMonitor"
+        xmlns:local="clr-namespace:TerminalMonitor" 
+        xmlns:controls="clr-namespace:TerminalMonitor.Controls"
         mc:Ignorable="d"
         Title="TerminalMonitor" Height="450" Width="800" Loaded="Window_Loaded" Closing="Window_Closing">
     <Grid>
@@ -41,29 +42,7 @@
         </Expander>
 
         <Expander Name="expanderFilter" Grid.Row="1" IsExpanded="True">
-            <Grid Name="gridFilter">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Label Name="labelField" Grid.Row="0" Content="Field" />
-                <Label Name="labelOperator" Grid.Row="1" Content="Operator" />
-                <Label Name="labelValue" Grid.Row="2" Content="Value" />
-                <ListView Name="listFilter" Grid.Row="3" Grid.ColumnSpan="3">
-                    <ListView.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel></WrapPanel>
-                        </ItemsPanelTemplate>
-                    </ListView.ItemsPanel>
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}" />
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </Grid>
+            <controls:FilterView />
         </Expander>
 
         <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" />
