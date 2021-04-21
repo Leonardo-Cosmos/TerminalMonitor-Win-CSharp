@@ -13,33 +13,62 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid Name="gridCommand" Grid.Row="0" Margin="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <Expander Name="expanderCommand" Grid.Row="0" IsExpanded="True">
+            <Grid Name="gridCommand" Margin="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-            <Label Name="labelCommand" Grid.Row="0" Grid.Column="0" Content="Command" />
-            <TextBox Name="textBoxCommand" Grid.Row="0" Grid.Column="1" />
-            <Button Name="buttonExecute" Grid.Row="0" Grid.Column="2" Margin="2" Content="Run" Click="ButtonExecute_Click" />
+                <Label Name="labelCommand" Grid.Row="0" Grid.Column="0" Content="Command" />
+                <TextBox Name="textBoxCommand" Grid.Row="0" Grid.Column="1" />
+                <Button Name="buttonExecute" Grid.Row="0" Grid.Column="2" Margin="2" Content="Run" Click="ButtonExecute_Click" />
 
-            <Label Name="labelArguments" Grid.Row="1" Grid.Column="0" Content="Arguments" />
-            <TextBox Name="textBoxArguments" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" />
+                <Label Name="labelArguments" Grid.Row="1" Grid.Column="0" Content="Arguments" />
+                <TextBox Name="textBoxArguments" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" />
 
-            <Label Name="labelWorkDir" Grid.Row="2" Grid.Column="0" Content="Working Directory" />
-            <TextBox Name="textBoxWorkDir" Grid.Row="2" Grid.Column="1" />
-            <Button Name="buttonBrowseWorkDir" Grid.Row="2" Grid.Column="2" Margin="2" Content="Browse" Click="ButtonBrowseWorkDir_Click" />
-        </Grid>
+                <Label Name="labelWorkDir" Grid.Row="2" Grid.Column="0" Content="Working Directory" />
+                <TextBox Name="textBoxWorkDir" Grid.Row="2" Grid.Column="1" />
+                <Button Name="buttonBrowseWorkDir" Grid.Row="2" Grid.Column="2" Margin="2" Content="Browse" Click="ButtonBrowseWorkDir_Click" />
+            </Grid>
+        </Expander>
 
-        <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
+        <Expander Name="expanderFilter" Grid.Row="1" IsExpanded="True">
+            <Grid Name="gridFilter">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Label Name="labelField" Grid.Row="0" Content="Field" />
+                <Label Name="labelOperator" Grid.Row="1" Content="Operator" />
+                <Label Name="labelValue" Grid.Row="2" Content="Value" />
+                <ListView Name="listFilter" Grid.Row="3" Grid.ColumnSpan="3">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel></WrapPanel>
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </Expander>
 
-        <ListView Name="listTerminal" Grid.Row="2">
+        <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" />
+
+        <ListView Name="listTerminal" Grid.Row="3">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
@@ -68,6 +97,6 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-
+        
     </Grid>
 </Window>
