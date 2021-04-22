@@ -14,7 +14,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Expander Name="expanderCommand" Grid.Row="0" IsExpanded="True">
+        <Expander Name="expanderCommand" Grid.Row="0" Header="Command" IsExpanded="True">
             <Grid Name="gridCommand" Margin="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -41,8 +41,8 @@
             </Grid>
         </Expander>
 
-        <Expander Name="expanderFilter" Grid.Row="1" IsExpanded="True">
-            <controls:FilterView />
+        <Expander Name="expanderFilter" Grid.Row="1" Header="Filters" IsExpanded="True">
+            <controls:FilterListView />
         </Expander>
 
         <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" />

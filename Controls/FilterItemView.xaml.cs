@@ -1,4 +1,4 @@
-﻿/* 2021/4/21 */
+﻿/* 2021/4/22 */
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,9 +19,9 @@ using System.Windows.Shapes;
 namespace TerminalMonitor.Controls
 {
     /// <summary>
-    /// Interaction logic for FilterView.xaml
+    /// Interaction logic for FilterItemView.xaml
     /// </summary>
-    public partial class FilterView : UserControl, INotifyPropertyChanged
+    public partial class FilterItemView : UserControl, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -29,30 +29,24 @@ namespace TerminalMonitor.Controls
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private string field;
+        private string fieldKey;
 
-        public string Field
+        public string FieldKey
         {
-            get
-            {
-                return field;
-            }
+            get { return fieldKey; }
 
             set
             {
-                field = value;
+                fieldKey = value;
                 OnPropertyChanged();
             }
         }
 
         private string compareOperator;
 
-        public string Operator
+        public string CompareOperator
         {
-            get
-            {
-                return compareOperator;
-            }
+            get { return compareOperator; }
 
             set
             {
@@ -61,9 +55,22 @@ namespace TerminalMonitor.Controls
             }
         }
 
-        public FilterView()
+        private string comparedValue;
+
+        public string ComparedValue
+        {
+            get { return comparedValue; }
+            set
+            {
+                comparedValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public FilterItemView()
         {
             InitializeComponent();
+            DataContext = this;
         }
     }
 }
