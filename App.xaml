@@ -4,6 +4,11 @@
              xmlns:local="clr-namespace:TerminalMonitor"
              StartupUri="Windows/MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources\StyleDictionary.xaml" />
+                <ResourceDictionary Source="Resources\ConverterDictionary.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

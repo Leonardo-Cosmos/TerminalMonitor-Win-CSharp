@@ -1,8 +1,9 @@
 ﻿/* 2021/4/22 */
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using TerminalMonitor.Checkers;
 
-namespace TerminalMonitor.Controls
+namespace TerminalMonitor.Windows.Controls
 {
     class FilterItemVO : INotifyPropertyChanged
     {
@@ -25,15 +26,15 @@ namespace TerminalMonitor.Controls
             }
         }
 
-        private string compareOperator;
+        private TextChecker.CheckOperator checkOperator;
 
-        public string CompareOperator
+        public TextChecker.CheckOperator CheckOperator
         {
-            get { return compareOperator; }
+            get { return checkOperator; }
 
             set
             {
-                compareOperator = value;
+                checkOperator = value;
                 OnPropertyChanged();
             }
         }

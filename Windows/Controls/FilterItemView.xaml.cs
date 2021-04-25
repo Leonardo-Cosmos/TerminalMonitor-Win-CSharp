@@ -16,7 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace TerminalMonitor.Controls
+namespace TerminalMonitor.Windows.Controls
 {
     /// <summary>
     /// Interaction logic for FilterItemView.xaml

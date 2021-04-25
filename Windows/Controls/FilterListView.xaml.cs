@@ -16,8 +16,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TerminalMonitor.Checkers;
 
-namespace TerminalMonitor.Controls
+namespace TerminalMonitor.Windows.Controls
 {
     /// <summary>
     /// Interaction logic for FilterListView.xaml
@@ -32,6 +33,7 @@ namespace TerminalMonitor.Controls
             InitializeComponent();
 
             DataContext = currentFilter;
+            cmbBxOperator.ItemsSource = Enum.GetValues(typeof(TextChecker.CheckOperator));
             lstFilters.ItemsSource = filters;
         }
 
@@ -40,7 +42,7 @@ namespace TerminalMonitor.Controls
             FilterItemVO item = new()
             {
                 FieldKey = currentFilter.FieldKey,
-                CompareOperator = currentFilter.CompareOperator,
+                CheckOperator = currentFilter.CheckOperator,
                 ComparedValue = currentFilter.ComparedValue,
             };
             filters.Add(item);
@@ -51,7 +53,7 @@ namespace TerminalMonitor.Controls
             if (lstFilters.SelectedItem is FilterItemVO selectedItem)
             {
                 selectedItem.FieldKey = currentFilter.FieldKey;
-                selectedItem.CompareOperator = currentFilter.CompareOperator;
+                selectedItem.CheckOperator = currentFilter.CheckOperator;
                 selectedItem.ComparedValue = currentFilter.ComparedValue;
             }
         }
@@ -69,12 +71,12 @@ namespace TerminalMonitor.Controls
             if (lstFilters.SelectedItem is FilterItemVO selectedItem)
             {
                 currentFilter.FieldKey = selectedItem.FieldKey;
-                currentFilter.CompareOperator = selectedItem.CompareOperator;
+                currentFilter.CheckOperator = selectedItem.CheckOperator;
                 currentFilter.ComparedValue = selectedItem.ComparedValue;
             } else
             {
                 currentFilter.FieldKey = String.Empty;
-                currentFilter.CompareOperator = String.Empty;
+                currentFilter.CheckOperator = TextChecker.CheckOperator.None;
                 currentFilter.ComparedValue = String.Empty;
             }
         }
