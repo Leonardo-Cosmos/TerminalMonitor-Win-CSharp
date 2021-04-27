@@ -17,6 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TerminalMonitor.Checkers;
+using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -27,6 +28,39 @@ namespace TerminalMonitor.Windows.Controls
     {
         private readonly FilterItemVO currentFilter = new();
         private readonly ObservableCollection<FilterItemVO> filters = new();
+
+        ReadOnlyCollection<Filter> Filters
+        {
+            get
+            {
+                return filters.Select(filterVo => new Filter()
+                {
+                    Condition = new TextCondition()
+                    {
+                        FieldKey = filterVo.FieldKey,
+                        CheckOperator = filterVo.CheckOperator,
+                        TargetValue = filterVo.TargetValue,
+                    },
+
+                    Excluded = false,
+                }).ToList().AsReadOnly();
+            }
+
+            set
+            {
+                filters.Clear();
+                if (value == null)
+                {
+                    return;
+                }
+                value.Select(filter => new FilterItemVO()
+                {
+                    FieldKey = filter.Condition?.FieldKey,
+                    CheckOperator = filter.Condition?.CheckOperator ?? TextChecker.CheckOperator.None,
+                    TargetValue = filter.Condition?.TargetValue,
+                }).ToList().ForEach(filterVO => filters.Add(filterVO));
+            }
+        }
 
         public FilterListView()
         {
@@ -43,7 +77,7 @@ namespace TerminalMonitor.Windows.Controls
             {
                 FieldKey = currentFilter.FieldKey,
                 CheckOperator = currentFilter.CheckOperator,
-                ComparedValue = currentFilter.ComparedValue,
+                TargetValue = currentFilter.TargetValue,
             };
             filters.Add(item);
         }
@@ -54,7 +88,7 @@ namespace TerminalMonitor.Windows.Controls
             {
                 selectedItem.FieldKey = currentFilter.FieldKey;
                 selectedItem.CheckOperator = currentFilter.CheckOperator;
-                selectedItem.ComparedValue = currentFilter.ComparedValue;
+                selectedItem.TargetValue = currentFilter.TargetValue;
             }
         }
 
@@ -72,12 +106,12 @@ namespace TerminalMonitor.Windows.Controls
             {
                 currentFilter.FieldKey = selectedItem.FieldKey;
                 currentFilter.CheckOperator = selectedItem.CheckOperator;
-                currentFilter.ComparedValue = selectedItem.ComparedValue;
+                currentFilter.TargetValue = selectedItem.TargetValue;
             } else
             {
                 currentFilter.FieldKey = String.Empty;
                 currentFilter.CheckOperator = TextChecker.CheckOperator.None;
-                currentFilter.ComparedValue = String.Empty;
+                currentFilter.TargetValue = String.Empty;
             }
         }
     }

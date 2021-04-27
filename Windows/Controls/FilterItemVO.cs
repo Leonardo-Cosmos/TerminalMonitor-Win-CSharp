@@ -39,14 +39,27 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private string comparedValue;
+        private string targetValue;
 
-        public string ComparedValue
+        public string TargetValue
         {
-            get { return comparedValue; }
+            get { return targetValue; }
             set
             {
-                comparedValue = value;
+                targetValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool excluded;
+
+        public bool Excluded
+        {
+            get { return excluded; }
+
+            set
+            {
+                excluded = value;
                 OnPropertyChanged();
             }
         }

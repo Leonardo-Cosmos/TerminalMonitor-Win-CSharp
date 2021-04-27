@@ -43,7 +43,7 @@
         </Grid>
 
         <Label Name="lblValue" Grid.Row="1" Grid.Column="0" Content="Value" />
-        <TextBox Name="txtBxValue" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding ComparedValue}" />
+        <TextBox Name="txtBxValue" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding TargetValue}" />
 
         <ListView Name="lstFilters" Grid.Row="3" Grid.ColumnSpan="4" SelectionMode="Single"
                   SelectionChanged="LstFilters_SelectionChanged">
@@ -58,7 +58,7 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{Binding FieldKey}" Margin="3" />
                             <TextBlock Text="{Binding CheckOperator, Converter={StaticResource CheckOperatorToStringConverter}}" Margin="3" />
-                            <TextBlock Text="{Binding ComparedValue}" Margin="3" />
+                            <TextBlock Text="{Binding TargetValue}" Margin="3" />
                         </StackPanel>
                     </Border>
                 </DataTemplate>
