@@ -29,11 +29,11 @@ namespace TerminalMonitor.Windows.Controls
         private readonly FilterItemVO currentFilter = new();
         private readonly ObservableCollection<FilterItemVO> filters = new();
 
-        ReadOnlyCollection<Filter> Filters
+        internal IReadOnlyList<FilterCondition> FilterConditions
         {
             get
             {
-                return filters.Select(filterVo => new Filter()
+                return filters.Select(filterVo => new FilterCondition()
                 {
                     Condition = new TextCondition()
                     {

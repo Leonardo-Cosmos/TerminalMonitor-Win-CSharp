@@ -41,9 +41,22 @@
             </Grid>
         </Expander>
 
-        <Expander Name="expanderFilter" Grid.Row="1" Header="Filters" IsExpanded="True">
-            <controls:FilterListView />
-        </Expander>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Expander Name="expanderFilter" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" Header="Filters" IsExpanded="True">
+                <controls:FilterListView Name="filterView" />
+            </Expander>
+            
+            <Button Name="buttonFilter" Grid.Row="0" Grid.Column="1" Panel.ZIndex="1" Content="Filter" Click="ButtonFilter_Click" />
+        </Grid>
 
         <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" />
 

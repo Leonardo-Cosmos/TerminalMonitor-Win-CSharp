@@ -12,14 +12,14 @@ namespace TerminalMonitor.Parsers
     static class JsonParser
     {
 
-        public static TerminalListItem ParseTerminalLine(string text)
+        public static TerminalTextVO ParseTerminalLine(string text)
         {
-            List<TerminalListItemField> parsedFields;
+            List<TerminalTextFieldVO> parsedFields;
             try
             {
                 var dict = JsonConvert.DeserializeObject<Dictionary<string, object>>(text);
                 parsedFields = dict.OrderBy(kvPair => kvPair.Key)
-                    .Select(kvPair => new TerminalListItemField()
+                    .Select(kvPair => new TerminalTextFieldVO()
                     {
                         Key = kvPair.Key,
                         Value = kvPair.Value.ToString(),
@@ -32,7 +32,7 @@ namespace TerminalMonitor.Parsers
                 parsedFields = new();
             }
 
-            return new TerminalListItem()
+            return new TerminalTextVO()
             {
                 PlainText = text,
                 ParsedFields = parsedFields,

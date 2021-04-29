@@ -16,6 +16,13 @@ namespace TerminalMonitor.Checkers
             Matches,
         }
 
+        /// <summary>
+        /// Check if text meets condition.
+        /// </summary>
+        /// <param name="text">Actual text.</param>
+        /// <param name="value">Target value.</param>
+        /// <param name="op">Operator of checking.</param>
+        /// <returns></returns>
         public static bool Check(string text, string value, CheckOperator op)
         {
             bool isPassed;

@@ -19,6 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using TerminalMonitor.Models;
 using TerminalMonitor.Parsers;
 using TerminalMonitor.Settings;
 
@@ -32,13 +33,16 @@ namespace TerminalMonitor.Windows
         private TerminalMonitorSetting setting;
 
         private readonly ConcurrentQueue<string> terminalTextQueue = new ();
-        private readonly ObservableCollection<TerminalListItem> terminalLines = new ();
+        private readonly List<string> terminalTextList = new();
+        private readonly ObservableCollection<TerminalTextVO> terminalLineVOs = new ();
+
+        private IReadOnlyList<FilterCondition> filterCondtions = new List<FilterCondition>(0);
 
         public MainWindow()
         {
             InitializeComponent();
 
-            listTerminal.ItemsSource = terminalLines;
+            listTerminal.ItemsSource = terminalLineVOs;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -81,14 +85,14 @@ namespace TerminalMonitor.Windows
                 {
                     if (terminalTextQueue.TryDequeue(out var text))
                     {
-                        terminalLines.Add(JsonParser.ParseTerminalLine(text));
+                        AddTerminalLine(text);
                     }
                 }
 
                 if (task.IsCompleted)
                 {
                     timer.Stop();
-                    terminalLines.Add(new() { PlainText = "Task is completed" });
+                    AddTerminalLine("Task is completed");
                 }
 
             };
@@ -139,6 +143,20 @@ namespace TerminalMonitor.Windows
                 await process.WaitForExitAsync();
                 process.Close();
             }
+        }
+
+        private void AddTerminalLine(string text)
+        {
+            terminalTextList.Add(text);
+
+            var terminalTextVO = JsonParser.ParseTerminalLine(text);
+
+            terminalLineVOs.Add(terminalTextVO);
+        }
+
+        private void ButtonFilter_Click(object sender, RoutedEventArgs e)
+        {
+            filterCondtions = filterView.FilterConditions;
         }
     }
 }
