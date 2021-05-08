@@ -20,32 +20,25 @@ namespace TerminalMonitor.Windows
 
         public List<TerminalTextFieldVO> ParsedFields { get; set; }
 
-        public bool Hidden { get; private set; }
-
-        public void Filter(IList<FilterCondition> filterConditions)
+        public bool IsMatch(IEnumerable<FilterCondition> filterConditions)
         {
             if (filterConditions == null)
             {
-                return;
+                return true;
             }
 
             bool included = filterConditions
                 .Where(filterCondition => !filterCondition.Excluded)
-                .All(filterCondition => Match(filterCondition.Condition));
+                .All(filterCondition => IsMatch(filterCondition.Condition));
 
             bool excluded = filterConditions
                 .Where(filterConditions => filterConditions.Excluded)
-                .Any(filterCondition => Match(filterCondition.Condition));
+                .Any(filterCondition => IsMatch(filterCondition.Condition));
 
-            var hidden = included && !excluded;
-
-            if (hidden != Hidden)
-            {
-                Hidden = hidden;
-            }
+            return included && !excluded;
         }
 
-        private bool Match(TextCondition condition)
+        private bool IsMatch(TextCondition condition)
         {
             if (condition == null)
             {

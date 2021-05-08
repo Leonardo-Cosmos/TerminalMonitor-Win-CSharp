@@ -33,8 +33,10 @@ namespace TerminalMonitor.Windows
         private TerminalMonitorSetting setting;
 
         private readonly ConcurrentQueue<string> terminalTextQueue = new ();
-        private readonly List<string> terminalTextList = new();
-        private readonly ObservableCollection<TerminalTextVO> terminalLineVOs = new ();
+        private readonly List<TerminalTextVO> allTerminalTextVOs = new();
+        private readonly ObservableCollection<TerminalTextVO> visibleTerminalTextVOs = new ();
+
+        private DispatcherTimer timer;
 
         private IReadOnlyList<FilterCondition> filterCondtions = new List<FilterCondition>(0);
 
@@ -42,7 +44,7 @@ namespace TerminalMonitor.Windows
         {
             InitializeComponent();
 
-            listTerminal.ItemsSource = terminalLineVOs;
+            listTerminal.ItemsSource = visibleTerminalTextVOs;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -73,14 +75,22 @@ namespace TerminalMonitor.Windows
 
         private void ButtonExecute_Click(object sender, RoutedEventArgs e)
         {
+            ClearTerminal();
+
             var command = textBoxCommand.Text;
             var arguments = textBoxArguments.Text;
             var workDir = textBoxWorkDir.Text;
             var task = ExecuteCommand(command, arguments: arguments, workingDirectory: workDir);
 
-            var timer = new DispatcherTimer();
-            timer.Tick += (sender, e) => { 
-            
+            StartTimer(task);
+        }
+
+        private void StartTimer(Task task)
+        {
+            timer = new();
+            timer.Tick += (sender, e) =>
+            {
+
                 while (!terminalTextQueue.IsEmpty)
                 {
                     if (terminalTextQueue.TryDequeue(out var text))
@@ -100,6 +110,16 @@ namespace TerminalMonitor.Windows
             timer.Start();
         }
 
+        private void PauseTimer()
+        {
+            timer.Stop();
+        }
+
+        private void ResumeTimer()
+        {
+            timer.Start();
+        }
+
         private void ButtonBrowseWorkDir_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new VistaFolderBrowserDialog();
@@ -107,6 +127,12 @@ namespace TerminalMonitor.Windows
             {
                 textBoxWorkDir.Text = dialog.SelectedPath;
             }
+        }
+
+        private void ButtonFilter_Click(object sender, RoutedEventArgs e)
+        {
+            filterCondtions = filterView.FilterConditions;
+            FilterTerminal(filterCondtions);
         }
 
         private async Task ExecuteCommand(string command, string arguments = null, string workingDirectory = null)
@@ -147,16 +173,35 @@ namespace TerminalMonitor.Windows
 
         private void AddTerminalLine(string text)
         {
-            terminalTextList.Add(text);
-
             var terminalTextVO = JsonParser.ParseTerminalLine(text);
+            allTerminalTextVOs.Add(terminalTextVO);
 
-            terminalLineVOs.Add(terminalTextVO);
+            if (terminalTextVO.IsMatch(filterCondtions))
+            {
+                visibleTerminalTextVOs.Add(terminalTextVO);
+            }
         }
 
-        private void ButtonFilter_Click(object sender, RoutedEventArgs e)
+        private void ClearTerminal()
         {
-            filterCondtions = filterView.FilterConditions;
+            allTerminalTextVOs.Clear();
+            visibleTerminalTextVOs.Clear();
+        }
+
+        private void FilterTerminal(IEnumerable<FilterCondition> filterConditions)
+        {
+            PauseTimer();
+
+            visibleTerminalTextVOs.Clear();
+            foreach (var terminalTextVO in allTerminalTextVOs)
+            {
+                if (terminalTextVO.IsMatch(filterConditions))
+                {
+                    visibleTerminalTextVOs.Add(terminalTextVO);
+                }
+            }
+
+            ResumeTimer();
         }
     }
 }
