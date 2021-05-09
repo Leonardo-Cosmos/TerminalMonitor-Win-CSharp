@@ -10,7 +10,6 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -41,54 +40,7 @@
             </Grid>
         </Expander>
 
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+        <controls:TerminalView x:Name="terminalView" Grid.Row="1" />
 
-            <Expander Name="expanderFilter" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" Header="Filters" IsExpanded="True">
-                <controls:FilterListView x:Name="filterView" />
-            </Expander>
-            
-            <Button Name="buttonFilter" Grid.Row="0" Grid.Column="1" Panel.ZIndex="1" Content="Filter" Click="ButtonFilter_Click" />
-        </Grid>
-
-        <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" />
-
-        <ListView Name="listTerminal" Grid.Row="3">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel>
-                        <Expander Header="{Binding PlainText}">
-                            <ListView ItemsSource="{Binding ParsedFields}">
-                                <ListView.Resources>
-                                    <Style TargetType="GridViewColumnHeader">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                    </Style>
-                                </ListView.Resources>
-                                <ListView.View>
-                                    <GridView>
-                                        <GridViewColumn Header="Key" DisplayMemberBinding="{Binding Key}" />
-                                        <GridViewColumn Header="Value">
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding Value}" TextWrapping="Wrap" />
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                    </GridView>
-                                </ListView.View>
-                            </ListView>
-                        </Expander>
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-        
     </Grid>
 </Window>
