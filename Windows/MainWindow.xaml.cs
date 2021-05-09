@@ -19,6 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using TerminalMonitor.Models;
 using TerminalMonitor.Parsers;
 using TerminalMonitor.Settings;
 
@@ -32,13 +33,18 @@ namespace TerminalMonitor.Windows
         private TerminalMonitorSetting setting;
 
         private readonly ConcurrentQueue<string> terminalTextQueue = new ();
-        private readonly ObservableCollection<TerminalListItem> terminalLines = new ();
+        private readonly List<TerminalTextVO> allTerminalTextVOs = new();
+        private readonly ObservableCollection<TerminalTextVO> visibleTerminalTextVOs = new ();
+
+        private DispatcherTimer timer;
+
+        private IReadOnlyList<FilterCondition> filterCondtions = new List<FilterCondition>(0);
 
         public MainWindow()
         {
             InitializeComponent();
 
-            listTerminal.ItemsSource = terminalLines;
+            listTerminal.ItemsSource = visibleTerminalTextVOs;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -69,30 +75,48 @@ namespace TerminalMonitor.Windows
 
         private void ButtonExecute_Click(object sender, RoutedEventArgs e)
         {
+            ClearTerminal();
+
             var command = textBoxCommand.Text;
             var arguments = textBoxArguments.Text;
             var workDir = textBoxWorkDir.Text;
             var task = ExecuteCommand(command, arguments: arguments, workingDirectory: workDir);
 
-            var timer = new DispatcherTimer();
-            timer.Tick += (sender, e) => { 
-            
+            StartTimer(task);
+        }
+
+        private void StartTimer(Task task)
+        {
+            timer = new();
+            timer.Tick += (sender, e) =>
+            {
+
                 while (!terminalTextQueue.IsEmpty)
                 {
                     if (terminalTextQueue.TryDequeue(out var text))
                     {
-                        terminalLines.Add(JsonParser.ParseTerminalLine(text));
+                        AddTerminalLine(text);
                     }
                 }
 
                 if (task.IsCompleted)
                 {
                     timer.Stop();
-                    terminalLines.Add(new() { PlainText = "Task is completed" });
+                    AddTerminalLine("Task is completed");
                 }
 
             };
             timer.Interval = new TimeSpan(0, 0, 1);
+            timer.Start();
+        }
+
+        private void PauseTimer()
+        {
+            timer.Stop();
+        }
+
+        private void ResumeTimer()
+        {
             timer.Start();
         }
 
@@ -103,6 +127,12 @@ namespace TerminalMonitor.Windows
             {
                 textBoxWorkDir.Text = dialog.SelectedPath;
             }
+        }
+
+        private void ButtonFilter_Click(object sender, RoutedEventArgs e)
+        {
+            filterCondtions = filterView.FilterConditions;
+            FilterTerminal(filterCondtions);
         }
 
         private async Task ExecuteCommand(string command, string arguments = null, string workingDirectory = null)
@@ -139,6 +169,39 @@ namespace TerminalMonitor.Windows
                 await process.WaitForExitAsync();
                 process.Close();
             }
+        }
+
+        private void AddTerminalLine(string text)
+        {
+            var terminalTextVO = JsonParser.ParseTerminalLine(text);
+            allTerminalTextVOs.Add(terminalTextVO);
+
+            if (terminalTextVO.IsMatch(filterCondtions))
+            {
+                visibleTerminalTextVOs.Add(terminalTextVO);
+            }
+        }
+
+        private void ClearTerminal()
+        {
+            allTerminalTextVOs.Clear();
+            visibleTerminalTextVOs.Clear();
+        }
+
+        private void FilterTerminal(IEnumerable<FilterCondition> filterConditions)
+        {
+            PauseTimer();
+
+            visibleTerminalTextVOs.Clear();
+            foreach (var terminalTextVO in allTerminalTextVOs)
+            {
+                if (terminalTextVO.IsMatch(filterConditions))
+                {
+                    visibleTerminalTextVOs.Add(terminalTextVO);
+                }
+            }
+
+            ResumeTimer();
         }
     }
 }

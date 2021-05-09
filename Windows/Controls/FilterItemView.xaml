@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="TerminalMonitor.Windows.Controls.FilterItemView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=local:FilterItemView}"
+             d:DesignHeight="50" d:DesignWidth="400">
+    <StackPanel Orientation="Horizontal">
+        <TextBlock Name="txtBlkField" Text="{Binding FieldKey}" />
+        <TextBlock Name="txtBlkOperator" Text="{Binding CompareOperator}" />
+        <TextBlock Name="txtBlkValue" Text="{Binding ComparedValue}" />
+    </StackPanel>
+</UserControl>
