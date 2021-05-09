@@ -1,5 +1,5 @@
 ﻿/* 2021/4/27 */
-using TerminalMonitor.Checkers;
+using TerminalMonitor.Matchers;
 
 namespace TerminalMonitor.Models
 {
@@ -8,7 +8,7 @@ namespace TerminalMonitor.Models
 
         public string FieldKey { get; set; }
 
-        public TextChecker.CheckOperator CheckOperator { get; set; }
+        public TextMatcher.MatchOperator MatchOperator { get; set; }
 
         public string TargetValue { get; set; }
 

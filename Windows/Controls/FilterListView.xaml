@@ -23,10 +23,10 @@
         <Label Name="lblField" Grid.Row="0" Grid.Column="0" Content="Key" />
         <TextBox Name="txtBxField" Grid.Row="0" Grid.Column="1" Text="{Binding Path=FieldKey}" />
 
-        <ComboBox Name="cmbBxOperator" Grid.Row="0" Grid.Column="2" SelectedValue="{Binding CheckOperator}">
+        <ComboBox Name="cmbBxOperator" Grid.Row="0" Grid.Column="2" SelectedValue="{Binding MatchOperator}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Converter={StaticResource CheckOperatorToStringConverter}}" />
+                    <TextBlock Text="{Binding Converter={StaticResource MatchOperatorToStringConverter}}" />
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
@@ -57,7 +57,7 @@
                     <Border BorderBrush="SkyBlue" BorderThickness="1">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{Binding FieldKey}" Margin="3" />
-                            <TextBlock Text="{Binding CheckOperator, Converter={StaticResource CheckOperatorToStringConverter}}" Margin="3" />
+                            <TextBlock Text="{Binding MatchOperator, Converter={StaticResource MatchOperatorToStringConverter}}" Margin="3" />
                             <TextBlock Text="{Binding TargetValue}" Margin="3" />
                         </StackPanel>
                     </Border>

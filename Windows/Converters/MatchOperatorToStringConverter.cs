@@ -7,27 +7,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
-using static TerminalMonitor.Checkers.TextChecker;
+using static TerminalMonitor.Matchers.TextMatcher;
 
 namespace TerminalMonitor.Windows.Converters
 {
-    class CheckOperatorToStringConverter : IValueConverter
+    class MatchOperatorToStringConverter : IValueConverter
     {
-        private static readonly ReadOnlyDictionary<CheckOperator, string> opTextDict = 
-            new(new Dictionary<CheckOperator, string>() {
-                { CheckOperator.None, "--" },
-                { CheckOperator.Equals, "equals"},
-                { CheckOperator.Contains, "contains" },
-                { CheckOperator.StartsWith, "starts with" },
-                { CheckOperator.EndsWith, "ends with" },
-                { CheckOperator.Matches, "matches" },
+        private static readonly ReadOnlyDictionary<MatchOperator, string> opTextDict = 
+            new(new Dictionary<MatchOperator, string>() {
+                { MatchOperator.None, "--" },
+                { MatchOperator.Equals, "equals"},
+                { MatchOperator.Contains, "contains" },
+                { MatchOperator.StartsWith, "starts with" },
+                { MatchOperator.EndsWith, "ends with" },
+                { MatchOperator.Matches, "matches" },
             });
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is CheckOperator checkOperator)
+            if (value is MatchOperator matchOperator)
             {
-                return opTextDict[checkOperator];
+                return opTextDict[matchOperator];
             }
             else
             {
@@ -43,7 +43,7 @@ namespace TerminalMonitor.Windows.Converters
                     .FirstOrDefault(kvPair => kvPair.Value.Equals(text, StringComparison.OrdinalIgnoreCase));
             } else
             {
-                return CheckOperator.None;
+                return MatchOperator.None;
             }
         }
     }

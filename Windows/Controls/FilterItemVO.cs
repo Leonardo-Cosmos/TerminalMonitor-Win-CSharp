@@ -1,7 +1,7 @@
 ﻿/* 2021/4/22 */
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using TerminalMonitor.Checkers;
+using TerminalMonitor.Matchers;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -26,15 +26,15 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private TextChecker.CheckOperator checkOperator;
+        private TextMatcher.MatchOperator matchOperator;
 
-        public TextChecker.CheckOperator CheckOperator
+        public TextMatcher.MatchOperator MatchOperator
         {
-            get { return checkOperator; }
+            get { return matchOperator; }
 
             set
             {
-                checkOperator = value;
+                matchOperator = value;
                 OnPropertyChanged();
             }
         }

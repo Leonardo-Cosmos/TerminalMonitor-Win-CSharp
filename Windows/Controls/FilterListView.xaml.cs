@@ -16,7 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TerminalMonitor.Checkers;
+using TerminalMonitor.Matchers;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
@@ -38,7 +38,7 @@ namespace TerminalMonitor.Windows.Controls
                     Condition = new TextCondition()
                     {
                         FieldKey = filterVo.FieldKey,
-                        CheckOperator = filterVo.CheckOperator,
+                        MatchOperator = filterVo.MatchOperator,
                         TargetValue = filterVo.TargetValue,
                     },
 
@@ -56,7 +56,7 @@ namespace TerminalMonitor.Windows.Controls
                 value.Select(filter => new FilterItemVO()
                 {
                     FieldKey = filter.Condition?.FieldKey,
-                    CheckOperator = filter.Condition?.CheckOperator ?? TextChecker.CheckOperator.None,
+                    MatchOperator = filter.Condition?.MatchOperator ?? TextMatcher.MatchOperator.None,
                     TargetValue = filter.Condition?.TargetValue,
                 }).ToList().ForEach(filterVO => filters.Add(filterVO));
             }
@@ -67,7 +67,7 @@ namespace TerminalMonitor.Windows.Controls
             InitializeComponent();
 
             DataContext = currentFilter;
-            cmbBxOperator.ItemsSource = Enum.GetValues(typeof(TextChecker.CheckOperator));
+            cmbBxOperator.ItemsSource = Enum.GetValues(typeof(TextMatcher.MatchOperator));
             lstFilters.ItemsSource = filters;
         }
 
@@ -76,7 +76,7 @@ namespace TerminalMonitor.Windows.Controls
             FilterItemVO item = new()
             {
                 FieldKey = currentFilter.FieldKey,
-                CheckOperator = currentFilter.CheckOperator,
+                MatchOperator = currentFilter.MatchOperator,
                 TargetValue = currentFilter.TargetValue,
             };
             filters.Add(item);
@@ -87,7 +87,7 @@ namespace TerminalMonitor.Windows.Controls
             if (lstFilters.SelectedItem is FilterItemVO selectedItem)
             {
                 selectedItem.FieldKey = currentFilter.FieldKey;
-                selectedItem.CheckOperator = currentFilter.CheckOperator;
+                selectedItem.MatchOperator = currentFilter.MatchOperator;
                 selectedItem.TargetValue = currentFilter.TargetValue;
             }
         }
@@ -105,12 +105,12 @@ namespace TerminalMonitor.Windows.Controls
             if (lstFilters.SelectedItem is FilterItemVO selectedItem)
             {
                 currentFilter.FieldKey = selectedItem.FieldKey;
-                currentFilter.CheckOperator = selectedItem.CheckOperator;
+                currentFilter.MatchOperator = selectedItem.MatchOperator;
                 currentFilter.TargetValue = selectedItem.TargetValue;
             } else
             {
                 currentFilter.FieldKey = String.Empty;
-                currentFilter.CheckOperator = TextChecker.CheckOperator.None;
+                currentFilter.MatchOperator = TextMatcher.MatchOperator.None;
                 currentFilter.TargetValue = String.Empty;
             }
         }

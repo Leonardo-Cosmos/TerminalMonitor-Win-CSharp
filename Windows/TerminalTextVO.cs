@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using TerminalMonitor.Checkers;
+using TerminalMonitor.Matchers;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows
@@ -45,7 +45,7 @@ namespace TerminalMonitor.Windows
                 return false;
             }
             var field = (ParsedFields ?? new()).FirstOrDefault(field => field.Key == condition.FieldKey);
-            return TextChecker.Check(field.Value, condition.TargetValue, condition.CheckOperator);
+            return TextMatcher.IsMatch(field.Value, condition.TargetValue, condition.MatchOperator);
         }
 
     }

@@ -1,12 +1,12 @@
 ﻿/* 2021/4/24 */
 using System.Text.RegularExpressions;
 
-namespace TerminalMonitor.Checkers
+namespace TerminalMonitor.Matchers
 {
-    static class TextChecker
+    static class TextMatcher
     {
 
-        public enum CheckOperator
+        public enum MatchOperator
         {
             None,
             Equals,
@@ -17,34 +17,34 @@ namespace TerminalMonitor.Checkers
         }
 
         /// <summary>
-        /// Check if text meets condition.
+        /// Indicates whether the text meets specified condition.
         /// </summary>
         /// <param name="text">Actual text.</param>
         /// <param name="value">Target value.</param>
-        /// <param name="op">Operator of checking.</param>
+        /// <param name="op">Operator of matching.</param>
         /// <returns></returns>
-        public static bool Check(string text, string value, CheckOperator op)
+        public static bool IsMatch(string text, string value, MatchOperator op)
         {
             bool isPassed;
             switch (op)
             {
-                case CheckOperator.Equals:
+                case MatchOperator.Equals:
                     isPassed = text.Equals(value);
                     break;
 
-                case CheckOperator.Contains:
+                case MatchOperator.Contains:
                     isPassed = text.Contains(value);
                     break;
 
-                case CheckOperator.StartsWith:
+                case MatchOperator.StartsWith:
                     isPassed = text.StartsWith(value);
                     break;
 
-                case CheckOperator.EndsWith:
+                case MatchOperator.EndsWith:
                     isPassed = text.EndsWith(value);
                     break;
 
-                case CheckOperator.Matches:
+                case MatchOperator.Matches:
                     Regex regex = new(value);
                     isPassed = regex.IsMatch(text);
                     break;
