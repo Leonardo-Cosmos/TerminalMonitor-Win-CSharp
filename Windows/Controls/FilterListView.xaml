@@ -11,6 +11,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -20,8 +21,8 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <Label Name="lblField" Grid.Row="0" Grid.Column="0" Content="Key" />
-        <TextBox Name="txtBxField" Grid.Row="0" Grid.Column="1" Text="{Binding Path=FieldKey}" />
+        <Label Name="lblKey" Grid.Row="0" Grid.Column="0" Content="Key" />
+        <TextBox Name="txtBxKey" Grid.Row="0" Grid.Column="1" Text="{Binding Path=FieldKey}" />
 
         <ComboBox Name="cmbBxOperator" Grid.Row="0" Grid.Column="2" SelectedValue="{Binding MatchOperator}">
             <ComboBox.ItemTemplate>
@@ -37,16 +38,18 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnAdd" Grid.Column="0" Click="BtnAdd_Click" Content="Add" />
-            <Button Name="btnUpdate" Grid.Column="1" Click="BtnUpdate_Click" Content="Update" />
-            <Button Name="btnDelete" Grid.Column="2" Click="BtnDelete_Click" Content="Delete" />
+            <Button Name="btnAdd" Grid.Column="0" Content="Add" Click="BtnAdd_Click" />
+            <Button Name="btnUpdate" Grid.Column="1" Content="Update" Click="BtnUpdate_Click" />
+            <Button Name="btnDelete" Grid.Column="2" Content="Delete" Click="BtnDelete_Click" />
         </Grid>
 
         <Label Name="lblValue" Grid.Row="1" Grid.Column="0" Content="Value" />
         <TextBox Name="txtBxValue" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding TargetValue}" />
 
-        <ListView Name="lstFilters" Grid.Row="3" Grid.ColumnSpan="4" SelectionMode="Single"
-                  SelectionChanged="LstFilters_SelectionChanged">
+        <Label Name="lblFilters" Grid.Row="2" Grid.Column="0" Content="Filters" />
+        
+        <ListView Name="lstFilters" Grid.Row="2" Grid.RowSpan="2" Grid.Column="1" Grid.ColumnSpan="3" MinHeight="20"
+                  SelectionMode="Single" SelectionChanged="LstFilters_SelectionChanged">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel></WrapPanel>

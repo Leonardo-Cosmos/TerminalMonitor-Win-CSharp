@@ -27,40 +27,8 @@ namespace TerminalMonitor.Windows.Controls
     public partial class FilterListView : UserControl
     {
         private readonly FilterItemVO currentFilter = new();
-        private readonly ObservableCollection<FilterItemVO> filters = new();
 
-        internal IReadOnlyList<FilterCondition> FilterConditions
-        {
-            get
-            {
-                return filters.Select(filterVo => new FilterCondition()
-                {
-                    Condition = new TextCondition()
-                    {
-                        FieldKey = filterVo.FieldKey,
-                        MatchOperator = filterVo.MatchOperator,
-                        TargetValue = filterVo.TargetValue,
-                    },
-
-                    Excluded = false,
-                }).ToList().AsReadOnly();
-            }
-
-            set
-            {
-                filters.Clear();
-                if (value == null)
-                {
-                    return;
-                }
-                value.Select(filter => new FilterItemVO()
-                {
-                    FieldKey = filter.Condition?.FieldKey,
-                    MatchOperator = filter.Condition?.MatchOperator ?? TextMatcher.MatchOperator.None,
-                    TargetValue = filter.Condition?.TargetValue,
-                }).ToList().ForEach(filterVO => filters.Add(filterVO));
-            }
-        }
+        private readonly ObservableCollection<FilterItemVO> filterVOs = new();
 
         public FilterListView()
         {
@@ -68,7 +36,7 @@ namespace TerminalMonitor.Windows.Controls
 
             DataContext = currentFilter;
             cmbBxOperator.ItemsSource = Enum.GetValues(typeof(TextMatcher.MatchOperator));
-            lstFilters.ItemsSource = filters;
+            lstFilters.ItemsSource = filterVOs;
         }
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
@@ -79,7 +47,7 @@ namespace TerminalMonitor.Windows.Controls
                 MatchOperator = currentFilter.MatchOperator,
                 TargetValue = currentFilter.TargetValue,
             };
-            filters.Add(item);
+            filterVOs.Add(item);
         }
 
         private void BtnUpdate_Click(object sender, RoutedEventArgs e)
@@ -96,7 +64,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             if (lstFilters.SelectedValue is FilterItemVO selectedItem)
             {
-                filters.Remove(selectedItem);
+                filterVOs.Remove(selectedItem);
             }
         }
 
@@ -107,11 +75,45 @@ namespace TerminalMonitor.Windows.Controls
                 currentFilter.FieldKey = selectedItem.FieldKey;
                 currentFilter.MatchOperator = selectedItem.MatchOperator;
                 currentFilter.TargetValue = selectedItem.TargetValue;
-            } else
+            }
+            else
             {
                 currentFilter.FieldKey = String.Empty;
                 currentFilter.MatchOperator = TextMatcher.MatchOperator.None;
                 currentFilter.TargetValue = String.Empty;
+            }
+        }
+
+        internal IEnumerable<FilterCondition> FilterConditions
+        {
+            get
+            {
+                return filterVOs.Select(filterVO => new FilterCondition()
+                {
+                    Condition = new TextCondition()
+                    {
+                        FieldKey = filterVO.FieldKey,
+                        MatchOperator = filterVO.MatchOperator,
+                        TargetValue = filterVO.TargetValue,
+                    },
+
+                    Excluded = false,
+                });
+            }
+
+            set
+            {
+                filterVOs.Clear();
+                if (value == null)
+                {
+                    return;
+                }
+                value.Select(filter => new FilterItemVO()
+                {
+                    FieldKey = filter.Condition?.FieldKey,
+                    MatchOperator = filter.Condition?.MatchOperator ?? TextMatcher.MatchOperator.None,
+                    TargetValue = filter.Condition?.TargetValue,
+                }).ToList().ForEach(filterVO => filterVOs.Add(filterVO));
             }
         }
     }

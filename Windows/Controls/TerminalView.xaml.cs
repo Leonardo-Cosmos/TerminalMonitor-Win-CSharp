@@ -31,25 +31,32 @@ namespace TerminalMonitor.Windows.Controls
 
         private DispatcherTimer timer;
 
-        private IReadOnlyList<FilterCondition> filterCondtions = new List<FilterCondition>(0);
+        private IEnumerable<FilterCondition> filterConditions = new List<FilterCondition>(0);
 
+        private readonly TerminalViewDataContextVO dataContextVO = new();
 
         public TerminalView()
         {
             InitializeComponent();
 
+            DataContext = dataContextVO;
             listTerminal.ItemsSource = visibleTerminalTextVOs;
         }
 
         private void ButtonFilter_Click(object sender, RoutedEventArgs e)
         {
-            filterCondtions = filterView.FilterConditions;
-            FilterTerminal(filterCondtions);
+            filterConditions = filterView.FilterConditions;
+            FilterTerminal();
         }
 
         private void MenuItemClear_Click(object sender, RoutedEventArgs e)
         {
             ClearTerminal();
+        }
+
+        private void MenuItemAutoScroll_Click(object sender, RoutedEventArgs e)
+        {
+            dataContextVO.AutoScroll = !dataContextVO.AutoScroll;
         }
 
         public void AddExecution(IExecution execution)
@@ -94,10 +101,14 @@ namespace TerminalMonitor.Windows.Controls
             var terminalTextVO = JsonParser.ParseTerminalLine(text);
             allTerminalTextVOs.Add(terminalTextVO);
 
-            if (terminalTextVO.IsMatch(filterCondtions))
+            if (terminalTextVO.IsMatch(filterConditions))
             {
                 visibleTerminalTextVOs.Add(terminalTextVO);
-                listTerminal.ScrollIntoView(terminalTextVO);
+
+                if (dataContextVO.AutoScroll)
+                {
+                    listTerminal.ScrollIntoView(terminalTextVO);
+                }
             }
         }
 
@@ -111,7 +122,7 @@ namespace TerminalMonitor.Windows.Controls
             ResumeTimer();
         }
 
-        private void FilterTerminal(IEnumerable<FilterCondition> filterConditions)
+        private void FilterTerminal()
         {
             PauseTimer();
 
