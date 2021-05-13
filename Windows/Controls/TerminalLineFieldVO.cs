@@ -1,8 +1,8 @@
 ﻿/* 2021/4/20 */
 
-namespace TerminalMonitor.Windows
+namespace TerminalMonitor.Windows.Controls
 {
-    class TerminalTextFieldVO
+    class TerminalLineFieldVO
     {
         public string Key { get; set; }
 

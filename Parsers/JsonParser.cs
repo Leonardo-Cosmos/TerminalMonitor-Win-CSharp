@@ -5,36 +5,42 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TerminalMonitor.Windows;
+using TerminalMonitor.Windows.Controls;
 
 namespace TerminalMonitor.Parsers
 {
     static class JsonParser
     {
 
-        public static TerminalTextVO ParseTerminalLine(string text)
+        public static Dictionary<string, object> ParseTerminalLine(string json)
         {
-            List<TerminalTextFieldVO> parsedFields;
             try
             {
-                var dict = JsonConvert.DeserializeObject<Dictionary<string, object>>(text);
-                parsedFields = dict.OrderBy(kvPair => kvPair.Key)
-                    .Select(kvPair => new TerminalTextFieldVO()
-                    {
-                        Key = kvPair.Key,
-                        Value = kvPair.Value.ToString(),
-                    })
-                    .ToList();
+                return JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex.StackTrace);
-                parsedFields = new();
+                return new();
             }
+        }
 
-            return new TerminalTextVO()
+        public static TerminalLineVO ParseTerminalLineToVO(string json)
+        {
+            var dict = ParseTerminalLine(json);
+
+            var parsedFields = dict.OrderBy(kvPair => kvPair.Key)
+                .Select(kvPair => new TerminalLineFieldVO()
+                {
+                    Key = kvPair.Key,
+                    Value = kvPair.Value.ToString(),
+                })
+                .ToList();
+
+            return new TerminalLineVO()
             {
-                PlainText = text,
+                PlainText = json,
+                ParsedFieldDict = dict,
                 ParsedFields = parsedFields,
             };
         }

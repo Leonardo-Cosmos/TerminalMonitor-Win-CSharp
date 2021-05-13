@@ -48,6 +48,7 @@ namespace TerminalMonitor.Windows.Controls
                 TargetValue = currentFilter.TargetValue,
             };
             filterVOs.Add(item);
+            lstFilters.SelectedItem = item;
         }
 
         private void BtnUpdate_Click(object sender, RoutedEventArgs e)
