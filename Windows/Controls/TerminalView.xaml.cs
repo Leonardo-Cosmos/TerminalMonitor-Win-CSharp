@@ -171,11 +171,17 @@ namespace TerminalMonitor.Windows.Controls
                     column.DataType = typeof(string);
                     terminalDataTable.Columns.Add(column);
 
+                    FrameworkElementFactory fef = new (typeof(TextBlock));
+                    Binding placeBinding = new ();
+                    fef.SetBinding(TextBlock.TextProperty, placeBinding);
+                    placeBinding.Path = new PropertyPath(visibleFieldKey, Array.Empty<object>());
+                    DataTemplate dataTemplate = new ();
+                    dataTemplate.VisualTree = fef;
 
                     gridView.Columns.Add(new GridViewColumn()
                     {
                         Header = visibleFieldKey,
-                        DisplayMemberBinding = new Binding(visibleFieldKey),
+                        CellTemplate = dataTemplate,
                     });
                 }
             }
@@ -185,10 +191,18 @@ namespace TerminalMonitor.Windows.Controls
                 column.DataType = typeof(string);
                 terminalDataTable.Columns.Add(column);
 
+                FrameworkElementFactory fef = new(typeof(TextBlock));
+                fef.SetValue(TextBlock.ForegroundProperty, Brushes.Red);
+                Binding placeBinding = new();
+                fef.SetBinding(TextBlock.TextProperty, placeBinding);
+                placeBinding.Path = new PropertyPath(defaultColumn, Array.Empty<object>());
+                DataTemplate dataTemplate = new();
+                dataTemplate.VisualTree = fef;
+
                 gridView.Columns.Add(new GridViewColumn()
                 {
                     Header = defaultColumn,
-                    DisplayMemberBinding = new Binding(defaultColumn),
+                    CellTemplate = dataTemplate,
                 });
             }
 
