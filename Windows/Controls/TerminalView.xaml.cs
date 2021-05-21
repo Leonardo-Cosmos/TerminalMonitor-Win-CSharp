@@ -30,6 +30,8 @@ namespace TerminalMonitor.Windows.Controls
     {
         private const string defaultColumn = "PlainText";
 
+        private readonly Brush[] foregrounds = new Brush[] { Brushes.Red, Brushes.Green, Brushes.Blue };
+
         private readonly List<TerminalLineVO> terminalLineVOs = new();
 
         private readonly DataTable terminalDataTable = new();
@@ -157,6 +159,23 @@ namespace TerminalMonitor.Windows.Controls
             AddMatchedTerminalLines();
         }
 
+        private static string GetForegroundColumnName(string columnName)
+        {
+            return $"{columnName}__foreground";
+        }
+
+        private static string GetBackgroundColumnName(string columnName)
+        {
+            return $"{columnName}__background";
+        }
+
+        private Brush GetRandomBrush()
+        {
+            Random random = new();
+            var index = random.Next(foregrounds.Length);
+            return foregrounds[index];
+        }
+
         private void ApplyVisibleField()
         {
             GridView gridView = new();
@@ -191,11 +210,24 @@ namespace TerminalMonitor.Windows.Controls
                 column.DataType = typeof(string);
                 terminalDataTable.Columns.Add(column);
 
+                DataColumn foregroundColumn = new(GetForegroundColumnName(defaultColumn));
+                foregroundColumn.DataType = typeof(Brush);
+                terminalDataTable.Columns.Add(foregroundColumn);
+
+                DataColumn backgroundColumn = new(GetBackgroundColumnName(defaultColumn));
+                backgroundColumn.DataType = typeof(Brush);
+                terminalDataTable.Columns.Add(backgroundColumn);
+
                 FrameworkElementFactory fef = new(typeof(TextBlock));
-                fef.SetValue(TextBlock.ForegroundProperty, Brushes.Red);
-                Binding placeBinding = new();
-                fef.SetBinding(TextBlock.TextProperty, placeBinding);
-                placeBinding.Path = new PropertyPath(defaultColumn, Array.Empty<object>());
+                Binding textBinding = new();
+                textBinding.Path = new PropertyPath(defaultColumn, Array.Empty<object>());
+                fef.SetBinding(TextBlock.TextProperty, textBinding);
+                Binding foregroundBinding = new();
+                foregroundBinding.Path = new PropertyPath(GetForegroundColumnName(defaultColumn), Array.Empty<object>());
+                fef.SetBinding(TextBlock.ForegroundProperty, foregroundBinding);
+                Binding backgroundBinding = new();
+                backgroundBinding.Path = new PropertyPath(GetBackgroundColumnName(defaultColumn), Array.Empty<object>());
+                fef.SetBinding(TextBlock.BackgroundProperty, backgroundBinding);
                 DataTemplate dataTemplate = new();
                 dataTemplate.VisualTree = fef;
 
@@ -230,7 +262,9 @@ namespace TerminalMonitor.Windows.Controls
             }
             else
             {
-                row[0] = terminalLineVO.PlainText;
+                row[defaultColumn] = terminalLineVO.PlainText;
+                row[GetForegroundColumnName(defaultColumn)] = GetRandomBrush();
+                row[GetBackgroundColumnName(defaultColumn)] = GetRandomBrush();
             }
 
             terminalDataTable.Rows.Add(row);
