@@ -2,7 +2,7 @@
 
 namespace TerminalMonitor.Models
 {
-    class TextStyleCondition
+    public class TextStyleCondition
     {
         public TextStyle Style { get; set; }      
 

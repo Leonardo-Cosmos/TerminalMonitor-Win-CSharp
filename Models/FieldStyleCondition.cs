@@ -7,7 +7,7 @@ namespace TerminalMonitor.Models
     {
         public string FieldKey { get; set; }
 
-        public IEnumerable<TextStyleCondition> Condtions { get; set; }
+        public IEnumerable<TextStyleCondition> Conditions { get; set; }
 
         public TextStyle DefaultStyle { get; set; }
     }

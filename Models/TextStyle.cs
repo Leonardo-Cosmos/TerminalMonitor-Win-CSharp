@@ -3,7 +3,7 @@ using System.Windows.Media;
 
 namespace TerminalMonitor.Models
 {
-    class TextStyle
+    public class TextStyle
     {
         public Color Foreground { get; set; }
 

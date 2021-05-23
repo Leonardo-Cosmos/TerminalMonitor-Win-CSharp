@@ -53,7 +53,7 @@ namespace TerminalMonitor.Windows.Controls
                 new FieldStyleCondition
                 {
                     FieldKey = "time",
-                    Condtions = new TextStyleCondition[]{
+                    Conditions = new TextStyleCondition[]{
                         new TextStyleCondition()
                         {
                             Style = new TextStyle()
@@ -315,7 +315,7 @@ namespace TerminalMonitor.Windows.Controls
 
                     if (visibleFieldStyleCondtion != null)
                     {
-                        var matchedTextStyleCondition = visibleFieldStyleCondtion.Condtions.FirstOrDefault(
+                        var matchedTextStyleCondition = visibleFieldStyleCondtion.Conditions.FirstOrDefault(
                             textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineVO, textStyleCondition.Condition));
                         var textStyle = matchedTextStyleCondition?.Style ?? visibleFieldStyleCondtion.DefaultStyle;
 

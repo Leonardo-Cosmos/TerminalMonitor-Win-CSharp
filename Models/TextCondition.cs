@@ -1,11 +1,11 @@
 ﻿/* 2021/4/27 */
+using System;
 using TerminalMonitor.Matchers;
 
 namespace TerminalMonitor.Models
 {
-    class TextCondition
+    public class TextCondition
     {
-
         public string FieldKey { get; set; }
 
         public TextMatcher.MatchOperator MatchOperator { get; set; }
