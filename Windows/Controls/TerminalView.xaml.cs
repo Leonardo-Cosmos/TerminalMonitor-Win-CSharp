@@ -30,14 +30,13 @@ namespace TerminalMonitor.Windows.Controls
     {
         private const string defaultColumn = "PlainText";
 
-        private readonly Brush[] foregrounds = new Brush[] { Brushes.Red, Brushes.Green, Brushes.Blue };
-
         private readonly List<TerminalLineVO> terminalLineVOs = new();
 
         private readonly DataTable terminalDataTable = new();
 
         private DispatcherTimer timer;
 
+        private IEnumerable<FieldStyleCondition> fieldStyleConditions;
         private IEnumerable<string> visibleFieldKeys = new List<string>();
         private IEnumerable<FilterCondition> filterConditions = new List<FilterCondition>(0);
 
@@ -49,6 +48,59 @@ namespace TerminalMonitor.Windows.Controls
 
             DataContext = dataContextVO;
             ApplyVisibleField();
+
+            fieldStyleConditions = new FieldStyleCondition[] {
+                new FieldStyleCondition
+                {
+                    FieldKey = "time",
+                    Condtions = new TextStyleCondition[]{
+                        new TextStyleCondition()
+                        {
+                            Style = new TextStyle()
+                            {
+                                Foreground = Colors.Green,
+                                Background = Colors.Red,
+                            },
+                            Condition = new TextCondition(){
+                                FieldKey = "time",
+                                MatchOperator = TextMatcher.MatchOperator.Contains,
+                                TargetValue = "05",
+                            }
+                        },
+                        new TextStyleCondition()
+                        {
+                            Style = new TextStyle()
+                            {
+                                Foreground = Colors.Blue,
+                                Background = Colors.Yellow,
+                            },
+                            Condition = new TextCondition(){
+                                FieldKey = "time",
+                                MatchOperator = TextMatcher.MatchOperator.Contains,
+                                TargetValue = "03",
+                            }
+                        },
+                        new TextStyleCondition()                                       
+                        {
+                            Style = new TextStyle()
+                            {
+                                Foreground = Colors.Red,
+                                Background = Colors.White
+                            },
+                            Condition = new TextCondition(){
+                                FieldKey = "time",
+                                MatchOperator = TextMatcher.MatchOperator.Contains,
+                                TargetValue = "09",
+                            }
+                        },
+                    },
+                    DefaultStyle = new TextStyle
+                    {
+                        Foreground = Colors.Black,
+                        Background = Colors.White,
+                    }
+                }
+            };
         }
 
         private void ButtonApplyFields_Click(object sender, RoutedEventArgs e)
@@ -169,13 +221,6 @@ namespace TerminalMonitor.Windows.Controls
             return $"{columnName}__background";
         }
 
-        private Brush GetRandomBrush()
-        {
-            Random random = new();
-            var index = random.Next(foregrounds.Length);
-            return foregrounds[index];
-        }
-
         private void ApplyVisibleField()
         {
             GridView gridView = new();
@@ -190,18 +235,45 @@ namespace TerminalMonitor.Windows.Controls
                     column.DataType = typeof(string);
                     terminalDataTable.Columns.Add(column);
 
-                    FrameworkElementFactory fef = new (typeof(TextBlock));
-                    Binding placeBinding = new ();
-                    fef.SetBinding(TextBlock.TextProperty, placeBinding);
-                    placeBinding.Path = new PropertyPath(visibleFieldKey, Array.Empty<object>());
-                    DataTemplate dataTemplate = new ();
-                    dataTemplate.VisualTree = fef;
-
-                    gridView.Columns.Add(new GridViewColumn()
+                    var visibleFieldStyleCondtion = fieldStyleConditions.FirstOrDefault(
+                        feildStyelCondtion => feildStyelCondtion.FieldKey == visibleFieldKey);
+                    if (visibleFieldStyleCondtion != null)
                     {
-                        Header = visibleFieldKey,
-                        CellTemplate = dataTemplate,
-                    });
+                        DataColumn foregroundColumn = new(GetForegroundColumnName(visibleFieldKey));
+                        foregroundColumn.DataType = typeof(Brush);
+                        terminalDataTable.Columns.Add(foregroundColumn);
+
+                        DataColumn backgroundColumn = new(GetBackgroundColumnName(visibleFieldKey));
+                        backgroundColumn.DataType = typeof(Brush);
+                        terminalDataTable.Columns.Add(backgroundColumn);
+
+                        FrameworkElementFactory fef = new(typeof(TextBlock));
+                        Binding textBinding = new();
+                        textBinding.Path = new PropertyPath(visibleFieldKey, Array.Empty<object>());
+                        fef.SetBinding(TextBlock.TextProperty, textBinding);
+                        Binding foregroundBinding = new();
+                        foregroundBinding.Path = new PropertyPath(GetForegroundColumnName(visibleFieldKey), Array.Empty<object>());
+                        fef.SetBinding(TextBlock.ForegroundProperty, foregroundBinding);
+                        Binding backgroundBinding = new();
+                        backgroundBinding.Path = new PropertyPath(GetBackgroundColumnName(visibleFieldKey), Array.Empty<object>());
+                        fef.SetBinding(TextBlock.BackgroundProperty, backgroundBinding);
+                        DataTemplate dataTemplate = new();
+                        dataTemplate.VisualTree = fef;
+
+                        gridView.Columns.Add(new GridViewColumn()
+                        {
+                            Header = visibleFieldKey,
+                            CellTemplate = dataTemplate,
+                        });
+                    }
+                    else
+                    {
+                        gridView.Columns.Add(new GridViewColumn()
+                        {
+                            Header = visibleFieldKey,
+                            DisplayMemberBinding = new Binding(visibleFieldKey),
+                        });
+                    }
                 }
             }
             else
@@ -210,31 +282,10 @@ namespace TerminalMonitor.Windows.Controls
                 column.DataType = typeof(string);
                 terminalDataTable.Columns.Add(column);
 
-                DataColumn foregroundColumn = new(GetForegroundColumnName(defaultColumn));
-                foregroundColumn.DataType = typeof(Brush);
-                terminalDataTable.Columns.Add(foregroundColumn);
-
-                DataColumn backgroundColumn = new(GetBackgroundColumnName(defaultColumn));
-                backgroundColumn.DataType = typeof(Brush);
-                terminalDataTable.Columns.Add(backgroundColumn);
-
-                FrameworkElementFactory fef = new(typeof(TextBlock));
-                Binding textBinding = new();
-                textBinding.Path = new PropertyPath(defaultColumn, Array.Empty<object>());
-                fef.SetBinding(TextBlock.TextProperty, textBinding);
-                Binding foregroundBinding = new();
-                foregroundBinding.Path = new PropertyPath(GetForegroundColumnName(defaultColumn), Array.Empty<object>());
-                fef.SetBinding(TextBlock.ForegroundProperty, foregroundBinding);
-                Binding backgroundBinding = new();
-                backgroundBinding.Path = new PropertyPath(GetBackgroundColumnName(defaultColumn), Array.Empty<object>());
-                fef.SetBinding(TextBlock.BackgroundProperty, backgroundBinding);
-                DataTemplate dataTemplate = new();
-                dataTemplate.VisualTree = fef;
-
                 gridView.Columns.Add(new GridViewColumn()
                 {
                     Header = defaultColumn,
-                    CellTemplate = dataTemplate,
+                    DisplayMemberBinding = new Binding(defaultColumn),
                 });
             }
 
@@ -252,19 +303,30 @@ namespace TerminalMonitor.Windows.Controls
 
             if (visibleFieldKeys.Any())
             {
-                foreach (var fieldKey in visibleFieldKeys)
+                foreach (var visibleFieldKey in visibleFieldKeys)
                 {
-                    var fieldValue = terminalLineVO.ParsedFieldDict.ContainsKey(fieldKey) ?
-                    terminalLineVO.ParsedFieldDict[fieldKey] : "";
+                    var fieldValue = terminalLineVO.ParsedFieldDict.ContainsKey(visibleFieldKey) ?
+                    terminalLineVO.ParsedFieldDict[visibleFieldKey] : "";
 
-                    row[fieldKey] = fieldValue;
+                    row[visibleFieldKey] = fieldValue;
+
+                    var visibleFieldStyleCondtion = fieldStyleConditions.FirstOrDefault(
+                        fieldStyleCondition => fieldStyleCondition.FieldKey == visibleFieldKey);
+
+                    if (visibleFieldStyleCondtion != null)
+                    {
+                        var matchedTextStyleCondition = visibleFieldStyleCondtion.Condtions.FirstOrDefault(
+                            textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineVO, textStyleCondition.Condition));
+                        var textStyle = matchedTextStyleCondition?.Style ?? visibleFieldStyleCondtion.DefaultStyle;
+
+                        row[GetForegroundColumnName(visibleFieldKey)] = new SolidColorBrush(textStyle.Foreground);
+                        row[GetBackgroundColumnName(visibleFieldKey)] = new SolidColorBrush(textStyle.Background);
+                    }
                 }              
             }
             else
             {
                 row[defaultColumn] = terminalLineVO.PlainText;
-                row[GetForegroundColumnName(defaultColumn)] = GetRandomBrush();
-                row[GetBackgroundColumnName(defaultColumn)] = GetRandomBrush();
             }
 
             terminalDataTable.Rows.Add(row);
