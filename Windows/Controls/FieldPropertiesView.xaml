@@ -22,7 +22,7 @@
         </Grid.ColumnDefinitions>
         
         <Label Name="lblKey" Grid.Row="0" Grid.Column="0" Content="Key" />
-        <TextBox Name="txtBxKey" Grid.Row="0" Grid.Column="1" Text="{Binding FieldKey}" />
+        <TextBox Name="txtBxKey" Grid.Row="0" Grid.Column="1" Text="" />
 
         <Grid Name="grdButton" Grid.Row="0" Grid.Column="2">
             <Grid.ColumnDefinitions>

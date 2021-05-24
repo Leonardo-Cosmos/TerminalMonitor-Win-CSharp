@@ -36,5 +36,43 @@ namespace TerminalMonitor.Windows.Controls
             DataContext = dataContextVO;
             lstStyleCondtions.ItemsSource = dataContextVO.Conditions;
         }
+
+        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        {
+            TextStyleCondition textStyleCondition = new()
+            {
+                Style = new TextStyle()
+                {
+
+                },
+                Condition = new TextCondition()
+                {
+                    FieldKey = "time",
+                    MatchOperator = Matchers.TextMatcher.MatchOperator.None,
+                    TargetValue = "",
+                }
+            };
+            dataContextVO.Conditions.Add(textStyleCondition);
+        }
+
+        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BtnMoveUp_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BtnMoveDown_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void lstStyleCondtions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

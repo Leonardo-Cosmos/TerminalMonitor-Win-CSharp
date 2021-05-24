@@ -5,12 +5,17 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=local:TextStyleViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="800">
 
     <WrapPanel Name="stkPnlStyle" Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
         <Label Name="lblForeground" Content="Foreground" />
-        <Rectangle Name="rctngForeground" Width="10" Height="10" Margin="0, 0, 10, 0" Fill="Black" />
+        <Rectangle Name="rctForeground" Width="10" Height="10" Margin="0, 0, 10, 0"
+                   Fill="{Binding Foreground}" Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                   MouseDown="RctForeground_MouseDown" />
         <Label Name="lblBackground" Content="Background" />
-        <Rectangle Name="rctngBackground" Width="10" Height="10" Margin="0, 0, 10, 0" Fill="White" />
+        <Rectangle Name="rctBackground" Width="10" Height="10" Margin="0, 0, 10, 0"
+                   Fill="{Binding Background}" Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                   MouseDown="RctBackground_MouseDown" />
     </WrapPanel>
 </UserControl>

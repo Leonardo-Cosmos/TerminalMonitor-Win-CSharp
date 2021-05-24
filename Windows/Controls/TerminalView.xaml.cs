@@ -107,7 +107,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             PauseTimer();
 
-            visibleFieldKeys = fieldListView.FieldKeys.ToArray();
+            //visibleFieldKeys = fieldListView.FieldKeys.ToArray();
             ApplyVisibleField();
 
             ResumeTimer();

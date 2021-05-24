@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TerminalMonitor.Matchers;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
@@ -24,17 +25,18 @@ namespace TerminalMonitor.Windows.Controls
     public partial class FieldConditionView : UserControl
     {
         public static readonly DependencyProperty FieldConditionProperty =
-            DependencyProperty.Register("FieldConditon", typeof(TextCondition), typeof(FieldConditionView),
-                new PropertyMetadata(OnFieldConditionChanged));
+            DependencyProperty.Register("FieldCondition", typeof(TextCondition), typeof(FieldConditionView),
+                new PropertyMetadata(TextCondition.Default, OnFieldConditionChanged));
 
         private TextCondition fieldCondition;
 
-        private FieldConditionViewDataContextVO dataContextVO = new();
+        private readonly FieldConditionViewDataContextVO dataContextVO = new();
 
         public FieldConditionView()
         {
             InitializeComponent();
 
+            cmbBxOperator.ItemsSource = Enum.GetValues(typeof(TextMatcher.MatchOperator));
             DataContext = dataContextVO;
             dataContextVO.PropertyChanged += OnDataContextPropertyChanged;
         }

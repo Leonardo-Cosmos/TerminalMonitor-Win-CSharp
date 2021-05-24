@@ -35,6 +35,43 @@ namespace TerminalMonitor.Windows.Controls
             DataContext = dataContextVO;
         }
 
+        private SolidColorBrush ShowColorDialog(SolidColorBrush brush)
+        {
+            var color = brush.Color;
+            System.Windows.Forms.ColorDialog colorDialog = new();
+
+            colorDialog.Color = System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+            if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                var selectedColor = colorDialog.Color;
+                color = Color.FromArgb(selectedColor.A,
+                    selectedColor.R, selectedColor.G, selectedColor.B);
+                return new SolidColorBrush(color);
+            } else
+            {
+
+                return null;
+            }
+        }
+
+        private void RctForeground_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var brush = ShowColorDialog(dataContextVO.Foreground as SolidColorBrush);
+            if (brush != null)
+            {
+                dataContextVO.Foreground = brush;
+            }
+        }
+
+        private void RctBackground_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var brush = ShowColorDialog(dataContextVO.Background as SolidColorBrush);
+            if (brush != null)
+            {
+                dataContextVO.Background = brush;
+            }
+        }
+
         public TextStyle StyleDetail
         {
             get

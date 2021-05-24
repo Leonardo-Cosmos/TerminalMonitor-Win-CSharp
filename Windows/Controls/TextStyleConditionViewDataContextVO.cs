@@ -1,6 +1,7 @@
 ﻿/* 2021/5/23 */
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -31,9 +32,9 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private IEnumerable<TextStyleCondition> conditions; 
+        private ObservableCollection<TextStyleCondition> conditions; 
 
-        public IEnumerable<TextStyleCondition> Conditions
+        public ObservableCollection<TextStyleCondition> Conditions
         {
             get { return conditions; }
             set

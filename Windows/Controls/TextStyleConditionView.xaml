@@ -12,13 +12,34 @@
             <controls:TextStyleView />
         </GroupBox>
         <GroupBox Header="Conditions" MinHeight="50">
-            <ListView Name="lstStyleCondtions">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <controls:FieldConditionView FieldCondition="{Binding}" />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+            <StackPanel Orientation="Vertical">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Name="grdButton" Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Name="btnAdd" Grid.Column="0" Content="+" Click="BtnAdd_Click" />
+                        <Button Name="btnDelete" Grid.Column="1" Content="-" Click="BtnDelete_Click" />
+                        <Button Name="btnMoveUp" Grid.Column="2" Content="←" Click="BtnMoveUp_Click" />
+                        <Button Name="btnMoveDown" Grid.Column="3" Content="→" Click="BtnMoveDown_Click" />
+                    </Grid>
+                </Grid>
+                <ListView Name="lstStyleCondtions" MinHeight="30" SelectionChanged="lstStyleCondtions_SelectionChanged">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <controls:FieldConditionView FieldCondition="{Binding Condition}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackPanel>
         </GroupBox>
     </StackPanel>
 </UserControl>
