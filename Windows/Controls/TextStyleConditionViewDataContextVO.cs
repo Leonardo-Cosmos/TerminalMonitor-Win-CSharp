@@ -11,7 +11,7 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
 {
-    class TextStyleConditionViewDataContextVO
+    class TextStyleConditionViewDataContextVO : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

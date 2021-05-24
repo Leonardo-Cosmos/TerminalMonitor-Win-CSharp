@@ -25,7 +25,7 @@ namespace TerminalMonitor.Windows.Controls
     {
         public static readonly DependencyProperty TextStyleProperty =
             DependencyProperty.Register("TextStyle", typeof(TextStyle), typeof(TextStyleView),
-                new PropertyMetadata(TextStyle.Default, OnTextStyleChanged));
+                new PropertyMetadata(TextStyle.Empty, OnTextStyleChanged));
 
         private TextStyle textStyle;
 
@@ -105,8 +105,11 @@ namespace TerminalMonitor.Windows.Controls
         private void OnTextStyleChanged(DependencyPropertyChangedEventArgs e)
         {
             textStyle = e.NewValue as TextStyle;
-            dataContextVO.Foreground = new SolidColorBrush(textStyle.Foreground);
-            dataContextVO.Background = new SolidColorBrush(textStyle.Background);
+            if (textStyle != null)
+            {
+                dataContextVO.Foreground = new SolidColorBrush(textStyle.Foreground);
+                dataContextVO.Background = new SolidColorBrush(textStyle.Background);
+            }
         }
 
         public TextStyle TextStyle

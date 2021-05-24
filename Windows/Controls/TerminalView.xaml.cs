@@ -36,7 +36,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private DispatcherTimer timer;
 
-        private IEnumerable<FieldStyleCondition> fieldStyleConditions;
+        private IEnumerable<FieldDisplayDetail> fieldStyleConditions;
         private IEnumerable<string> visibleFieldKeys = new List<string>();
         private IEnumerable<FilterCondition> filterConditions = new List<FilterCondition>(0);
 
@@ -49,8 +49,8 @@ namespace TerminalMonitor.Windows.Controls
             DataContext = dataContextVO;
             ApplyVisibleField();
 
-            fieldStyleConditions = new FieldStyleCondition[] {
-                new FieldStyleCondition
+            fieldStyleConditions = new FieldDisplayDetail[] {
+                new FieldDisplayDetail
                 {
                     FieldKey = "time",
                     Conditions = new TextStyleCondition[]{
@@ -94,7 +94,7 @@ namespace TerminalMonitor.Windows.Controls
                             }
                         },
                     },
-                    DefaultStyle = new TextStyle
+                    Style = new TextStyle
                     {
                         Foreground = Colors.Black,
                         Background = Colors.White,
@@ -107,7 +107,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             PauseTimer();
 
-            //visibleFieldKeys = fieldListView.FieldKeys.ToArray();
+            visibleFieldKeys = fieldListView.FieldKeys.ToArray();
             ApplyVisibleField();
 
             ResumeTimer();
@@ -317,7 +317,7 @@ namespace TerminalMonitor.Windows.Controls
                     {
                         var matchedTextStyleCondition = visibleFieldStyleCondtion.Conditions.FirstOrDefault(
                             textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineVO, textStyleCondition.Condition));
-                        var textStyle = matchedTextStyleCondition?.Style ?? visibleFieldStyleCondtion.DefaultStyle;
+                        var textStyle = matchedTextStyleCondition?.Style ?? visibleFieldStyleCondtion.Style;
 
                         row[GetForegroundColumnName(visibleFieldKey)] = new SolidColorBrush(textStyle.Foreground);
                         row[GetBackgroundColumnName(visibleFieldKey)] = new SolidColorBrush(textStyle.Background);

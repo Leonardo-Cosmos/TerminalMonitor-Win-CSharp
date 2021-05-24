@@ -5,13 +5,11 @@ namespace TerminalMonitor.Models
 {
     public class TextStyle
     {
-        private static readonly TextStyle defaultInstance = new()
+        public static TextStyle Empty => new()
         {
             Foreground = Colors.Black,
             Background = Colors.White,
         };
-
-        public static TextStyle Default => defaultInstance;
 
         public Color Foreground { get; set; }
 

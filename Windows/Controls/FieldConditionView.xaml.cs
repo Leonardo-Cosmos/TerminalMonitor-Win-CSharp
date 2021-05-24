@@ -26,7 +26,7 @@ namespace TerminalMonitor.Windows.Controls
     {
         public static readonly DependencyProperty FieldConditionProperty =
             DependencyProperty.Register("FieldCondition", typeof(TextCondition), typeof(FieldConditionView),
-                new PropertyMetadata(TextCondition.Default, OnFieldConditionChanged));
+                new PropertyMetadata(TextCondition.Empty, OnFieldConditionChanged));
 
         private TextCondition fieldCondition;
 
@@ -57,9 +57,12 @@ namespace TerminalMonitor.Windows.Controls
         private void OnFieldConditionChanged(DependencyPropertyChangedEventArgs e)
         {
             fieldCondition = e.NewValue as TextCondition;
-            dataContextVO.FieldKey = fieldCondition.FieldKey;
-            dataContextVO.MatchOperator = fieldCondition.MatchOperator;
-            dataContextVO.TargetValue = fieldCondition.TargetValue;
+            if (fieldCondition != null)
+            {
+                dataContextVO.FieldKey = fieldCondition.FieldKey;
+                dataContextVO.MatchOperator = fieldCondition.MatchOperator;
+                dataContextVO.TargetValue = fieldCondition.TargetValue;
+            }
         }
 
         public TextCondition FieldCondition
