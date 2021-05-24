@@ -20,14 +20,14 @@ namespace TerminalMonitor.Windows.Controls
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private TextStyle defaultStyle;
+        private TextStyle style;
 
-        public TextStyle DefaultStyle
+        public TextStyle Style
         {
-            get { return defaultStyle; }
+            get { return style; }
             set
             {
-                defaultStyle = value;
+                style = value;
                 OnPropertyChanged();
             }
         }

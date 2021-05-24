@@ -1,6 +1,7 @@
 ﻿/* 2021/5/23 */
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,12 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class TextStyleView : UserControl
     {
+        public static readonly DependencyProperty TextStyleProperty =
+            DependencyProperty.Register("TextStyle", typeof(TextStyle), typeof(TextStyleView),
+                new PropertyMetadata(TextStyle.Default, OnTextStyleChanged));
+
+        private TextStyle textStyle;
+
         private readonly TextStyleViewDataContextVO dataContextVO = new()
         {
             Foreground = Brushes.Black,
@@ -32,10 +39,11 @@ namespace TerminalMonitor.Windows.Controls
         {
             InitializeComponent();
 
-            DataContext = dataContextVO;
+            wrpPnl.DataContext = dataContextVO;
+            dataContextVO.PropertyChanged += OnDataContextPropertyChanged;
         }
 
-        private SolidColorBrush ShowColorDialog(SolidColorBrush brush)
+        private static SolidColorBrush ShowColorDialog(SolidColorBrush brush)
         {
             var color = brush.Color;
             System.Windows.Forms.ColorDialog colorDialog = new();
@@ -47,7 +55,8 @@ namespace TerminalMonitor.Windows.Controls
                 color = Color.FromArgb(selectedColor.A,
                     selectedColor.R, selectedColor.G, selectedColor.B);
                 return new SolidColorBrush(color);
-            } else
+            }
+            else
             {
 
                 return null;
@@ -72,25 +81,38 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public TextStyle StyleDetail
+        private void OnDataContextPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            get
+            switch (e.PropertyName)
             {
-                return new TextStyle()
-                {
-                    Foreground = (dataContextVO.Foreground as SolidColorBrush).Color,
-                    Background = (dataContextVO.Background as SolidColorBrush).Color,
-                };
+                case "Foreground":
+                    textStyle.Foreground = (dataContextVO.Foreground as SolidColorBrush).Color;
+                    break;
+                case "Background":
+                    textStyle.Background = (dataContextVO.Background as SolidColorBrush).Color;
+                    break;
+                default:
+                    break;
             }
+        }
 
-            set
-            {
-                if (value != null)
-                {
-                    dataContextVO.Foreground = new SolidColorBrush(value.Foreground);
-                    dataContextVO.Background = new SolidColorBrush(value.Background);
-                }
-            }
+        private static void OnTextStyleChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
+        {
+            var textStyleView = dependencyObject as TextStyleView;
+            textStyleView.OnTextStyleChanged(e);
+        }
+
+        private void OnTextStyleChanged(DependencyPropertyChangedEventArgs e)
+        {
+            textStyle = e.NewValue as TextStyle;
+            dataContextVO.Foreground = new SolidColorBrush(textStyle.Foreground);
+            dataContextVO.Background = new SolidColorBrush(textStyle.Background);
+        }
+
+        public TextStyle TextStyle
+        {
+            get { return (TextStyle)GetValue(TextStyleProperty); }
+            set { SetValue(TextStyleProperty, value); }
         }
     }
 }

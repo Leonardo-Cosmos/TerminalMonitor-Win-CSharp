@@ -6,17 +6,14 @@ namespace TerminalMonitor.Models
 {
     public class TextCondition
     {
-        private static readonly TextCondition defaultInstance = new TextCondition()
+        private static readonly TextCondition defaultInstance = new()
         {
             FieldKey = String.Empty,
             MatchOperator = TextMatcher.MatchOperator.None,
             TargetValue = String.Empty,
         };
 
-        public static TextCondition Default
-        {
-            get { return defaultInstance; }
-        }
+        public static TextCondition Default => defaultInstance;
 
         public string FieldKey { get; set; }
 

@@ -25,7 +25,7 @@ namespace TerminalMonitor.Windows.Controls
     {
         private readonly TextStyleConditionViewDataContextVO dataContextVO = new()
         {
-            DefaultStyle = new TextStyle(),
+            Style = new TextStyle(),
             Conditions = new ObservableCollection<TextStyleCondition>(),
         };
 
