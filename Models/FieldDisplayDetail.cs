@@ -7,7 +7,7 @@ namespace TerminalMonitor.Models
     {
         public string FieldKey { get; set; }
 
-        public bool UseDefaultStyle { get; set; }
+        public bool CustomizeStyle { get; set; }
 
         public TextStyle Style { get; set; }
 

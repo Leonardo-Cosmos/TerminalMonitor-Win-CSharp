@@ -36,9 +36,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private DispatcherTimer timer;
 
-        private IEnumerable<FieldDisplayDetail> fieldStyleConditions;
-        private IEnumerable<string> visibleFieldKeys = new List<string>();
-        private IEnumerable<FilterCondition> filterConditions = new List<FilterCondition>(0);
+        private IEnumerable<FieldDisplayDetail> visibleFields = Array.Empty<FieldDisplayDetail>();
+        private IEnumerable<FilterCondition> filterConditions = Array.Empty<FilterCondition>();
 
         private readonly TerminalViewDataContextVO dataContextVO = new();
 
@@ -48,66 +47,13 @@ namespace TerminalMonitor.Windows.Controls
 
             DataContext = dataContextVO;
             ApplyVisibleField();
-
-            fieldStyleConditions = new FieldDisplayDetail[] {
-                new FieldDisplayDetail
-                {
-                    FieldKey = "time",
-                    Conditions = new TextStyleCondition[]{
-                        new TextStyleCondition()
-                        {
-                            Style = new TextStyle()
-                            {
-                                Foreground = Colors.Green,
-                                Background = Colors.Red,
-                            },
-                            Condition = new TextCondition(){
-                                FieldKey = "time",
-                                MatchOperator = TextMatcher.MatchOperator.Contains,
-                                TargetValue = "05",
-                            }
-                        },
-                        new TextStyleCondition()
-                        {
-                            Style = new TextStyle()
-                            {
-                                Foreground = Colors.Blue,
-                                Background = Colors.Yellow,
-                            },
-                            Condition = new TextCondition(){
-                                FieldKey = "time",
-                                MatchOperator = TextMatcher.MatchOperator.Contains,
-                                TargetValue = "03",
-                            }
-                        },
-                        new TextStyleCondition()                                       
-                        {
-                            Style = new TextStyle()
-                            {
-                                Foreground = Colors.Red,
-                                Background = Colors.White
-                            },
-                            Condition = new TextCondition(){
-                                FieldKey = "time",
-                                MatchOperator = TextMatcher.MatchOperator.Contains,
-                                TargetValue = "09",
-                            }
-                        },
-                    },
-                    Style = new TextStyle
-                    {
-                        Foreground = Colors.Black,
-                        Background = Colors.White,
-                    }
-                }
-            };
         }
 
         private void ButtonApplyFields_Click(object sender, RoutedEventArgs e)
         {
             PauseTimer();
 
-            visibleFieldKeys = fieldListView.FieldKeys.ToArray();
+            visibleFields = fieldListView.FieldKeys.ToArray();
             ApplyVisibleField();
 
             ResumeTimer();
@@ -227,42 +173,40 @@ namespace TerminalMonitor.Windows.Controls
 
             terminalDataTable.Columns.Clear();
             terminalDataTable.Rows.Clear();
-            if (visibleFieldKeys.Any())
+            if (visibleFields.Any())
             {
-                foreach (var visibleFieldKey in visibleFieldKeys)
+                foreach (var visibleField in visibleFields)
                 {
-                    DataColumn column = new(visibleFieldKey);
+                    DataColumn column = new(visibleField.FieldKey);
                     column.DataType = typeof(string);
                     terminalDataTable.Columns.Add(column);
 
-                    var visibleFieldStyleCondtion = fieldStyleConditions.FirstOrDefault(
-                        feildStyelCondtion => feildStyelCondtion.FieldKey == visibleFieldKey);
-                    if (visibleFieldStyleCondtion != null)
+                    if (visibleField.CustomizeStyle)
                     {
-                        DataColumn foregroundColumn = new(GetForegroundColumnName(visibleFieldKey));
+                        DataColumn foregroundColumn = new(GetForegroundColumnName(visibleField.FieldKey));
                         foregroundColumn.DataType = typeof(Brush);
                         terminalDataTable.Columns.Add(foregroundColumn);
 
-                        DataColumn backgroundColumn = new(GetBackgroundColumnName(visibleFieldKey));
+                        DataColumn backgroundColumn = new(GetBackgroundColumnName(visibleField.FieldKey));
                         backgroundColumn.DataType = typeof(Brush);
                         terminalDataTable.Columns.Add(backgroundColumn);
 
                         FrameworkElementFactory fef = new(typeof(TextBlock));
                         Binding textBinding = new();
-                        textBinding.Path = new PropertyPath(visibleFieldKey, Array.Empty<object>());
+                        textBinding.Path = new PropertyPath(visibleField.FieldKey, Array.Empty<object>());
                         fef.SetBinding(TextBlock.TextProperty, textBinding);
                         Binding foregroundBinding = new();
-                        foregroundBinding.Path = new PropertyPath(GetForegroundColumnName(visibleFieldKey), Array.Empty<object>());
+                        foregroundBinding.Path = new PropertyPath(GetForegroundColumnName(visibleField.FieldKey), Array.Empty<object>());
                         fef.SetBinding(TextBlock.ForegroundProperty, foregroundBinding);
                         Binding backgroundBinding = new();
-                        backgroundBinding.Path = new PropertyPath(GetBackgroundColumnName(visibleFieldKey), Array.Empty<object>());
+                        backgroundBinding.Path = new PropertyPath(GetBackgroundColumnName(visibleField.FieldKey), Array.Empty<object>());
                         fef.SetBinding(TextBlock.BackgroundProperty, backgroundBinding);
                         DataTemplate dataTemplate = new();
                         dataTemplate.VisualTree = fef;
 
                         gridView.Columns.Add(new GridViewColumn()
                         {
-                            Header = visibleFieldKey,
+                            Header = visibleField.FieldKey,
                             CellTemplate = dataTemplate,
                         });
                     }
@@ -270,8 +214,8 @@ namespace TerminalMonitor.Windows.Controls
                     {
                         gridView.Columns.Add(new GridViewColumn()
                         {
-                            Header = visibleFieldKey,
-                            DisplayMemberBinding = new Binding(visibleFieldKey),
+                            Header = visibleField.FieldKey,
+                            DisplayMemberBinding = new Binding(visibleField.FieldKey),
                         });
                     }
                 }
@@ -301,26 +245,23 @@ namespace TerminalMonitor.Windows.Controls
         {
             DataRow row = terminalDataTable.NewRow();
 
-            if (visibleFieldKeys.Any())
+            if (visibleFields.Any())
             {
-                foreach (var visibleFieldKey in visibleFieldKeys)
+                foreach (var visibleField in visibleFields)
                 {
-                    var fieldValue = terminalLineVO.ParsedFieldDict.ContainsKey(visibleFieldKey) ?
-                    terminalLineVO.ParsedFieldDict[visibleFieldKey] : "";
+                    var fieldValue = terminalLineVO.ParsedFieldDict.ContainsKey(visibleField.FieldKey) ?
+                    terminalLineVO.ParsedFieldDict[visibleField.FieldKey] : "";
 
-                    row[visibleFieldKey] = fieldValue;
+                    row[visibleField.FieldKey] = fieldValue;
 
-                    var visibleFieldStyleCondtion = fieldStyleConditions.FirstOrDefault(
-                        fieldStyleCondition => fieldStyleCondition.FieldKey == visibleFieldKey);
-
-                    if (visibleFieldStyleCondtion != null)
+                    if (visibleField.CustomizeStyle)
                     {
-                        var matchedTextStyleCondition = visibleFieldStyleCondtion.Conditions.FirstOrDefault(
+                        var matchedTextStyleCondition = visibleField.Conditions.FirstOrDefault(
                             textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineVO, textStyleCondition.Condition));
-                        var textStyle = matchedTextStyleCondition?.Style ?? visibleFieldStyleCondtion.Style;
+                        var textStyle = matchedTextStyleCondition?.Style ?? visibleField.Style;
 
-                        row[GetForegroundColumnName(visibleFieldKey)] = new SolidColorBrush(textStyle.Foreground);
-                        row[GetBackgroundColumnName(visibleFieldKey)] = new SolidColorBrush(textStyle.Background);
+                        row[GetForegroundColumnName(visibleField.FieldKey)] = new SolidColorBrush(textStyle.Foreground);
+                        row[GetBackgroundColumnName(visibleField.FieldKey)] = new SolidColorBrush(textStyle.Background);
                     }
                 }              
             }

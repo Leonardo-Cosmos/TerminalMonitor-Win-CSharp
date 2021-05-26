@@ -30,11 +30,11 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="+" Click="BtnAdd_Click" />
-            <Button Name="btnModify" Grid.Column="1" Width="20" Content="*" Click="BtnModify_Click" />
-            <Button Name="btnDelete" Grid.Column="2" Width="20" Content="-" Click="BtnDelete_Click" />
-            <Button Name="btnMoveLeft" Grid.Column="3" Width="20" Content="←" Click="BtnMoveLeft_Click" />
-            <Button Name="btnMoveRight" Grid.Column="4" Width="20" Content="→" Click="BtnMoveRight_Click" />
+            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="+" ToolTip="Add" Click="BtnAdd_Click" />
+            <Button Name="btnModify" Grid.Column="1" Width="20" Content="*" ToolTip="Modify" Click="BtnModify_Click" />
+            <Button Name="btnDelete" Grid.Column="2" Width="20" Content="-" ToolTip="Delete" Click="BtnDelete_Click" />
+            <Button Name="btnMoveLeft" Grid.Column="3" Width="20" Content="←" ToolTip="Move Left" Click="BtnMoveLeft_Click" />
+            <Button Name="btnMoveRight" Grid.Column="4" Width="20" Content="→" ToolTip="Move Right" Click="BtnMoveRight_Click" />
         </Grid>
 
         <Label Name="lblFields" Grid.Row="1" Grid.Column="0" Content="Fields" />

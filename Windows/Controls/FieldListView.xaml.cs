@@ -137,24 +137,30 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        internal IEnumerable<string> FieldKeys
+        public IEnumerable<FieldDisplayDetail> FieldKeys
         {
             get
             {
-                return fieldVOs.Select(fieldVO => fieldVO.FieldKey);
+                List<FieldDisplayDetail> fieldList = new();
+                fieldList.AddRange(fields);
+                return new ReadOnlyCollection<FieldDisplayDetail>(fieldList);
             }
 
             set
             {
+                fields.Clear();
                 fieldVOs.Clear();
                 if (value == null)
                 {
                     return;
                 }
-                value.Select(fieldKey => new FieldItemVO()
+
+                fields.AddRange(value);
+                value.Select(field => new FieldItemVO()
                 {
-                    FieldKey = fieldKey,
-                }).ToList().ForEach(fieldVO => fieldVOs.Add(fieldVO));
+                    FieldKey = field.FieldKey,
+                }).ToList()
+                .ForEach(fieldVO => fieldVOs.Add(fieldVO));
             }
         }
     }

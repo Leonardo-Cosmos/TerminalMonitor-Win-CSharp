@@ -36,7 +36,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Label Name="lblEnable" Grid.Row="0" Grid.Column="0" Content="Enable" />
-                <CheckBox Name="chkBxStyle" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding UseDefaultStyle}" />
+                <CheckBox Name="chkBxStyle" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding CustomizeStyle}" />
 
                 <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
                     <GroupBox Header="Default">
@@ -57,10 +57,10 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <Button Name="btnAdd" Grid.Column="0" Width="20" Content="+" Click="BtnAdd_Click" />
-                                    <Button Name="btnDelete" Grid.Column="1" Width="20" Content="-" Click="BtnDelete_Click" />
-                                    <Button Name="btnMoveUp" Grid.Column="2" Width="20" Content="↑" Click="BtnMoveUp_Click" />
-                                    <Button Name="btnMoveDown" Grid.Column="3" Width="20" Content="↓" Click="BtnMoveDown_Click" />
+                                    <Button Name="btnAdd" Grid.Column="0" Width="20" Content="+" ToolTip="Add" Click="BtnAdd_Click" />
+                                    <Button Name="btnDelete" Grid.Column="1" Width="20" Content="-" ToolTip="Delete" Click="BtnDelete_Click" />
+                                    <Button Name="btnMoveUp" Grid.Column="2" Width="20" Content="↑" ToolTip="Move Up" Click="BtnMoveUp_Click" />
+                                    <Button Name="btnMoveDown" Grid.Column="3" Width="20" Content="↓" ToolTip="Move Down" Click="BtnMoveDown_Click" />
                                 </Grid>
                             </Grid>
                             <ListView Name="lstStyleCondtions" MinHeight="30" ItemsSource="{Binding Conditions}">

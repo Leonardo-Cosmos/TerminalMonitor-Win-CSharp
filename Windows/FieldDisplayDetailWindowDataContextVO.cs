@@ -27,12 +27,12 @@ namespace TerminalMonitor.Windows
             set { fieldKey = value; OnPropertyChanged(); }
         }
 
-        private bool useDefaultStyle;
+        private bool customizeStyle;
 
-        public bool UseDefaultStyle
+        public bool CustomizeStyle
         {
-            get => useDefaultStyle;
-            set { useDefaultStyle = value; OnPropertyChanged(); }
+            get => customizeStyle;
+            set { customizeStyle = value; OnPropertyChanged(); }
         }
 
         private TextStyle style;

@@ -98,7 +98,7 @@ namespace TerminalMonitor.Windows
                 return new FieldDisplayDetail()
                 {
                     FieldKey = dataContextVO.FieldKey,
-                    UseDefaultStyle = dataContextVO.UseDefaultStyle,
+                    CustomizeStyle = dataContextVO.CustomizeStyle,
                     Style = dataContextVO.Style,
                     Conditions = dataContextVO.Conditions.ToArray(),
                 };
@@ -108,7 +108,7 @@ namespace TerminalMonitor.Windows
                 if (value != null)
                 {
                     dataContextVO.FieldKey = value.FieldKey;
-                    dataContextVO.UseDefaultStyle = value.UseDefaultStyle;
+                    dataContextVO.CustomizeStyle = value.CustomizeStyle;
 
                     dataContextVO.Style = value.Style ?? TextStyle.Empty;
 
