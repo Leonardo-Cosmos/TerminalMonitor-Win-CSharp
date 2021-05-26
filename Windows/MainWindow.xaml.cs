@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TerminalMonitor.Execution;
 using TerminalMonitor.Settings;
+using TerminalMonitor.Settings.Models;
 
 namespace TerminalMonitor.Windows
 {
@@ -41,6 +42,12 @@ namespace TerminalMonitor.Windows
             var executionSetting = setting.Executions?[0] ?? new();
             textBoxArguments.Text = executionSetting.ArgumentsText;
             textBoxWorkDir.Text = executionSetting.WorkingDirectory;
+
+            var terminalSetting = setting.Terminals?[0] ?? new();
+            terminalView.VisibleFields = terminalSetting.Fields?
+                .Select(field => FieldDisplayDetailSettings.Load(field));
+            terminalView.FilterConditions = terminalSetting.Filters?
+                .Select(filter => FilterConditionSettings.Load(filter));
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -53,6 +60,13 @@ namespace TerminalMonitor.Windows
             executionSetting.ArgumentsText = textBoxArguments.Text;
             executionSetting.WorkingDirectory = textBoxWorkDir.Text;
             setting.Executions = new List<ExecutionSetting>() { executionSetting };
+
+            TerminalSetting terminalSetting = new();
+            terminalSetting.Fields = terminalView.VisibleFields
+                .Select(field => FieldDisplayDetailSettings.Save(field)).ToList();
+            terminalSetting.Filters = terminalView.FilterConditions
+                .Select(filter => FilterConditionSettings.Save(filter)).ToList();
+            setting.Terminals = new List<TerminalSetting>() { terminalSetting };
 
             SettingSerializer.Save(setting);
         }

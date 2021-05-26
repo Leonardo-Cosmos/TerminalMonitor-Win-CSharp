@@ -43,9 +43,20 @@ namespace TerminalMonitor.Windows.Controls
 
         private void OnDataContextPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            fieldCondition.FieldKey = dataContextVO.FieldKey;
-            fieldCondition.MatchOperator = dataContextVO.MatchOperator;
-            fieldCondition.TargetValue = dataContextVO.TargetValue;
+            switch (e.PropertyName)
+            {
+                case "FieldKey":
+                    fieldCondition.FieldKey = dataContextVO.FieldKey;
+                    break;
+                case "MatchOperator":
+                    fieldCondition.MatchOperator = dataContextVO.MatchOperator;
+                    break;
+                case "TargetValue":
+                    fieldCondition.TargetValue = dataContextVO.TargetValue;
+                    break;
+                default:
+                    break;
+            }
         }
 
         private static void OnFieldConditionChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)

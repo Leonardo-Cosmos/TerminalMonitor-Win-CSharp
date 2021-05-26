@@ -112,11 +112,19 @@ namespace TerminalMonitor.Windows.Controls
 
         private void PauseTimer()
         {
+            if (timer == null)
+            {
+                return;
+            }
             timer.Stop();
         }
 
         private void ResumeTimer()
         {
+            if (timer == null)
+            {
+                return;
+            }
             timer.Start();
         }
 
@@ -281,6 +289,58 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     AddTerminalLine(terminalLineVO);
                 }                
+            }
+        }
+
+        public IEnumerable<FieldDisplayDetail> VisibleFields
+        {
+            get
+            {
+                List<FieldDisplayDetail> fieldList = new();
+                fieldList.AddRange(visibleFields);
+                return new ReadOnlyCollection<FieldDisplayDetail>(fieldList);
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    return;
+                }
+
+                PauseTimer();
+
+                fieldListView.FieldKeys = value;
+                visibleFields = value.ToArray();
+                ApplyVisibleField();
+
+                ResumeTimer();
+            }
+        }
+
+        public IEnumerable<FilterCondition> FilterConditions
+        {
+            get
+            {
+                List<FilterCondition> filterList = new();
+                filterList.AddRange(filterConditions);
+                return new ReadOnlyCollection<FilterCondition>(filterList);
+            }
+
+            set
+            {
+                if (value == null)
+                {
+                    return;
+                }
+
+                PauseTimer();
+
+                filterView.FilterConditions = value;
+                filterConditions = value.ToArray();
+                FilterTerminal();
+
+                ResumeTimer();
             }
         }
     }

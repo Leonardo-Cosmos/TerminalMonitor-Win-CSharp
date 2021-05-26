@@ -2,7 +2,7 @@
 
 namespace TerminalMonitor.Models
 {
-    class FilterCondition
+    public class FilterCondition
     {
         public TextCondition Condition { get; set; }
 
