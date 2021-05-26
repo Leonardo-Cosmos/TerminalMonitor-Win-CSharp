@@ -41,13 +41,18 @@ namespace TerminalMonitor.Matchers
             return included && !excluded;
         }
 
-        private static bool IsMatch(TerminalLineVO terminalLineVO, TextCondition condition)
+        public static bool IsMatch(TerminalLineVO terminalLineVO, TextCondition condition)
         {
             if (condition == null)
             {
                 return false;
             }
             var field = (terminalLineVO.ParsedFields ?? new()).FirstOrDefault(field => field.Key == condition.FieldKey);
+            if (field == null)
+            {
+                return false;
+            }
+
             return TextMatcher.IsMatch(field.Value, condition.TargetValue, condition.MatchOperator);
         }
     }

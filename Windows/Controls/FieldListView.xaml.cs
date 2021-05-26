@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -26,6 +27,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly ObservableCollection<FieldItemVO> fieldVOs = new();
 
+        private readonly List<FieldDisplayDetail> fields = new();
+
         public FieldListView()
         {
             InitializeComponent();
@@ -36,19 +39,51 @@ namespace TerminalMonitor.Windows.Controls
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            FieldItemVO item = new()
+            FieldDisplayDetailWindow window = new();
+            if (window.ShowDialog() ?? false)
             {
-                FieldKey = currentField.FieldKey
-            };
-            fieldVOs.Add(item);
-            lstFields.SelectedItem = item;
+                var field = window.Field;
+
+                FieldItemVO item = new()
+                {
+                    FieldKey = field.FieldKey
+                };
+                fieldVOs.Add(item);
+                lstFields.SelectedItem = item;
+
+                fields.Add(field);
+            }
+        }
+
+        private void BtnModify_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstFields.SelectedItem is FieldItemVO selectedItem)
+            {
+                var index = fieldVOs.IndexOf(selectedItem);
+
+                var field = fields[index];
+                FieldDisplayDetailWindow window = new()
+                {
+                    Field = field,
+                };
+                if (window.ShowDialog() ?? false)
+                {
+                    field = window.Field;
+                    fields[index] = field;
+
+                    fieldVOs[index].FieldKey = field.FieldKey;
+                }
+            }
         }
 
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             if (lstFields.SelectedItem is FieldItemVO selectedItem)
             {
-                fieldVOs.Remove(selectedItem);
+                var index = fieldVOs.IndexOf(selectedItem);
+                fieldVOs.RemoveAt(index);
+
+                fields.RemoveAt(index);
             }
         }
 
@@ -63,6 +98,10 @@ namespace TerminalMonitor.Windows.Controls
                     fieldVOs.Insert(index - 1, selectedItem);
 
                     lstFields.SelectedItem = selectedItem;
+
+                    var field = fields[index];
+                    fields.RemoveAt(index);
+                    fields.Insert(index - 1, field);
                 }
             }
         }
@@ -78,6 +117,10 @@ namespace TerminalMonitor.Windows.Controls
                     fieldVOs.Insert(index + 1, selectedItem);
 
                     lstFields.SelectedItem = selectedItem;
+
+                    var field = fields[index];
+                    fields.RemoveAt(index);
+                    fields.Insert(index + 1, field);
                 }
             }
         }
@@ -94,24 +137,30 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        internal IEnumerable<string> FieldKeys
+        public IEnumerable<FieldDisplayDetail> FieldKeys
         {
             get
             {
-                return fieldVOs.Select(fieldVO => fieldVO.FieldKey);
+                List<FieldDisplayDetail> fieldList = new();
+                fieldList.AddRange(fields);
+                return new ReadOnlyCollection<FieldDisplayDetail>(fieldList);
             }
 
             set
             {
+                fields.Clear();
                 fieldVOs.Clear();
                 if (value == null)
                 {
                     return;
                 }
-                value.Select(fieldKey => new FieldItemVO()
+
+                fields.AddRange(value);
+                value.Select(field => new FieldItemVO()
                 {
-                    FieldKey = fieldKey,
-                }).ToList().ForEach(fieldVO => fieldVOs.Add(fieldVO));
+                    FieldKey = field.FieldKey,
+                }).ToList()
+                .ForEach(fieldVO => fieldVOs.Add(fieldVO));
             }
         }
     }

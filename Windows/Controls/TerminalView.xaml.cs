@@ -36,8 +36,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private DispatcherTimer timer;
 
-        private IEnumerable<string> visibleFieldKeys = new List<string>();
-        private IEnumerable<FilterCondition> filterConditions = new List<FilterCondition>(0);
+        private IEnumerable<FieldDisplayDetail> visibleFields = Array.Empty<FieldDisplayDetail>();
+        private IEnumerable<FilterCondition> filterConditions = Array.Empty<FilterCondition>();
 
         private readonly TerminalViewDataContextVO dataContextVO = new();
 
@@ -53,7 +53,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             PauseTimer();
 
-            visibleFieldKeys = fieldListView.FieldKeys.ToArray();
+            visibleFields = fieldListView.FieldKeys.ToArray();
             ApplyVisibleField();
 
             ResumeTimer();
@@ -157,26 +157,67 @@ namespace TerminalMonitor.Windows.Controls
             AddMatchedTerminalLines();
         }
 
+        private static string GetForegroundColumnName(string columnName)
+        {
+            return $"{columnName}__foreground";
+        }
+
+        private static string GetBackgroundColumnName(string columnName)
+        {
+            return $"{columnName}__background";
+        }
+
         private void ApplyVisibleField()
         {
             GridView gridView = new();
 
             terminalDataTable.Columns.Clear();
             terminalDataTable.Rows.Clear();
-            if (visibleFieldKeys.Any())
+            if (visibleFields.Any())
             {
-                foreach (var visibleFieldKey in visibleFieldKeys)
+                foreach (var visibleField in visibleFields)
                 {
-                    DataColumn column = new(visibleFieldKey);
+                    DataColumn column = new(visibleField.FieldKey);
                     column.DataType = typeof(string);
                     terminalDataTable.Columns.Add(column);
 
-
-                    gridView.Columns.Add(new GridViewColumn()
+                    if (visibleField.CustomizeStyle)
                     {
-                        Header = visibleFieldKey,
-                        DisplayMemberBinding = new Binding(visibleFieldKey),
-                    });
+                        DataColumn foregroundColumn = new(GetForegroundColumnName(visibleField.FieldKey));
+                        foregroundColumn.DataType = typeof(Brush);
+                        terminalDataTable.Columns.Add(foregroundColumn);
+
+                        DataColumn backgroundColumn = new(GetBackgroundColumnName(visibleField.FieldKey));
+                        backgroundColumn.DataType = typeof(Brush);
+                        terminalDataTable.Columns.Add(backgroundColumn);
+
+                        FrameworkElementFactory fef = new(typeof(TextBlock));
+                        Binding textBinding = new();
+                        textBinding.Path = new PropertyPath(visibleField.FieldKey, Array.Empty<object>());
+                        fef.SetBinding(TextBlock.TextProperty, textBinding);
+                        Binding foregroundBinding = new();
+                        foregroundBinding.Path = new PropertyPath(GetForegroundColumnName(visibleField.FieldKey), Array.Empty<object>());
+                        fef.SetBinding(TextBlock.ForegroundProperty, foregroundBinding);
+                        Binding backgroundBinding = new();
+                        backgroundBinding.Path = new PropertyPath(GetBackgroundColumnName(visibleField.FieldKey), Array.Empty<object>());
+                        fef.SetBinding(TextBlock.BackgroundProperty, backgroundBinding);
+                        DataTemplate dataTemplate = new();
+                        dataTemplate.VisualTree = fef;
+
+                        gridView.Columns.Add(new GridViewColumn()
+                        {
+                            Header = visibleField.FieldKey,
+                            CellTemplate = dataTemplate,
+                        });
+                    }
+                    else
+                    {
+                        gridView.Columns.Add(new GridViewColumn()
+                        {
+                            Header = visibleField.FieldKey,
+                            DisplayMemberBinding = new Binding(visibleField.FieldKey),
+                        });
+                    }
                 }
             }
             else
@@ -204,19 +245,29 @@ namespace TerminalMonitor.Windows.Controls
         {
             DataRow row = terminalDataTable.NewRow();
 
-            if (visibleFieldKeys.Any())
+            if (visibleFields.Any())
             {
-                foreach (var fieldKey in visibleFieldKeys)
+                foreach (var visibleField in visibleFields)
                 {
-                    var fieldValue = terminalLineVO.ParsedFieldDict.ContainsKey(fieldKey) ?
-                    terminalLineVO.ParsedFieldDict[fieldKey] : "";
+                    var fieldValue = terminalLineVO.ParsedFieldDict.ContainsKey(visibleField.FieldKey) ?
+                    terminalLineVO.ParsedFieldDict[visibleField.FieldKey] : "";
 
-                    row[fieldKey] = fieldValue;
+                    row[visibleField.FieldKey] = fieldValue;
+
+                    if (visibleField.CustomizeStyle)
+                    {
+                        var matchedTextStyleCondition = visibleField.Conditions.FirstOrDefault(
+                            textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineVO, textStyleCondition.Condition));
+                        var textStyle = matchedTextStyleCondition?.Style ?? visibleField.Style;
+
+                        row[GetForegroundColumnName(visibleField.FieldKey)] = new SolidColorBrush(textStyle.Foreground);
+                        row[GetBackgroundColumnName(visibleField.FieldKey)] = new SolidColorBrush(textStyle.Background);
+                    }
                 }              
             }
             else
             {
-                row[0] = terminalLineVO.PlainText;
+                row[defaultColumn] = terminalLineVO.PlainText;
             }
 
             terminalDataTable.Rows.Add(row);

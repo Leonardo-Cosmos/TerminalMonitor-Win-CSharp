@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace TerminalMonitor.Matchers
 {
-    static class TextMatcher
+    public static class TextMatcher
     {
 
         public enum MatchOperator
