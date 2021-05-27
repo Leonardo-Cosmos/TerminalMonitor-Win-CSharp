@@ -28,7 +28,7 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class TerminalView : UserControl
     {
-        private const string defaultColumn = "PlainText";
+        private const string defaultColumnName = "PlainText";
 
         private readonly List<TerminalLineVO> terminalLineVOs = new();
 
@@ -228,18 +228,16 @@ namespace TerminalMonitor.Windows.Controls
                     }
                 }
             }
-            else
-            {
-                DataColumn column = new(defaultColumn);
-                column.DataType = typeof(string);
-                terminalDataTable.Columns.Add(column);
 
-                gridView.Columns.Add(new GridViewColumn()
-                {
-                    Header = defaultColumn,
-                    DisplayMemberBinding = new Binding(defaultColumn),
-                });
-            }
+            DataColumn defaultColumn = new(defaultColumnName);
+            defaultColumn.DataType = typeof(string);
+            terminalDataTable.Columns.Add(defaultColumn);
+
+            gridView.Columns.Add(new GridViewColumn()
+            {
+                Header = defaultColumnName,
+                DisplayMemberBinding = new Binding(defaultColumnName),
+            });
 
             AddMatchedTerminalLines();
 
@@ -273,11 +271,9 @@ namespace TerminalMonitor.Windows.Controls
                     }
                 }              
             }
-            else
-            {
-                row[defaultColumn] = terminalLineVO.PlainText;
-            }
-
+            
+            row[defaultColumnName] = terminalLineVO.PlainText;
+ 
             terminalDataTable.Rows.Add(row);
         }
 
