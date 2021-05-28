@@ -1,0 +1,14 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ControlTemplate x:Key="validationTemplate">
+        <StackPanel Orientation="Vertical">
+            <Border BorderBrush="Red" BorderThickness="2">
+                <AdornedElementPlaceholder Name="adornedElement" />
+            </Border>
+            <TextBlock Foreground="Red"
+                       Text="{Binding ElementName=adornedElement, Path=AdornedElement.(Validation.Errors)/ErrorContent}" />
+        </StackPanel>
+    </ControlTemplate>
+    
+</ResourceDictionary>

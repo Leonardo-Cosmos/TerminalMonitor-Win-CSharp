@@ -39,7 +39,12 @@ namespace TerminalMonitor.Windows.Controls
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            FieldDisplayDetailWindow window = new();
+            var existingFieldKeys = fields
+                    .Select(field => field.FieldKey);
+            FieldDisplayDetailWindow window = new()
+            {
+                ExistingFieldKeys = existingFieldKeys,
+            };
             if (window.ShowDialog() ?? false)
             {
                 var field = window.Field;
@@ -62,9 +67,13 @@ namespace TerminalMonitor.Windows.Controls
                 var index = fieldVOs.IndexOf(selectedItem);
 
                 var field = fields[index];
+                var existingFieldKeys = fields
+                    .Select(field => field.FieldKey)
+                    .Where(fieldKey => fieldKey != field.FieldKey);
                 FieldDisplayDetailWindow window = new()
                 {
                     Field = field,
+                    ExistingFieldKeys = existingFieldKeys,
                 };
                 if (window.ShowDialog() ?? false)
                 {

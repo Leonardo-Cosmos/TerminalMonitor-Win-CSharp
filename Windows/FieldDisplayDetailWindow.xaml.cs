@@ -1,6 +1,7 @@
 ﻿/* 2021/5/24 */
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using TerminalMonitor.Models;
+using TerminalMonitor.Windows.ValidationRules;
 
 namespace TerminalMonitor.Windows
 {
@@ -26,11 +28,22 @@ namespace TerminalMonitor.Windows
             Style = TextStyle.Empty,
         };
 
+        private readonly List<string> existingFieldKeys = new();
+
         public FieldDisplayDetailWindow()
         {
             InitializeComponent();
 
             DataContext = dataContextVO;
+
+            Binding fieldKeyBinding = new("FieldKey");
+            fieldKeyBinding.Source = dataContextVO;
+            fieldKeyBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            fieldKeyBinding.ValidationRules.Add(new FieldKeyRule()
+            {
+                ExistingFieldKeys = existingFieldKeys
+            });
+            txtBxKey.SetBinding(TextBox.TextProperty, fieldKeyBinding);
         }
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
@@ -88,7 +101,29 @@ namespace TerminalMonitor.Windows
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
+            var fieldKeyHasError = Validation.GetHasError(txtBxKey);
+
+            if (fieldKeyHasError)
+            {
+                txtBxKey.Focus();
+                return;
+            }
+
             DialogResult = true;
+        }
+
+        public IEnumerable<string> ExistingFieldKeys
+        {
+            get
+            {
+                return new ReadOnlyCollection<string>(existingFieldKeys);
+            }
+
+            set
+            {
+                existingFieldKeys.Clear();
+                existingFieldKeys.AddRange(value);
+            }
         }
 
         public FieldDisplayDetail Field
