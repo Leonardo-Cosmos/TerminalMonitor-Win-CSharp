@@ -53,7 +53,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             PauseTimer();
 
-            visibleFields = fieldListView.FieldKeys.ToArray();
+            visibleFields = fieldListView.Fields.ToArray();
             ApplyVisibleField();
 
             ResumeTimer();
@@ -306,7 +306,7 @@ namespace TerminalMonitor.Windows.Controls
 
                 PauseTimer();
 
-                fieldListView.FieldKeys = value;
+                fieldListView.Fields = value;
                 visibleFields = value.ToArray();
                 ApplyVisibleField();
 

@@ -23,9 +23,7 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class FieldListView : UserControl
     {
-        private readonly FieldItemVO currentField = new();
-
-        private readonly ObservableCollection<FieldItemVO> fieldVOs = new();
+        private readonly ObservableCollection<FieldListItemVO> fieldVOs = new();
 
         private readonly List<FieldDisplayDetail> fields = new();
 
@@ -33,7 +31,6 @@ namespace TerminalMonitor.Windows.Controls
         {
             InitializeComponent();
 
-            DataContext = currentField;
             lstFields.ItemsSource = fieldVOs;
         }
 
@@ -49,7 +46,7 @@ namespace TerminalMonitor.Windows.Controls
             {
                 var field = window.Field;
 
-                FieldItemVO item = new()
+                FieldListItemVO item = new()
                 {
                     FieldKey = field.FieldKey
                 };
@@ -62,7 +59,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void BtnModify_Click(object sender, RoutedEventArgs e)
         {
-            if (lstFields.SelectedItem is FieldItemVO selectedItem)
+            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
             {
                 var index = fieldVOs.IndexOf(selectedItem);
 
@@ -87,7 +84,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
-            if (lstFields.SelectedItem is FieldItemVO selectedItem)
+            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
             {
                 var index = fieldVOs.IndexOf(selectedItem);
                 fieldVOs.RemoveAt(index);
@@ -98,12 +95,12 @@ namespace TerminalMonitor.Windows.Controls
 
         private void BtnMoveLeft_Click(object sender, RoutedEventArgs e)
         {
-            if (lstFields.SelectedItem is FieldItemVO selectedItem)
+            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
             {
                 var index = fieldVOs.IndexOf(selectedItem);
                 if (index > 0)
                 {
-                    fieldVOs.Remove(selectedItem);
+                    fieldVOs.RemoveAt(index);
                     fieldVOs.Insert(index - 1, selectedItem);
 
                     lstFields.SelectedItem = selectedItem;
@@ -117,12 +114,12 @@ namespace TerminalMonitor.Windows.Controls
 
         private void BtnMoveRight_Click(object sender, RoutedEventArgs e)
         {
-            if (lstFields.SelectedItem is FieldItemVO selectedItem)
+            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
             {
                 var index = fieldVOs.IndexOf(selectedItem);
                 if (index < fieldVOs.Count - 1)
                 {
-                    fieldVOs.Remove(selectedItem);
+                    fieldVOs.RemoveAt(index);
                     fieldVOs.Insert(index + 1, selectedItem);
 
                     lstFields.SelectedItem = selectedItem;
@@ -134,25 +131,11 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void LstFields_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (lstFields.SelectedItem is FieldItemVO selectedItem)
-            {
-                currentField.FieldKey = selectedItem.FieldKey;
-            }
-            else
-            {
-                currentField.FieldKey = String.Empty;
-            }
-        }
-
-        public IEnumerable<FieldDisplayDetail> FieldKeys
+        public IEnumerable<FieldDisplayDetail> Fields
         {
             get
             {
-                List<FieldDisplayDetail> fieldList = new();
-                fieldList.AddRange(fields);
-                return new ReadOnlyCollection<FieldDisplayDetail>(fieldList);
+                return new ReadOnlyCollection<FieldDisplayDetail>(fields.ToArray());
             }
 
             set
@@ -165,7 +148,7 @@ namespace TerminalMonitor.Windows.Controls
                 }
 
                 fields.AddRange(value);
-                value.Select(field => new FieldItemVO()
+                value.Select(field => new FieldListItemVO()
                 {
                     FieldKey = field.FieldKey,
                 }).ToList()

@@ -116,13 +116,16 @@ namespace TerminalMonitor.Windows
         {
             get
             {
-                return new ReadOnlyCollection<string>(existingFieldKeys);
+                return new ReadOnlyCollection<string>(existingFieldKeys.ToArray());
             }
 
             set
             {
                 existingFieldKeys.Clear();
-                existingFieldKeys.AddRange(value);
+                if (value != null)
+                {
+                    existingFieldKeys.AddRange(value);
+                }
             }
         }
 

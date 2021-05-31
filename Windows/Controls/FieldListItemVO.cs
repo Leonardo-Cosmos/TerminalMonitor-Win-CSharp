@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace TerminalMonitor.Windows.Controls
 {
-    class FieldItemVO : INotifyPropertyChanged
+    class FieldListItemVO : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
