@@ -9,20 +9,22 @@ using System.Windows.Controls;
 
 namespace TerminalMonitor.Windows.ValidationRules
 {
-    class FieldKeyRule : ValidationRule
+    class UniqueItemRule : ValidationRule
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
-            var fieldKey = value as string;
+            var currentValue = value as string;
 
-            if (ExistingFieldKeys?.Contains(fieldKey) ?? false)
+            if (ExistingValues?.Contains(currentValue) ?? false)
             {
-                return new ValidationResult(false, "Field key had been added");
+                return new ValidationResult(false, ErrorMessage ?? "Value exists already");
             }
 
             return ValidationResult.ValidResult;
         }
 
-        public IEnumerable<string> ExistingFieldKeys { get; init; }
+        public IEnumerable<string> ExistingValues { get; init; }
+
+        public string ErrorMessage { get; init; }
     }
 }

@@ -130,6 +130,11 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private void btnRun_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         public IEnumerable<CommandConfig> Commands
         {
             get

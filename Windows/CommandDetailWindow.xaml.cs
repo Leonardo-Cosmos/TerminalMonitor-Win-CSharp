@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using TerminalMonitor.Models;
+using TerminalMonitor.Windows.ValidationRules;
 
 namespace TerminalMonitor.Windows
 {
@@ -32,6 +33,20 @@ namespace TerminalMonitor.Windows
             InitializeComponent();
 
             DataContext = dataContextVO;
+
+            Binding commandNameBinding = new("Name");
+            commandNameBinding.Source = dataContextVO;
+            commandNameBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            commandNameBinding.ValidationRules.Add(new UniqueItemRule()
+            {
+                ExistingValues = existingCommandNames,
+                ErrorMessage = "Command name has been used already"
+            });
+            commandNameBinding.ValidationRules.Add(new NotEmptyRule()
+            {
+                ErrorMessage = "Command name should not be empty"
+            });
+            txtBxName.SetBinding(TextBox.TextProperty, commandNameBinding);
         }
 
         private void BtnBrowseWorkDir_Click(object sender, RoutedEventArgs e)
@@ -48,7 +63,22 @@ namespace TerminalMonitor.Windows
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
+            txtBxName.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+            txtBxCommand.GetBindingExpression(TextBox.TextProperty).UpdateSource();
 
+            if (Validation.GetHasError(txtBxName))
+            {
+                txtBxName.Focus();
+                return;
+            }
+
+            if (Validation.GetHasError(txtBxCommand))
+            {
+                txtBxCommand.Focus();
+                return;
+            }
+
+            DialogResult = true;
         }
 
         public IEnumerable<string> ExistingCommandNames
@@ -73,6 +103,7 @@ namespace TerminalMonitor.Windows
             get
             {
                 return new() { 
+                    Name = dataContextVO.Name,
                     StartFile = dataContextVO.StartFile,
                     Arguments = dataContextVO.Arguments,
                     WorkDirectory = dataContextVO.WorkDirectory,
@@ -86,6 +117,7 @@ namespace TerminalMonitor.Windows
                     return;
                 }
 
+                dataContextVO.Name = value.Name;
                 dataContextVO.StartFile = value.StartFile;
                 dataContextVO.Arguments = value.Arguments;
                 dataContextVO.WorkDirectory = value.WorkDirectory;

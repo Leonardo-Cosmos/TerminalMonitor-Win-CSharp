@@ -21,7 +21,7 @@
 
                 <Label Name="lblKey" Grid.Row="0" Grid.Column="0" Content="Key" />
                 <TextBox Name="txtBxKey" Grid.Row="0" Grid.Column="1"
-                         Style="{StaticResource textBoxInError}"
+                         Style="{StaticResource textBoxInValidation}"
                          Validation.ErrorTemplate="{StaticResource validationTemplate}" />
             </Grid>
         </GroupBox>
