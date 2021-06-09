@@ -6,103 +6,52 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Execution
 {
     class CommandExecutor
     {
-        private readonly string command;
+        private readonly List<string> executionNames = new();
 
-        private readonly string arguments = null;
-
-        private readonly string workingDirectory = null;
+        private readonly Dictionary<string, Execution> executionDict = new();
 
         private readonly ConcurrentQueue<string> terminalTextQueue = new();
 
-        private bool started = false;
-
-        private class Execution : IExecution
+        public CommandExecutor()
         {
-            private readonly CommandExecutor executor;
-
-            private readonly Task processTask;
-
-            internal Execution(CommandExecutor executor, Task processTask)
-            {
-                this.executor = executor;
-                this.processTask = processTask;
-            }
-
-            public IEnumerable<string> ReadTerminalLines()
-            {
-                return executor.ReadTerminalLines();
-            }
-
-            public bool IsCompleted
-            {
-                get
-                {
-                    return processTask.IsCompleted;
-                }
-            }
+            
         }
 
-        public CommandExecutor(string command, string arguments = null, string workingDirectory = null)
+        public void Execute(CommandConfig commandConfig)
         {
-            this.command = command;
-            this.arguments = arguments;
-            this.workingDirectory = workingDirectory;
+            Execution execution = new(commandConfig);
+            var name = GetValidExecutionName(commandConfig.Name);
+            executionNames.Add(name);
+            executionDict.Add(name, execution);
+
+            
         }
 
-        public IExecution Execute()
+        private string GetValidExecutionName(string configName)
         {
-            if (started)
+            if (!executionDict.ContainsKey(configName))
             {
-                throw new InvalidOperationException("It has been started already.");
+                return configName;
             }
 
-            var task = Start();
-            started = true;
-            return new Execution(this, task);
-        }
-
-        private async Task Start()
-        {
-            if (!String.IsNullOrEmpty(command))
+            int number = 0;
+            string name;
+            do
             {
-                var process = new Process();
-                process.StartInfo.FileName = command;
-                if (!String.IsNullOrWhiteSpace(arguments))
-                {
-                    process.StartInfo.Arguments = arguments;
-                }
-                if (!String.IsNullOrWhiteSpace(workingDirectory))
-                {
-                    process.StartInfo.WorkingDirectory = workingDirectory;
-                }
+                number++;
+                name = $"{configName} {number}";
+            } while (executionDict.ContainsKey(name));
 
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.RedirectStandardOutput = true;
-                process.OutputDataReceived += (sender, e) =>
-                {
-
-                    if (!String.IsNullOrEmpty(e.Data))
-                    {
-                        terminalTextQueue.Enqueue(e.Data);
-                    }
-
-                };
-
-                process.Start();
-
-                process.BeginOutputReadLine();
-
-                await process.WaitForExitAsync();
-                process.Close();
-            }
+            return name;
         }
 
-        IEnumerable<string> ReadTerminalLines()
+        public IEnumerable<string> ReadTerminalLines()
         {
             List<string> lines = new();
             while (!terminalTextQueue.IsEmpty)
