@@ -51,9 +51,9 @@ namespace TerminalMonitor.Execution
 
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardOutput = true;
+
                 process.OutputDataReceived += (sender, e) =>
                 {
-
                     if (!String.IsNullOrEmpty(e.Data))
                     {
                         OnLineReceived(new()
@@ -61,7 +61,6 @@ namespace TerminalMonitor.Execution
                             Line = e.Data
                         });
                     }
-
                 };
 
                 process.Start();
@@ -71,7 +70,7 @@ namespace TerminalMonitor.Execution
                 await process.WaitForExitAsync();
                 process.Close();
 
-                OnCompleted(EventArgs.Empty);
+                OnExited(EventArgs.Empty);
             }
         }
 
@@ -80,14 +79,14 @@ namespace TerminalMonitor.Execution
             LineReceived?.Invoke(this, e);
         }
 
-        protected void OnCompleted(EventArgs e)
+        protected void OnExited(EventArgs e)
         {
-            Completed?.Invoke(this, e);
+            Exited?.Invoke(this, e);
         }
 
-        public TerminalLineEventHandler LineReceived;
+        public event TerminalLineEventHandler LineReceived;
 
-        public EventHandler Completed;
+        public event EventHandler Exited;
 
         public bool IsCompleted
         {

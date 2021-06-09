@@ -24,11 +24,23 @@ namespace TerminalMonitor.Windows
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly CommandExecutor executor = new();
+        
         private TerminalMonitorSetting setting;
        
         public MainWindow()
         {
             InitializeComponent();
+
+            commandListView.CommandRun += (sender, e) =>
+            {
+                executor.Execute(e.Command);
+            };
+
+            executor.Started += (sender, e) =>
+            {
+                terminalView.AddExecution(executor);
+            };
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -58,19 +70,6 @@ namespace TerminalMonitor.Windows
             setting.Terminals = new List<TerminalSetting>() { terminalSetting };
 
             SettingSerializer.Save(setting);
-        }
-
-        private void ButtonExecute_Click(object sender, RoutedEventArgs e)
-        {
-            /*
-            var command = textBoxCommand.Text;
-            var arguments = textBoxArguments.Text;
-            var workDir = textBoxWorkDir.Text;
-            CommandExecutor executor = new(command, arguments: arguments, workingDirectory: workDir);
-            var execution = executor.Execute();
-
-            terminalView.AddExecution(execution);
-            */
         }
     }
 }

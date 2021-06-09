@@ -130,10 +130,26 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void btnRun_Click(object sender, RoutedEventArgs e)
+        private void BtnRun_Click(object sender, RoutedEventArgs e)
         {
+            if (lstCommands.SelectedItem is CommandListItemVO selectedItem)
+            {
+                var index = commandVOs.IndexOf(selectedItem);
 
+                var command = commands[index];
+                OnCommandRun(new()
+                {
+                    Command = command
+                });
+            }
         }
+
+        protected void OnCommandRun(CommandRunEventArgs e)
+        {
+            CommandRun?.Invoke(this, e);
+        }
+
+        public event CommandRunEventHandler CommandRun;
 
         public IEnumerable<CommandConfig> Commands
         {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TerminalMonitor.Execution
 {
-    public interface IExecution
+    public interface ITerminalLineProducer
     {
         IEnumerable<string> ReadTerminalLines();
 

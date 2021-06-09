@@ -83,28 +83,26 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.AutoScroll = !dataContextVO.AutoScroll;
         }
 
-        public void AddExecution(IExecution execution)
+        public void AddExecution(ITerminalLineProducer producer)
         {
-            StartTimer(execution);
+            StartTimer(producer);
         }
 
-        private void StartTimer(IExecution execution)
+        private void StartTimer(ITerminalLineProducer producer)
         {
             timer = new();
             timer.Tick += (sender, e) =>
             {
-                var lines = execution.ReadTerminalLines();
+                var lines = producer.ReadTerminalLines();
                 foreach (var line in lines)
                 {
                     ParseTerminalLine(line);
                 }
 
-                if (execution.IsCompleted)
+                if (producer.IsCompleted)
                 {
                     timer.Stop();
-                    ParseTerminalLine("Task is completed");
                 }
-
             };
             timer.Interval = new TimeSpan(0, 0, 1);
             timer.Start();

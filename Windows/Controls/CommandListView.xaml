@@ -20,7 +20,7 @@
             <Button Name="btnDelete" Width="20" Content="-" ToolTip="Delete" Click="BtnDelete_Click" />
             <Button Name="btnMoveUp" Width="20" Content="↑" ToolTip="Move Up" Click="BtnMoveUp_Click" />
             <Button Name="btnMoveDown" Width="20" Content="↓" ToolTip="Move Down" Click="BtnMoveDown_Click" />
-            <Button Name="btnRun" Width="20" Content="▷" ToolTip="Run" Click="btnRun_Click" />
+            <Button Name="btnRun" Width="20" Content="▷" ToolTip="Run" Click="BtnRun_Click" />
         </WrapPanel>
     </StackPanel>
 </UserControl>
