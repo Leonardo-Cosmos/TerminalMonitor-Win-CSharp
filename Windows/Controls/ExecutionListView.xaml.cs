@@ -36,7 +36,9 @@ namespace TerminalMonitor.Windows.Controls
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)
         {
-            
+            var tag = (sender as Button).Tag;
+            var executionName = tag as string;
+            executor.Terminate(executionName);
         }
 
         private void Executor_ExecutionStarted(object sender, ExecutionInfoEventArgs e)

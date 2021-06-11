@@ -46,6 +46,20 @@ namespace TerminalMonitor.Execution
             AddExecution(name, execution);
         }
 
+        public void Terminate(string executionName)
+        {
+            if (!executionDict.ContainsKey(executionName))
+            {
+                Debug.Print($"Executor {executionName} doesn't exist when terminate.");
+                return;
+            }
+
+            var execution = executionDict[executionName];
+            execution.Kill();
+
+            RemoveExecution(executionName);
+        }
+
         private string GetValidExecutionName(string configName)
         {
             if (!executionDict.ContainsKey(configName))

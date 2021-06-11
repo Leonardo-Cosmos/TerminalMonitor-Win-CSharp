@@ -16,6 +16,8 @@ namespace TerminalMonitor.Execution
 
         private bool started = false;
 
+        private Process process;
+
         private Task processTask;
 
         internal Execution(CommandConfig commandConfig)
@@ -34,19 +36,29 @@ namespace TerminalMonitor.Execution
             started = true;
         }
 
-        private async Task Start(string startFile, string arguments = null, string workDirectory = null)
+        public void Kill()
+        {
+            if (!started)
+            {
+                throw new InvalidOperationException("It is not running.");
+            }
+
+            process.Kill();
+        }
+
+        private async Task Start(string startFile, string arguments = null, string workingDirectory = null)
         {
             if (!String.IsNullOrEmpty(startFile))
             {
-                var process = new Process();
+                process = new Process();
                 process.StartInfo.FileName = startFile;
                 if (!String.IsNullOrWhiteSpace(arguments))
                 {
                     process.StartInfo.Arguments = arguments;
                 }
-                if (!String.IsNullOrWhiteSpace(workDirectory))
+                if (!String.IsNullOrWhiteSpace(workingDirectory))
                 {
-                    process.StartInfo.WorkingDirectory = workDirectory;
+                    process.StartInfo.WorkingDirectory = workingDirectory;
                 }
 
                 process.StartInfo.UseShellExecute = false;
@@ -69,13 +81,15 @@ namespace TerminalMonitor.Execution
                     }
                 };
 
+                process.StartInfo.CreateNoWindow = true;
+
                 process.Start();
 
                 process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
 
                 await process.WaitForExitAsync();
                 process.Close();
-
                 OnExited();
             }
         }

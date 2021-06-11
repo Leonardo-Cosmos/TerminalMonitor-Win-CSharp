@@ -25,9 +25,9 @@ namespace TerminalMonitor.Windows
     public partial class MainWindow : Window
     {
         private readonly CommandExecutor commandExecutor = new();
-        
+
         private TerminalMonitorSetting setting;
-       
+
         public MainWindow()
         {
             InitializeComponent();
