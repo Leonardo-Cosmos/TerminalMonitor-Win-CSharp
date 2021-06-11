@@ -25,6 +25,8 @@ namespace TerminalMonitor.Windows.Controls
     {
         private readonly ObservableCollection<ExecutionListItemVO> executionVOs = new();
 
+        private IExecutor executor;
+
         public ExecutionListView()
         {
             InitializeComponent();
@@ -37,15 +39,46 @@ namespace TerminalMonitor.Windows.Controls
             
         }
 
-        public void AddExecution(Execution.Execution execution)
+        private void Executor_ExecutionStarted(object sender, ExecutionInfoEventArgs e)
         {
-
+            var executionName = e.Execution.Name;
+            ExecutionListItemVO item = new()
+            {
+                Name = executionName,
+            };
+            executionVOs.Add(item);
         }
 
-        public void RemoveExecution(Execution.Execution execution)
+        private void Executor_ExecutionExited(object sender, ExecutionInfoEventArgs e)
         {
-
+            var executionName = e.Execution.Name;
+            ExecutionListItemVO item = executionVOs
+                .FirstOrDefault(execution => execution.Name == executionName);
+            if (item != null)
+            {
+                executionVOs.Remove(item);
+            }
         }
 
+        public IExecutor Executor
+        {
+            get => executor;
+            set
+            {
+                if (executor != value && executor != null)
+                {
+                    executor.ExecutionStarted -= Executor_ExecutionStarted;
+                    executor.ExecutionExited -= Executor_ExecutionExited;
+                }
+
+                executor = value;
+
+                if (executor != null)
+                {
+                    executor.ExecutionStarted += Executor_ExecutionStarted;
+                    executor.ExecutionExited += Executor_ExecutionExited;
+                }
+            }
+        }
     }
 }

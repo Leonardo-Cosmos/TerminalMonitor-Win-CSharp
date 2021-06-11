@@ -10,7 +10,7 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Execution
 {
-    class CommandExecutor : ITerminalLineProducer
+    class CommandExecutor : IExecutor, ITerminalLineProducer
     {
         private readonly List<string> executionNames = new();
 
@@ -25,14 +25,8 @@ namespace TerminalMonitor.Execution
 
         public void Execute(CommandConfig commandConfig)
         {
-            if (executionNames.Count == 0)
-            {
-                OnStarted(EventArgs.Empty);
-            }
-
             Execution execution = new(commandConfig);
             var name = GetValidExecutionName(commandConfig.Name);
-            AddExecution(name, execution);
 
             execution.LineReceived += (sender, e) =>
             {
@@ -44,15 +38,12 @@ namespace TerminalMonitor.Execution
                 RemoveExecution(name);
 
                 Debug.Print($"Executor {name} completed.");
-
-                if (executionNames.Count == 0)
-                {
-                    OnCompleted(EventArgs.Empty);
-                }
             };
 
+            execution.Start();
+
             Debug.Print($"Executor {name} is started");
-            execution.Execute();
+            AddExecution(name, execution);
         }
 
         private string GetValidExecutionName(string configName)
@@ -75,27 +66,71 @@ namespace TerminalMonitor.Execution
 
         private void AddExecution(string name, Execution execution)
         {
+            // Emit event when the first execution started.
+            if (executionNames.Count == 0)
+            {
+                OnStarted();
+            }
+
             executionNames.Add(name);
             executionDict.Add(name, execution);
+
+            OnExecutionStarted(name);
         }
 
         private void RemoveExecution(string name)
         {
             executionNames.Remove(name);
             executionDict.Remove(name);
+
+            OnExecutionExited(name);
+
+            // Emit event when the last execution ended.
+            if (executionNames.Count == 0)
+            {
+                OnCompleted();
+            }
         }
 
-        protected void OnStarted(EventArgs e)
+        protected void OnExecutionStarted(string name)
+        {
+            ExecutionInfoEventArgs e = new()
+            {
+                Execution = new()
+                {
+                    Name = name,
+                },
+            };
+            ExecutionStarted?.Invoke(this, e);
+        }
+
+        protected void OnExecutionExited(string name)
+        {
+            ExecutionInfoEventArgs e = new()
+            {
+                Execution = new()
+                {
+                    Name = name,
+                },
+            };
+            ExecutionExited?.Invoke(this, e);
+        }
+
+        protected void OnStarted()
         {
             IsCompleted = false;
-            Started?.Invoke(this, e);
+            Started?.Invoke(this, EventArgs.Empty);
         }
 
-        protected void OnCompleted(EventArgs e)
+        protected void OnCompleted()
         {
             IsCompleted = true;
-            Completed?.Invoke(this, e);
+            Completed?.Invoke(this, EventArgs.Empty);
         }
+
+        public event ExecutionInfoEventHandler ExecutionStarted;
+
+        public event ExecutionInfoEventHandler ExecutionExited;
 
         public event EventHandler Started;
 
@@ -113,11 +148,11 @@ namespace TerminalMonitor.Execution
             }
             return lines.AsEnumerable();
         }
+
         public bool IsCompleted
         {
             get;
             private set;
         }
-
     }
 }

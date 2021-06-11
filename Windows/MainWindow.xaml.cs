@@ -24,7 +24,7 @@ namespace TerminalMonitor.Windows
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly CommandExecutor executor = new();
+        private readonly CommandExecutor commandExecutor = new();
         
         private TerminalMonitorSetting setting;
        
@@ -34,13 +34,11 @@ namespace TerminalMonitor.Windows
 
             commandListView.CommandRun += (sender, e) =>
             {
-                executor.Execute(e.Command);
+                commandExecutor.Execute(e.Command);
             };
 
-            executor.Started += (sender, e) =>
-            {
-                terminalView.AddExecution(executor);
-            };
+            executionListView.Executor = commandExecutor;
+            terminalView.LineProducer = commandExecutor;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

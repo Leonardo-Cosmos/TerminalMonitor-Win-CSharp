@@ -10,6 +10,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -22,9 +23,15 @@
             <controls:CommandListView x:Name="commandListView" />
         </Expander>
 
-        <GridSplitter Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+        <GridSplitter Grid.Row="1" Grid.Column="0" Height="5" HorizontalAlignment="Stretch" />
+
+        <Expander Name="expanderExecution" Grid.Row="2" Grid.Column="0" Header="Execution" IsExpanded="True">
+            <controls:ExecutionListView x:Name="executionListView" />
+        </Expander>
+
+        <GridSplitter Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
         
-        <controls:TerminalView x:Name="terminalView" Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" />
+        <controls:TerminalView x:Name="terminalView" Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" />
 
     </Grid>
 </Window>

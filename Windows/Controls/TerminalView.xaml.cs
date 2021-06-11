@@ -34,6 +34,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly DataTable terminalDataTable = new();
 
+        private ITerminalLineProducer lineProducer;
+
         private DispatcherTimer timer;
 
         private IEnumerable<FieldDisplayDetail> visibleFields = Array.Empty<FieldDisplayDetail>();
@@ -83,11 +85,6 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.AutoScroll = !dataContextVO.AutoScroll;
         }
 
-        public void AddExecution(ITerminalLineProducer producer)
-        {
-            StartTimer(producer);
-        }
-
         private void StartTimer(ITerminalLineProducer producer)
         {
             timer = new();
@@ -106,6 +103,12 @@ namespace TerminalMonitor.Windows.Controls
             };
             timer.Interval = new TimeSpan(0, 0, 1);
             timer.Start();
+        }
+
+        private void StopTimer()
+        {
+            timer.Stop();
+            timer = null;
         }
 
         private void PauseTimer()
@@ -154,7 +157,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void FilterTerminal()
         {
-            TerminalLineMatcher matcher = new (filterConditions);
+            TerminalLineMatcher matcher = new(filterConditions);
             foreach (var terminalLineVO in terminalLineVOs)
             {
                 terminalLineVO.Matched = matcher.IsMatch(terminalLineVO);
@@ -267,11 +270,11 @@ namespace TerminalMonitor.Windows.Controls
                         row[GetForegroundColumnName(visibleField.FieldKey)] = new SolidColorBrush(textStyle.Foreground);
                         row[GetBackgroundColumnName(visibleField.FieldKey)] = new SolidColorBrush(textStyle.Background);
                     }
-                }              
+                }
             }
-            
+
             row[defaultColumnName] = terminalLineVO.PlainText;
- 
+
             terminalDataTable.Rows.Add(row);
         }
 
@@ -282,7 +285,32 @@ namespace TerminalMonitor.Windows.Controls
                 if (terminalLineVO.Matched)
                 {
                     AddTerminalLine(terminalLineVO);
-                }                
+                }
+            }
+        }
+
+        private void LineProducer_Started(object sender, EventArgs e)
+        {
+            StartTimer(lineProducer);
+        }
+
+        public ITerminalLineProducer LineProducer
+        {
+            get => lineProducer;
+            set
+            {
+                if (lineProducer != value && lineProducer != null)
+                {
+                    StopTimer();
+                    lineProducer.Started -= LineProducer_Started;
+                }
+
+                lineProducer = value;
+
+                if (lineProducer != null)
+                {
+                    lineProducer.Started += LineProducer_Started;
+                }
             }
         }
 

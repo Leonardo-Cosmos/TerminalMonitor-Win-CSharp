@@ -23,7 +23,7 @@ namespace TerminalMonitor.Execution
             this.commandConfig = commandConfig;
         }
 
-        public void Execute()
+        public void Start()
         {
             if (started)
             {
@@ -50,16 +50,22 @@ namespace TerminalMonitor.Execution
                 }
 
                 process.StartInfo.UseShellExecute = false;
-                process.StartInfo.RedirectStandardOutput = true;
 
+                process.StartInfo.RedirectStandardOutput = true;
                 process.OutputDataReceived += (sender, e) =>
                 {
                     if (!String.IsNullOrEmpty(e.Data))
                     {
-                        OnLineReceived(new()
-                        {
-                            Line = e.Data
-                        });
+                        OnLineReceived(e.Data);
+                    }
+                };
+
+                process.StartInfo.RedirectStandardError = true;
+                process.ErrorDataReceived += (sender, e) =>
+                {
+                    if (!String.IsNullOrEmpty(e.Data))
+                    {
+                        OnLineReceived(e.Data);
                     }
                 };
 
@@ -70,18 +76,22 @@ namespace TerminalMonitor.Execution
                 await process.WaitForExitAsync();
                 process.Close();
 
-                OnExited(EventArgs.Empty);
+                OnExited();
             }
         }
 
-        protected void OnLineReceived(TerminalLineEventArgs e)
+        protected void OnLineReceived(string line)
         {
+            TerminalLineEventArgs e = new()
+            {
+                Line = line,
+            };
             LineReceived?.Invoke(this, e);
         }
 
-        protected void OnExited(EventArgs e)
+        protected void OnExited()
         {
-            Exited?.Invoke(this, e);
+            Exited?.Invoke(this, EventArgs.Empty);
         }
 
         public event TerminalLineEventHandler LineReceived;
