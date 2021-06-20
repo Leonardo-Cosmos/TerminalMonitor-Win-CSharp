@@ -60,6 +60,18 @@ namespace TerminalMonitor.Execution
             RemoveExecution(executionName);
         }
 
+        public void TerminateAll()
+        {
+            foreach (var executionName in executionNames)
+            {
+                var execution = executionDict[executionName];
+                execution.Kill();
+            }
+
+            executionNames.Clear();
+            executionDict.Clear();
+        }
+
         private string GetValidExecutionName(string configName)
         {
             if (!executionDict.ContainsKey(configName))

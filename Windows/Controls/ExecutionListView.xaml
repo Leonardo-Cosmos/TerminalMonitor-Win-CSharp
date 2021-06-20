@@ -17,7 +17,7 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0" Text="{Binding Name}" />
-                        <Button Name="btnStop" Grid.Column="1" Width="20" Content="□" Tag="{Binding Name0}" Click="BtnStop_Click" />
+                        <Button Name="btnStop" Grid.Column="1" Width="20" Content="□" Tag="{Binding Name}" Click="BtnStop_Click" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

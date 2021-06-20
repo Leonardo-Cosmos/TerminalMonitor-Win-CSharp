@@ -19,7 +19,6 @@ using System.Windows.Threading;
 using TerminalMonitor.Execution;
 using TerminalMonitor.Matchers;
 using TerminalMonitor.Models;
-using TerminalMonitor.Parsers;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -28,20 +27,18 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class TerminalView : UserControl
     {
+        private ITerminalLineSupervisor lineSupervisor;
+
         private const string defaultColumnName = "PlainText";
 
-        private readonly List<TerminalLineVO> terminalLineVOs = new();
-
         private readonly DataTable terminalDataTable = new();
-
-        private ITerminalLineProducer lineProducer;
-
-        private DispatcherTimer timer;
 
         private IEnumerable<FieldDisplayDetail> visibleFields = Array.Empty<FieldDisplayDetail>();
         private IEnumerable<FilterCondition> filterConditions = Array.Empty<FilterCondition>();
 
         private readonly TerminalViewDataContextVO dataContextVO = new();
+
+        private readonly Dictionary<string, bool> matchedLineDict = new();
 
         public TerminalView()
         {
@@ -53,31 +50,31 @@ namespace TerminalMonitor.Windows.Controls
 
         private void ButtonApplyFields_Click(object sender, RoutedEventArgs e)
         {
-            PauseTimer();
+            //PauseTimer();
 
             visibleFields = fieldListView.Fields.ToArray();
             ApplyVisibleField();
 
-            ResumeTimer();
+            //ResumeTimer();
         }
 
         private void ButtonFilter_Click(object sender, RoutedEventArgs e)
         {
-            PauseTimer();
+            //PauseTimer();
 
             filterConditions = filterView.FilterConditions.ToArray();
             FilterTerminal();
 
-            ResumeTimer();
+            //ResumeTimer();
         }
 
         private void MenuItemClear_Click(object sender, RoutedEventArgs e)
         {
-            PauseTimer();
+            //PauseTimer();
 
             ClearTerminal();
 
-            ResumeTimer();
+            //ResumeTimer();
         }
 
         private void MenuItemAutoScroll_Click(object sender, RoutedEventArgs e)
@@ -85,66 +82,19 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.AutoScroll = !dataContextVO.AutoScroll;
         }
 
-        private void StartTimer(ITerminalLineProducer producer)
-        {
-            timer = new();
-            timer.Tick += (sender, e) =>
-            {
-                var lines = producer.ReadTerminalLines();
-                foreach (var line in lines)
-                {
-                    ParseTerminalLine(line);
-                }
-
-                if (producer.IsCompleted)
-                {
-                    timer.Stop();
-                }
-            };
-            timer.Interval = new TimeSpan(0, 0, 1);
-            timer.Start();
-        }
-
-        private void StopTimer()
-        {
-            timer.Stop();
-            timer = null;
-        }
-
-        private void PauseTimer()
-        {
-            if (timer == null)
-            {
-                return;
-            }
-            timer.Stop();
-        }
-
-        private void ResumeTimer()
-        {
-            if (timer == null)
-            {
-                return;
-            }
-            timer.Start();
-        }
-
         private void ClearTerminal()
         {
-            terminalLineVOs.Clear();
             terminalDataTable.Rows.Clear();
         }
 
-        private void ParseTerminalLine(string text)
+        public void AddNewTerminalLine(TerminalLineDto terminalLineDto)
         {
-            var terminalLineVO = JsonParser.ParseTerminalLineToVO(text);
-            terminalLineVOs.Add(terminalLineVO);
+            var matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterConditions);
+            matchedLineDict.Add(terminalLineDto.Id, matched);
 
-
-            terminalLineVO.Matched = TerminalLineMatcher.IsMatch(terminalLineVO, filterConditions);
-            if (terminalLineVO.Matched)
+            if (matched)
             {
-                AddTerminalLine(terminalLineVO);
+                AddTerminalLine(terminalLineDto);
 
                 if (dataContextVO.AutoScroll)
                 {
@@ -157,10 +107,17 @@ namespace TerminalMonitor.Windows.Controls
 
         private void FilterTerminal()
         {
-            TerminalLineMatcher matcher = new(filterConditions);
-            foreach (var terminalLineVO in terminalLineVOs)
+            if (lineSupervisor == null)
             {
-                terminalLineVO.Matched = matcher.IsMatch(terminalLineVO);
+                return;
+            }
+
+            matchedLineDict.Clear();
+            TerminalLineMatcher matcher = new(filterConditions);
+            foreach (var terminalLineDto in lineSupervisor.TerminalLines)
+            {
+                var matched = matcher.IsMatch(terminalLineDto);
+                matchedLineDict.Add(terminalLineDto.Id, matched);
             }
 
             AddMatchedTerminalLines();
@@ -248,7 +205,7 @@ namespace TerminalMonitor.Windows.Controls
             listTerminal.SetBinding(ItemsControl.ItemsSourceProperty, binding);
         }
 
-        private void AddTerminalLine(TerminalLineVO terminalLineVO)
+        private void AddTerminalLine(TerminalLineDto terminalLineDto)
         {
             DataRow row = terminalDataTable.NewRow();
 
@@ -256,15 +213,15 @@ namespace TerminalMonitor.Windows.Controls
             {
                 foreach (var visibleField in visibleFields)
                 {
-                    var fieldValue = terminalLineVO.ParsedFieldDict.ContainsKey(visibleField.FieldKey) ?
-                    terminalLineVO.ParsedFieldDict[visibleField.FieldKey] : "";
+                    var fieldValue = terminalLineDto.ParsedFieldDict.ContainsKey(visibleField.FieldKey) ?
+                    terminalLineDto.ParsedFieldDict[visibleField.FieldKey] : "";
 
                     row[visibleField.FieldKey] = fieldValue;
 
                     if (visibleField.CustomizeStyle)
                     {
                         var matchedTextStyleCondition = visibleField.Conditions.FirstOrDefault(
-                            textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineVO, textStyleCondition.Condition));
+                            textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineDto, textStyleCondition.Condition));
                         var textStyle = matchedTextStyleCondition?.Style ?? visibleField.Style;
 
                         row[GetForegroundColumnName(visibleField.FieldKey)] = new SolidColorBrush(textStyle.Foreground);
@@ -273,43 +230,48 @@ namespace TerminalMonitor.Windows.Controls
                 }
             }
 
-            row[defaultColumnName] = terminalLineVO.PlainText;
+            row[defaultColumnName] = terminalLineDto.PlainText;
 
             terminalDataTable.Rows.Add(row);
         }
 
         private void AddMatchedTerminalLines()
         {
-            foreach (var terminalLineVO in terminalLineVOs)
+            if (lineSupervisor == null)
             {
-                if (terminalLineVO.Matched)
+                return;
+            }
+
+            foreach (var terminalLineDto in lineSupervisor.TerminalLines)
+            {
+                var matched = matchedLineDict[terminalLineDto.Id];
+                if (matched)
                 {
-                    AddTerminalLine(terminalLineVO);
+                    AddTerminalLine(terminalLineDto);
                 }
             }
         }
 
-        private void LineProducer_Started(object sender, EventArgs e)
+        private void Supervisor_TerminalLineAdded(object sender, TerminalLineEventArgs e)
         {
-            StartTimer(lineProducer);
+            AddNewTerminalLine(e.TerminalLine);
         }
 
-        public ITerminalLineProducer LineProducer
+        public ITerminalLineSupervisor LineSupervisor
         {
-            get => lineProducer;
+            get => lineSupervisor;
             set
             {
-                if (lineProducer != value && lineProducer != null)
+                if (lineSupervisor != value && lineSupervisor != null)
                 {
-                    StopTimer();
-                    lineProducer.Started -= LineProducer_Started;
+                    lineSupervisor.TerminalLineAdded -= Supervisor_TerminalLineAdded;
                 }
 
-                lineProducer = value;
+                lineSupervisor = value;
 
-                if (lineProducer != null)
+                if (lineSupervisor != null)
                 {
-                    lineProducer.Started += LineProducer_Started;
+                    lineSupervisor.TerminalLineAdded += Supervisor_TerminalLineAdded;
                 }
             }
         }
@@ -330,13 +292,13 @@ namespace TerminalMonitor.Windows.Controls
                     return;
                 }
 
-                PauseTimer();
+                //PauseTimer();
 
                 fieldListView.Fields = value;
                 visibleFields = value.ToArray();
                 ApplyVisibleField();
 
-                ResumeTimer();
+                //ResumeTimer();
             }
         }
 
@@ -356,13 +318,13 @@ namespace TerminalMonitor.Windows.Controls
                     return;
                 }
 
-                PauseTimer();
+                //PauseTimer();
 
                 filterView.FilterConditions = value;
                 filterConditions = value.ToArray();
                 FilterTerminal();
 
-                ResumeTimer();
+                //ResumeTimer();
             }
         }
     }

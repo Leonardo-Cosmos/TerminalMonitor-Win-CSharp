@@ -25,7 +25,7 @@ namespace TerminalMonitor.Parsers
             }
         }
 
-        public static TerminalLineVO ParseTerminalLineToVO(string json)
+        public static TerminalLineDto ParseTerminalLineToVO(string json)
         {
             var dict = ParseTerminalLine(json);
 
@@ -37,8 +37,9 @@ namespace TerminalMonitor.Parsers
                 })
                 .ToList();
 
-            return new TerminalLineVO()
+            return new TerminalLineDto()
             {
+                Id = Guid.NewGuid().ToString(),
                 PlainText = json,
                 ParsedFieldDict = dict,
                 ParsedFields = parsedFields,

@@ -38,7 +38,7 @@ namespace TerminalMonitor.Windows
             };
 
             executionListView.Executor = commandExecutor;
-            terminalView.LineProducer = commandExecutor;
+            terminalTabControl.LineProducer = commandExecutor;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -49,23 +49,25 @@ namespace TerminalMonitor.Windows
                 .Select(command => CommandConfigSettings.Load(command));
 
             var terminalSetting = setting.Terminals?[0] ?? new();
-            terminalView.VisibleFields = terminalSetting.Fields?
-                .Select(field => FieldDisplayDetailSettings.Load(field));
-            terminalView.FilterConditions = terminalSetting.Filters?
-                .Select(filter => FilterConditionSettings.Load(filter));
+            //terminalView.VisibleFields = terminalSetting.Fields?
+            //    .Select(field => FieldDisplayDetailSettings.Load(field));
+            //terminalView.FilterConditions = terminalSetting.Filters?
+            //    .Select(filter => FilterConditionSettings.Load(filter));
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            commandExecutor.TerminateAll();
+
             setting.Commands = commandListView.Commands
                 .Select(command => CommandConfigSettings.Save(command)).ToList();
 
             TerminalSetting terminalSetting = new();
-            terminalSetting.Fields = terminalView.VisibleFields
-                .Select(field => FieldDisplayDetailSettings.Save(field)).ToList();
-            terminalSetting.Filters = terminalView.FilterConditions
-                .Select(filter => FilterConditionSettings.Save(filter)).ToList();
-            setting.Terminals = new List<TerminalSetting>() { terminalSetting };
+            //terminalSetting.Fields = terminalView.VisibleFields
+            //    .Select(field => FieldDisplayDetailSettings.Save(field)).ToList();
+            //terminalSetting.Filters = terminalView.FilterConditions
+            //    .Select(filter => FilterConditionSettings.Save(filter)).ToList();
+            //setting.Terminals = new List<TerminalSetting>() { terminalSetting };
 
             SettingSerializer.Save(setting);
         }

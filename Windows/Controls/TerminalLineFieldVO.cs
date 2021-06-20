@@ -2,7 +2,7 @@
 
 namespace TerminalMonitor.Windows.Controls
 {
-    class TerminalLineFieldVO
+    public class TerminalLineFieldVO
     {
         public string Key { get; set; }
 
