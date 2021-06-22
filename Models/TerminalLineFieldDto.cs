@@ -1,6 +1,6 @@
 ﻿/* 2021/4/20 */
 
-namespace TerminalMonitor.Windows.Controls
+namespace TerminalMonitor.Models
 {
     public class TerminalLineFieldDto
     {

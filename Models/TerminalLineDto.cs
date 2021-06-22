@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using TerminalMonitor.Matchers;
 using TerminalMonitor.Models;
 
-namespace TerminalMonitor.Windows.Controls
+namespace TerminalMonitor.Models
 {
     public class TerminalLineDto
     {
