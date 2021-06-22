@@ -139,7 +139,24 @@ namespace TerminalMonitor.Windows.Controls
 
         private void ParseTerminalLine(string text)
         {
-            var terminalLineDto = JsonParser.ParseTerminalLineToVO(text);
+            var dict = JsonParser.ParseTerminalLine(text);
+            var jsonProperties = JsonParser.FlattenJsonPath(dict)
+                .Select(kvPair => new TerminalLineFieldDto()
+                {
+                    Key = kvPair.Key,
+                    Value = kvPair.Value.ToString(),
+                })
+                .ToDictionary(fieldDto => fieldDto.Key);
+
+            TerminalLineDto terminalLineDto = new()
+            {
+                Id = Guid.NewGuid().ToString(),
+                DateTime = DateTime.Now,
+                PlainText = text,
+                JsonObjectDict = dict,
+                JsonProperties = jsonProperties,
+            };
+
             terminalLineDtos.Add(terminalLineDto);
 
             OnTerminalLineAdded(terminalLineDto);

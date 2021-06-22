@@ -1,4 +1,5 @@
 ﻿/* 2021/4/20 */
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -11,12 +12,20 @@ namespace TerminalMonitor.Windows.Controls
     public class TerminalLineDto
     {
         public string Id { get; set; }
+
+        public DateTime DateTime { get; set; }
         
         public string PlainText { get; set; }
 
-        public Dictionary<string, object> ParsedFieldDict { get; set; }
+        /// <summary>
+        /// Deserialized JSON object by hierarchy.
+        /// </summary>
+        public Dictionary<string, object> JsonObjectDict { get; set; }
 
-        public List<TerminalLineFieldVO> ParsedFields { get; set; }
+        /// <summary>
+        /// JSON properties with full path as key.
+        /// </summary>
+        public Dictionary<string, TerminalLineFieldDto> JsonProperties { get; set; }
 
     }
 }

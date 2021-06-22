@@ -47,13 +47,15 @@ namespace TerminalMonitor.Matchers
             {
                 return false;
             }
-            var field = (terminalLineDto.ParsedFields ?? new()).FirstOrDefault(field => field.Key == condition.FieldKey);
-            if (field == null)
+            
+            if (terminalLineDto.JsonProperties == null || !terminalLineDto.JsonProperties.ContainsKey(condition.FieldKey))
             {
                 return false;
             }
 
-            return TextMatcher.IsMatch(field.Value, condition.TargetValue, condition.MatchOperator);
+            var jsonProperty = terminalLineDto.JsonProperties[condition.FieldKey];
+
+            return TextMatcher.IsMatch(jsonProperty.Value, condition.TargetValue, condition.MatchOperator);
         }
     }
 }

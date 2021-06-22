@@ -213,8 +213,8 @@ namespace TerminalMonitor.Windows.Controls
             {
                 foreach (var visibleField in visibleFields)
                 {
-                    var fieldValue = terminalLineDto.ParsedFieldDict.ContainsKey(visibleField.FieldKey) ?
-                    terminalLineDto.ParsedFieldDict[visibleField.FieldKey] : "";
+                    var fieldValue = terminalLineDto.JsonProperties.ContainsKey(visibleField.FieldKey) ?
+                        terminalLineDto.JsonProperties[visibleField.FieldKey].Value : "";
 
                     row[visibleField.FieldKey] = fieldValue;
 
