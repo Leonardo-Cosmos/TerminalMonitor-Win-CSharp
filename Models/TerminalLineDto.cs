@@ -13,7 +13,7 @@ namespace TerminalMonitor.Models
     {
         public string Id { get; set; }
 
-        public DateTime DateTime { get; set; }
+        public DateTime Timestamp { get; set; }
         
         public string PlainText { get; set; }
 
@@ -23,9 +23,9 @@ namespace TerminalMonitor.Models
         public Dictionary<string, object> JsonObjectDict { get; set; }
 
         /// <summary>
-        /// JSON properties with full path as key.
+        /// Line fields with full path as key.
         /// </summary>
-        public Dictionary<string, TerminalLineFieldDto> JsonProperties { get; set; }
+        public Dictionary<string, TerminalLineFieldDto> LineFieldDict { get; set; }
 
     }
 }

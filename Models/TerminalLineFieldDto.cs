@@ -6,7 +6,11 @@ namespace TerminalMonitor.Models
     {
         public string Key { get; set; }
 
-        public string Value { get; set; }
+        public string FieldKey { get; set; }
+
+        public object Value { get; set; }
+
+        public string Text { get; set; }
 
     }
 }

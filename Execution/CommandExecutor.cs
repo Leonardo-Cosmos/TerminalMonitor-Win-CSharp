@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TerminalMonitor.Models;
+using static TerminalMonitor.Execution.ITerminalLineProducer;
 
 namespace TerminalMonitor.Execution
 {
@@ -16,7 +17,7 @@ namespace TerminalMonitor.Execution
 
         private readonly Dictionary<string, Execution> executionDict = new();
 
-        private readonly ConcurrentQueue<string> terminalLineQueue = new();
+        private readonly ConcurrentQueue<TerminalLine> terminalLineQueue = new();
 
         public CommandExecutor()
         {
@@ -30,7 +31,8 @@ namespace TerminalMonitor.Execution
 
             execution.LineReceived += (sender, e) =>
             {
-                terminalLineQueue.Enqueue(e.Line);
+                TerminalLine terminalLine = new(Text: e.Line, ExecutionName: name);
+                terminalLineQueue.Enqueue(terminalLine);
             };
 
             execution.Exited += (sender, e) =>
@@ -162,17 +164,17 @@ namespace TerminalMonitor.Execution
 
         public event EventHandler Completed;
 
-        public IEnumerable<string> ReadTerminalLines()
+        public IEnumerable<TerminalLine> ReadTerminalLines()
         {
-            List<string> lines = new();
+            List<TerminalLine> terminalLines = new();
             while (!terminalLineQueue.IsEmpty)
             {
-                if (terminalLineQueue.TryDequeue(out var line))
+                if (terminalLineQueue.TryDequeue(out var terminalLine))
                 {
-                    lines.Add(line);
+                    terminalLines.Add(terminalLine);
                 }
             }
-            return lines.AsEnumerable();
+            return terminalLines.AsEnumerable();
         }
 
         public bool IsCompleted

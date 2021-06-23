@@ -98,10 +98,10 @@ namespace TerminalMonitor.Windows.Controls
             readTerminalTimer = new();
             readTerminalTimer.Tick += (sender, e) =>
             {
-                var lines = producer.ReadTerminalLines();
-                foreach (var line in lines)
+                var terminalLines = producer.ReadTerminalLines();
+                foreach (var terminalLine in terminalLines)
                 {
-                    ParseTerminalLine(line);
+                    ParseTerminalLine(terminalLine.Text, terminalLine.ExecutionName);
                 }
 
                 if (producer.IsCompleted)
@@ -137,25 +137,10 @@ namespace TerminalMonitor.Windows.Controls
             readTerminalTimer.Start();
         }
 
-        private void ParseTerminalLine(string text)
+        private void ParseTerminalLine(string text, string executionName)
         {
-            var dict = JsonParser.ParseTerminalLine(text);
-            var jsonProperties = JsonParser.FlattenJsonPath(dict)
-                .Select(kvPair => new TerminalLineFieldDto()
-                {
-                    Key = kvPair.Key,
-                    Value = kvPair.Value.ToString(),
-                })
-                .ToDictionary(fieldDto => fieldDto.Key);
-
-            TerminalLineDto terminalLineDto = new()
-            {
-                Id = Guid.NewGuid().ToString(),
-                DateTime = DateTime.Now,
-                PlainText = text,
-                JsonObjectDict = dict,
-                JsonProperties = jsonProperties,
-            };
+            TerminalLineDto terminalLineDto =
+                TerminalLineParser.ParseTerminalLine(text, executionName);
 
             terminalLineDtos.Add(terminalLineDto);
 
@@ -218,12 +203,11 @@ namespace TerminalMonitor.Windows.Controls
             TerminalLineAdded?.Invoke(this, e);
         }
 
-        public IEnumerable<TerminalLineDto> TerminalLines
+        public TerminalLineCollection TerminalLines
         {
             get
             {
-                var lines = terminalLineDtos.AsEnumerable();
-                return lines;
+                return new TerminalLineCollection(terminalLineDtos.AsEnumerable());
             }
         }
 

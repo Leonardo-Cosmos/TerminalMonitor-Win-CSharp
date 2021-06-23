@@ -48,14 +48,14 @@ namespace TerminalMonitor.Matchers
                 return false;
             }
             
-            if (terminalLineDto.JsonProperties == null || !terminalLineDto.JsonProperties.ContainsKey(condition.FieldKey))
+            if (terminalLineDto.LineFieldDict == null || !terminalLineDto.LineFieldDict.ContainsKey(condition.FieldKey))
             {
                 return false;
             }
 
-            var jsonProperty = terminalLineDto.JsonProperties[condition.FieldKey];
+            var jsonProperty = terminalLineDto.LineFieldDict[condition.FieldKey];
 
-            return TextMatcher.IsMatch(jsonProperty.Value, condition.TargetValue, condition.MatchOperator);
+            return TextMatcher.IsMatch(jsonProperty.Text, condition.TargetValue, condition.MatchOperator);
         }
     }
 }

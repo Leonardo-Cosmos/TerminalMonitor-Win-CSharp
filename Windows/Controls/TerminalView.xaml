@@ -55,7 +55,9 @@
         <ListView Name="listTerminal" Grid.Row="3">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Name="menuItemClear" Header="Clear" Click="MenuItemClear_Click" />
+                    <MenuItem Name="menuItemShowDetail" Header="Detail" Click="MenuItemShowDetail_Click" />
+                    <Separator />
+                    <!--<MenuItem Name="menuItemClear" Header="Clear" Click="MenuItemClear_Click" />-->
                     <MenuItem Name="menuItemAutoScroll" Header="Auto Scroll" IsChecked="{Binding AutoScroll}" Click="MenuItemAutoScroll_Click" />
                 </ContextMenu>
             </ListView.ContextMenu>
