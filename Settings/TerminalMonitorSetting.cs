@@ -6,8 +6,8 @@ namespace TerminalMonitor.Settings
 {
     class TerminalMonitorSetting
     {
-        public List<Models.CommandSetting> Commands { get; set; }
+        public List<CommandConfigSetting> Commands { get; set; }
 
-        public List<TerminalSetting> Terminals { get; set; }
+        public List<TerminalConfigSetting> Terminals { get; set; }
     }
 }

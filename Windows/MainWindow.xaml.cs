@@ -48,11 +48,8 @@ namespace TerminalMonitor.Windows
             commandListView.Commands = setting.Commands?
                 .Select(command => CommandConfigSettings.Load(command));
 
-            var terminalSetting = setting.Terminals?[0] ?? new();
-            //terminalView.VisibleFields = terminalSetting.Fields?
-            //    .Select(field => FieldDisplayDetailSettings.Load(field));
-            //terminalView.FilterConditions = terminalSetting.Filters?
-            //    .Select(filter => FilterConditionSettings.Load(filter));
+            terminalTabControl.Terminals = setting.Terminals?
+                .Select(terminal => TerminalConfigSettings.Load(terminal));
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -62,12 +59,8 @@ namespace TerminalMonitor.Windows
             setting.Commands = commandListView.Commands
                 .Select(command => CommandConfigSettings.Save(command)).ToList();
 
-            TerminalSetting terminalSetting = new();
-            //terminalSetting.Fields = terminalView.VisibleFields
-            //    .Select(field => FieldDisplayDetailSettings.Save(field)).ToList();
-            //terminalSetting.Filters = terminalView.FilterConditions
-            //    .Select(filter => FilterConditionSettings.Save(filter)).ToList();
-            //setting.Terminals = new List<TerminalSetting>() { terminalSetting };
+            setting.Terminals = terminalTabControl.Terminals
+                .Select(terminal => TerminalConfigSettings.Save(terminal)).ToList();
 
             SettingSerializer.Save(setting);
         }

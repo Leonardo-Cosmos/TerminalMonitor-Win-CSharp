@@ -37,7 +37,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private int selectTabIndex = 0;
 
-        private bool addingNewTab = false;
+        private bool changingTab = false;
 
         public TerminalTabControl()
         {
@@ -46,17 +46,11 @@ namespace TerminalMonitor.Windows.Controls
             var defaultTab = tbCtrl.Items[0] as TabItem;
             (defaultTab.Content as TerminalView).LineSupervisor = this;
 
-            //AddTab(new()
-            //{
-            //    Id = Guid.NewGuid().ToString(),
-            //    Name = "Default",
-            //});
-
             selectTabTimer = new();
             selectTabTimer.Tick += (sender, e) =>
             {
                 tbCtrl.SelectedIndex = selectTabIndex;
-                addingNewTab = false;
+                changingTab = false;
                 selectTabTimer.Stop();
             };
             selectTabTimer.Interval = new TimeSpan(0, 0, 0, 0, 1);
@@ -64,20 +58,21 @@ namespace TerminalMonitor.Windows.Controls
 
         private void TbCtrl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!addingNewTab && tbCtrl.SelectedIndex == tbCtrl.Items.Count - 1)
+            if (!changingTab && tbCtrl.SelectedIndex == tbCtrl.Items.Count - 1)
             {
-                TerminalConfig config = new()
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = "New",
-                };
-
-                addingNewTab = true;
-                AddTab(config);
-
                 // Set selected tab after "SelectionChanged" event.
                 selectTabIndex = tbCtrl.Items.Count - 2;
                 selectTabTimer.Start();
+                tbCtrl.SelectedItem = selectTabIndex;
+
+                TerminalConfig config = new()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = "New View",
+                };
+
+                changingTab = true;
+                AddTab(config);
             }
         }
 
@@ -147,11 +142,23 @@ namespace TerminalMonitor.Windows.Controls
             OnTerminalLineAdded(terminalLineDto);
         }
 
+        private static TerminalConfig GetConfig(TabItem tab)
+        {
+            var terminalView = tab.Content as TerminalView;
+            return new TerminalConfig()
+            {
+                Id = tab.Tag as string,
+                Name = tab.Header as string,
+                VisibleFields = terminalView.VisibleFields,
+                FilterConditions = terminalView.FilterConditions,
+            };
+        }
+
         private void AddTab(TerminalConfig config)
         {
             TabItem tab = new();
-            tab.Tag = config.Id;
-            tab.Header = config.Name;
+            tab.Tag = config.Id ?? Guid.NewGuid().ToString();
+            tab.Header = config.Name ?? "Unknown View";
 
             TerminalView terminalView = new();
             terminalView.VisibleFields = config.VisibleFields;
@@ -160,6 +167,14 @@ namespace TerminalMonitor.Windows.Controls
             tab.Content = terminalView;
 
             tbCtrl.Items.Insert(tbCtrl.Items.Count - 1, tab);
+        }
+
+        private void RemoveTab(TabItem tab)
+        {
+            var terminalView = tab.Content as TerminalView;
+            terminalView.LineSupervisor = null;
+
+            tbCtrl.Items.Remove(tab);
         }
 
         private void RemoveTab(string id)
@@ -189,7 +204,7 @@ namespace TerminalMonitor.Windows.Controls
                     tbCtrl.SelectedIndex = tbCtrl.Items.Count - 3;
                 }
 
-                tbCtrl.Items.Remove(removedItem);
+                RemoveTab(removedItem);
             }
         }
 
@@ -238,9 +253,68 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public TerminalConfig Terminals
+        public IEnumerable<TerminalConfig> Terminals
         {
-            get; set;
+            get
+            {
+                List<TerminalConfig> terminalConfigs = new();
+                var tabCount = tbCtrl.Items.Count;
+                for (var i = 0; i < tabCount - 1; i++)
+                {
+                    var tab = tbCtrl.Items[i] as TabItem;
+
+                    terminalConfigs.Add(GetConfig(tab));
+                }
+                return terminalConfigs.AsEnumerable();
+            }
+
+            set
+            {
+                changingTab = true;
+
+                /*
+                 * Remove existing tabs.
+                 */
+                List<TabItem> removeTabs = new();
+                var tabCount = tbCtrl.Items.Count;
+                for (var i = 0; i < tabCount - 1; i++)
+                {
+                    var tab = tbCtrl.Items[i] as TabItem;
+
+                    removeTabs.Add(tab);
+                }
+                foreach (var tab in removeTabs)
+                {
+                    RemoveTab(tab);
+                }
+
+
+                if (value == null)
+                {
+                    // Add default tab.
+                    AddTab(new()
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Name = "Default",
+                    });
+
+                    tbCtrl.SelectedIndex = 0;
+
+                    return;
+                }
+
+                /*
+                 * Add new tabs.
+                 */
+                foreach (var terminalConfig in value)
+                {
+                    AddTab(terminalConfig);
+                }
+
+                tbCtrl.SelectedIndex = 0;
+
+                changingTab = false;
+            }
         }
     }
 }
