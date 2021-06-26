@@ -44,7 +44,7 @@ namespace TerminalMonitor.Windows.Controls
             InitializeComponent();
 
             var defaultTab = tbCtrl.Items[0] as TabItem;
-            (defaultTab.Content as TerminalView).LineSupervisor = this;
+            GetTabTerminalView(defaultTab).LineSupervisor = this;
 
             selectTabTimer = new();
             selectTabTimer.Tick += (sender, e) =>
@@ -83,9 +83,71 @@ namespace TerminalMonitor.Windows.Controls
             RemoveTab(self.Tag as string);
         }
 
+        private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            var self = sender as Border;
+
+            if ((self.Tag as string) == "+")
+            {
+                e.Handled = true;
+            }
+        }
+
         private void MnRename_Click(object sender, RoutedEventArgs e)
         {
+            var tab = GetMenuTab(sender as MenuItem);
 
+            InputWindow window = new()
+            {
+                Title = "Rename tab",
+                Message = "New tab name: ",
+                Text = tab.Header as string,
+            };
+
+            if (window.ShowDialog() ?? false)
+            {
+                tab.Header = window.Text;
+            }
+        }
+
+        private void MnMoveLeft_Click(object sender, RoutedEventArgs e)
+        {
+            var tab = GetMenuTab(sender as MenuItem);
+
+            var index = tbCtrl.Items.IndexOf(tab);
+            if (index > 0)
+            {
+                changingTab = true;
+
+                tbCtrl.Items.Remove(tab);
+                tbCtrl.Items.Insert(index - 1, tab);
+
+                changingTab = false;
+            }
+        }
+
+        private void MnMoveRight_Click(object sender, RoutedEventArgs e)
+        {
+            var tab = GetMenuTab(sender as MenuItem);
+
+            var index = tbCtrl.Items.IndexOf(tab);
+            if (index < tbCtrl.Items.Count - 2)
+            {
+                changingTab = true;
+
+                tbCtrl.Items.Remove(tab);
+                tbCtrl.Items.Insert(index + 1, tab);
+                tbCtrl.SelectedIndex = index + 1;
+
+                changingTab = false;
+            }
+        }
+
+        private TabItem GetMenuTab(MenuItem menuItem)
+        {
+            var menu = menuItem.Parent as ContextMenu;
+            var border = menu.PlacementTarget as Border;
+            return GetTab((border.Tag as string));
         }
 
         private void StartTimer(ITerminalLineProducer producer)
@@ -142,9 +204,9 @@ namespace TerminalMonitor.Windows.Controls
             OnTerminalLineAdded(terminalLineDto);
         }
 
-        private static TerminalConfig GetConfig(TabItem tab)
+        private static TerminalConfig GetTabConfig(TabItem tab)
         {
-            var terminalView = tab.Content as TerminalView;
+            var terminalView = GetTabTerminalView(tab);
             return new TerminalConfig()
             {
                 Id = tab.Tag as string,
@@ -152,6 +214,25 @@ namespace TerminalMonitor.Windows.Controls
                 VisibleFields = terminalView.VisibleFields,
                 FilterConditions = terminalView.FilterConditions,
             };
+        }
+
+        private static TerminalView GetTabTerminalView(TabItem tab)
+        {
+            return tab.Content as TerminalView;
+        }
+
+        private TabItem GetTab(string id)
+        {
+            TabItem matchedItem = null;
+            foreach (var item in tbCtrl.Items)
+            {
+                if (item is TabItem tab && (tab.Tag as string) == id)
+                {
+                    matchedItem = tab;
+                    break;
+                }
+            }
+            return matchedItem;
         }
 
         private void AddTab(TerminalConfig config)
@@ -171,7 +252,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void RemoveTab(TabItem tab)
         {
-            var terminalView = tab.Content as TerminalView;
+            var terminalView = GetTabTerminalView(tab);
             terminalView.LineSupervisor = null;
 
             tbCtrl.Items.Remove(tab);
@@ -185,15 +266,7 @@ namespace TerminalMonitor.Windows.Controls
                 return;
             }
 
-            TabItem removedItem = null;
-            foreach (var item in tbCtrl.Items)
-            {
-                if (item is TabItem tab && (tab.Tag as string) == id)
-                {
-                    removedItem = tab;
-                    break;
-                }
-            }
+            TabItem removedItem = GetTab(id);
 
             if (removedItem != null)
             {
@@ -263,7 +336,7 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     var tab = tbCtrl.Items[i] as TabItem;
 
-                    terminalConfigs.Add(GetConfig(tab));
+                    terminalConfigs.Add(GetTabConfig(tab));
                 }
                 return terminalConfigs.AsEnumerable();
             }
