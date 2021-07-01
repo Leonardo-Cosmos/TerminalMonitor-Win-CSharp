@@ -19,7 +19,6 @@ using System.Windows.Threading;
 using TerminalMonitor.Execution;
 using TerminalMonitor.Matchers;
 using TerminalMonitor.Models;
-using TerminalMonitor.Parsers;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -28,54 +27,72 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class TerminalView : UserControl
     {
-        private const string defaultColumnName = "PlainText";
+        private ITerminalLineSupervisor lineSupervisor;
 
-        private readonly List<TerminalLineVO> terminalLineVOs = new();
+        private const string idColumnName = "Id";
+
+        private const string plaintextColumnName = "PlainText";
 
         private readonly DataTable terminalDataTable = new();
-
-        private DispatcherTimer timer;
 
         private IEnumerable<FieldDisplayDetail> visibleFields = Array.Empty<FieldDisplayDetail>();
         private IEnumerable<FilterCondition> filterConditions = Array.Empty<FilterCondition>();
 
         private readonly TerminalViewDataContextVO dataContextVO = new();
 
+        private readonly Dictionary<string, bool> matchedLineDict = new();
+
         public TerminalView()
         {
             InitializeComponent();
 
             DataContext = dataContextVO;
+            listTerminal.DataContext = dataContextVO;
             ApplyVisibleField();
         }
 
         private void ButtonApplyFields_Click(object sender, RoutedEventArgs e)
         {
-            PauseTimer();
+            //PauseTimer();
 
-            visibleFields = fieldListView.FieldKeys.ToArray();
+            visibleFields = fieldListView.Fields.ToArray();
             ApplyVisibleField();
 
-            ResumeTimer();
+            //ResumeTimer();
         }
 
         private void ButtonFilter_Click(object sender, RoutedEventArgs e)
         {
-            PauseTimer();
+            //PauseTimer();
 
             filterConditions = filterView.FilterConditions.ToArray();
             FilterTerminal();
 
-            ResumeTimer();
+            //ResumeTimer();
+        }
+
+        private void MenuItemShowDetail_Click(object sender, RoutedEventArgs e)
+        {
+            if (listTerminal.SelectedValue is DataRowView item)
+            {
+                var id = (string)item[idColumnName];
+                var terminalLine = lineSupervisor.TerminalLines[id];
+
+                TerminalLineDetailWindow window = new()
+                {
+                    TerminalLine = terminalLine,
+                };
+                window.Show();
+            }
         }
 
         private void MenuItemClear_Click(object sender, RoutedEventArgs e)
         {
-            PauseTimer();
+            //PauseTimer();
 
             ClearTerminal();
 
-            ResumeTimer();
+            //ResumeTimer();
         }
 
         private void MenuItemAutoScroll_Click(object sender, RoutedEventArgs e)
@@ -83,67 +100,19 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.AutoScroll = !dataContextVO.AutoScroll;
         }
 
-        public void AddExecution(IExecution execution)
-        {
-            StartTimer(execution);
-        }
-
-        private void StartTimer(IExecution execution)
-        {
-            timer = new();
-            timer.Tick += (sender, e) =>
-            {
-                var lines = execution.ReadTerminalLines();
-                foreach (var line in lines)
-                {
-                    ParseTerminalLine(line);
-                }
-
-                if (execution.IsCompleted)
-                {
-                    timer.Stop();
-                    ParseTerminalLine("Task is completed");
-                }
-
-            };
-            timer.Interval = new TimeSpan(0, 0, 1);
-            timer.Start();
-        }
-
-        private void PauseTimer()
-        {
-            if (timer == null)
-            {
-                return;
-            }
-            timer.Stop();
-        }
-
-        private void ResumeTimer()
-        {
-            if (timer == null)
-            {
-                return;
-            }
-            timer.Start();
-        }
-
         private void ClearTerminal()
         {
-            terminalLineVOs.Clear();
             terminalDataTable.Rows.Clear();
         }
 
-        private void ParseTerminalLine(string text)
+        public void AddNewTerminalLine(TerminalLineDto terminalLineDto)
         {
-            var terminalLineVO = JsonParser.ParseTerminalLineToVO(text);
-            terminalLineVOs.Add(terminalLineVO);
+            var matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterConditions);
+            matchedLineDict.Add(terminalLineDto.Id, matched);
 
-
-            terminalLineVO.Matched = TerminalLineMatcher.IsMatch(terminalLineVO, filterConditions);
-            if (terminalLineVO.Matched)
+            if (matched)
             {
-                AddTerminalLine(terminalLineVO);
+                AddTerminalLine(terminalLineDto);
 
                 if (dataContextVO.AutoScroll)
                 {
@@ -156,23 +125,35 @@ namespace TerminalMonitor.Windows.Controls
 
         private void FilterTerminal()
         {
-            TerminalLineMatcher matcher = new (filterConditions);
-            foreach (var terminalLineVO in terminalLineVOs)
+            if (lineSupervisor == null)
             {
-                terminalLineVO.Matched = matcher.IsMatch(terminalLineVO);
+                return;
+            }
+
+            matchedLineDict.Clear();
+            TerminalLineMatcher matcher = new(filterConditions);
+            foreach (var terminalLineDto in lineSupervisor.TerminalLines)
+            {
+                var matched = matcher.IsMatch(terminalLineDto);
+                matchedLineDict.Add(terminalLineDto.Id, matched);
             }
 
             AddMatchedTerminalLines();
         }
 
+        private static string ToColumnName(string fieldKey)
+        {
+            return fieldKey!.Replace(".", "-");
+        }
+
         private static string GetForegroundColumnName(string columnName)
         {
-            return $"{columnName}__foreground";
+            return $"{columnName!}__foreground";
         }
 
         private static string GetBackgroundColumnName(string columnName)
         {
-            return $"{columnName}__background";
+            return $"{columnName!}__background";
         }
 
         private void ApplyVisibleField()
@@ -181,36 +162,25 @@ namespace TerminalMonitor.Windows.Controls
 
             terminalDataTable.Columns.Clear();
             terminalDataTable.Rows.Clear();
+
+            DataColumn idColumn = new(idColumnName);
+            idColumn.DataType = typeof(string);
+            terminalDataTable.Columns.Add(idColumn);
+
             if (visibleFields.Any())
             {
+                /*
+                 * Add selected visible fields.
+                 */
                 foreach (var visibleField in visibleFields)
                 {
-                    DataColumn column = new(visibleField.FieldKey);
+                    DataColumn column = new(ToColumnName(visibleField.FieldKey));
                     column.DataType = typeof(string);
                     terminalDataTable.Columns.Add(column);
 
                     if (visibleField.CustomizeStyle)
                     {
-                        DataColumn foregroundColumn = new(GetForegroundColumnName(visibleField.FieldKey));
-                        foregroundColumn.DataType = typeof(Brush);
-                        terminalDataTable.Columns.Add(foregroundColumn);
-
-                        DataColumn backgroundColumn = new(GetBackgroundColumnName(visibleField.FieldKey));
-                        backgroundColumn.DataType = typeof(Brush);
-                        terminalDataTable.Columns.Add(backgroundColumn);
-
-                        FrameworkElementFactory fef = new(typeof(TextBlock));
-                        Binding textBinding = new();
-                        textBinding.Path = new PropertyPath(visibleField.FieldKey, Array.Empty<object>());
-                        fef.SetBinding(TextBlock.TextProperty, textBinding);
-                        Binding foregroundBinding = new();
-                        foregroundBinding.Path = new PropertyPath(GetForegroundColumnName(visibleField.FieldKey), Array.Empty<object>());
-                        fef.SetBinding(TextBlock.ForegroundProperty, foregroundBinding);
-                        Binding backgroundBinding = new();
-                        backgroundBinding.Path = new PropertyPath(GetBackgroundColumnName(visibleField.FieldKey), Array.Empty<object>());
-                        fef.SetBinding(TextBlock.BackgroundProperty, backgroundBinding);
-                        DataTemplate dataTemplate = new();
-                        dataTemplate.VisualTree = fef;
+                        DataTemplate dataTemplate = BuildFieldDataTemplate(visibleField, terminalDataTable);
 
                         gridView.Columns.Add(new GridViewColumn()
                         {
@@ -223,21 +193,26 @@ namespace TerminalMonitor.Windows.Controls
                         gridView.Columns.Add(new GridViewColumn()
                         {
                             Header = visibleField.FieldKey,
-                            DisplayMemberBinding = new Binding(visibleField.FieldKey),
+                            DisplayMemberBinding = new Binding(ToColumnName(visibleField.FieldKey)),
                         });
                     }
                 }
             }
-
-            DataColumn defaultColumn = new(defaultColumnName);
-            defaultColumn.DataType = typeof(string);
-            terminalDataTable.Columns.Add(defaultColumn);
-
-            gridView.Columns.Add(new GridViewColumn()
+            else
             {
-                Header = defaultColumnName,
-                DisplayMemberBinding = new Binding(defaultColumnName),
-            });
+                /*
+                 * Add default column when no visible field selected.
+                 */
+                DataColumn defaultColumn = new(plaintextColumnName);
+                defaultColumn.DataType = typeof(string);
+                terminalDataTable.Columns.Add(defaultColumn);
+
+                gridView.Columns.Add(new GridViewColumn()
+                {
+                    Header = plaintextColumnName,
+                    DisplayMemberBinding = new Binding(plaintextColumnName),
+                });
+            }
 
             AddMatchedTerminalLines();
 
@@ -247,44 +222,107 @@ namespace TerminalMonitor.Windows.Controls
             listTerminal.SetBinding(ItemsControl.ItemsSourceProperty, binding);
         }
 
-        private void AddTerminalLine(TerminalLineVO terminalLineVO)
+        private static DataTemplate BuildFieldDataTemplate(FieldDisplayDetail visibleField, DataTable terminalDataTable)
+        {
+            DataColumn foregroundColumn = new(GetForegroundColumnName(ToColumnName(visibleField.FieldKey)));
+            foregroundColumn.DataType = typeof(Brush);
+            terminalDataTable.Columns.Add(foregroundColumn);
+
+            DataColumn backgroundColumn = new(GetBackgroundColumnName(ToColumnName(visibleField.FieldKey)));
+            backgroundColumn.DataType = typeof(Brush);
+            terminalDataTable.Columns.Add(backgroundColumn);
+
+            FrameworkElementFactory fef = new(typeof(TextBlock));
+
+            Binding textBinding = new();
+            textBinding.Path = new PropertyPath(ToColumnName(visibleField.FieldKey), Array.Empty<object>());
+            fef.SetBinding(TextBlock.TextProperty, textBinding);
+
+            Binding foregroundBinding = new();
+            foregroundBinding.Path = new PropertyPath(GetForegroundColumnName(ToColumnName(visibleField.FieldKey)), Array.Empty<object>());
+            fef.SetBinding(TextBlock.ForegroundProperty, foregroundBinding);
+
+            Binding backgroundBinding = new();
+            backgroundBinding.Path = new PropertyPath(GetBackgroundColumnName(ToColumnName(visibleField.FieldKey)), Array.Empty<object>());
+            fef.SetBinding(TextBlock.BackgroundProperty, backgroundBinding);
+
+            DataTemplate dataTemplate = new();
+            dataTemplate.VisualTree = fef;
+            return dataTemplate;
+        }
+
+        private void AddTerminalLine(TerminalLineDto terminalLineDto)
         {
             DataRow row = terminalDataTable.NewRow();
+
+            row[idColumnName] = terminalLineDto.Id;
 
             if (visibleFields.Any())
             {
                 foreach (var visibleField in visibleFields)
                 {
-                    var fieldValue = terminalLineVO.ParsedFieldDict.ContainsKey(visibleField.FieldKey) ?
-                    terminalLineVO.ParsedFieldDict[visibleField.FieldKey] : "";
+                    var fieldValue = terminalLineDto.LineFieldDict.ContainsKey(visibleField.FieldKey) ?
+                        terminalLineDto.LineFieldDict[visibleField.FieldKey].Text : "";
 
-                    row[visibleField.FieldKey] = fieldValue;
+                    row[ToColumnName(visibleField.FieldKey)] = fieldValue;
 
                     if (visibleField.CustomizeStyle)
                     {
                         var matchedTextStyleCondition = visibleField.Conditions.FirstOrDefault(
-                            textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineVO, textStyleCondition.Condition));
+                            textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineDto, textStyleCondition.Condition));
                         var textStyle = matchedTextStyleCondition?.Style ?? visibleField.Style;
 
-                        row[GetForegroundColumnName(visibleField.FieldKey)] = new SolidColorBrush(textStyle.Foreground);
-                        row[GetBackgroundColumnName(visibleField.FieldKey)] = new SolidColorBrush(textStyle.Background);
+                        row[GetForegroundColumnName(ToColumnName(visibleField.FieldKey))] = new SolidColorBrush(textStyle.Foreground);
+                        row[GetBackgroundColumnName(ToColumnName(visibleField.FieldKey))] = new SolidColorBrush(textStyle.Background);
                     }
-                }              
+                }
             }
-            
-            row[defaultColumnName] = terminalLineVO.PlainText;
- 
+            else
+            {
+                row[plaintextColumnName] = terminalLineDto.PlainText;
+            }
+
             terminalDataTable.Rows.Add(row);
         }
 
         private void AddMatchedTerminalLines()
         {
-            foreach (var terminalLineVO in terminalLineVOs)
+            if (lineSupervisor == null)
             {
-                if (terminalLineVO.Matched)
+                return;
+            }
+
+            foreach (var terminalLineDto in lineSupervisor.TerminalLines)
+            {
+                var matched = matchedLineDict[terminalLineDto.Id];
+                if (matched)
                 {
-                    AddTerminalLine(terminalLineVO);
-                }                
+                    AddTerminalLine(terminalLineDto);
+                }
+            }
+        }
+
+        private void Supervisor_TerminalLineAdded(object sender, TerminalLineEventArgs e)
+        {
+            AddNewTerminalLine(e.TerminalLine);
+        }
+
+        public ITerminalLineSupervisor LineSupervisor
+        {
+            get => lineSupervisor;
+            set
+            {
+                if (lineSupervisor != value && lineSupervisor != null)
+                {
+                    lineSupervisor.TerminalLineAdded -= Supervisor_TerminalLineAdded;
+                }
+
+                lineSupervisor = value;
+
+                if (lineSupervisor != null)
+                {
+                    lineSupervisor.TerminalLineAdded += Supervisor_TerminalLineAdded;
+                }
             }
         }
 
@@ -304,13 +342,13 @@ namespace TerminalMonitor.Windows.Controls
                     return;
                 }
 
-                PauseTimer();
+                //PauseTimer();
 
-                fieldListView.FieldKeys = value;
+                fieldListView.Fields = value;
                 visibleFields = value.ToArray();
                 ApplyVisibleField();
 
-                ResumeTimer();
+                //ResumeTimer();
             }
         }
 
@@ -330,13 +368,13 @@ namespace TerminalMonitor.Windows.Controls
                     return;
                 }
 
-                PauseTimer();
+                //PauseTimer();
 
                 filterView.FilterConditions = value;
                 filterConditions = value.ToArray();
                 FilterTerminal();
 
-                ResumeTimer();
+                //ResumeTimer();
             }
         }
     }

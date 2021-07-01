@@ -39,9 +39,10 @@ namespace TerminalMonitor.Windows
             Binding fieldKeyBinding = new("FieldKey");
             fieldKeyBinding.Source = dataContextVO;
             fieldKeyBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-            fieldKeyBinding.ValidationRules.Add(new FieldKeyRule()
+            fieldKeyBinding.ValidationRules.Add(new UniqueItemRule()
             {
-                ExistingFieldKeys = existingFieldKeys
+                ExistingValues = existingFieldKeys,
+                ErrorMessage = "Field key has been used already",
             });
             txtBxKey.SetBinding(TextBox.TextProperty, fieldKeyBinding);
         }
@@ -116,13 +117,16 @@ namespace TerminalMonitor.Windows
         {
             get
             {
-                return new ReadOnlyCollection<string>(existingFieldKeys);
+                return new ReadOnlyCollection<string>(existingFieldKeys.ToArray());
             }
 
             set
             {
                 existingFieldKeys.Clear();
-                existingFieldKeys.AddRange(value);
+                if (value != null)
+                {
+                    existingFieldKeys.AddRange(value);
+                }
             }
         }
 

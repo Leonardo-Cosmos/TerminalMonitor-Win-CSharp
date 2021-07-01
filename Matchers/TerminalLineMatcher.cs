@@ -18,42 +18,44 @@ namespace TerminalMonitor.Matchers
             this.filterConditions = filterConditions;
         }
 
-        public bool IsMatch(TerminalLineVO terminalLineVO)
+        public bool IsMatch(TerminalLineDto terminalLineDto)
         {
-            return IsMatch(terminalLineVO, filterConditions);
+            return IsMatch(terminalLineDto, filterConditions);
         }
 
-        public static bool IsMatch(TerminalLineVO terminalLineVO, IEnumerable<FilterCondition> filterConditions)
+        public static bool IsMatch(TerminalLineDto terminalLineDto, IEnumerable<FilterCondition> filterConditions)
         {
-            if (filterConditions == null)
+            if (filterConditions == null || !filterConditions.Any())
             {
                 return true;
             }
 
             bool included = filterConditions
                 .Where(filterCondition => !filterCondition.Excluded)
-                .All(filterCondition => IsMatch(terminalLineVO, filterCondition.Condition));
+                .All(filterCondition => IsMatch(terminalLineDto, filterCondition.Condition));
 
             bool excluded = filterConditions
                 .Where(filterConditions => filterConditions.Excluded)
-                .Any(filterCondition => IsMatch(terminalLineVO, filterCondition.Condition));
+                .Any(filterCondition => IsMatch(terminalLineDto, filterCondition.Condition));
 
             return included && !excluded;
         }
 
-        public static bool IsMatch(TerminalLineVO terminalLineVO, TextCondition condition)
+        public static bool IsMatch(TerminalLineDto terminalLineDto, TextCondition condition)
         {
             if (condition == null)
             {
                 return false;
             }
-            var field = (terminalLineVO.ParsedFields ?? new()).FirstOrDefault(field => field.Key == condition.FieldKey);
-            if (field == null)
+            
+            if (terminalLineDto.LineFieldDict == null || !terminalLineDto.LineFieldDict.ContainsKey(condition.FieldKey))
             {
                 return false;
             }
 
-            return TextMatcher.IsMatch(field.Value, condition.TargetValue, condition.MatchOperator);
+            var jsonProperty = terminalLineDto.LineFieldDict[condition.FieldKey];
+
+            return TextMatcher.IsMatch(jsonProperty.Text, condition.TargetValue, condition.MatchOperator);
         }
     }
 }

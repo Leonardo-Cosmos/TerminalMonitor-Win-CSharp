@@ -1,0 +1,71 @@
+﻿<UserControl x:Class="TerminalMonitor.Windows.Controls.TerminalTabControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <TabControl Name="tbCtrl" SelectionChanged="TbCtrl_SelectionChanged">
+            <TabControl.Resources>
+                <Style TargetType="TabItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TabItem">
+                                <Border Name="bdr" BorderThickness="1,1,1,0" BorderBrush="Gainsboro" CornerRadius="4,4,0,0" Margin="2,0"
+                                        ToolTip="{Binding RelativeSource={RelativeSource AncestorType=TabItem}, Path=Header}"
+                                        Tag="{Binding RelativeSource={RelativeSource AncestorType=TabItem}, Path=Tag}"
+                                        ContextMenuOpening="ContextMenu_ContextMenuOpening">
+
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Name="mnMoveLeft" Header="Move Left" Click="MnMoveLeft_Click" />
+                                            <MenuItem Name="mnMoveRight" Header="Move Right" Click="MnMoveRight_Click" />
+                                            <Separator />
+                                            <MenuItem Name="mnRename" Header="Rename" Click="MnRename_Click" />
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    
+                                    <Grid Margin="5,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <ContentPresenter x:Name="cnt" Grid.Column="0"
+                                                          MinWidth="50" MaxWidth="150"
+                                                          VerticalAlignment="Center"
+                                                          HorizontalAlignment="Center"
+                                                          ContentSource="Header" />
+                                        <Button Name="btnClose" Grid.Column="1" Content="×" Background="Transparent"
+                                                Tag="{Binding RelativeSource={RelativeSource AncestorType=TabItem}, Path=Tag}"
+                                                Click="BtnClose_Click" />
+                                    </Grid>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="bdr" Property="Background" Value="LightSkyBlue" />
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="False">
+                                        <Setter TargetName="bdr" Property="Background" Value="GhostWhite" />
+                                    </Trigger>
+                                    <Trigger Property="Header" Value="+">
+                                        <Setter TargetName="cnt" Property="MinWidth" Value="0" />
+                                        <Setter TargetName="cnt" Property="Margin" Value="0" />
+                                        <Setter TargetName="btnClose" Property="Visibility" Value="Collapsed" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.Resources>
+            <TabItem Header="Default" Tag="Default">
+                <local:TerminalView />
+            </TabItem>
+            <TabItem Header="+" Tag="+" />
+
+        </TabControl>
+    </Grid>
+</UserControl>

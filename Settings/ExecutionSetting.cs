@@ -1,7 +1,10 @@
 ﻿/* 2021/4/19 */
 
+using System;
+
 namespace TerminalMonitor.Settings
 {
+    [Obsolete]
     class ExecutionSetting
     {
         public string CommandName { get; set; }

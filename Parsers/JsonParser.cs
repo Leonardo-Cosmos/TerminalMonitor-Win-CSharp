@@ -11,7 +11,6 @@ namespace TerminalMonitor.Parsers
 {
     static class JsonParser
     {
-
         public static Dictionary<string, object> ParseTerminalLine(string json)
         {
             try
@@ -25,24 +24,16 @@ namespace TerminalMonitor.Parsers
             }
         }
 
-        public static TerminalLineVO ParseTerminalLineToVO(string json)
+        public static Dictionary<string, object> FlattenJsonPath(Dictionary<string, object> dict)
         {
-            var dict = ParseTerminalLine(json);
-
-            var parsedFields = dict.OrderBy(kvPair => kvPair.Key)
-                .Select(kvPair => new TerminalLineFieldVO()
-                {
-                    Key = kvPair.Key,
-                    Value = kvPair.Value.ToString(),
-                })
-                .ToList();
-
-            return new TerminalLineVO()
+            var jsonProperties = dict.Select(kvPair => new
             {
-                PlainText = json,
-                ParsedFieldDict = dict,
-                ParsedFields = parsedFields,
-            };
+                Key = kvPair.Key,
+                Value = kvPair.Value,
+            })
+           .ToDictionary(kvPair => kvPair.Key, kvPair => kvPair.Value);
+
+            return jsonProperties;
         }
 
     }

@@ -1,6 +1,5 @@
 ﻿/* 2021/4/16 */
 using Newtonsoft.Json;
-using Ookii.Dialogs.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,70 +24,45 @@ namespace TerminalMonitor.Windows
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly CommandExecutor commandExecutor = new();
+
         private TerminalMonitorSetting setting;
-       
+
         public MainWindow()
         {
             InitializeComponent();
+
+            commandListView.CommandRun += (sender, e) =>
+            {
+                commandExecutor.Execute(e.Command);
+            };
+
+            executionListView.Executor = commandExecutor;
+            terminalTabControl.LineProducer = commandExecutor;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             setting = SettingSerializer.Load() ?? new();
 
-            var commandSetting = setting.Commands?[0] ?? new();
-            textBoxCommand.Text = commandSetting.FilePath;
+            commandListView.Commands = setting.Commands?
+                .Select(command => CommandConfigSettings.Load(command));
 
-            var executionSetting = setting.Executions?[0] ?? new();
-            textBoxArguments.Text = executionSetting.ArgumentsText;
-            textBoxWorkDir.Text = executionSetting.WorkingDirectory;
-
-            var terminalSetting = setting.Terminals?[0] ?? new();
-            terminalView.VisibleFields = terminalSetting.Fields?
-                .Select(field => FieldDisplayDetailSettings.Load(field));
-            terminalView.FilterConditions = terminalSetting.Filters?
-                .Select(filter => FilterConditionSettings.Load(filter));
+            terminalTabControl.Terminals = setting.Terminals?
+                .Select(terminal => TerminalConfigSettings.Load(terminal));
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            CommandSetting commandSetting = new();
-            commandSetting.FilePath = textBoxCommand.Text;
-            setting.Commands = new List<CommandSetting>() { commandSetting };
+            commandExecutor.TerminateAll();
 
-            ExecutionSetting executionSetting = new();
-            executionSetting.ArgumentsText = textBoxArguments.Text;
-            executionSetting.WorkingDirectory = textBoxWorkDir.Text;
-            setting.Executions = new List<ExecutionSetting>() { executionSetting };
+            setting.Commands = commandListView.Commands
+                .Select(command => CommandConfigSettings.Save(command)).ToList();
 
-            TerminalSetting terminalSetting = new();
-            terminalSetting.Fields = terminalView.VisibleFields
-                .Select(field => FieldDisplayDetailSettings.Save(field)).ToList();
-            terminalSetting.Filters = terminalView.FilterConditions
-                .Select(filter => FilterConditionSettings.Save(filter)).ToList();
-            setting.Terminals = new List<TerminalSetting>() { terminalSetting };
+            setting.Terminals = terminalTabControl.Terminals
+                .Select(terminal => TerminalConfigSettings.Save(terminal)).ToList();
 
             SettingSerializer.Save(setting);
-        }
-
-        private void ButtonExecute_Click(object sender, RoutedEventArgs e)
-        {
-            var command = textBoxCommand.Text;
-            var arguments = textBoxArguments.Text;
-            var workDir = textBoxWorkDir.Text;
-            CommandExecutor executor = new(command, arguments: arguments, workingDirectory: workDir);
-            var execution = executor.Execute();
-
-            terminalView.AddExecution(execution);
-        }
-
-        private void ButtonBrowseWorkDir_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new VistaFolderBrowserDialog();
-            if (dialog.ShowDialog() ?? false)
-            {
-                textBoxWorkDir.Text = dialog.SelectedPath;
-            }
         }
     }
 }

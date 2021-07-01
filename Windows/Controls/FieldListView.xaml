@@ -5,24 +5,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=local:FieldItemVO}"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DataContext="{d:DesignInstance Type=local:FieldListItemVO}"
+             d:DesignHeight="150" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <Label Name="lblKey" Grid.Row="0" Grid.Column="0" Content="Key" />
-        <TextBox Name="txtBxKey" Grid.Row="0" Grid.Column="1" Text="{Binding FieldKey}" />
-
-        <Grid Name="grdButton" Grid.Row="0" Grid.Column="2">
+        <Grid Name="grdButton" Grid.Row="1" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -37,9 +32,8 @@
             <Button Name="btnMoveRight" Grid.Column="4" Width="20" Content="→" ToolTip="Move Right" Click="BtnMoveRight_Click" />
         </Grid>
 
-        <Label Name="lblFields" Grid.Row="1" Grid.Column="0" Content="Fields" />
-        <ListView Name="lstFields" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Grid.ColumnSpan="2" MinHeight="25"
-                  SelectionMode="Single" SelectionChanged="LstFields_SelectionChanged">
+        <ListView Name="lstFields" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" MinHeight="25"
+                  SelectionMode="Single">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel></WrapPanel>

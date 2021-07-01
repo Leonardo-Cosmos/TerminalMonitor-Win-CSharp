@@ -5,7 +5,12 @@
         <Setter Property="Margin" Value="2" />
     </Style>
 
-    <Style x:Key="textBoxInError" TargetType="{x:Type TextBox}">
+    <Style TargetType="TextBox">
+        <Setter Property="Margin" Value="2" />
+    </Style>
+
+    <Style x:Key="textBoxInValidation" TargetType="{x:Type TextBox}">
+        <Setter Property="Margin" Value="2" />
         <Style.Triggers>
             <Trigger Property="Validation.HasError" Value="true">
                 <Setter Property="BorderBrush" Value="Red" />
