@@ -24,6 +24,8 @@
                                             <MenuItem Name="mnMoveRight" Header="Move Right" Click="MnMoveRight_Click" />
                                             <Separator />
                                             <MenuItem Name="mnRename" Header="Rename" Click="MnRename_Click" />
+                                            <Separator />
+                                            <MenuItem Name="mnDuplicate" Header="Duplicate" Click="MnDuplicate_Click" />
                                         </ContextMenu>
                                     </Border.ContextMenu>
                                     

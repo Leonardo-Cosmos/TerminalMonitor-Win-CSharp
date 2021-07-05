@@ -4,7 +4,7 @@ using TerminalMonitor.Matchers;
 
 namespace TerminalMonitor.Models
 {
-    public class TextCondition
+    public class TextCondition : ICloneable
     {
         public static TextCondition Empty => new()
         {
@@ -19,5 +19,14 @@ namespace TerminalMonitor.Models
 
         public string TargetValue { get; set; }
 
+        public object Clone()
+        {
+            return new TextCondition()
+            {
+                FieldKey = this.FieldKey,
+                MatchOperator = this.MatchOperator,
+                TargetValue = this.TargetValue,
+            };
+        }
     }
 }

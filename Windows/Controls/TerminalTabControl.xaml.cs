@@ -143,11 +143,24 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private void MnDuplicate_Click(object sender, RoutedEventArgs e)
+        {
+            var tab = GetMenuTab(sender as MenuItem);
+            var terminalConfig = GetTabConfig(tab);
+            var index = tbCtrl.Items.IndexOf(tab);
+
+            TerminalConfig config = (TerminalConfig) terminalConfig.Clone();
+            config.Name = $"{terminalConfig.Name} (Copy)";
+            config.Id = Guid.NewGuid().ToString();
+
+            InsertTab(index + 1, config);
+        }
+
         private TabItem GetMenuTab(MenuItem menuItem)
         {
             var menu = menuItem.Parent as ContextMenu;
             var border = menu.PlacementTarget as Border;
-            return GetTab((border.Tag as string));
+            return GetTab(border.Tag as string);
         }
 
         private void StartTimer(ITerminalLineProducer producer)
@@ -235,7 +248,7 @@ namespace TerminalMonitor.Windows.Controls
             return matchedItem;
         }
 
-        private void AddTab(TerminalConfig config)
+        private TabItem CreateTab(TerminalConfig config)
         {
             TabItem tab = new();
             tab.Tag = config.Id ?? Guid.NewGuid().ToString();
@@ -247,7 +260,26 @@ namespace TerminalMonitor.Windows.Controls
             terminalView.LineSupervisor = this;
             tab.Content = terminalView;
 
+            return tab;
+        }
+
+        private void AddTab(TerminalConfig config)
+        {
+            var tab = CreateTab(config);
+
             tbCtrl.Items.Insert(tbCtrl.Items.Count - 1, tab);
+        }
+
+        private void InsertTab(int index, TerminalConfig config)
+        {
+            var tab = CreateTab(config);
+
+            if (index < 0 || index > tbCtrl.Items.Count -1)
+            {
+                index = tbCtrl.Items.Count - 1;
+            }
+
+            tbCtrl.Items.Insert(index, tab);
         }
 
         private void RemoveTab(TabItem tab)
