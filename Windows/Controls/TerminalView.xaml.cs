@@ -294,7 +294,17 @@ namespace TerminalMonitor.Windows.Controls
 
             foreach (var terminalLineDto in lineSupervisor.TerminalLines)
             {
-                var matched = matchedLineDict[terminalLineDto.Id];
+                bool matched;
+                if (matchedLineDict.ContainsKey(terminalLineDto.Id))
+                {
+                    matched = matchedLineDict[terminalLineDto.Id];
+                }
+                else
+                {
+                    matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterConditions);
+                    matchedLineDict.Add(terminalLineDto.Id, matched);
+                }
+
                 if (matched)
                 {
                     AddTerminalLine(terminalLineDto);
