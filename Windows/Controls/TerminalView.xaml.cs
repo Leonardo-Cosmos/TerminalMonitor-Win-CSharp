@@ -130,6 +130,8 @@ namespace TerminalMonitor.Windows.Controls
                 return;
             }
 
+            terminalDataTable.Rows.Clear();
+
             matchedLineDict.Clear();
             TerminalLineMatcher matcher = new(filterConditions);
             foreach (var terminalLineDto in lineSupervisor.TerminalLines)
