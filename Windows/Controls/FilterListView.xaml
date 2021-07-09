@@ -38,9 +38,9 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnAdd" Grid.Column="0" Content="Add" Click="BtnAdd_Click" />
-            <Button Name="btnUpdate" Grid.Column="1" Content="Update" Click="BtnUpdate_Click" />
-            <Button Name="btnDelete" Grid.Column="2" Content="Delete" Click="BtnDelete_Click" />
+            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="+" Click="BtnAdd_Click" />
+            <Button Name="btnUpdate" Grid.Column="1" Width="20" Content="*" Click="BtnUpdate_Click" />
+            <Button Name="btnDelete" Grid.Column="2" Width="20" Content="-" Click="BtnDelete_Click" />
         </Grid>
 
         <Label Name="lblValue" Grid.Row="1" Grid.Column="0" Content="Value" />

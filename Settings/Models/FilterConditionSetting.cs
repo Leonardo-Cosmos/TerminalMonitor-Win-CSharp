@@ -1,5 +1,5 @@
 ﻿/* 2021/5/26 */
-using TerminalMonitor.Models;
+using TerminalMonitor.Matchers.Models;
 
 namespace TerminalMonitor.Settings.Models
 {

@@ -17,6 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TerminalMonitor.Matchers;
+using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
@@ -91,7 +92,7 @@ namespace TerminalMonitor.Windows.Controls
             {
                 return filterVOs.Select(filterVO => new FilterCondition()
                 {
-                    Condition = new TextCondition()
+                    Condition = new FieldCondition()
                     {
                         FieldKey = filterVO.FieldKey,
                         MatchOperator = filterVO.MatchOperator,

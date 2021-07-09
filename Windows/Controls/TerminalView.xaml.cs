@@ -18,6 +18,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using TerminalMonitor.Execution;
 using TerminalMonitor.Matchers;
+using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
@@ -36,7 +37,7 @@ namespace TerminalMonitor.Windows.Controls
         private readonly DataTable terminalDataTable = new();
 
         private IEnumerable<FieldDisplayDetail> visibleFields = Array.Empty<FieldDisplayDetail>();
-        private IEnumerable<FilterCondition> filterConditions = Array.Empty<FilterCondition>();
+        private ConditionGroup filterConditions = new();
 
         private readonly TerminalViewDataContextVO dataContextVO = new();
 
@@ -65,7 +66,11 @@ namespace TerminalMonitor.Windows.Controls
         {
             //PauseTimer();
 
-            filterConditions = filterView.FilterConditions.ToArray();
+            filterConditions = new ConditionGroup()
+            {
+                Conditions = filterView.FilterConditions
+                    .Select(filter => filter.Condition).ToArray()
+            };
             FilterTerminal();
 
             //ResumeTimer();
@@ -369,7 +374,9 @@ namespace TerminalMonitor.Windows.Controls
             get
             {
                 List<FilterCondition> filterList = new();
-                filterList.AddRange(filterConditions);
+                filterList.AddRange(filterConditions.Conditions
+                    .Select(condition => new FilterCondition() { Condition = (FieldCondition) condition })
+                    .ToArray());
                 return new ReadOnlyCollection<FilterCondition>(filterList);
             }
 
@@ -383,7 +390,10 @@ namespace TerminalMonitor.Windows.Controls
                 //PauseTimer();
 
                 filterView.FilterConditions = value;
-                filterConditions = value.ToArray();
+                filterConditions = new ConditionGroup()
+                {
+                    Conditions = value.Select(filter => filter.Condition)
+                };
                 FilterTerminal();
 
                 //ResumeTimer();

@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
 using TerminalMonitor.Windows.ValidationRules;
 
@@ -53,7 +54,7 @@ namespace TerminalMonitor.Windows
             TextStyleCondition item = new()
             {
                 Style = TextStyle.Empty,
-                Condition = TextCondition.Empty,
+                Condition = FieldCondition.Empty,
             };
             conditions.Add(item);
             lstStyleCondtions.SelectedItem = item;

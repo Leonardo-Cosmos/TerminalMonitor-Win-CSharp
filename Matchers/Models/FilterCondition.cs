@@ -1,11 +1,12 @@
 ﻿/* 2021/4/27 */
 using System;
 
-namespace TerminalMonitor.Models
+namespace TerminalMonitor.Matchers.Models
 {
+    [Obsolete]
     public class FilterCondition : ICloneable
     {
-        public TextCondition Condition { get; set; }
+        public FieldCondition Condition { get; set; }
 
         public bool Excluded { get; set; }
 
@@ -13,7 +14,7 @@ namespace TerminalMonitor.Models
         {
             return new FilterCondition()
             {
-                Condition = (TextCondition)this.Condition.Clone(),
+                Condition = (FieldCondition)this.Condition.Clone(),
                 Excluded = this.Excluded,
             };
         }

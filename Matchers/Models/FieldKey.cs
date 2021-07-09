@@ -1,7 +1,10 @@
 ﻿/* 2021/6/22 */
 
-namespace TerminalMonitor.Models
+using System;
+
+namespace TerminalMonitor.Matchers.Models
 {
+    [Obsolete]
     public class FieldKey
     {
         public static FieldKey Empty => new()

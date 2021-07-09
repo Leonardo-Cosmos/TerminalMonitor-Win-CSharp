@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using TerminalMonitor.Models;
+using TerminalMonitor.Matchers.Models;
 using static TerminalMonitor.Matchers.TextMatcher;
 
 namespace TerminalMonitor.Settings.Models
@@ -45,7 +45,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static FieldConditionSetting Save(TextCondition obj)
+        public static FieldConditionSetting Save(FieldCondition obj)
         {
             if (obj == null)
             {
@@ -59,14 +59,14 @@ namespace TerminalMonitor.Settings.Models
                 );
         }
 
-        public static TextCondition Load(FieldConditionSetting setting)
+        public static FieldCondition Load(FieldConditionSetting setting)
         {
             if (setting == null)
             {
                 return null;
             }
 
-            return new TextCondition()
+            return new FieldCondition()
             {
                 FieldKey = setting.FieldKey,
                 MatchOperator = StringToOperator(setting.MatchOperator),

@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TerminalMonitor.Matchers;
+using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
@@ -25,10 +26,10 @@ namespace TerminalMonitor.Windows.Controls
     public partial class FieldConditionView : UserControl
     {
         public static readonly DependencyProperty FieldConditionProperty =
-            DependencyProperty.Register("FieldCondition", typeof(TextCondition), typeof(FieldConditionView),
-                new PropertyMetadata(TextCondition.Empty, OnFieldConditionChanged));
+            DependencyProperty.Register("FieldCondition", typeof(FieldCondition), typeof(FieldConditionView),
+                new PropertyMetadata(FieldCondition.Empty, OnFieldConditionChanged));
 
-        private TextCondition fieldCondition;
+        private FieldCondition fieldCondition;
 
         private readonly FieldConditionViewDataContextVO dataContextVO = new();
 
@@ -67,7 +68,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void OnFieldConditionChanged(DependencyPropertyChangedEventArgs e)
         {
-            fieldCondition = e.NewValue as TextCondition;
+            fieldCondition = e.NewValue as FieldCondition;
             if (fieldCondition != null)
             {
                 dataContextVO.FieldKey = fieldCondition.FieldKey;
@@ -76,9 +77,9 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public TextCondition FieldCondition
+        public FieldCondition FieldCondition
         {
-            get { return (TextCondition)GetValue(FieldConditionProperty); }
+            get { return (FieldCondition)GetValue(FieldConditionProperty); }
             set { SetValue(FieldConditionProperty, value); }
         }
 
