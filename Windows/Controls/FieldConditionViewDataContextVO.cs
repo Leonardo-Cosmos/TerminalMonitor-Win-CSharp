@@ -49,5 +49,29 @@ namespace TerminalMonitor.Windows.Controls
                 OnPropertyChanged();
             }
         }
+
+        public bool defaultMatch;
+
+        public bool DefaultMatch
+        {
+            get { return defaultMatch; }
+            set
+            {
+                defaultMatch = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool ignored;
+
+        public bool Ignored
+        {
+            get { return ignored; }
+            set
+            {
+                ignored = value;
+                OnPropertyChanged();
+            }
+        }
     }
 }

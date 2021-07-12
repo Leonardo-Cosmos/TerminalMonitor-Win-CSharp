@@ -11,8 +11,8 @@ namespace TerminalMonitor.Matchers.Models
     {
         public bool Negative { get; set; }
 
-        public bool Default { get; set; }
+        public bool DefaultMatch { get; set; }
 
-        public bool Disabled { get; set; }
+        public bool Ignored { get; set; }
     }
 }

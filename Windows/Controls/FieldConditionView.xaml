@@ -21,5 +21,8 @@
         
         <Label Name="lblValue" Content="Value" />
         <TextBox Name="txtBxValue" MinWidth="150" MaxWidth="300" Margin="0, 0, 10, 0" Text="{Binding TargetValue}" />
+
+        <CheckBox Name="chkBxDefault" Margin="0, 0, 10, 0" Content="Match by Default" IsChecked="{Binding DefaultMatch}" />
+        <CheckBox Name="chkBxIgnored" Margin="0, 0, 10, 0" Content="Ignored" IsChecked="{Binding Ignored}" />
     </StackPanel>
 </UserControl>

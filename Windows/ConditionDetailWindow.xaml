@@ -4,9 +4,51 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TerminalMonitor.Windows"
+        xmlns:controls="clr-namespace:TerminalMonitor.Windows.Controls"
         mc:Ignorable="d"
-        Title="Condition Detail" Height="450" Width="800">
+        Title="Condition Detail" SizeToContent="WidthAndHeight" Height="450" Width="800">
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style TargetType="GroupBox">
+                <Setter Property="Margin" Value="3,2" />
+            </Style>
+            <Style TargetType="RadioButton">
+                <Setter Property="Margin" Value="3,4" />
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
     <StackPanel Orientation="Vertical">
-        
+        <GroupBox Header="Single Field">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <RadioButton Grid.Row="0" Content="Use single field condtion" />
+                <controls:FieldConditionView  Grid.Row="1" />
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Header="Multiple Field">
+            <StackPanel>
+                <RadioButton Content="Use multiple field condtion" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Label Name="lblConditionName" Grid.Column="0" Content="Condition name" />
+                    <TextBox Name="txtBxConditionName" Grid.Column="1" />
+                </Grid>
+                
+                <controls:FieldConditionView />
+
+                <TreeView>
+                    <TreeView.Resources>
+                        <HierarchicalDataTemplate DataType="{x:Type local:ConditionGroupNodeVO}" />
+                    </TreeView.Resources>
+                </TreeView>
+            </StackPanel>
+        </GroupBox>
     </StackPanel>
 </Window>
