@@ -48,30 +48,35 @@ namespace TerminalMonitor.Matchers
             }
 
             bool groupMatched = false;
-            if (conditionGroup.MatchAny)
+            switch (conditionGroup.MatchMode)
             {
-                if (conditionGroup.Conditions == null)
-                {
-                    groupMatched = false;
-                }
-                else
-                {
-                    groupMatched = conditionGroup.Conditions.Any(condition => IsMatch(terminalLineDto, condition));
-                }
-            }
-            else
-            {
-                if (conditionGroup.Conditions == null)
-                {
-                    groupMatched = true;
-                }
-                else
-                {
-                    groupMatched = conditionGroup.Conditions.All(condition => IsMatch(terminalLineDto, condition));
-                }
+                case GroupMatchMode.All:
+                    if (conditionGroup.Conditions == null)
+                    {
+                        groupMatched = false;
+                    }
+                    else
+                    {
+                        groupMatched = conditionGroup.Conditions.Any(condition => IsMatch(terminalLineDto, condition));
+                    }
+                    break;
+
+                case GroupMatchMode.Any:
+                    if (conditionGroup.Conditions == null)
+                    {
+                        groupMatched = true;
+                    }
+                    else
+                    {
+                        groupMatched = conditionGroup.Conditions.All(condition => IsMatch(terminalLineDto, condition));
+                    }
+                    break;
+
+                default:
+                    break;
             }
 
-            return groupMatched ^ conditionGroup.Negative;
+            return groupMatched ^ conditionGroup.NegativeMatch;
         }
 
         public static bool IsMatch(TerminalLineDto terminalLineDto, FieldCondition condition)
@@ -83,13 +88,13 @@ namespace TerminalMonitor.Matchers
 
             if (terminalLineDto.LineFieldDict == null || !terminalLineDto.LineFieldDict.ContainsKey(condition.FieldKey))
             {
-                return condition.Negative;
+                return condition.NegativeMatch;
             }
 
             var jsonProperty = terminalLineDto.LineFieldDict[condition.FieldKey];
             var fieldMatched = TextMatcher.IsMatch(jsonProperty.Text, condition.TargetValue, condition.MatchOperator);
 
-            return fieldMatched ^ condition.Negative;
+            return fieldMatched ^ condition.NegativeMatch;
         }
     }
 }

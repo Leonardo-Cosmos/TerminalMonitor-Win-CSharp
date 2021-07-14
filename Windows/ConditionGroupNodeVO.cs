@@ -1,14 +1,33 @@
 ﻿/* 2021/7/12 */
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using TerminalMonitor.Matchers.Models;
 
 namespace TerminalMonitor.Windows
 {
-    class ConditionGroupNodeVO
+    class ConditionGroupNodeVO : ConditionNodeVO
     {
+        private static readonly Array matchModes = Enum.GetValues(typeof(GroupMatchMode));
 
+        public static Array MatchModes => matchModes;
+
+        private GroupMatchMode matchMode;
+
+        public GroupMatchMode MatchMode
+        {
+            get => matchMode;
+            set
+            {
+                matchMode = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private readonly ObservableCollection<ConditionNodeVO> conditions = new ObservableCollection<ConditionNodeVO>();
+
+        public ObservableCollection<ConditionNodeVO> Conditions
+        {
+            get => conditions;
+        }
     }
 }

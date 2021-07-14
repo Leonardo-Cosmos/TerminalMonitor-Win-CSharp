@@ -24,14 +24,14 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <RadioButton Grid.Row="0" Content="Use single field condtion" />
+                <RadioButton Grid.Row="0" Content="Use single field condtion" GroupName="condition" IsChecked="True" />
                 <controls:FieldConditionView  Grid.Row="1" />
             </Grid>
         </GroupBox>
 
         <GroupBox Header="Multiple Field">
             <StackPanel>
-                <RadioButton Content="Use multiple field condtion" />
+                <RadioButton Content="Use multiple field condtion" GroupName="condition" />
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -40,13 +40,35 @@
                     <Label Name="lblConditionName" Grid.Column="0" Content="Condition name" />
                     <TextBox Name="txtBxConditionName" Grid.Column="1" />
                 </Grid>
-                
-                <controls:FieldConditionView />
 
-                <TreeView>
+                <TreeView Name="trConditions" MinHeight="50">
                     <TreeView.Resources>
-                        <HierarchicalDataTemplate DataType="{x:Type local:ConditionGroupNodeVO}" />
+                        <HierarchicalDataTemplate DataType="{x:Type local:ConditionGroupNodeVO}" ItemsSource="{Binding Conditions}">
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox ItemsSource="{Binding MatchModes}" SelectedValue="{Binding MatchMode}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Converter={StaticResource MatchModeToStringConverter}}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <Button Name="btnAddConditionGroup" Content="Add group"
+                                        Tag="{Binding}"
+                                        Click="BtnAddConditionGroup_Click" />
+                                <Button Name="btnAddCondition" Content="Add condition"
+                                        Tag="{Binding}"
+                                        Click="BtnAddCondition_Click" />
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                        <DataTemplate DataType="{x:Type local:FieldConditionNodeVO}">
+                            <controls:FieldConditionView FieldCondition="{Binding}" />
+                        </DataTemplate>
                     </TreeView.Resources>
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Setter Property="IsExpanded" Value="True" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
                 </TreeView>
             </StackPanel>
         </GroupBox>

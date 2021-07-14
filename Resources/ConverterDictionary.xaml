@@ -3,5 +3,6 @@
                     xmlns:converters="clr-namespace:TerminalMonitor.Windows.Converters">
 
     <converters:MatchOperatorToStringConverter x:Key="MatchOperatorToStringConverter" />
-    
+    <converters:MatchModeToStringConverter x:Key="MatchModeToStringConverter" />
+
 </ResourceDictionary>

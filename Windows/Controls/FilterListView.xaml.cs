@@ -70,6 +70,12 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private void BtnNew_Click(object sender, RoutedEventArgs e)
+        {
+            ConditionDetailWindow window = new();
+            window.ShowDialog();
+        }
+
         private void LstFilters_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (lstFilters.SelectedItem is FilterItemVO selectedItem)

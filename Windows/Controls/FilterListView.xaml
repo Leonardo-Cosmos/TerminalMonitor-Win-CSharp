@@ -37,10 +37,12 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Button Name="btnAdd" Grid.Column="0" Width="20" Content="+" Click="BtnAdd_Click" />
             <Button Name="btnUpdate" Grid.Column="1" Width="20" Content="*" Click="BtnUpdate_Click" />
             <Button Name="btnDelete" Grid.Column="2" Width="20" Content="-" Click="BtnDelete_Click" />
+            <Button Name="btnNew" Grid.Column="3" Width="20" Content="#" Click="BtnNew_Click" />
         </Grid>
 
         <Label Name="lblValue" Grid.Row="1" Grid.Column="0" Content="Value" />

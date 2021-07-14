@@ -9,10 +9,22 @@ namespace TerminalMonitor.Matchers.Models
 {
     public abstract class Condition
     {
-        public bool Negative { get; set; }
+        /// <summary>
+        /// The match result of this condition is negative.
+        /// </summary>
+        public bool NegativeMatch { get; set; }
 
+        /// <summary>
+        /// The match result by default. When this condition is dismissed,
+        /// specified field is not found or group list is empty, this value
+        /// is applied.
+        /// </summary>
         public bool DefaultMatch { get; set; }
 
-        public bool Ignored { get; set; }
+        /// <summary>
+        /// The indicator that determines whether this condition always 
+        /// have default match result.
+        /// </summary>
+        public bool DismissMatch { get; set; }
     }
 }
