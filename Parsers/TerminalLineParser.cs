@@ -50,7 +50,7 @@ namespace TerminalMonitor.Parsers
                     Key = kvPair.Key,
                     FieldKey = $"{keyPrefix!}{kvPair.Key}",
                     Value = kvPair.Value,
-                    Text = kvPair.Value.ToString(),
+                    Text = (kvPair.Value ?? "%null%").ToString(),
                 });
             }
         }
