@@ -26,9 +26,9 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private TextMatcher.MatchOperator matchOperator;
+        private TextMatchOperator matchOperator;
 
-        public TextMatcher.MatchOperator MatchOperator
+        public TextMatchOperator MatchOperator
         {
             get { return matchOperator; }
             set

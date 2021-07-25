@@ -17,9 +17,9 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private TextMatcher.MatchOperator matchOperator;
+        private TextMatchOperator matchOperator;
 
-        public TextMatcher.MatchOperator MatchOperator
+        public TextMatchOperator MatchOperator
         {
             get => matchOperator;
             set

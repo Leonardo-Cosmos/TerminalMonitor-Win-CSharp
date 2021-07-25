@@ -7,25 +7,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
-using static TerminalMonitor.Matchers.TextMatcher;
+using TerminalMonitor.Matchers;
 
 namespace TerminalMonitor.Windows.Converters
 {
     class MatchOperatorToStringConverter : IValueConverter
     {
-        private static readonly ReadOnlyDictionary<MatchOperator, string> opTextDict = 
-            new(new Dictionary<MatchOperator, string>() {
-                { MatchOperator.None, "--" },
-                { MatchOperator.Equals, "equals"},
-                { MatchOperator.Contains, "contains" },
-                { MatchOperator.StartsWith, "starts with" },
-                { MatchOperator.EndsWith, "ends with" },
-                { MatchOperator.Matches, "matches" },
+        private static readonly ReadOnlyDictionary<TextMatchOperator, string> opTextDict = 
+            new(new Dictionary<TextMatchOperator, string>() {
+                { TextMatchOperator.None, "--" },
+                { TextMatchOperator.Equals, "equals"},
+                { TextMatchOperator.Contains, "contains" },
+                { TextMatchOperator.StartsWith, "starts with" },
+                { TextMatchOperator.EndsWith, "ends with" },
+                { TextMatchOperator.Matches, "matches" },
             });
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is MatchOperator matchOperator)
+            if (value is TextMatchOperator matchOperator)
             {
                 return opTextDict[matchOperator];
             }
@@ -43,7 +43,7 @@ namespace TerminalMonitor.Windows.Converters
                     .FirstOrDefault(kvPair => kvPair.Value.Equals(text, StringComparison.OrdinalIgnoreCase));
             } else
             {
-                return MatchOperator.None;
+                return TextMatchOperator.None;
             }
         }
     }

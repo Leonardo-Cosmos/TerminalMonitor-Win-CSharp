@@ -37,7 +37,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             InitializeComponent();
 
-            cmbBxOperator.ItemsSource = Enum.GetValues(typeof(TextMatcher.MatchOperator));
+            cmbBxOperator.ItemsSource = Enum.GetValues(typeof(TextMatchOperator));
             stkPnl.DataContext = dataContextVO;
             dataContextVO.PropertyChanged += OnDataContextPropertyChanged;
         }

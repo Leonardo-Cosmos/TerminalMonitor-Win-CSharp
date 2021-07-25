@@ -7,10 +7,6 @@ namespace TerminalMonitor.Windows
 {
     class ConditionGroupNodeVO : ConditionNodeVO
     {
-        private static readonly Array matchModes = Enum.GetValues(typeof(GroupMatchMode));
-
-        public static Array MatchModes => matchModes;
-
         private GroupMatchMode matchMode;
 
         public GroupMatchMode MatchMode

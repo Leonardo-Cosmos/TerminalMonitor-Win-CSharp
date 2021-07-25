@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using TerminalMonitor.Matchers.Models;
-using static TerminalMonitor.Matchers.TextMatcher;
+using TerminalMonitor.Matchers;
 
 namespace TerminalMonitor.Settings.Models
 {
@@ -11,29 +11,29 @@ namespace TerminalMonitor.Settings.Models
 
     static class FieldConditionSettings
     {
-        private static readonly IReadOnlyDictionary<string, MatchOperator> matchOperatorDict;
+        private static readonly IReadOnlyDictionary<string, TextMatchOperator> matchOperatorDict;
 
         static FieldConditionSettings()
         {
-            var dict = new Dictionary<string, MatchOperator>();
-            var matchOperators = Enum.GetValues(typeof(MatchOperator));
+            var dict = new Dictionary<string, TextMatchOperator>();
+            var matchOperators = Enum.GetValues(typeof(TextMatchOperator));
             foreach (var item in matchOperators)
             {
-                if (item is MatchOperator matchOperator)
+                if (item is TextMatchOperator matchOperator)
                 {
                     dict.Add(matchOperator.ToString(), matchOperator);
                 }
             }
 
-            matchOperatorDict = new ReadOnlyDictionary<string, MatchOperator>(dict);
+            matchOperatorDict = new ReadOnlyDictionary<string, TextMatchOperator>(dict);
         }
 
-        static string OperatorToString(MatchOperator matchOperator)
+        static string OperatorToString(TextMatchOperator matchOperator)
         {
             return matchOperator.ToString();
         }
 
-        static MatchOperator StringToOperator(string str)
+        static TextMatchOperator StringToOperator(string str)
         {
             if (matchOperatorDict.ContainsKey(str))
             {
@@ -41,7 +41,7 @@ namespace TerminalMonitor.Settings.Models
             }
             else
             {
-                return MatchOperator.None;
+                return TextMatchOperator.None;
             }
         }
 

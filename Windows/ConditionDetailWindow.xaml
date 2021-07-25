@@ -18,20 +18,23 @@
         </ResourceDictionary>
     </Window.Resources>
     <StackPanel Orientation="Vertical">
-        <GroupBox Header="Single Field">
+        <RadioButton Name="rdBtnSingle" Grid.Row="0" Content="Use single field condtion" 
+                     GroupName="condition" Checked="RdBtnCondition_Checked" />        
+        <GroupBox Name="grpBxSingleField" Header="Single Field">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <RadioButton Grid.Row="0" Content="Use single field condtion" GroupName="condition" IsChecked="True" />
-                <controls:FieldConditionView  Grid.Row="1" />
+
+                <controls:FieldConditionView x:Name="conditionView" Grid.Row="1" />
             </Grid>
         </GroupBox>
 
-        <GroupBox Header="Multiple Field">
+        <RadioButton Name="rdBtnMultiple" Content="Use multiple field condtion"
+                     GroupName="condition" Checked="RdBtnCondition_Checked" />        
+        <GroupBox Name="grpBxMultipleField" Header="Multiple Field">
             <StackPanel>
-                <RadioButton Content="Use multiple field condtion" GroupName="condition" />
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -45,23 +48,47 @@
                     <TreeView.Resources>
                         <HierarchicalDataTemplate DataType="{x:Type local:ConditionGroupNodeVO}" ItemsSource="{Binding Conditions}">
                             <StackPanel Orientation="Horizontal">
-                                <ComboBox ItemsSource="{Binding MatchModes}" SelectedValue="{Binding MatchMode}">
+                                <StackPanel.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Name="mnItmAddConditionGroup" Header="Add group" Tag="{Binding}" Click="MuItmAddConditionGroup_Click" />
+                                        <MenuItem Name="mnItmAddCondition" Header="Add field" Tag="{Binding}" Click="MnItmAddCondition_Click" />
+                                    </ContextMenu>
+                                </StackPanel.ContextMenu>
+                                <ComboBox ItemsSource="{StaticResource GroupMatchModes}" SelectedValue="{Binding MatchMode}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Converter={StaticResource MatchModeToStringConverter}}" />
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>
-                                <Button Name="btnAddConditionGroup" Content="Add group"
-                                        Tag="{Binding}"
-                                        Click="BtnAddConditionGroup_Click" />
-                                <Button Name="btnAddCondition" Content="Add condition"
-                                        Tag="{Binding}"
-                                        Click="BtnAddCondition_Click" />
+                                <CheckBox Content="Negative" IsChecked="{Binding NegativeMatch}" />
+                                <CheckBox Content="Default" IsChecked="{Binding DefaultMatch}" />
+                                <CheckBox Content="Dismiss" IsChecked="{Binding DismissMatch}" />
                             </StackPanel>
                         </HierarchicalDataTemplate>
+                        
                         <DataTemplate DataType="{x:Type local:FieldConditionNodeVO}">
-                            <controls:FieldConditionView FieldCondition="{Binding}" />
+                            <StackPanel Orientation="Horizontal">
+                                <Label Name="lblKey" Content="Key" />
+                                <TextBox Name="txtBxKey" MinWidth="100" MaxWidth="200" Margin="0, 0, 10, 0" Text="{Binding FieldKey}" />
+
+                                <ComboBox Name="cmbBxOperator" Width="100" Margin="0, 0, 10, 0"
+                                          ItemsSource="{StaticResource TextMatchOperators}"
+                                          SelectedValue="{Binding MatchOperator}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Converter={StaticResource MatchOperatorToStringConverter}}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+
+                                <Label Name="lblValue" Content="Value" />
+                                <TextBox Name="txtBxValue" MinWidth="150" MaxWidth="300" Margin="0, 0, 10, 0" Text="{Binding TargetValue}" />
+
+                                <CheckBox Margin="0, 0, 10, 0" Content="Negative" IsChecked="{Binding NegativeMatch}" />
+                                <CheckBox Margin="0, 0, 10, 0" Content="Default" IsChecked="{Binding DefaultMatch}" />
+                                <CheckBox Margin="0, 0, 10, 0" Content="Dismiss" IsChecked="{Binding DismissMatch}" />
+                            </StackPanel>
                         </DataTemplate>
                     </TreeView.Resources>
                     <TreeView.ItemContainerStyle>

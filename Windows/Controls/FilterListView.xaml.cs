@@ -19,6 +19,7 @@ using System.Windows.Shapes;
 using TerminalMonitor.Matchers;
 using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
+using Condition = TerminalMonitor.Matchers.Models.Condition;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -36,7 +37,7 @@ namespace TerminalMonitor.Windows.Controls
             InitializeComponent();
 
             DataContext = currentFilter;
-            cmbBxOperator.ItemsSource = Enum.GetValues(typeof(TextMatcher.MatchOperator));
+            cmbBxOperator.ItemsSource = Enum.GetValues(typeof(TextMatchOperator));
             lstFilters.ItemsSource = filterVOs;
         }
 
@@ -70,10 +71,18 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private Condition condition;
+
         private void BtnNew_Click(object sender, RoutedEventArgs e)
         {
-            ConditionDetailWindow window = new();
+            ConditionDetailWindow window = new()
+            {
+                Condition = condition,
+            };
             window.ShowDialog();
+
+            var newCondition = window.Condition;
+            condition = newCondition;
         }
 
         private void LstFilters_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -87,7 +96,7 @@ namespace TerminalMonitor.Windows.Controls
             else
             {
                 currentFilter.FieldKey = String.Empty;
-                currentFilter.MatchOperator = TextMatcher.MatchOperator.None;
+                currentFilter.MatchOperator = TextMatchOperator.None;
                 currentFilter.TargetValue = String.Empty;
             }
         }
@@ -119,7 +128,7 @@ namespace TerminalMonitor.Windows.Controls
                 value.Select(filter => new FilterItemVO()
                 {
                     FieldKey = filter.Condition?.FieldKey,
-                    MatchOperator = filter.Condition?.MatchOperator ?? TextMatcher.MatchOperator.None,
+                    MatchOperator = filter.Condition?.MatchOperator ?? TextMatchOperator.None,
                     TargetValue = filter.Condition?.TargetValue,
                 }).ToList().ForEach(filterVO => filterVOs.Add(filterVO));
             }
