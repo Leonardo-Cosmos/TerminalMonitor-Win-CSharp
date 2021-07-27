@@ -37,7 +37,7 @@ namespace TerminalMonitor.Execution
 
             execution.Exited += (sender, e) =>
             {
-                RemoveExecution(name);
+                RemoveExecution(name, execution.Id, e.Exception);
 
                 Debug.Print($"Executor {name} completed.");
             };
@@ -57,9 +57,15 @@ namespace TerminalMonitor.Execution
             }
 
             var execution = executionDict[executionName];
-            execution.Kill();
-
-            RemoveExecution(executionName);
+            try
+            {
+                execution.Kill();
+                RemoveExecution(executionName, execution.Id);
+            }
+            catch (Exception ex)
+            {
+                RemoveExecution(executionName, execution.Id, ex);
+            }
         }
 
         public void TerminateAll()
@@ -103,15 +109,15 @@ namespace TerminalMonitor.Execution
             executionNames.Add(name);
             executionDict.Add(name, execution);
 
-            OnExecutionStarted(name);
+            OnExecutionStarted(name, execution.Id);
         }
 
-        private void RemoveExecution(string name)
+        private void RemoveExecution(string name, string id, Exception exception = null)
         {
             executionNames.Remove(name);
             executionDict.Remove(name);
 
-            OnExecutionExited(name);
+            OnExecutionExited(name, id, exception);
 
             // Emit event when the last execution ended.
             if (executionNames.Count == 0)
@@ -120,26 +126,33 @@ namespace TerminalMonitor.Execution
             }
         }
 
-        protected void OnExecutionStarted(string name)
+        protected void OnExecutionStarted(string name, string id)
         {
             ExecutionInfoEventArgs e = new()
             {
                 Execution = new()
                 {
+                    Id = id,
                     Name = name,
+                    Status = ExecutionStatus.Started,
                 },
             };
             ExecutionStarted?.Invoke(this, e);
         }
 
-        protected void OnExecutionExited(string name)
+        protected void OnExecutionExited(string name, string id, Exception exception)
         {
+            var status = exception == null ? ExecutionStatus.Completed : ExecutionStatus.Error;
             ExecutionInfoEventArgs e = new()
             {
                 Execution = new()
                 {
+                    Id = id,
                     Name = name,
+                    Status = status,
                 },
+
+                Exception = exception,
             };
             ExecutionExited?.Invoke(this, e);
         }

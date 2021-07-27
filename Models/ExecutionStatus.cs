@@ -6,6 +6,7 @@ namespace TerminalMonitor.Models
     {
         Unknown,
         Started,
-        Exited,
+        Completed,
+        Error,
     }
 }
