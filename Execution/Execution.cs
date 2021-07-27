@@ -20,9 +20,12 @@ namespace TerminalMonitor.Execution
 
         private Task processTask;
 
+        internal string Id { get; init; }
+
         internal Execution(CommandConfig commandConfig)
         {
             this.commandConfig = commandConfig;
+            Id = Guid.NewGuid().ToString();
         }
 
         public void Start()
@@ -32,8 +35,11 @@ namespace TerminalMonitor.Execution
                 throw new InvalidOperationException("It has been started already.");
             }
 
-            processTask = Start(commandConfig.StartFile, commandConfig.Arguments, commandConfig.WorkDirectory);
             started = true;
+            processTask = Start(commandConfig.StartFile, commandConfig.Arguments, commandConfig.WorkDirectory);
+            processTask.ContinueWith(task => {                
+                OnExited(task.Exception);
+            });
         }
 
         public void Kill()
@@ -90,7 +96,6 @@ namespace TerminalMonitor.Execution
 
                 await process.WaitForExitAsync();
                 process.Close();
-                OnExited();
             }
         }
 
@@ -103,14 +108,18 @@ namespace TerminalMonitor.Execution
             LineReceived?.Invoke(this, e);
         }
 
-        protected void OnExited()
+        protected void OnExited(Exception exception)
         {
-            Exited?.Invoke(this, EventArgs.Empty);
+            ProcessInfoEventArgs e = new()
+            {
+                Exception = exception,
+            };
+            Exited?.Invoke(this, e);
         }
 
         public event TerminalLineEventHandler LineReceived;
 
-        public event EventHandler Exited;
+        public event ProcessInfoEventHandler Exited;
 
         public bool IsCompleted
         {

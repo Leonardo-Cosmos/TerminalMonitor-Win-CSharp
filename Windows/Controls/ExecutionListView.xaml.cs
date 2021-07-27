@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,6 +45,8 @@ namespace TerminalMonitor.Windows.Controls
         private void Executor_ExecutionStarted(object sender, ExecutionInfoEventArgs e)
         {
             var executionName = e.Execution.Name;
+            Debug.WriteLine($"Add {executionName} to list.");
+
             ExecutionListItemVO item = new()
             {
                 Name = executionName,
@@ -54,11 +57,21 @@ namespace TerminalMonitor.Windows.Controls
         private void Executor_ExecutionExited(object sender, ExecutionInfoEventArgs e)
         {
             var executionName = e.Execution.Name;
+            Debug.WriteLine($"Remove {executionName} from list.");
+
             ExecutionListItemVO item = executionVOs
                 .FirstOrDefault(execution => execution.Name == executionName);
             if (item != null)
             {
                 executionVOs.Remove(item);
+            }
+
+            if (e.Exception != null)
+            {
+                Debug.WriteLine($"Execution exception: {e.Exception.Message}");
+                Debug.WriteLine(e.Exception.StackTrace);
+                MessageBox.Show("Error during execution", "Execution Exception",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
