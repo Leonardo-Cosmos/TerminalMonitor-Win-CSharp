@@ -4,10 +4,12 @@
     <ControlTemplate x:Key="validationTemplate">
         <StackPanel Orientation="Vertical">
             <Border BorderBrush="Red" BorderThickness="2">
+                <Border.ToolTip>
+                    <TextBlock Foreground="Red"
+                       Text="{Binding ElementName=adornedElement, Path=AdornedElement.(Validation.Errors)/ErrorContent}" />
+                </Border.ToolTip>
                 <AdornedElementPlaceholder Name="adornedElement" />
             </Border>
-            <TextBlock Foreground="Red"
-                       Text="{Binding ElementName=adornedElement, Path=AdornedElement.(Validation.Errors)/ErrorContent}" />
         </StackPanel>
     </ControlTemplate>
     

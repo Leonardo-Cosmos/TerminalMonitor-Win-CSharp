@@ -55,6 +55,15 @@ namespace TerminalMonitor.Windows.Controls
                 case "TargetValue":
                     fieldCondition.TargetValue = dataContextVO.TargetValue;
                     break;
+                case "NegativeMatch":
+                    fieldCondition.NegativeMatch = dataContextVO.NegativeMatch;
+                    break;
+                case "DefaultMatch":
+                    fieldCondition.DefaultMatch = dataContextVO.DefaultMatch;
+                    break;
+                case "DismissMatch":
+                    fieldCondition.DismissMatch = dataContextVO.DismissMatch;
+                    break;
                 default:
                     break;
             }
@@ -74,6 +83,10 @@ namespace TerminalMonitor.Windows.Controls
                 dataContextVO.FieldKey = fieldCondition.FieldKey;
                 dataContextVO.MatchOperator = fieldCondition.MatchOperator;
                 dataContextVO.TargetValue = fieldCondition.TargetValue;
+
+                dataContextVO.NegativeMatch = fieldCondition.NegativeMatch;
+                dataContextVO.DefaultMatch = fieldCondition.DefaultMatch;
+                dataContextVO.DismissMatch = fieldCondition.DismissMatch;
             }
         }
 

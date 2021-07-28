@@ -50,7 +50,19 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public bool defaultMatch;
+        private bool negativeMatch;
+
+        public bool NegativeMatch
+        {
+            get { return negativeMatch; }
+            set
+            {
+                negativeMatch = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool defaultMatch;
 
         public bool DefaultMatch
         {
@@ -62,14 +74,14 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public bool ignored;
+        private bool dismissMatch;
 
-        public bool Ignored
+        public bool DismissMatch
         {
-            get { return ignored; }
+            get { return dismissMatch; }
             set
             {
-                ignored = value;
+                dismissMatch = value;
                 OnPropertyChanged();
             }
         }

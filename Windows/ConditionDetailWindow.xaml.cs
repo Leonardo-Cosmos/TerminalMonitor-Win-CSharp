@@ -23,6 +23,8 @@ namespace TerminalMonitor.Windows
     /// </summary>
     public partial class ConditionDetailWindow : Window
     {
+        private readonly ConditionDetailWindowDataContextVO dataContextVO = new();
+
         private readonly ObservableCollection<ConditionGroupNodeVO> rootConditions = new()
         {
             new ConditionGroupNodeVO()
@@ -31,6 +33,8 @@ namespace TerminalMonitor.Windows
         public ConditionDetailWindow()
         {
             InitializeComponent();
+
+            DataContext = dataContextVO;
 
             conditionView.FieldCondition = new FieldCondition();
             trConditions.ItemsSource = rootConditions;
@@ -65,6 +69,22 @@ namespace TerminalMonitor.Windows
             var groupNodeVO = menuItem.Tag as ConditionGroupNodeVO;
 
             groupNodeVO.Conditions.Add(new FieldConditionNodeVO());
+        }
+
+        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (rdBtnMultiple.IsChecked ?? false)
+            {
+                txtBxConditionName.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+
+                if (Validation.GetHasError(txtBxConditionName))
+                {
+                    txtBxConditionName.Focus();
+                    return;
+                }
+            }
+
+            DialogResult = true;
         }
 
         private static ConditionNodeVO ToVO(Condition condition)

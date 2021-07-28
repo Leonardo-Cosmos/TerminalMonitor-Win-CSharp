@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TerminalMonitor.Windows"
         xmlns:controls="clr-namespace:TerminalMonitor.Windows.Controls"
+        xmlns:rules="clr-namespace:TerminalMonitor.Windows.ValidationRules"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=local:CommandDetailWindowDataContextVO}"
         Title="Condition Detail" SizeToContent="WidthAndHeight" Height="450" Width="800">
     <Window.Resources>
         <ResourceDictionary>
@@ -40,8 +42,18 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Label Name="lblConditionName" Grid.Column="0" Content="Condition name" />
-                    <TextBox Name="txtBxConditionName" Grid.Column="1" />
+                    <Label Name="lblConditionName" Grid.Column="0" Content="Condition name (*)" />
+                    <TextBox Name="txtBxConditionName" Grid.Column="1"
+                             Style="{StaticResource textBoxInValidation}"
+                             Validation.ErrorTemplate="{StaticResource validationTemplate}">
+                        <TextBox.Text>
+                            <Binding Path="ConditionName" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                    <rules:NotEmptyRule ErrorMessage="Condition name is required" />
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
                 </Grid>
 
                 <TreeView Name="trConditions" MinHeight="50">
@@ -85,9 +97,9 @@
                                 <Label Name="lblValue" Content="Value" />
                                 <TextBox Name="txtBxValue" MinWidth="150" MaxWidth="300" Margin="0, 0, 10, 0" Text="{Binding TargetValue}" />
 
-                                <CheckBox Margin="0, 0, 10, 0" Content="Negative" IsChecked="{Binding NegativeMatch}" />
-                                <CheckBox Margin="0, 0, 10, 0" Content="Default" IsChecked="{Binding DefaultMatch}" />
-                                <CheckBox Margin="0, 0, 10, 0" Content="Dismiss" IsChecked="{Binding DismissMatch}" />
+                                <CheckBox Margin="0, 0, 10, 0" Content="Negative Result" IsChecked="{Binding NegativeMatch}" />
+                                <CheckBox Margin="0, 0, 10, 0" Content="Match by Default" IsChecked="{Binding DefaultMatch}" />
+                                <CheckBox Margin="0, 0, 10, 0" Content="Dismissed" IsChecked="{Binding DismissMatch}" />
                             </StackPanel>
                         </DataTemplate>
                     </TreeView.Resources>
@@ -99,5 +111,14 @@
                 </TreeView>
             </StackPanel>
         </GroupBox>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Button Name="btnSave" Grid.Column="1" Content="Save" Click="BtnSave_Click" />
+        </Grid>
     </StackPanel>
 </Window>
