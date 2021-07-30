@@ -10,29 +10,37 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <Label Name="lblKey" Grid.Row="0" Grid.Column="0" Content="Key" />
-        <TextBox Name="txtBxKey" Grid.Row="0" Grid.Column="1" Text="{Binding Path=FieldKey}" />
+        <Label Name="lblFilters" Grid.Row="0" Grid.Column="0" Content="Filters" />
 
-        <ComboBox Name="cmbBxOperator" Grid.Row="0" Grid.Column="2" SelectedValue="{Binding MatchOperator}">
-            <ComboBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Converter={StaticResource MatchOperatorToStringConverter}}" />
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
+        <StackPanel Name="stkPnlCondition" Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
 
-        <Grid Name="grdButton" Grid.Row="0" Grid.Column="3">
+            <ComboBox ItemsSource="{StaticResource GroupMatchModes}" SelectedValue="{Binding MatchMode}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource MatchModeToStringConverter}}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <CheckBox Name="chkBxNegative" Margin="0, 0, 10, 0" VerticalAlignment="Center"
+                      Content="Negative Result" IsChecked="{Binding DismissMatch}" />
+
+            <CheckBox Name="chkBxDefault" Margin="0, 0, 10, 0" VerticalAlignment="Center"
+                      Content="Match by Default" IsChecked="{Binding DefaultMatch}" />
+
+            <CheckBox Name="chkBxDismiss" Margin="0, 0, 10, 0" VerticalAlignment="Center"
+                      Content="Dismissed" IsChecked="{Binding DismissMatch}" />
+        </StackPanel>
+
+        <Grid Name="grdButton" Grid.Row="0" Grid.Column="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -42,16 +50,10 @@
             <Button Name="btnAdd" Grid.Column="0" Width="20" Content="+" Click="BtnAdd_Click" />
             <Button Name="btnUpdate" Grid.Column="1" Width="20" Content="*" Click="BtnUpdate_Click" />
             <Button Name="btnDelete" Grid.Column="2" Width="20" Content="-" Click="BtnDelete_Click" />
-            <Button Name="btnNew" Grid.Column="3" Width="20" Content="#" Click="BtnNew_Click" />
         </Grid>
-
-        <Label Name="lblValue" Grid.Row="1" Grid.Column="0" Content="Value" />
-        <TextBox Name="txtBxValue" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding TargetValue}" />
-
-        <Label Name="lblFilters" Grid.Row="2" Grid.Column="0" Content="Filters" />
         
-        <ListView Name="lstFilters" Grid.Row="2" Grid.RowSpan="2" Grid.Column="1" Grid.ColumnSpan="3" MinHeight="20"
-                  SelectionMode="Single" SelectionChanged="LstFilters_SelectionChanged">
+        <ListView Name="lstFilters" Grid.Row="1" Grid.RowSpan="1" Grid.Column="0" Grid.ColumnSpan="3" MinHeight="20"
+                  SelectionMode="Single">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel></WrapPanel>

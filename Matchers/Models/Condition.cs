@@ -9,6 +9,8 @@ namespace TerminalMonitor.Matchers.Models
 {
     public abstract class Condition
     {
+        public string Name { get; set; }
+
         /// <summary>
         /// The match result of this condition is negative.
         /// </summary>

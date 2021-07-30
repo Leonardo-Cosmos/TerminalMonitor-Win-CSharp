@@ -28,38 +28,100 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class FilterListView : UserControl
     {
-        private readonly FilterItemVO currentFilter = new();
-
         private readonly ObservableCollection<FilterItemVO> filterVOs = new();
+
+        private readonly List<Condition> conditions;
+
+        private readonly ConditionGroup conditionGroup;
 
         public FilterListView()
         {
             InitializeComponent();
 
-            DataContext = currentFilter;
-            cmbBxOperator.ItemsSource = Enum.GetValues(typeof(TextMatchOperator));
+            conditions = new List<Condition>();
+            conditionGroup = new()
+            {
+                MatchMode = GroupMatchMode.All,
+                Conditions = conditions,
+            };
+
             lstFilters.ItemsSource = filterVOs;
         }
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            FilterItemVO item = new()
+            ConditionDetailWindow window = new();
+
+            if (window.ShowDialog() ?? false)
             {
-                FieldKey = currentFilter.FieldKey,
-                MatchOperator = currentFilter.MatchOperator,
-                TargetValue = currentFilter.TargetValue,
-            };
-            filterVOs.Add(item);
-            lstFilters.SelectedItem = item;
+                FilterItemVO item;
+                Condition condition = window.Condition;
+                if (!String.IsNullOrEmpty(condition.Name))
+                {
+                    item = new()
+                    {
+                        ConditionName = condition.Name,
+                    };
+                }
+                else if (condition is FieldCondition fieldCondition)
+                {
+                    item = new()
+                    {
+                        FieldKey = fieldCondition.FieldKey,
+                        MatchOperator = fieldCondition.MatchOperator,
+                        TargetValue = fieldCondition.TargetValue,
+                    };
+                }
+                else
+                {
+                    throw new NotImplementedException("Condition without name or field");
+                }
+
+                filterVOs.Add(item);
+                lstFilters.SelectedItem = item;
+
+                conditions.Add(condition);
+            }
         }
 
         private void BtnUpdate_Click(object sender, RoutedEventArgs e)
         {
             if (lstFilters.SelectedItem is FilterItemVO selectedItem)
             {
-                selectedItem.FieldKey = currentFilter.FieldKey;
-                selectedItem.MatchOperator = currentFilter.MatchOperator;
-                selectedItem.TargetValue = currentFilter.TargetValue;
+                var index = filterVOs.IndexOf(selectedItem);
+                ConditionDetailWindow window = new()
+                {
+                    Condition = conditions[index],
+                };
+
+                if (window.ShowDialog() ?? false)
+                {
+                    FilterItemVO item;
+                    Condition condition = window.Condition;
+                    if (!String.IsNullOrEmpty(condition.Name))
+                    {
+                        item = new()
+                        {
+                            ConditionName = condition.Name,
+                        };
+                    }
+                    else if (condition is FieldCondition fieldCondition)
+                    {
+                        item = new()
+                        {
+                            FieldKey = fieldCondition.FieldKey,
+                            MatchOperator = fieldCondition.MatchOperator,
+                            TargetValue = fieldCondition.TargetValue,
+                        };
+                    }
+                    else
+                    {
+                        throw new NotImplementedException("Condition without name or field");
+                    }
+
+                    filterVOs[index] = item;
+                    conditions[index] = condition;
+                }
             }
         }
 
@@ -67,37 +129,9 @@ namespace TerminalMonitor.Windows.Controls
         {
             if (lstFilters.SelectedValue is FilterItemVO selectedItem)
             {
-                filterVOs.Remove(selectedItem);
-            }
-        }
-
-        private Condition condition;
-
-        private void BtnNew_Click(object sender, RoutedEventArgs e)
-        {
-            ConditionDetailWindow window = new()
-            {
-                Condition = condition,
-            };
-            window.ShowDialog();
-
-            var newCondition = window.Condition;
-            condition = newCondition;
-        }
-
-        private void LstFilters_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (lstFilters.SelectedItem is FilterItemVO selectedItem)
-            {
-                currentFilter.FieldKey = selectedItem.FieldKey;
-                currentFilter.MatchOperator = selectedItem.MatchOperator;
-                currentFilter.TargetValue = selectedItem.TargetValue;
-            }
-            else
-            {
-                currentFilter.FieldKey = String.Empty;
-                currentFilter.MatchOperator = TextMatchOperator.None;
-                currentFilter.TargetValue = String.Empty;
+                var index = filterVOs.IndexOf(selectedItem);
+                filterVOs.RemoveAt(index);
+                conditions.RemoveAt(index);
             }
         }
 

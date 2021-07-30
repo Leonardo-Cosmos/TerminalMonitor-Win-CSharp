@@ -51,15 +51,14 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private bool excluded;
+        private string conditionName;
 
-        public bool Excluded
+        public string ConditionName
         {
-            get { return excluded; }
-
+            get { return conditionName; }
             set
             {
-                excluded = value;
+                conditionName = value;
                 OnPropertyChanged();
             }
         }

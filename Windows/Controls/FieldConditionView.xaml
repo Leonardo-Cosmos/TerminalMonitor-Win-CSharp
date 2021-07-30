@@ -8,6 +8,17 @@
              d:DataContext="{d:DesignInstance Type=local:FieldConditionViewDataContextVO}"
              d:DesignHeight="50" d:DesignWidth="800">
     <StackPanel Name="stkPnl" Orientation="Horizontal">
+        <StackPanel.Resources>
+            <ResourceDictionary>
+                <Style TargetType="Label">
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+                <Style TargetType="CheckBox">
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+            </ResourceDictionary>
+        </StackPanel.Resources>
+        
         <Label Name="lblKey" Content="Key" />
         <TextBox Name="txtBxKey" MinWidth="100" MaxWidth="200" Margin="0, 0, 10, 0" Text="{Binding FieldKey}" />
 
@@ -18,7 +29,7 @@
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        
+
         <Label Name="lblValue" Content="Value" />
         <TextBox Name="txtBxValue" MinWidth="150" MaxWidth="300" Margin="0, 0, 10, 0" Text="{Binding TargetValue}" />
 
