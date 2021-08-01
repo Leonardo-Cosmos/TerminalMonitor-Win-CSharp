@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace TerminalMonitor.Settings
 {
@@ -13,7 +14,8 @@ namespace TerminalMonitor.Settings
         {
             var options = new JsonSerializerOptions
             {
-                WriteIndented = true
+                WriteIndented = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             };
             var json = JsonSerializer.Serialize<TerminalMonitorSetting>(setting, options);
 

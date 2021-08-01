@@ -2,20 +2,23 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Matchers;
+using TerminalMonitor.Matchers.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record FieldConditionSetting(string FieldKey, string MatchOperator, string TargetValue);
+    record FieldConditionSetting(string FieldKey, string MatchOperator, string TargetValue,
+        string Name, bool NegativeMatch, bool DefaultMatch, bool DismissMatch)
+        : ConditionSetting(Name, NegativeMatch, DefaultMatch, DismissMatch);
 
     static class FieldConditionSettings
     {
-        private static readonly IReadOnlyDictionary<string, TextMatchOperator> matchOperatorDict;
+        private static readonly IReadOnlyDictionary<string, TextMatchOperator> matchOperatorDict
+            = InitMatchOperatorDict();
 
-        static FieldConditionSettings()
+        private static IReadOnlyDictionary<string, TextMatchOperator> InitMatchOperatorDict()
         {
-            var dict = new Dictionary<string, TextMatchOperator>();
+            Dictionary<string, TextMatchOperator> dict = new();
             var matchOperators = Enum.GetValues(typeof(TextMatchOperator));
             foreach (var item in matchOperators)
             {
@@ -25,7 +28,7 @@ namespace TerminalMonitor.Settings.Models
                 }
             }
 
-            matchOperatorDict = new ReadOnlyDictionary<string, TextMatchOperator>(dict);
+            return new ReadOnlyDictionary<string, TextMatchOperator>(dict);
         }
 
         static string OperatorToString(TextMatchOperator matchOperator)
@@ -35,7 +38,7 @@ namespace TerminalMonitor.Settings.Models
 
         static TextMatchOperator StringToOperator(string str)
         {
-            if (matchOperatorDict.ContainsKey(str))
+            if (str != null && matchOperatorDict.ContainsKey(str))
             {
                 return matchOperatorDict[str];
             }
@@ -55,7 +58,11 @@ namespace TerminalMonitor.Settings.Models
             return new FieldConditionSetting(
                 FieldKey: obj.FieldKey,
                 MatchOperator: OperatorToString(obj.MatchOperator),
-                TargetValue: obj.TargetValue
+                TargetValue: obj.TargetValue,
+                Name: obj.Name,
+                NegativeMatch: obj.NegativeMatch,
+                DefaultMatch: obj.DefaultMatch,
+                DismissMatch: obj.DismissMatch
                 );
         }
 
@@ -71,6 +78,10 @@ namespace TerminalMonitor.Settings.Models
                 FieldKey = setting.FieldKey,
                 MatchOperator = StringToOperator(setting.MatchOperator),
                 TargetValue = setting.TargetValue,
+                Name = setting.Name,
+                NegativeMatch = setting.NegativeMatch,
+                DefaultMatch = setting.DefaultMatch,
+                DismissMatch = setting.DismissMatch,
             };
         }
     }

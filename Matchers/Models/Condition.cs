@@ -7,8 +7,23 @@ using System.Threading.Tasks;
 
 namespace TerminalMonitor.Matchers.Models
 {
-    public abstract class Condition
+    public abstract class Condition : ICloneable
     {
+        protected Condition()
+        {
+
+        }
+
+        protected Condition(Condition obj)
+        {
+            Name = obj.Name;
+            NegativeMatch = obj.NegativeMatch;
+            DefaultMatch = obj.DefaultMatch;
+            DismissMatch = obj.DismissMatch;
+        }
+
+        public abstract object Clone();
+
         public string Name { get; set; }
 
         /// <summary>

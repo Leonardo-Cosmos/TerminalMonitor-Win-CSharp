@@ -28,22 +28,17 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class FilterListView : UserControl
     {
+        private readonly FilterListViewDataContextVO dataContextVO = new();
+
         private readonly ObservableCollection<FilterItemVO> filterVOs = new();
 
-        private readonly List<Condition> conditions;
-
-        private readonly ConditionGroup conditionGroup;
+        private readonly List<Condition> conditions = new();
 
         public FilterListView()
         {
             InitializeComponent();
 
-            conditions = new List<Condition>();
-            conditionGroup = new()
-            {
-                MatchMode = GroupMatchMode.All,
-                Conditions = conditions,
-            };
+            DataContext = dataContextVO;
 
             lstFilters.ItemsSource = filterVOs;
         }
@@ -54,29 +49,9 @@ namespace TerminalMonitor.Windows.Controls
 
             if (window.ShowDialog() ?? false)
             {
-                FilterItemVO item;
                 Condition condition = window.Condition;
-                if (!String.IsNullOrEmpty(condition.Name))
-                {
-                    item = new()
-                    {
-                        ConditionName = condition.Name,
-                    };
-                }
-                else if (condition is FieldCondition fieldCondition)
-                {
-                    item = new()
-                    {
-                        FieldKey = fieldCondition.FieldKey,
-                        MatchOperator = fieldCondition.MatchOperator,
-                        TargetValue = fieldCondition.TargetValue,
-                    };
-                }
-                else
-                {
-                    throw new NotImplementedException("Condition without name or field");
-                }
 
+                FilterItemVO item = CreateFilterVO(condition);
                 filterVOs.Add(item);
                 lstFilters.SelectedItem = item;
 
@@ -96,30 +71,11 @@ namespace TerminalMonitor.Windows.Controls
 
                 if (window.ShowDialog() ?? false)
                 {
-                    FilterItemVO item;
                     Condition condition = window.Condition;
-                    if (!String.IsNullOrEmpty(condition.Name))
-                    {
-                        item = new()
-                        {
-                            ConditionName = condition.Name,
-                        };
-                    }
-                    else if (condition is FieldCondition fieldCondition)
-                    {
-                        item = new()
-                        {
-                            FieldKey = fieldCondition.FieldKey,
-                            MatchOperator = fieldCondition.MatchOperator,
-                            TargetValue = fieldCondition.TargetValue,
-                        };
-                    }
-                    else
-                    {
-                        throw new NotImplementedException("Condition without name or field");
-                    }
 
+                    FilterItemVO item = CreateFilterVO(condition);
                     filterVOs[index] = item;
+
                     conditions[index] = condition;
                 }
             }
@@ -135,36 +91,65 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        internal IEnumerable<FilterCondition> FilterConditions
+        private static FilterItemVO CreateFilterVO(Condition condition)
+        {
+            FilterItemVO item;
+            if (!String.IsNullOrEmpty(condition.Name))
+            {
+                item = new()
+                {
+                    ConditionName = condition.Name,
+                };
+            }
+            else if (condition is FieldCondition fieldCondition)
+            {
+                item = new()
+                {
+                    FieldKey = fieldCondition.FieldKey,
+                    MatchOperator = fieldCondition.MatchOperator,
+                    TargetValue = fieldCondition.TargetValue,
+                };
+            }
+            else
+            {
+                throw new NotImplementedException("Condition without name or field");
+            }
+
+            return item;
+        }
+
+        internal ConditionGroup ConditionGroup
         {
             get
             {
-                return filterVOs.Select(filterVO => new FilterCondition()
+                return new ConditionGroup()
                 {
-                    Condition = new FieldCondition()
-                    {
-                        FieldKey = filterVO.FieldKey,
-                        MatchOperator = filterVO.MatchOperator,
-                        TargetValue = filterVO.TargetValue,
-                    },
-
-                    Excluded = false,
-                });
+                    MatchMode = dataContextVO.MatchMode,
+                    NegativeMatch = dataContextVO.NegativeMatch,
+                    Conditions = conditions,
+                };
             }
 
             set
             {
                 filterVOs.Clear();
+                conditions.Clear();
+
                 if (value == null)
                 {
                     return;
                 }
-                value.Select(filter => new FilterItemVO()
+
+                dataContextVO.MatchMode = value.MatchMode;
+                dataContextVO.NegativeMatch = value.NegativeMatch;
+                if (value.Conditions != null)
                 {
-                    FieldKey = filter.Condition?.FieldKey,
-                    MatchOperator = filter.Condition?.MatchOperator ?? TextMatchOperator.None,
-                    TargetValue = filter.Condition?.TargetValue,
-                }).ToList().ForEach(filterVO => filterVOs.Add(filterVO));
+                    foreach (Condition condition in value.Conditions)
+                    {
+                        conditions.Add(condition);
+                        filterVOs.Add(CreateFilterVO(condition));
+                    }
+                }
             }
         }
     }

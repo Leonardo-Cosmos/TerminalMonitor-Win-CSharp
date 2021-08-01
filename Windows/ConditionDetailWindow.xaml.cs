@@ -36,6 +36,7 @@ namespace TerminalMonitor.Windows
 
             DataContext = dataContextVO;
 
+            rdBtnSingle.IsChecked = true;
             conditionView.FieldCondition = new FieldCondition();
             trConditions.ItemsSource = rootConditions;
         }
@@ -99,7 +100,7 @@ namespace TerminalMonitor.Windows
             }
             else
             {
-                throw new ArgumentException("Unknown condition type");
+                throw new NotImplementedException("Unknown condition type");
             }
         }
         private static FieldConditionNodeVO ToVO(FieldCondition fieldCondition)
@@ -129,7 +130,7 @@ namespace TerminalMonitor.Windows
                 DismissMatch = conditionGroup.DismissMatch,
             };
 
-            conditionGroup.Conditions
+            conditionGroup.Conditions?
                 .Select(condition => ToVO(condition))
                 .ToList()
                 .ForEach(conditionVO => conditionGroupVO.Conditions.Add(conditionVO));
@@ -149,7 +150,7 @@ namespace TerminalMonitor.Windows
             }
             else
             {
-                throw new ArgumentException("Unknown condition VO type");
+                throw new NotImplementedException("Unknown condition VO type");
             }
         }
 
@@ -197,7 +198,10 @@ namespace TerminalMonitor.Windows
                 {
                     var conditionGroupVO =
                         rootConditions.Count > 0 ? rootConditions[0] : new ConditionGroupNodeVO();
-                    return FromVO(conditionGroupVO);
+                    
+                    var conditionGroup = FromVO(conditionGroupVO);
+                    conditionGroup.Name = dataContextVO.ConditionName;
+                    return conditionGroup;
                 }
             }
 
@@ -222,14 +226,19 @@ namespace TerminalMonitor.Windows
                     rootConditions.Clear();
                     rootConditions.Add(new ConditionGroupNodeVO());
                 }
-                else
+                else if (value is ConditionGroup conditionGroup)
                 {
                     rdBtnMultiple.IsChecked = true;
-                    var conditionGroupVO = ToVO(value) as ConditionGroupNodeVO;
+                    dataContextVO.ConditionName = conditionGroup.Name;
+                    var conditionGroupVO = ToVO(conditionGroup);
                     rootConditions.Clear();
                     rootConditions.Add(conditionGroupVO);
 
                     conditionView.FieldCondition = new FieldCondition();
+                }
+                else
+                {
+                    throw new NotImplementedException("Unknown condition type");
                 }
             }
         }

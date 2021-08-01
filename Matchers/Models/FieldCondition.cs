@@ -6,6 +6,23 @@ namespace TerminalMonitor.Matchers.Models
 {
     public class FieldCondition : Condition, ICloneable
     {
+        public FieldCondition()
+        {
+
+        }
+
+        protected FieldCondition(FieldCondition obj) : base(obj)
+        {
+            FieldKey = obj.FieldKey;
+            MatchOperator = obj.MatchOperator;
+            TargetValue = obj.TargetValue;
+        }
+
+        public override object Clone()
+        {
+            return new FieldCondition(this);
+        }
+
         public static FieldCondition Empty => new()
         {
             FieldKey = String.Empty,
@@ -18,15 +35,5 @@ namespace TerminalMonitor.Matchers.Models
         public TextMatchOperator MatchOperator { get; set; }
 
         public string TargetValue { get; set; }
-
-        public object Clone()
-        {
-            return new FieldCondition()
-            {
-                FieldKey = this.FieldKey,
-                MatchOperator = this.MatchOperator,
-                TargetValue = this.TargetValue,
-            };
-        }
     }
 }

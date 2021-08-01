@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=local:FilterItemVO}"
+             d:DataContext="{d:DesignInstance Type=local:FilterListViewDataContextVO}"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -22,7 +22,7 @@
 
         <StackPanel Name="stkPnlCondition" Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
 
-            <ComboBox ItemsSource="{StaticResource GroupMatchModes}" SelectedValue="{Binding MatchMode}">
+            <ComboBox Margin="10, 0, 10, 0"  ItemsSource="{StaticResource GroupMatchModes}" SelectedValue="{Binding MatchMode}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Converter={StaticResource MatchModeToStringConverter}}" />
@@ -31,13 +31,7 @@
             </ComboBox>
 
             <CheckBox Name="chkBxNegative" Margin="0, 0, 10, 0" VerticalAlignment="Center"
-                      Content="Negative Result" IsChecked="{Binding DismissMatch}" />
-
-            <CheckBox Name="chkBxDefault" Margin="0, 0, 10, 0" VerticalAlignment="Center"
-                      Content="Match by Default" IsChecked="{Binding DefaultMatch}" />
-
-            <CheckBox Name="chkBxDismiss" Margin="0, 0, 10, 0" VerticalAlignment="Center"
-                      Content="Dismissed" IsChecked="{Binding DismissMatch}" />
+                      Content="Negative Result" IsChecked="{Binding NegativeMatch}" />
         </StackPanel>
 
         <Grid Name="grdButton" Grid.Row="0" Grid.Column="2">

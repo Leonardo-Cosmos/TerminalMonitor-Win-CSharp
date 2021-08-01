@@ -14,7 +14,7 @@ namespace TerminalMonitor.Models
 
         public IEnumerable<FieldDisplayDetail> VisibleFields { get; set; }
 
-        public IEnumerable<FilterCondition> FilterConditions { get; set; }
+        public ConditionGroup FilterCondition { get; set; }
 
         public object Clone()
         {
@@ -23,7 +23,7 @@ namespace TerminalMonitor.Models
                 Id = this.Id,
                 Name = this.Name,
                 VisibleFields = this.VisibleFields?.Select(field => (FieldDisplayDetail)field.Clone()),
-                FilterConditions = this.FilterConditions?.Select(filter => (FilterCondition)filter.Clone()),
+                FilterCondition = this.FilterCondition?.Clone() as ConditionGroup,
             };
 
             return clone;
