@@ -2,6 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:converters="clr-namespace:TerminalMonitor.Windows.Converters">
 
+    <converters:ObjectNullOrEmptyConverter x:Key="ObjectNullOrEmptyConverter" />
+
     <x:Array x:Key="TextMatchOperators" Type="matchers:TextMatchOperator" xmlns:matchers="clr-namespace:TerminalMonitor.Matchers">
         <matchers:TextMatchOperator>None</matchers:TextMatchOperator>
         <matchers:TextMatchOperator>Equals</matchers:TextMatchOperator>
