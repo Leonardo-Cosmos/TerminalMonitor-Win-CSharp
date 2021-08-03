@@ -126,6 +126,7 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     MatchMode = dataContextVO.MatchMode,
                     NegativeMatch = dataContextVO.NegativeMatch,
+                    DefaultMatch = dataContextVO.DefaultMatch,
                     Conditions = conditions,
                 };
             }
@@ -142,6 +143,7 @@ namespace TerminalMonitor.Windows.Controls
 
                 dataContextVO.MatchMode = value.MatchMode;
                 dataContextVO.NegativeMatch = value.NegativeMatch;
+                dataContextVO.DefaultMatch = value.DefaultMatch;
                 if (value.Conditions != null)
                 {
                     foreach (Condition condition in value.Conditions)

@@ -22,6 +22,14 @@ namespace TerminalMonitor.Windows.Controls
             set { negativeMatch = value; OnPropertyChanged(); }
         }
 
+        private bool defaultMatch;
+
+        public bool DefaultMatch
+        {
+            get => defaultMatch;
+            set { defaultMatch = value; OnPropertyChanged(); }
+        }
+
         private GroupMatchMode matchMode;
 
         public GroupMatchMode MatchMode

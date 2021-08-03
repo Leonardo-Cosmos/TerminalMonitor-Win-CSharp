@@ -47,33 +47,25 @@ namespace TerminalMonitor.Matchers
                 return false;
             }
 
-            bool groupMatched = false;
-            switch (conditionGroup.MatchMode)
+            var conditions = conditionGroup.Conditions?.Where(condition => !(condition?.DismissMatch ?? true)) ?? new List<Condition>();
+
+            bool groupMatched;
+            if (conditionGroup.DismissMatch)
             {
-                case GroupMatchMode.All:
-                    if (conditionGroup.Conditions == null)
-                    {
-                        groupMatched = false;
-                    }
-                    else
-                    {
-                        groupMatched = conditionGroup.Conditions.Any(condition => IsMatch(terminalLineDto, condition));
-                    }
-                    break;
-
-                case GroupMatchMode.Any:
-                    if (conditionGroup.Conditions == null)
-                    {
-                        groupMatched = true;
-                    }
-                    else
-                    {
-                        groupMatched = conditionGroup.Conditions.All(condition => IsMatch(terminalLineDto, condition));
-                    }
-                    break;
-
-                default:
-                    break;
+                groupMatched = conditionGroup.DefaultMatch;
+            }
+            else if (!conditions.Any())
+            {
+                groupMatched = conditionGroup.DefaultMatch;
+            }
+            else
+            {
+                groupMatched = conditionGroup.MatchMode switch
+                {
+                    GroupMatchMode.All => conditions.All(condition => IsMatch(terminalLineDto, condition)),
+                    GroupMatchMode.Any => conditions.Any(condition => IsMatch(terminalLineDto, condition)),
+                    _ => false
+                };
             }
 
             return groupMatched ^ conditionGroup.NegativeMatch;
@@ -86,13 +78,20 @@ namespace TerminalMonitor.Matchers
                 return false;
             }
 
-            if (terminalLineDto.LineFieldDict == null || !terminalLineDto.LineFieldDict.ContainsKey(condition.FieldKey))
+            bool fieldMatched;
+            if (condition.DismissMatch)
             {
-                return condition.NegativeMatch;
+                fieldMatched = condition.DefaultMatch;
             }
-
-            var jsonProperty = terminalLineDto.LineFieldDict[condition.FieldKey];
-            var fieldMatched = TextMatcher.IsMatch(jsonProperty.Text, condition.TargetValue, condition.MatchOperator);
+            else if (terminalLineDto.LineFieldDict == null || !terminalLineDto.LineFieldDict.ContainsKey(condition.FieldKey))
+            {
+                fieldMatched = condition.DefaultMatch;
+            }
+            else
+            {
+                var jsonProperty = terminalLineDto.LineFieldDict[condition.FieldKey];
+                fieldMatched = TextMatcher.IsMatch(jsonProperty.Text, condition.TargetValue, condition.MatchOperator);
+            }
 
             return fieldMatched ^ condition.NegativeMatch;
         }

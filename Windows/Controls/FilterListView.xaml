@@ -32,6 +32,9 @@
 
             <CheckBox Name="chkBxNegative" Margin="0, 0, 10, 0" VerticalAlignment="Center"
                       Content="Negative Result" IsChecked="{Binding NegativeMatch}" />
+            <CheckBox Name="chkBxDefault" Margin="0, 0, 10, 0" VerticalAlignment="Center"
+                      Content="Match by Default" IsChecked="{Binding DefaultMatch}" />
+
         </StackPanel>
 
         <Grid Name="grdButton" Grid.Row="0" Grid.Column="2">

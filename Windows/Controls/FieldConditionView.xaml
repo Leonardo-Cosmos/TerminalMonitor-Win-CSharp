@@ -33,7 +33,7 @@
         <Label Name="lblValue" Content="Value" />
         <TextBox Name="txtBxValue" MinWidth="150" MaxWidth="300" Margin="0, 0, 10, 0" Text="{Binding TargetValue}" />
 
-        <CheckBox Name="chkBxNegative" Margin="0, 0, 10, 0" Content="Negative Result" IsChecked="{Binding DismissMatch}" />
+        <CheckBox Name="chkBxNegative" Margin="0, 0, 10, 0" Content="Negative Result" IsChecked="{Binding NegativeMatch}" />
         <CheckBox Name="chkBxDefault" Margin="0, 0, 10, 0" Content="Match by Default" IsChecked="{Binding DefaultMatch}" />
         <CheckBox Name="chkBxDismiss" Margin="0, 0, 10, 0" Content="Dismissed" IsChecked="{Binding DismissMatch}" />
     </StackPanel>
