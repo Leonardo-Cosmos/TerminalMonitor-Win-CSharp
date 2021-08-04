@@ -115,6 +115,10 @@ namespace TerminalMonitor.Windows.Controls
                 throw new NotImplementedException("Condition without name or field");
             }
 
+            item.NegativeMatch = condition.NegativeMatch;
+            item.DefaultMatch = condition.DefaultMatch;
+            item.DismissMatch = condition.DismissMatch;
+
             return item;
         }
 
