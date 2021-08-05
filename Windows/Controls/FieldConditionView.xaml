@@ -22,12 +22,12 @@
                     <Setter Property="VerticalAlignment" Value="Center" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding NegativeMatch}" Value="False">
-                            <Setter Property="Content" Value="☀" />
-                            <Setter Property="Foreground" Value="OrangeRed" />
+                            <Setter Property="Content" Value="🛑" />
+                            <Setter Property="Foreground" Value="Green" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding NegativeMatch}" Value="True">
-                            <Setter Property="Content" Value="🌙" />
-                            <Setter Property="Foreground" Value="Blue" />
+                            <Setter Property="Content" Value="⛔" />
+                            <Setter Property="Foreground" Value="Red" />
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -52,11 +52,11 @@
                     <Setter Property="VerticalAlignment" Value="Center" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding DismissMatch}" Value="False">
-                            <Setter Property="Content" Value="🛑" />
+                            <Setter Property="Content" Value="⏺" />
                             <Setter Property="Foreground" Value="Green" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding DismissMatch}" Value="True">
-                            <Setter Property="Content" Value="⛔" />
+                            <Setter Property="Content" Value="⏸" />
                             <Setter Property="Foreground" Value="Red" />
                         </DataTrigger>
                     </Style.Triggers>

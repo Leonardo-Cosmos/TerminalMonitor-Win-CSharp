@@ -15,12 +15,12 @@
                     <Setter Property="VerticalAlignment" Value="Center" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding NegativeMatch}" Value="False">
-                            <Setter Property="Content" Value="☀" />
-                            <Setter Property="Foreground" Value="OrangeRed" />
+                            <Setter Property="Content" Value="🛑" />
+                            <Setter Property="Foreground" Value="Green" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding NegativeMatch}" Value="True">
-                            <Setter Property="Content" Value="🌙" />
-                            <Setter Property="Foreground" Value="Blue" />
+                            <Setter Property="Content" Value="⛔" />
+                            <Setter Property="Foreground" Value="Red" />
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -39,18 +39,32 @@
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
+                <Style x:Key="checkBoxDismiss" TargetType="CheckBox">
+                    <Setter Property="ToolTip" Value="Dismiss this condition in match" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding DismissMatch}" Value="False">
+                            <Setter Property="Content" Value="⏺" />
+                            <Setter Property="Foreground" Value="Green" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding DismissMatch}" Value="True">
+                            <Setter Property="Content" Value="⏸" />
+                            <Setter Property="Foreground" Value="Red" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
 
                 <Style x:Key="textInvert" TargetType="TextBlock">
                     <Setter Property="ToolTip" Value="Invert match result" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding NegativeMatch}" Value="False">
-                            <Setter Property="Text" Value="☀" />
-                            <Setter Property="Foreground" Value="OrangeRed" />
+                            <Setter Property="Text" Value="🛑" />
+                            <Setter Property="Foreground" Value="Green" />
                             <Setter Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding NegativeMatch}" Value="True">
-                            <Setter Property="Text" Value="🌙" />
-                            <Setter Property="Foreground" Value="Blue" />
+                            <Setter Property="Text" Value="⛔" />
+                            <Setter Property="Foreground" Value="Red" />
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -74,12 +88,12 @@
                     <Setter Property="ToolTip" Value="Dismiss this condition in match" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding DismissMatch}" Value="False">
-                            <Setter Property="Text" Value="🛑" />
+                            <Setter Property="Text" Value="⏺" />
                             <Setter Property="Foreground" Value="Green" />
                             <Setter Property="Visibility" Value="Collapsed" />
                         </DataTrigger>
                         <DataTrigger Binding="{Binding DismissMatch}" Value="True">
-                            <Setter Property="Text" Value="⛔" />
+                            <Setter Property="Text" Value="⏸" />
                             <Setter Property="Foreground" Value="Red" />
                         </DataTrigger>
                     </Style.Triggers>
@@ -109,8 +123,9 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <CheckBox Name="chkBxNegative" Style="{StaticResource checkBoxInvert}" IsChecked="{Binding NegativeMatch}" />
-            <CheckBox Name="chkBxDefault" Style="{StaticResource checkBoxDefault}" IsChecked="{Binding DefaultMatch}" />
+            <CheckBox Name="chkBxNegative" Margin="2, 0" Style="{StaticResource checkBoxInvert}" IsChecked="{Binding NegativeMatch}" />
+            <CheckBox Name="chkBxDefault" Margin="2, 0" Style="{StaticResource checkBoxDefault}" IsChecked="{Binding DefaultMatch}" />
+            <CheckBox Name="chkBxDismiss" Margin="2, 0" Style="{StaticResource checkBoxDismiss}" IsChecked="{Binding DismissMatch}" />
 
         </StackPanel>
 

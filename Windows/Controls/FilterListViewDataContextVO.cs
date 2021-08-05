@@ -30,6 +30,14 @@ namespace TerminalMonitor.Windows.Controls
             set { defaultMatch = value; OnPropertyChanged(); }
         }
 
+        private bool dismissMatch;
+
+        public bool DismissMatch
+        {
+            get => dismissMatch;
+            set { dismissMatch = value; OnPropertyChanged(); }
+        }
+
         private GroupMatchMode matchMode;
 
         public GroupMatchMode MatchMode
