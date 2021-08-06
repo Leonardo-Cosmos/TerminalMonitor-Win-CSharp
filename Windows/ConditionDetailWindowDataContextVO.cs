@@ -1,6 +1,7 @@
 ﻿/* 2021/7/28 */
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using TerminalMonitor.Matchers.Models;
 
 namespace TerminalMonitor.Windows
 {
@@ -18,6 +19,38 @@ namespace TerminalMonitor.Windows
         {
             get => conditionName;
             set { conditionName = value; OnPropertyChanged(); }
+        }
+
+        private bool negativeMatch;
+
+        public bool NegativeMatch
+        {
+            get => negativeMatch;
+            set { negativeMatch = value; OnPropertyChanged(); }
+        }
+
+        private bool defaultMatch;
+
+        public bool DefaultMatch
+        {
+            get => defaultMatch;
+            set { defaultMatch = value; OnPropertyChanged(); }
+        }
+
+        private bool dismissMatch;
+
+        public bool DismissMatch
+        {
+            get => dismissMatch;
+            set { dismissMatch = value; OnPropertyChanged(); }
+        }
+
+        private GroupMatchMode matchMode;
+
+        public GroupMatchMode MatchMode
+        {
+            get => matchMode;
+            set { matchMode = value; OnPropertyChanged(); }
         }
     }
 }

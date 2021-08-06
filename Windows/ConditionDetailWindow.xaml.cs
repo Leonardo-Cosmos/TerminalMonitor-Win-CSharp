@@ -25,10 +25,7 @@ namespace TerminalMonitor.Windows
     {
         private readonly ConditionDetailWindowDataContextVO dataContextVO = new();
 
-        private readonly ObservableCollection<ConditionGroupNodeVO> rootConditions = new()
-        {
-            new ConditionGroupNodeVO()
-        };
+        private readonly ObservableCollection<ConditionNodeVO> rootConditions = new();
 
         public ConditionDetailWindow()
         {
@@ -70,6 +67,80 @@ namespace TerminalMonitor.Windows
             var groupNodeVO = menuItem.Tag as ConditionGroupNodeVO;
 
             groupNodeVO.Conditions.Add(new FieldConditionNodeVO());
+        }
+
+        private void BtnAddField_Click(object sender, RoutedEventArgs e)
+        {
+            AddNodeVO(conditions => conditions.Add(new FieldConditionNodeVO() { Siblings = conditions }));
+        }
+
+        private void BtnAddGroup_Click(object sender, RoutedEventArgs e)
+        {
+            AddNodeVO(conditions => conditions.Add(new ConditionGroupNodeVO() { Siblings = conditions }));
+        }
+
+        private void AddNodeVO(Action<ObservableCollection<ConditionNodeVO>> addNodeVO)
+        {
+            var selectedItem = trConditions.SelectedItem;
+
+            if (selectedItem == null)
+            {
+                addNodeVO(rootConditions);
+            }
+            else if (selectedItem is ConditionGroupNodeVO groupNodeVO)
+            {
+                addNodeVO(groupNodeVO.Conditions);
+            }
+            else if (selectedItem is FieldConditionNodeVO fieldNodeVO)
+            {
+                addNodeVO(fieldNodeVO.Siblings);
+            }
+            else
+            {
+                throw new NotImplementedException("Unknown condtion node type.");
+            }
+        }
+
+        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = trConditions.SelectedItem;
+            
+            if (selectedItem is ConditionNodeVO conditionNodeVO)
+            {
+                conditionNodeVO.Siblings.Remove(conditionNodeVO);
+            }
+        }
+
+        private void BtnMoveUp_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = trConditions.SelectedItem;
+
+            if (selectedItem is ConditionNodeVO conditionNodeVO)
+            {
+                var siblings = conditionNodeVO.Siblings;
+                var index = siblings.IndexOf(conditionNodeVO);
+                if (index > 0)
+                {
+                    siblings.Remove(conditionNodeVO);
+                    siblings.Insert(index - 1, conditionNodeVO);
+                }
+            }
+        }
+
+        private void BtnMoveDown_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = trConditions.SelectedItem;
+
+            if (selectedItem is ConditionNodeVO conditionNodeVO)
+            {
+                var siblings = conditionNodeVO.Siblings;
+                var index = siblings.IndexOf(conditionNodeVO);
+                if (index < siblings.Count - 1)
+                {
+                    siblings.Remove(conditionNodeVO);
+                    siblings.Insert(index + 1, conditionNodeVO);
+                }
+            }
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
@@ -196,11 +267,17 @@ namespace TerminalMonitor.Windows
                 }
                 else
                 {
-                    var conditionGroupVO =
-                        rootConditions.Count > 0 ? rootConditions[0] : new ConditionGroupNodeVO();
-                    
-                    var conditionGroup = FromVO(conditionGroupVO);
-                    conditionGroup.Name = dataContextVO.ConditionName;
+                    var conditionGroup = new ConditionGroup()
+                    {
+                        Name = dataContextVO.ConditionName,
+                        NegativeMatch = dataContextVO.NegativeMatch,
+                        DefaultMatch = dataContextVO.DefaultMatch,
+                        DismissMatch = dataContextVO.DismissMatch,
+                        MatchMode = dataContextVO.MatchMode,
+                        Conditions = rootConditions
+                            .Select(conditionNodeVO => FromVO(conditionNodeVO)).ToList(),
+                    };                    
+                  
                     return conditionGroup;
                 }
             }
@@ -210,10 +287,16 @@ namespace TerminalMonitor.Windows
                 if (value == null)
                 {
                     rdBtnSingle.IsChecked = true;
+
+                    /*
+                     * Clear single condition.
+                     */
                     conditionView.FieldCondition = new FieldCondition();
 
+                    /*
+                     * Clear multiple condtion.
+                     */
                     rootConditions.Clear();
-                    rootConditions.Add(new ConditionGroupNodeVO());
 
                     return;
                 }
@@ -223,17 +306,28 @@ namespace TerminalMonitor.Windows
                     rdBtnSingle.IsChecked = true;
                     conditionView.FieldCondition = fieldCondition;
 
+                    /*
+                     * Clear multiple condtion.
+                     */
                     rootConditions.Clear();
-                    rootConditions.Add(new ConditionGroupNodeVO());
                 }
                 else if (value is ConditionGroup conditionGroup)
                 {
                     rdBtnMultiple.IsChecked = true;
                     dataContextVO.ConditionName = conditionGroup.Name;
-                    var conditionGroupVO = ToVO(conditionGroup);
+                    dataContextVO.NegativeMatch = conditionGroup.NegativeMatch;
+                    dataContextVO.DefaultMatch = conditionGroup.DefaultMatch;
+                    dataContextVO.DismissMatch = conditionGroup.DismissMatch;
+                    dataContextVO.MatchMode = conditionGroup.MatchMode;
                     rootConditions.Clear();
-                    rootConditions.Add(conditionGroupVO);
+                    conditionGroup.Conditions?
+                        .Select(condition => ToVO(condition))
+                        .ToList()
+                        .ForEach(conditionNodeVO => rootConditions.Add(conditionNodeVO));
 
+                    /*
+                     * Clear single condition.
+                     */
                     conditionView.FieldCondition = new FieldCondition();
                 }
                 else

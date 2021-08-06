@@ -7,7 +7,7 @@
         xmlns:controls="clr-namespace:TerminalMonitor.Windows.Controls"
         xmlns:rules="clr-namespace:TerminalMonitor.Windows.ValidationRules"
         mc:Ignorable="d"
-        d:DataContext="{d:DesignInstance Type=local:CommandDetailWindowDataContextVO}"
+        d:DataContext="{d:DesignInstance Type=local:ConditionDetailWindowDataContextVO}"
         Title="Condition Detail" SizeToContent="WidthAndHeight" Height="450" Width="800">
     <Window.Resources>
         <ResourceDictionary>
@@ -19,6 +19,51 @@
             </Style>
             <Style TargetType="CheckBox">
                 <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="checkBoxInvert" TargetType="CheckBox">
+                <Setter Property="ToolTip" Value="Invert match result" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding NegativeMatch}" Value="False">
+                        <Setter Property="Content" Value="🛑" />
+                        <Setter Property="Foreground" Value="Green" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding NegativeMatch}" Value="True">
+                        <Setter Property="Content" Value="⛔" />
+                        <Setter Property="Foreground" Value="Red" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="checkBoxDefault" TargetType="CheckBox">
+                <Setter Property="ToolTip" Value="Match by Default" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding DefaultMatch}" Value="False">
+                        <Setter Property="Content" Value="☆" />
+                        <Setter Property="Foreground" Value="Orange" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding DefaultMatch}" Value="True">
+                        <Setter Property="Content" Value="★" />
+                        <Setter Property="Foreground" Value="Gold" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="checkBoxDismiss" TargetType="CheckBox">
+                <Setter Property="ToolTip" Value="Dismiss this condition in match" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding DismissMatch}" Value="False">
+                        <Setter Property="Content" Value="⏺" />
+                        <Setter Property="Foreground" Value="Green" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding DismissMatch}" Value="True">
+                        <Setter Property="Content" Value="⏸" />
+                        <Setter Property="Foreground" Value="Red" />
+                    </DataTrigger>
+                </Style.Triggers>
             </Style>
         </ResourceDictionary>
     </Window.Resources>
@@ -45,8 +90,9 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Label Name="lblConditionName" Grid.Column="0" Content="Condition name (*)" />
-                    <TextBox Name="txtBxConditionName" Grid.Column="1"
+
+                    <Label Name="lblConditionName" Grid.Row="0" Grid.Column="0" Content="Condition name (*)" />
+                    <TextBox Name="txtBxConditionName" Grid.Row="0" Grid.Column="1"
                              Style="{StaticResource textBoxInValidation}"
                              Validation.ErrorTemplate="{StaticResource validationTemplate}">
                         <TextBox.Text>
@@ -59,54 +105,44 @@
                     </TextBox>
                 </Grid>
 
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <ComboBox Margin="10, 0, 10, 0"  ItemsSource="{StaticResource GroupMatchModes}" SelectedValue="{Binding MatchMode}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource MatchModeToStringConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <CheckBox Name="chkBxNegative" Margin="2, 0" Style="{StaticResource checkBoxInvert}" IsChecked="{Binding NegativeMatch}" />
+                        <CheckBox Name="chkBxDefault" Margin="2, 0" Style="{StaticResource checkBoxDefault}" IsChecked="{Binding DefaultMatch}" />
+                        <CheckBox Name="chkBxDismiss" Margin="2, 0" Style="{StaticResource checkBoxDismiss}" IsChecked="{Binding DismissMatch}" />
+                    </StackPanel>
+
+                    <Grid Name="grdButton" Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Name="btnAddField" Grid.Column="0" Width="20" Content="+" Click="BtnAddField_Click" />
+                        <Button Name="btnAddGroup" Grid.Column="1" Width="20" Content="+{}" Click="BtnAddGroup_Click" />
+                        <Button Name="btnDelete" Grid.Column="2" Width="20" Content="-" Click="BtnDelete_Click" />
+                        <Button Name="btnMoveUp" Grid.Column="3"  Width="20" Content="↑" ToolTip="Move Up" Click="BtnMoveUp_Click" />
+                        <Button Name="btnMoveDown" Grid.Column="4"  Width="20" Content="↓" ToolTip="Move Down" Click="BtnMoveDown_Click" />
+                    </Grid>
+                </Grid>
+
                 <TreeView Name="trConditions" MinHeight="50">
                     <TreeView.Resources>
-
-                        <Style x:Key="checkBoxInvert" TargetType="CheckBox">
-                            <Setter Property="ToolTip" Value="Invert match result" />
-                            <Setter Property="VerticalAlignment" Value="Center" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding NegativeMatch}" Value="False">
-                                    <Setter Property="Content" Value="🛑" />
-                                    <Setter Property="Foreground" Value="Green" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding NegativeMatch}" Value="True">
-                                    <Setter Property="Content" Value="⛔" />
-                                    <Setter Property="Foreground" Value="Red" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-
-                        <Style x:Key="checkBoxDefault" TargetType="CheckBox">
-                            <Setter Property="ToolTip" Value="Match by Default" />
-                            <Setter Property="VerticalAlignment" Value="Center" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DefaultMatch}" Value="False">
-                                    <Setter Property="Content" Value="☆" />
-                                    <Setter Property="Foreground" Value="Orange" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding DefaultMatch}" Value="True">
-                                    <Setter Property="Content" Value="★" />
-                                    <Setter Property="Foreground" Value="Gold" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-
-                        <Style x:Key="checkBoxDismiss" TargetType="CheckBox">
-                            <Setter Property="ToolTip" Value="Dismiss this condition in match" />
-                            <Setter Property="VerticalAlignment" Value="Center" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DismissMatch}" Value="False">
-                                    <Setter Property="Content" Value="⏺" />
-                                    <Setter Property="Foreground" Value="Green" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding DismissMatch}" Value="True">
-                                    <Setter Property="Content" Value="⏸" />
-                                    <Setter Property="Foreground" Value="Red" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-
                         <HierarchicalDataTemplate DataType="{x:Type local:ConditionGroupNodeVO}" ItemsSource="{Binding Conditions}">
                             <Border BorderBrush="GreenYellow" BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">

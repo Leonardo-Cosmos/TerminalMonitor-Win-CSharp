@@ -1,4 +1,5 @@
 ﻿/* 2021/7/12 */
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -11,6 +12,8 @@ namespace TerminalMonitor.Windows
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
+
+        public ObservableCollection<ConditionNodeVO> Siblings { get; init; }
 
         private bool negativeMatch;
 
