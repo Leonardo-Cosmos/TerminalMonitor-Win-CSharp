@@ -6,7 +6,7 @@ using TerminalMonitor.Matchers.Models;
 namespace TerminalMonitor.Settings.Models
 {
     [JsonConverter(typeof(ConditionSettingConverter))]
-    abstract record ConditionSetting(string Name, bool NegativeMatch, bool DefaultMatch, bool DismissMatch)
+    abstract record ConditionSetting(string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
     {
         public string ConditionType { get; set; }
     }
@@ -25,9 +25,9 @@ namespace TerminalMonitor.Settings.Models
             {
                 setting = FieldConditionSettings.Save(fieldCondition);
             }
-            else if (obj is ConditionGroup conditionGroup)
+            else if (obj is GroupCondition groupCondition)
             {
-                setting = ConditionGroupSettings.Save(conditionGroup);
+                setting = GroupConditionSettings.Save(groupCondition);
             }
             else
             {
@@ -48,9 +48,9 @@ namespace TerminalMonitor.Settings.Models
             {
                 condition = FieldConditionSettings.Load(fieldConditionSetting);
             }
-            else if (setting is ConditionGroupSetting conditionGroupSetting)
+            else if (setting is GroupConditionSetting groupConditionSetting)
             {
-                condition = ConditionGroupSettings.Load(conditionGroupSetting);
+                condition = GroupConditionSettings.Load(groupConditionSetting);
             }
             else
             {

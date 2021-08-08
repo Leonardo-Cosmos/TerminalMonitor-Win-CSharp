@@ -115,23 +115,23 @@ namespace TerminalMonitor.Windows.Controls
                 throw new NotImplementedException("Condition without name or field");
             }
 
-            item.NegativeMatch = condition.NegativeMatch;
-            item.DefaultMatch = condition.DefaultMatch;
-            item.DismissMatch = condition.DismissMatch;
+            item.IsInverted = condition.IsInverted;
+            item.DefaultResult = condition.DefaultResult;
+            item.IsDisabled = condition.IsDisabled;
 
             return item;
         }
 
-        internal ConditionGroup ConditionGroup
+        internal GroupCondition Condition
         {
             get
             {
-                return new ConditionGroup()
+                return new GroupCondition()
                 {
                     MatchMode = dataContextVO.MatchMode,
-                    NegativeMatch = dataContextVO.NegativeMatch,
-                    DefaultMatch = dataContextVO.DefaultMatch,
-                    DismissMatch = dataContextVO.DismissMatch,
+                    IsInverted = dataContextVO.IsInverted,
+                    DefaultResult = dataContextVO.DefaultResult,
+                    IsDisabled = dataContextVO.IsDisabled,
                     Conditions = conditions,
                 };
             }
@@ -147,9 +147,9 @@ namespace TerminalMonitor.Windows.Controls
                 }
 
                 dataContextVO.MatchMode = value.MatchMode;
-                dataContextVO.NegativeMatch = value.NegativeMatch;
-                dataContextVO.DefaultMatch = value.DefaultMatch;
-                dataContextVO.DismissMatch = value.DismissMatch;
+                dataContextVO.IsInverted = value.IsInverted;
+                dataContextVO.DefaultResult = value.DefaultResult;
+                dataContextVO.IsDisabled = value.IsDisabled;
                 if (value.Conditions != null)
                 {
                     foreach (Condition condition in value.Conditions)

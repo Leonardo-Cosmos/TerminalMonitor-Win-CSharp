@@ -14,28 +14,28 @@ namespace TerminalMonitor.Windows.Controls
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private bool negativeMatch;
+        private bool isInverted;
 
-        public bool NegativeMatch
+        public bool IsInverted
         {
-            get => negativeMatch;
-            set { negativeMatch = value; OnPropertyChanged(); }
+            get => isInverted;
+            set { isInverted = value; OnPropertyChanged(); }
         }
 
-        private bool defaultMatch;
+        private bool defaultResult;
 
-        public bool DefaultMatch
+        public bool DefaultResult
         {
-            get => defaultMatch;
-            set { defaultMatch = value; OnPropertyChanged(); }
+            get => defaultResult;
+            set { defaultResult = value; OnPropertyChanged(); }
         }
 
-        private bool dismissMatch;
+        private bool isDisabled;
 
-        public bool DismissMatch
+        public bool IsDisabled
         {
-            get => dismissMatch;
-            set { dismissMatch = value; OnPropertyChanged(); }
+            get => isDisabled;
+            set { isDisabled = value; OnPropertyChanged(); }
         }
 
         private GroupMatchMode matchMode;

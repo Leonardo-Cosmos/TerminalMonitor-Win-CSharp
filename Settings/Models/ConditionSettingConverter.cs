@@ -29,7 +29,7 @@ namespace TerminalMonitor.Settings.Models
             string propertyName = readerClone.GetString();
             if (propertyName == propertyNameMatchMode)
             {
-                return JsonSerializer.Deserialize<ConditionGroupSetting>(ref reader);
+                return JsonSerializer.Deserialize<GroupConditionSetting>(ref reader);
             }
             else
             {
@@ -43,9 +43,9 @@ namespace TerminalMonitor.Settings.Models
             {
                 JsonSerializer.Serialize<FieldConditionSetting>(writer, fieldConditionSetting, options);
             }
-            else if (value is ConditionGroupSetting conditionGroupSetting)
+            else if (value is GroupConditionSetting groupConditionSetting)
             {
-                JsonSerializer.Serialize<ConditionGroupSetting>(writer, conditionGroupSetting, options);
+                JsonSerializer.Serialize<GroupConditionSetting>(writer, groupConditionSetting, options);
             }
             else
             {

@@ -5,14 +5,14 @@ using System.Linq;
 
 namespace TerminalMonitor.Matchers.Models
 {
-    public class ConditionGroup : Condition, ICloneable
+    public class GroupCondition : Condition, ICloneable
     {
-        public ConditionGroup()
+        public GroupCondition()
         {
 
         }
 
-        protected ConditionGroup(ConditionGroup obj) : base(obj)
+        protected GroupCondition(GroupCondition obj) : base(obj)
         {
             MatchMode = obj.MatchMode;
             if (obj.Conditions != null)
@@ -23,7 +23,7 @@ namespace TerminalMonitor.Matchers.Models
 
         public override object Clone()
         {
-            return new ConditionGroup(this);
+            return new GroupCondition(this);
         }
 
         public GroupMatchMode MatchMode { get; set; }

@@ -8,8 +8,9 @@ using TerminalMonitor.Matchers.Models;
 namespace TerminalMonitor.Settings.Models
 {
     record FieldConditionSetting(string FieldKey, string MatchOperator, string TargetValue,
-        string Name, bool NegativeMatch, bool DefaultMatch, bool DismissMatch)
-        : ConditionSetting(Name, NegativeMatch, DefaultMatch, DismissMatch);
+        string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
+        : ConditionSetting(Name: Name,
+            IsInverted: IsInverted, DefaultResult: DefaultResult, IsDisabled: IsDisabled);
 
     static class FieldConditionSettings
     {
@@ -60,9 +61,9 @@ namespace TerminalMonitor.Settings.Models
                 MatchOperator: OperatorToString(obj.MatchOperator),
                 TargetValue: obj.TargetValue,
                 Name: obj.Name,
-                NegativeMatch: obj.NegativeMatch,
-                DefaultMatch: obj.DefaultMatch,
-                DismissMatch: obj.DismissMatch
+                IsInverted: obj.IsInverted,
+                DefaultResult: obj.DefaultResult,
+                IsDisabled: obj.IsDisabled
                 );
         }
 
@@ -79,9 +80,9 @@ namespace TerminalMonitor.Settings.Models
                 MatchOperator = StringToOperator(setting.MatchOperator),
                 TargetValue = setting.TargetValue,
                 Name = setting.Name,
-                NegativeMatch = setting.NegativeMatch,
-                DefaultMatch = setting.DefaultMatch,
-                DismissMatch = setting.DismissMatch,
+                IsInverted = setting.IsInverted,
+                DefaultResult = setting.DefaultResult,
+                IsDisabled = setting.IsDisabled,
             };
         }
     }

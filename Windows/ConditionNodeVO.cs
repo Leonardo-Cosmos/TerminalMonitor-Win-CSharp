@@ -13,40 +13,40 @@ namespace TerminalMonitor.Windows
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        public ObservableCollection<ConditionNodeVO> Siblings { get; init; }
+        public ObservableCollection<ConditionNodeVO> Siblings { get; set; }
 
-        private bool negativeMatch;
+        private bool isInverted;
 
-        public bool NegativeMatch
+        public bool IsInverted
         {
-            get => negativeMatch;
+            get => isInverted;
             set
             {
-                negativeMatch = value;
+                isInverted = value;
                 OnPropertyChanged();
             }
         }
 
-        private bool defaultMatch;
+        private bool defaultResult;
 
-        public bool DefaultMatch
+        public bool DefaultResult
         {
-            get => defaultMatch;
+            get => defaultResult;
             set
             {
-                defaultMatch = value;
+                defaultResult = value;
                 OnPropertyChanged();
             }
         }
 
-        private bool dismissMatch;
+        private bool isDisabled;
 
-        public bool DismissMatch
+        public bool IsDisabled
         {
-            get => dismissMatch;
+            get => isDisabled;
             set
             {
-                dismissMatch = value;
+                isDisabled = value;
                 OnPropertyChanged();
             }
         }

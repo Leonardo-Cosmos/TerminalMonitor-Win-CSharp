@@ -26,7 +26,7 @@ namespace TerminalMonitor.Windows.Controls
     public partial class FieldConditionView : UserControl
     {
         public static readonly DependencyProperty FieldConditionProperty =
-            DependencyProperty.Register("FieldCondition", typeof(FieldCondition), typeof(FieldConditionView),
+            DependencyProperty.Register(nameof(FieldCondition), typeof(FieldCondition), typeof(FieldConditionView),
                 new PropertyMetadata(FieldCondition.Empty, OnFieldConditionChanged));
 
         private FieldCondition fieldCondition;
@@ -46,23 +46,23 @@ namespace TerminalMonitor.Windows.Controls
         {
             switch (e.PropertyName)
             {
-                case "FieldKey":
+                case nameof(FieldConditionViewDataContextVO.FieldKey):
                     fieldCondition.FieldKey = dataContextVO.FieldKey;
                     break;
-                case "MatchOperator":
+                case nameof(FieldConditionViewDataContextVO.MatchOperator):
                     fieldCondition.MatchOperator = dataContextVO.MatchOperator;
                     break;
-                case "TargetValue":
+                case nameof(FieldConditionViewDataContextVO.TargetValue):
                     fieldCondition.TargetValue = dataContextVO.TargetValue;
                     break;
-                case "NegativeMatch":
-                    fieldCondition.NegativeMatch = dataContextVO.NegativeMatch;
+                case nameof(FieldConditionViewDataContextVO.IsInverted):
+                    fieldCondition.IsInverted = dataContextVO.IsInverted;
                     break;
-                case "DefaultMatch":
-                    fieldCondition.DefaultMatch = dataContextVO.DefaultMatch;
+                case nameof(FieldConditionViewDataContextVO.DefaultResult):
+                    fieldCondition.DefaultResult = dataContextVO.DefaultResult;
                     break;
-                case "DismissMatch":
-                    fieldCondition.DismissMatch = dataContextVO.DismissMatch;
+                case nameof(FieldConditionViewDataContextVO.IsDisabled):
+                    fieldCondition.IsDisabled = dataContextVO.IsDisabled;
                     break;
                 default:
                     break;
@@ -84,9 +84,9 @@ namespace TerminalMonitor.Windows.Controls
                 dataContextVO.MatchOperator = fieldCondition.MatchOperator;
                 dataContextVO.TargetValue = fieldCondition.TargetValue;
 
-                dataContextVO.NegativeMatch = fieldCondition.NegativeMatch;
-                dataContextVO.DefaultMatch = fieldCondition.DefaultMatch;
-                dataContextVO.DismissMatch = fieldCondition.DismissMatch;
+                dataContextVO.IsInverted = fieldCondition.IsInverted;
+                dataContextVO.DefaultResult = fieldCondition.DefaultResult;
+                dataContextVO.IsDisabled = fieldCondition.IsDisabled;
             }
         }
 

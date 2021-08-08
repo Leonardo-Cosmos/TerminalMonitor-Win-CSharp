@@ -5,7 +5,7 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record TerminalConfigSetting(string Id, string Name, List<FieldDisplayDetailSetting> VisibleFields, ConditionGroupSetting FilterCondition);
+    record TerminalConfigSetting(string Id, string Name, List<FieldDisplayDetailSetting> VisibleFields, GroupConditionSetting FilterCondition);
 
     static class TerminalConfigSettings
     {
@@ -21,7 +21,7 @@ namespace TerminalMonitor.Settings.Models
                     Name: obj.Name,
                     VisibleFields: obj.VisibleFields?
                         .Select(field => FieldDisplayDetailSettings.Save(field)).ToList(),
-                    FilterCondition: ConditionGroupSettings.Save(obj.FilterCondition)
+                    FilterCondition: GroupConditionSettings.Save(obj.FilterCondition)
                 );
         }
 
@@ -38,7 +38,7 @@ namespace TerminalMonitor.Settings.Models
                 Name = setting.Name,
                 VisibleFields = setting.VisibleFields?
                     .Select(field => FieldDisplayDetailSettings.Load(field)),
-                FilterCondition = ConditionGroupSettings.Load(setting.FilterCondition),
+                FilterCondition = GroupConditionSettings.Load(setting.FilterCondition),
             };
         }
     }

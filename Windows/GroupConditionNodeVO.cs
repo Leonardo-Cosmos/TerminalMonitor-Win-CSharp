@@ -5,7 +5,7 @@ using TerminalMonitor.Matchers.Models;
 
 namespace TerminalMonitor.Windows
 {
-    class ConditionGroupNodeVO : ConditionNodeVO
+    class GroupConditionNodeVO : ConditionNodeVO
     {
         private GroupMatchMode matchMode;
 

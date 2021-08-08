@@ -37,7 +37,7 @@ namespace TerminalMonitor.Windows.Controls
         private readonly DataTable terminalDataTable = new();
 
         private IEnumerable<FieldDisplayDetail> visibleFields = Array.Empty<FieldDisplayDetail>();
-        private ConditionGroup filterCondition = new();
+        private GroupCondition filterCondition = new();
 
         private readonly TerminalViewDataContextVO dataContextVO = new();
 
@@ -60,7 +60,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void ButtonFilter_Click(object sender, RoutedEventArgs e)
         {
-            filterCondition = filterView.ConditionGroup;
+            filterCondition = filterView.Condition;
             FilterTerminal();
         }
 
@@ -349,7 +349,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public ConditionGroup FilterCondition
+        public GroupCondition FilterCondition
         {
             get
             {
@@ -358,8 +358,8 @@ namespace TerminalMonitor.Windows.Controls
 
             set
             {
-                filterCondition = value ?? new ConditionGroup();
-                filterView.ConditionGroup = filterCondition;
+                filterCondition = value ?? new GroupCondition();
+                filterView.Condition = filterCondition;
                 FilterTerminal();
             }
         }

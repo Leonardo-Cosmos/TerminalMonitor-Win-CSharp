@@ -53,22 +53,6 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private void MuItmAddConditionGroup_Click(object sender, RoutedEventArgs e)
-        {
-            var menuItem = e.Source as MenuItem;
-            var groupNodeVO = menuItem.Tag as ConditionGroupNodeVO;
-
-            groupNodeVO.Conditions.Add(new ConditionGroupNodeVO());
-        }
-
-        private void MnItmAddCondition_Click(object sender, RoutedEventArgs e)
-        {
-            var menuItem = e.Source as MenuItem;
-            var groupNodeVO = menuItem.Tag as ConditionGroupNodeVO;
-
-            groupNodeVO.Conditions.Add(new FieldConditionNodeVO());
-        }
-
         private void BtnAddField_Click(object sender, RoutedEventArgs e)
         {
             AddNodeVO(conditions => conditions.Add(new FieldConditionNodeVO() { Siblings = conditions }));
@@ -76,7 +60,7 @@ namespace TerminalMonitor.Windows
 
         private void BtnAddGroup_Click(object sender, RoutedEventArgs e)
         {
-            AddNodeVO(conditions => conditions.Add(new ConditionGroupNodeVO() { Siblings = conditions }));
+            AddNodeVO(conditions => conditions.Add(new GroupConditionNodeVO() { Siblings = conditions }));
         }
 
         private void AddNodeVO(Action<ObservableCollection<ConditionNodeVO>> addNodeVO)
@@ -87,7 +71,7 @@ namespace TerminalMonitor.Windows
             {
                 addNodeVO(rootConditions);
             }
-            else if (selectedItem is ConditionGroupNodeVO groupNodeVO)
+            else if (selectedItem is GroupConditionNodeVO groupNodeVO)
             {
                 addNodeVO(groupNodeVO.Conditions);
             }
@@ -165,9 +149,9 @@ namespace TerminalMonitor.Windows
             {
                 return ToVO(fieldCondtion);
             }
-            else if (condition is ConditionGroup conditionGroup)
+            else if (condition is GroupCondition groupCondition)
             {
-                return ToVO(conditionGroup);
+                return ToVO(groupCondition);
             }
             else
             {
@@ -182,31 +166,35 @@ namespace TerminalMonitor.Windows
                 MatchOperator = fieldCondition.MatchOperator,
                 TargetValue = fieldCondition.TargetValue,
 
-                NegativeMatch = fieldCondition.NegativeMatch,
-                DefaultMatch = fieldCondition.DefaultMatch,
-                DismissMatch = fieldCondition.DismissMatch,
+                IsInverted = fieldCondition.IsInverted,
+                DefaultResult = fieldCondition.DefaultResult,
+                IsDisabled = fieldCondition.IsDisabled,
             };
 
             return fieldConditionVO;
         }
 
-        private static ConditionGroupNodeVO ToVO(ConditionGroup conditionGroup)
+        private static GroupConditionNodeVO ToVO(GroupCondition groupCondition)
         {
-            ConditionGroupNodeVO conditionGroupVO = new()
+            GroupConditionNodeVO groupConditionVO = new()
             {
-                MatchMode = conditionGroup.MatchMode,
+                MatchMode = groupCondition.MatchMode,
 
-                NegativeMatch = conditionGroup.NegativeMatch,
-                DefaultMatch = conditionGroup.DefaultMatch,
-                DismissMatch = conditionGroup.DismissMatch,
+                IsInverted = groupCondition.IsInverted,
+                DefaultResult = groupCondition.DefaultResult,
+                IsDisabled = groupCondition.IsDisabled,
             };
 
-            conditionGroup.Conditions?
+            groupCondition.Conditions?
                 .Select(condition => ToVO(condition))
                 .ToList()
-                .ForEach(conditionVO => conditionGroupVO.Conditions.Add(conditionVO));
+                .ForEach(conditionVO =>
+                {
+                    conditionVO.Siblings = groupConditionVO.Conditions;
+                    groupConditionVO.Conditions.Add(conditionVO);
+                });
 
-            return conditionGroupVO;
+            return groupConditionVO;
         }
 
         private static Condition FromVO(ConditionNodeVO conditionVO)
@@ -215,9 +203,9 @@ namespace TerminalMonitor.Windows
             {
                 return FromVO(fieldCondtionVO);
             }
-            else if (conditionVO is ConditionGroupNodeVO conditionGroupVO)
+            else if (conditionVO is GroupConditionNodeVO groupConditionVO)
             {
-                return FromVO(conditionGroupVO);
+                return FromVO(groupConditionVO);
             }
             else
             {
@@ -233,28 +221,28 @@ namespace TerminalMonitor.Windows
                 MatchOperator = fieldConditionVO.MatchOperator,
                 TargetValue = fieldConditionVO.TargetValue,
 
-                NegativeMatch = fieldConditionVO.NegativeMatch,
-                DefaultMatch = fieldConditionVO.DefaultMatch,
-                DismissMatch = fieldConditionVO.DismissMatch,
+                IsInverted = fieldConditionVO.IsInverted,
+                DefaultResult = fieldConditionVO.DefaultResult,
+                IsDisabled = fieldConditionVO.IsDisabled,
             };
 
             return fieldCondition;
         }
 
-        private static ConditionGroup FromVO(ConditionGroupNodeVO conditionGroupVO)
+        private static GroupCondition FromVO(GroupConditionNodeVO groupConditionVO)
         {
-            ConditionGroup conditionGroup = new()
+            GroupCondition groupCondition = new()
             {
-                MatchMode = conditionGroupVO.MatchMode,
-                Conditions = conditionGroupVO.Conditions
+                MatchMode = groupConditionVO.MatchMode,
+                Conditions = groupConditionVO.Conditions
                     .Select(conditionVO => FromVO(conditionVO)),
 
-                NegativeMatch = conditionGroupVO.NegativeMatch,
-                DefaultMatch = conditionGroupVO.DefaultMatch,
-                DismissMatch = conditionGroupVO.DismissMatch,
+                IsInverted = groupConditionVO.IsInverted,
+                DefaultResult = groupConditionVO.DefaultResult,
+                IsDisabled = groupConditionVO.IsDisabled,
             };
 
-            return conditionGroup;
+            return groupCondition;
         }
 
         public Condition Condition
@@ -267,18 +255,18 @@ namespace TerminalMonitor.Windows
                 }
                 else
                 {
-                    var conditionGroup = new ConditionGroup()
+                    var groupCondition = new GroupCondition()
                     {
                         Name = dataContextVO.ConditionName,
-                        NegativeMatch = dataContextVO.NegativeMatch,
-                        DefaultMatch = dataContextVO.DefaultMatch,
-                        DismissMatch = dataContextVO.DismissMatch,
+                        IsInverted = dataContextVO.IsInverted,
+                        DefaultResult = dataContextVO.DefaultResult,
+                        IsDisabled = dataContextVO.IsDisabled,
                         MatchMode = dataContextVO.MatchMode,
                         Conditions = rootConditions
                             .Select(conditionNodeVO => FromVO(conditionNodeVO)).ToList(),
                     };                    
                   
-                    return conditionGroup;
+                    return groupCondition;
                 }
             }
 
@@ -311,19 +299,23 @@ namespace TerminalMonitor.Windows
                      */
                     rootConditions.Clear();
                 }
-                else if (value is ConditionGroup conditionGroup)
+                else if (value is GroupCondition groupCondition)
                 {
                     rdBtnMultiple.IsChecked = true;
-                    dataContextVO.ConditionName = conditionGroup.Name;
-                    dataContextVO.NegativeMatch = conditionGroup.NegativeMatch;
-                    dataContextVO.DefaultMatch = conditionGroup.DefaultMatch;
-                    dataContextVO.DismissMatch = conditionGroup.DismissMatch;
-                    dataContextVO.MatchMode = conditionGroup.MatchMode;
+                    dataContextVO.ConditionName = groupCondition.Name;
+                    dataContextVO.IsInverted = groupCondition.IsInverted;
+                    dataContextVO.DefaultResult = groupCondition.DefaultResult;
+                    dataContextVO.IsDisabled = groupCondition.IsDisabled;
+                    dataContextVO.MatchMode = groupCondition.MatchMode;
                     rootConditions.Clear();
-                    conditionGroup.Conditions?
+                    groupCondition.Conditions?
                         .Select(condition => ToVO(condition))
                         .ToList()
-                        .ForEach(conditionNodeVO => rootConditions.Add(conditionNodeVO));
+                        .ForEach(conditionNodeVO =>
+                        {
+                            conditionNodeVO.Siblings = rootConditions;
+                            rootConditions.Add(conditionNodeVO);
+                        });
 
                     /*
                      * Clear single condition.

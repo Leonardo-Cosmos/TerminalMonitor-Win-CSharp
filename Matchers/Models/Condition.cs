@@ -17,9 +17,9 @@ namespace TerminalMonitor.Matchers.Models
         protected Condition(Condition obj)
         {
             Name = obj.Name;
-            NegativeMatch = obj.NegativeMatch;
-            DefaultMatch = obj.DefaultMatch;
-            DismissMatch = obj.DismissMatch;
+            IsInverted = obj.IsInverted;
+            DefaultResult = obj.DefaultResult;
+            IsDisabled = obj.IsDisabled;
         }
 
         public abstract object Clone();
@@ -27,21 +27,19 @@ namespace TerminalMonitor.Matchers.Models
         public string Name { get; set; }
 
         /// <summary>
-        /// The match result of this condition is negative.
+        /// Gets or sets whehter the match result of this condition is inverted.
         /// </summary>
-        public bool NegativeMatch { get; set; }
+        public bool IsInverted { get; set; }
 
         /// <summary>
-        /// The match result by default. When this condition is dismissed,
-        /// specified field is not found or group list is empty, this value
-        /// is applied.
+        /// Gets or sets default result of matching when required value is not presented
+        /// (e.g. no specified field, group is empty).
         /// </summary>
-        public bool DefaultMatch { get; set; }
+        public bool DefaultResult { get; set; }
 
         /// <summary>
-        /// The indicator that determines whether this condition always 
-        /// have default match result.
+        /// Gets or sets whether this condition is temporarily excluded from group.
         /// </summary>
-        public bool DismissMatch { get; set; }
+        public bool IsDisabled { get; set; }
     }
 }

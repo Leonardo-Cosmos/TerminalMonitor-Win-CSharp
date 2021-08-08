@@ -26,13 +26,13 @@ namespace TerminalMonitor.Matchers
 
         public static bool IsMatch(TerminalLineDto terminalLineDto, Condition matchCondition)
         {
-            if (matchCondition is ConditionGroup conditionGroup)
+            if (matchCondition is GroupCondition groupCondition)
             {
-                return IsMatch(terminalLineDto, conditionGroup);
+                return IsMatch(terminalLineDto, groupCondition);
             }
-            else if (matchCondition is FieldCondition condition)
+            else if (matchCondition is FieldCondition fieldCondition)
             {
-                return IsMatch(terminalLineDto, condition);
+                return IsMatch(terminalLineDto, fieldCondition);
             }
             else
             {
@@ -40,27 +40,27 @@ namespace TerminalMonitor.Matchers
             }
         }
 
-        public static bool IsMatch(TerminalLineDto terminalLineDto, ConditionGroup conditionGroup)
+        public static bool IsMatch(TerminalLineDto terminalLineDto, GroupCondition groupCondition)
         {
-            if (conditionGroup == null)
+            if (groupCondition == null)
             {
-                return false;
+                throw new ArgumentNullException(nameof(groupCondition));
             }
 
-            var conditions = conditionGroup.Conditions?.Where(condition => !(condition?.DismissMatch ?? true)) ?? new List<Condition>();
+            var conditions = groupCondition.Conditions?.Where(condition => !(condition?.IsDisabled ?? true)) ?? new List<Condition>();
 
             bool groupMatched;
-            if (conditionGroup.DismissMatch)
+            if (groupCondition.IsDisabled)
             {
-                groupMatched = conditionGroup.DefaultMatch;
+                groupMatched = false;
             }
             else if (!conditions.Any())
             {
-                groupMatched = conditionGroup.DefaultMatch;
+                groupMatched = groupCondition.DefaultResult;
             }
             else
             {
-                groupMatched = conditionGroup.MatchMode switch
+                groupMatched = groupCondition.MatchMode switch
                 {
                     GroupMatchMode.All => conditions.All(condition => IsMatch(terminalLineDto, condition)),
                     GroupMatchMode.Any => conditions.Any(condition => IsMatch(terminalLineDto, condition)),
@@ -68,32 +68,32 @@ namespace TerminalMonitor.Matchers
                 };
             }
 
-            return groupMatched ^ conditionGroup.NegativeMatch;
+            return groupMatched ^ groupCondition.IsInverted;
         }
 
-        public static bool IsMatch(TerminalLineDto terminalLineDto, FieldCondition condition)
+        public static bool IsMatch(TerminalLineDto terminalLineDto, FieldCondition fieldCondition)
         {
-            if (condition == null)
+            if (fieldCondition == null)
             {
-                return false;
+                throw new ArgumentNullException(nameof(fieldCondition));
             }
 
             bool fieldMatched;
-            if (condition.DismissMatch)
+            if (fieldCondition.IsDisabled)
             {
-                fieldMatched = condition.DefaultMatch;
+                fieldMatched = false;
             }
-            else if (terminalLineDto.LineFieldDict == null || !terminalLineDto.LineFieldDict.ContainsKey(condition.FieldKey))
+            else if (terminalLineDto.LineFieldDict == null || !terminalLineDto.LineFieldDict.ContainsKey(fieldCondition.FieldKey))
             {
-                fieldMatched = condition.DefaultMatch;
+                fieldMatched = fieldCondition.DefaultResult;
             }
             else
             {
-                var jsonProperty = terminalLineDto.LineFieldDict[condition.FieldKey];
-                fieldMatched = TextMatcher.IsMatch(jsonProperty.Text, condition.TargetValue, condition.MatchOperator);
+                var jsonProperty = terminalLineDto.LineFieldDict[fieldCondition.FieldKey];
+                fieldMatched = TextMatcher.IsMatch(jsonProperty.Text, fieldCondition.TargetValue, fieldCondition.MatchOperator);
             }
 
-            return fieldMatched ^ condition.NegativeMatch;
+            return fieldMatched ^ fieldCondition.IsInverted;
         }
     }
 }

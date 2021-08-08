@@ -50,38 +50,38 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private bool negativeMatch;
+        private bool isInverted;
 
-        public bool NegativeMatch
+        public bool IsInverted
         {
-            get { return negativeMatch; }
+            get { return isInverted; }
             set
             {
-                negativeMatch = value;
+                isInverted = value;
                 OnPropertyChanged();
             }
         }
 
-        private bool defaultMatch;
+        private bool defaultResult;
 
-        public bool DefaultMatch
+        public bool DefaultResult
         {
-            get { return defaultMatch; }
+            get { return defaultResult; }
             set
             {
-                defaultMatch = value;
+                defaultResult = value;
                 OnPropertyChanged();
             }
         }
 
-        private bool dismissMatch;
+        private bool isDisabled;
 
-        public bool DismissMatch
+        public bool IsDisabled
         {
-            get { return dismissMatch; }
+            get { return isDisabled; }
             set
             {
-                dismissMatch = value;
+                isDisabled = value;
                 OnPropertyChanged();
             }
         }

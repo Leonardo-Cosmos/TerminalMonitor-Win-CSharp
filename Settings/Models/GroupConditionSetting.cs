@@ -7,11 +7,12 @@ using TerminalMonitor.Matchers.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record ConditionGroupSetting(string MatchMode, List<ConditionSetting> Conditions,
-         string Name, bool NegativeMatch, bool DefaultMatch, bool DismissMatch)
-         : ConditionSetting(Name, NegativeMatch, DefaultMatch, DismissMatch);
+    record GroupConditionSetting(string MatchMode, List<ConditionSetting> Conditions,
+         string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
+         : ConditionSetting(Name: Name,
+             IsInverted: IsInverted, DefaultResult: DefaultResult, IsDisabled: IsDisabled);
 
-    static class ConditionGroupSettings
+    static class GroupConditionSettings
     {
         private static IReadOnlyDictionary<string, GroupMatchMode> matchModeDict
             = InitMatchModeDict();
@@ -45,40 +46,40 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static ConditionGroupSetting Save(ConditionGroup obj)
+        public static GroupConditionSetting Save(GroupCondition obj)
         {
             if (obj == null)
             {
                 return null;
             }
 
-            return new ConditionGroupSetting(
+            return new GroupConditionSetting(
                 MatchMode: ModeToString(obj.MatchMode),
                 Conditions: obj.Conditions?
                     .Select(condition => ConditionSettings.Save(condition)).ToList(),
                 Name: obj.Name,
-                NegativeMatch: obj.NegativeMatch,
-                DefaultMatch: obj.DefaultMatch,
-                DismissMatch: obj.DismissMatch
+                IsInverted: obj.IsInverted,
+                DefaultResult: obj.DefaultResult,
+                IsDisabled: obj.IsDisabled
                 );
         }
 
-        public static ConditionGroup Load(ConditionGroupSetting setting)
+        public static GroupCondition Load(GroupConditionSetting setting)
         {
             if (setting == null)
             {
                 return null;
             }
 
-            return new ConditionGroup()
+            return new GroupCondition()
             {
                 MatchMode = StringToMode(setting.MatchMode),
                 Conditions = setting.Conditions?
                     .Select(condition => ConditionSettings.Load(condition)),
                 Name = setting.Name,
-                NegativeMatch = setting.NegativeMatch,
-                DefaultMatch = setting.DefaultMatch,
-                DismissMatch = setting.DismissMatch,
+                IsInverted = setting.IsInverted,
+                DefaultResult = setting.DefaultResult,
+                IsDisabled = setting.IsDisabled,
             };
         }
     }
