@@ -19,7 +19,7 @@
                     <GridViewColumn Header="Value">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" />
+                                <TextBox BorderThickness="0" IsReadOnly="True" Text="{Binding Text}" TextWrapping="Wrap" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
