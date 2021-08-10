@@ -1,10 +1,12 @@
 ﻿/* 2021/5/26 */
-using TerminalMonitor.Models;
+using System;
+using TerminalMonitor.Matchers.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
     record FilterConditionSetting(FieldConditionSetting Condition, bool Excluded);
 
+    [Obsolete]
     static class FilterConditionSettings
     {
         public static FilterConditionSetting Save(FilterCondition obj)

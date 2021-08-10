@@ -18,6 +18,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using TerminalMonitor.Execution;
 using TerminalMonitor.Matchers;
+using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
@@ -36,7 +37,7 @@ namespace TerminalMonitor.Windows.Controls
         private readonly DataTable terminalDataTable = new();
 
         private IEnumerable<FieldDisplayDetail> visibleFields = Array.Empty<FieldDisplayDetail>();
-        private IEnumerable<FilterCondition> filterConditions = Array.Empty<FilterCondition>();
+        private GroupCondition filterCondition = new();
 
         private readonly TerminalViewDataContextVO dataContextVO = new();
 
@@ -53,22 +54,14 @@ namespace TerminalMonitor.Windows.Controls
 
         private void ButtonApplyFields_Click(object sender, RoutedEventArgs e)
         {
-            //PauseTimer();
-
             visibleFields = fieldListView.Fields.ToArray();
             ApplyVisibleField();
-
-            //ResumeTimer();
         }
 
         private void ButtonFilter_Click(object sender, RoutedEventArgs e)
         {
-            //PauseTimer();
-
-            filterConditions = filterView.FilterConditions.ToArray();
+            filterCondition = filterView.Condition;
             FilterTerminal();
-
-            //ResumeTimer();
         }
 
         private void MenuItemShowDetail_Click(object sender, RoutedEventArgs e)
@@ -88,11 +81,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void MenuItemClear_Click(object sender, RoutedEventArgs e)
         {
-            //PauseTimer();
-
             ClearTerminal();
-
-            //ResumeTimer();
         }
 
         private void MenuItemAutoScroll_Click(object sender, RoutedEventArgs e)
@@ -107,7 +96,7 @@ namespace TerminalMonitor.Windows.Controls
 
         public void AddNewTerminalLine(TerminalLineDto terminalLineDto)
         {
-            var matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterConditions);
+            var matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterCondition);
             matchedLineDict.Add(terminalLineDto.Id, matched);
 
             if (matched)
@@ -133,7 +122,7 @@ namespace TerminalMonitor.Windows.Controls
             terminalDataTable.Rows.Clear();
 
             matchedLineDict.Clear();
-            TerminalLineMatcher matcher = new(filterConditions);
+            TerminalLineMatcher matcher = new(filterCondition);
             foreach (var terminalLineDto in lineSupervisor.TerminalLines)
             {
                 var matched = matcher.IsMatch(terminalLineDto);
@@ -303,7 +292,7 @@ namespace TerminalMonitor.Windows.Controls
                 }
                 else
                 {
-                    matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterConditions);
+                    matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterCondition);
                     matchedLineDict.Add(terminalLineDto.Id, matched);
                 }
 
@@ -354,39 +343,24 @@ namespace TerminalMonitor.Windows.Controls
                     return;
                 }
 
-                //PauseTimer();
-
                 fieldListView.Fields = value;
                 visibleFields = value.ToArray();
                 ApplyVisibleField();
-
-                //ResumeTimer();
             }
         }
 
-        public IEnumerable<FilterCondition> FilterConditions
+        public GroupCondition FilterCondition
         {
             get
             {
-                List<FilterCondition> filterList = new();
-                filterList.AddRange(filterConditions);
-                return new ReadOnlyCollection<FilterCondition>(filterList);
+                return filterCondition;
             }
 
             set
             {
-                if (value == null)
-                {
-                    return;
-                }
-
-                //PauseTimer();
-
-                filterView.FilterConditions = value;
-                filterConditions = value.ToArray();
+                filterCondition = value ?? new GroupCondition();
+                filterView.Condition = filterCondition;
                 FilterTerminal();
-
-                //ResumeTimer();
             }
         }
     }

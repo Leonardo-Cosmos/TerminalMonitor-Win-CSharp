@@ -225,7 +225,7 @@ namespace TerminalMonitor.Windows.Controls
                 Id = tab.Tag as string,
                 Name = tab.Header as string,
                 VisibleFields = terminalView.VisibleFields,
-                FilterConditions = terminalView.FilterConditions,
+                FilterCondition = terminalView.FilterCondition,
             };
         }
 
@@ -256,7 +256,7 @@ namespace TerminalMonitor.Windows.Controls
 
             TerminalView terminalView = new();
             terminalView.VisibleFields = config.VisibleFields;
-            terminalView.FilterConditions = config.FilterConditions;
+            terminalView.FilterCondition = config.FilterCondition;
             terminalView.LineSupervisor = this;
             tab.Content = terminalView;
 

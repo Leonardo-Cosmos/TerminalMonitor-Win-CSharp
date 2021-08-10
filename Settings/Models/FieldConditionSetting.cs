@@ -2,50 +2,54 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using TerminalMonitor.Models;
-using static TerminalMonitor.Matchers.TextMatcher;
+using TerminalMonitor.Matchers;
+using TerminalMonitor.Matchers.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record FieldConditionSetting(string FieldKey, string MatchOperator, string TargetValue);
+    record FieldConditionSetting(string FieldKey, string MatchOperator, string TargetValue,
+        string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
+        : ConditionSetting(Name: Name,
+            IsInverted: IsInverted, DefaultResult: DefaultResult, IsDisabled: IsDisabled);
 
     static class FieldConditionSettings
     {
-        private static readonly IReadOnlyDictionary<string, MatchOperator> matchOperatorDict;
+        private static readonly IReadOnlyDictionary<string, TextMatchOperator> matchOperatorDict
+            = InitMatchOperatorDict();
 
-        static FieldConditionSettings()
+        private static IReadOnlyDictionary<string, TextMatchOperator> InitMatchOperatorDict()
         {
-            var dict = new Dictionary<string, MatchOperator>();
-            var matchOperators = Enum.GetValues(typeof(MatchOperator));
+            Dictionary<string, TextMatchOperator> dict = new();
+            var matchOperators = Enum.GetValues(typeof(TextMatchOperator));
             foreach (var item in matchOperators)
             {
-                if (item is MatchOperator matchOperator)
+                if (item is TextMatchOperator matchOperator)
                 {
                     dict.Add(matchOperator.ToString(), matchOperator);
                 }
             }
 
-            matchOperatorDict = new ReadOnlyDictionary<string, MatchOperator>(dict);
+            return new ReadOnlyDictionary<string, TextMatchOperator>(dict);
         }
 
-        static string OperatorToString(MatchOperator matchOperator)
+        static string OperatorToString(TextMatchOperator matchOperator)
         {
             return matchOperator.ToString();
         }
 
-        static MatchOperator StringToOperator(string str)
+        static TextMatchOperator StringToOperator(string str)
         {
-            if (matchOperatorDict.ContainsKey(str))
+            if (str != null && matchOperatorDict.ContainsKey(str))
             {
                 return matchOperatorDict[str];
             }
             else
             {
-                return MatchOperator.None;
+                return TextMatchOperator.None;
             }
         }
 
-        public static FieldConditionSetting Save(TextCondition obj)
+        public static FieldConditionSetting Save(FieldCondition obj)
         {
             if (obj == null)
             {
@@ -55,22 +59,30 @@ namespace TerminalMonitor.Settings.Models
             return new FieldConditionSetting(
                 FieldKey: obj.FieldKey,
                 MatchOperator: OperatorToString(obj.MatchOperator),
-                TargetValue: obj.TargetValue
+                TargetValue: obj.TargetValue,
+                Name: obj.Name,
+                IsInverted: obj.IsInverted,
+                DefaultResult: obj.DefaultResult,
+                IsDisabled: obj.IsDisabled
                 );
         }
 
-        public static TextCondition Load(FieldConditionSetting setting)
+        public static FieldCondition Load(FieldConditionSetting setting)
         {
             if (setting == null)
             {
                 return null;
             }
 
-            return new TextCondition()
+            return new FieldCondition()
             {
                 FieldKey = setting.FieldKey,
                 MatchOperator = StringToOperator(setting.MatchOperator),
                 TargetValue = setting.TargetValue,
+                Name = setting.Name,
+                IsInverted = setting.IsInverted,
+                DefaultResult = setting.DefaultResult,
+                IsDisabled = setting.IsDisabled,
             };
         }
     }

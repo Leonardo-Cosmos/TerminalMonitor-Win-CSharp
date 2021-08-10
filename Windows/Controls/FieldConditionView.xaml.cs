@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TerminalMonitor.Matchers;
+using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
@@ -25,10 +26,10 @@ namespace TerminalMonitor.Windows.Controls
     public partial class FieldConditionView : UserControl
     {
         public static readonly DependencyProperty FieldConditionProperty =
-            DependencyProperty.Register("FieldCondition", typeof(TextCondition), typeof(FieldConditionView),
-                new PropertyMetadata(TextCondition.Empty, OnFieldConditionChanged));
+            DependencyProperty.Register(nameof(FieldCondition), typeof(FieldCondition), typeof(FieldConditionView),
+                new PropertyMetadata(FieldCondition.Empty, OnFieldConditionChanged));
 
-        private TextCondition fieldCondition;
+        private FieldCondition fieldCondition;
 
         private readonly FieldConditionViewDataContextVO dataContextVO = new();
 
@@ -36,7 +37,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             InitializeComponent();
 
-            cmbBxOperator.ItemsSource = Enum.GetValues(typeof(TextMatcher.MatchOperator));
+            cmbBxOperator.ItemsSource = Enum.GetValues(typeof(TextMatchOperator));
             stkPnl.DataContext = dataContextVO;
             dataContextVO.PropertyChanged += OnDataContextPropertyChanged;
         }
@@ -45,14 +46,23 @@ namespace TerminalMonitor.Windows.Controls
         {
             switch (e.PropertyName)
             {
-                case "FieldKey":
+                case nameof(FieldConditionViewDataContextVO.FieldKey):
                     fieldCondition.FieldKey = dataContextVO.FieldKey;
                     break;
-                case "MatchOperator":
+                case nameof(FieldConditionViewDataContextVO.MatchOperator):
                     fieldCondition.MatchOperator = dataContextVO.MatchOperator;
                     break;
-                case "TargetValue":
+                case nameof(FieldConditionViewDataContextVO.TargetValue):
                     fieldCondition.TargetValue = dataContextVO.TargetValue;
+                    break;
+                case nameof(FieldConditionViewDataContextVO.IsInverted):
+                    fieldCondition.IsInverted = dataContextVO.IsInverted;
+                    break;
+                case nameof(FieldConditionViewDataContextVO.DefaultResult):
+                    fieldCondition.DefaultResult = dataContextVO.DefaultResult;
+                    break;
+                case nameof(FieldConditionViewDataContextVO.IsDisabled):
+                    fieldCondition.IsDisabled = dataContextVO.IsDisabled;
                     break;
                 default:
                     break;
@@ -67,18 +77,22 @@ namespace TerminalMonitor.Windows.Controls
 
         private void OnFieldConditionChanged(DependencyPropertyChangedEventArgs e)
         {
-            fieldCondition = e.NewValue as TextCondition;
+            fieldCondition = e.NewValue as FieldCondition;
             if (fieldCondition != null)
             {
                 dataContextVO.FieldKey = fieldCondition.FieldKey;
                 dataContextVO.MatchOperator = fieldCondition.MatchOperator;
                 dataContextVO.TargetValue = fieldCondition.TargetValue;
+
+                dataContextVO.IsInverted = fieldCondition.IsInverted;
+                dataContextVO.DefaultResult = fieldCondition.DefaultResult;
+                dataContextVO.IsDisabled = fieldCondition.IsDisabled;
             }
         }
 
-        public TextCondition FieldCondition
+        public FieldCondition FieldCondition
         {
-            get { return (TextCondition)GetValue(FieldConditionProperty); }
+            get { return (FieldCondition)GetValue(FieldConditionProperty); }
             set { SetValue(FieldConditionProperty, value); }
         }
 

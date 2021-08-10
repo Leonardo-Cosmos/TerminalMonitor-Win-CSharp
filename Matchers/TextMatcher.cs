@@ -5,17 +5,6 @@ namespace TerminalMonitor.Matchers
 {
     public static class TextMatcher
     {
-
-        public enum MatchOperator
-        {
-            None,
-            Equals,
-            Contains,
-            StartsWith,
-            EndsWith,
-            Matches,
-        }
-
         /// <summary>
         /// Indicates whether the text meets specified condition.
         /// </summary>
@@ -23,28 +12,28 @@ namespace TerminalMonitor.Matchers
         /// <param name="value">Target value.</param>
         /// <param name="op">Operator of matching.</param>
         /// <returns></returns>
-        public static bool IsMatch(string text, string value, MatchOperator op)
+        public static bool IsMatch(string text, string value, TextMatchOperator op)
         {
             bool isPassed;
             switch (op)
             {
-                case MatchOperator.Equals:
+                case TextMatchOperator.Equals:
                     isPassed = text.Equals(value);
                     break;
 
-                case MatchOperator.Contains:
+                case TextMatchOperator.Contains:
                     isPassed = text.Contains(value);
                     break;
 
-                case MatchOperator.StartsWith:
+                case TextMatchOperator.StartsWith:
                     isPassed = text.StartsWith(value);
                     break;
 
-                case MatchOperator.EndsWith:
+                case TextMatchOperator.EndsWith:
                     isPassed = text.EndsWith(value);
                     break;
 
-                case MatchOperator.Matches:
+                case TextMatchOperator.Matches:
                     Regex regex = new(value);
                     isPassed = regex.IsMatch(text);
                     break;

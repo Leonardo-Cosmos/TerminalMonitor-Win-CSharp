@@ -5,12 +5,103 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=local:FilterItemVO}"
+             d:DataContext="{d:DesignInstance Type=local:FilterListViewDataContextVO}"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
+        <Grid.Resources>
+            <ResourceDictionary>
+                <Style x:Key="checkBoxInvert" TargetType="CheckBox">
+                    <Setter Property="ToolTip" Value="Invert match result" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsInverted}" Value="False">
+                            <Setter Property="Content" Value="🛑" />
+                            <Setter Property="Foreground" Value="Green" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsInverted}" Value="True">
+                            <Setter Property="Content" Value="⛔" />
+                            <Setter Property="Foreground" Value="Red" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+
+                <Style x:Key="checkBoxDefault" TargetType="CheckBox">
+                    <Setter Property="ToolTip" Value="Match by Default" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding DefaultResult}" Value="False">
+                            <Setter Property="Content" Value="☆" />
+                            <Setter Property="Foreground" Value="Orange" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding DefaultResult}" Value="True">
+                            <Setter Property="Content" Value="★" />
+                            <Setter Property="Foreground" Value="Gold" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+                <Style x:Key="checkBoxDismiss" TargetType="CheckBox">
+                    <Setter Property="ToolTip" Value="Dismiss this condition in match" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsDisabled}" Value="False">
+                            <Setter Property="Content" Value="⏺" />
+                            <Setter Property="Foreground" Value="Green" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsDisabled}" Value="True">
+                            <Setter Property="Content" Value="⏸" />
+                            <Setter Property="Foreground" Value="Red" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+
+                <Style x:Key="textInvert" TargetType="TextBlock">
+                    <Setter Property="ToolTip" Value="Invert match result" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsInverted}" Value="False">
+                            <Setter Property="Text" Value="🛑" />
+                            <Setter Property="Foreground" Value="Green" />
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsInverted}" Value="True">
+                            <Setter Property="Text" Value="⛔" />
+                            <Setter Property="Foreground" Value="Red" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+
+                <Style x:Key="textDefault" TargetType="TextBlock">
+                    <Setter Property="ToolTip" Value="Match by Default" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding DefaultResult}" Value="False">
+                            <Setter Property="Text" Value="☆" />
+                            <Setter Property="Foreground" Value="Orange" />
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding DefaultResult}" Value="True">
+                            <Setter Property="Text" Value="★" />
+                            <Setter Property="Foreground" Value="Gold" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+
+                <Style x:Key="textDismiss" TargetType="TextBlock">
+                    <Setter Property="ToolTip" Value="Dismiss this condition in match" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsDisabled}" Value="False">
+                            <Setter Property="Text" Value="⏺" />
+                            <Setter Property="Foreground" Value="Green" />
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsDisabled}" Value="True">
+                            <Setter Property="Text" Value="⏸" />
+                            <Setter Property="Foreground" Value="Red" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ResourceDictionary>
+        </Grid.Resources>
+        
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
@@ -18,38 +109,40 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <Label Name="lblKey" Grid.Row="0" Grid.Column="0" Content="Key" />
-        <TextBox Name="txtBxKey" Grid.Row="0" Grid.Column="1" Text="{Binding Path=FieldKey}" />
+        <Label Name="lblFilters" Grid.Row="0" Grid.Column="0" Content="Filters" />
 
-        <ComboBox Name="cmbBxOperator" Grid.Row="0" Grid.Column="2" SelectedValue="{Binding MatchOperator}">
-            <ComboBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Converter={StaticResource MatchOperatorToStringConverter}}" />
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
+        <StackPanel Name="stkPnlCondition" Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
 
-        <Grid Name="grdButton" Grid.Row="0" Grid.Column="3">
+            <ComboBox Margin="10, 0, 10, 0"  ItemsSource="{StaticResource GroupMatchModes}" SelectedValue="{Binding MatchMode}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource MatchModeToStringConverter}}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <CheckBox Name="chkBxNegative" Margin="2, 0" Style="{StaticResource checkBoxInvert}" IsChecked="{Binding IsInverted}" />
+            <CheckBox Name="chkBxDefault" Margin="2, 0" Style="{StaticResource checkBoxDefault}" IsChecked="{Binding DefaultResult}" />
+            <CheckBox Name="chkBxDismiss" Margin="2, 0" Style="{StaticResource checkBoxDismiss}" IsChecked="{Binding IsDisabled}" />
+
+        </StackPanel>
+
+        <Grid Name="grdButton" Grid.Row="0" Grid.Column="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnAdd" Grid.Column="0" Content="Add" Click="BtnAdd_Click" />
-            <Button Name="btnUpdate" Grid.Column="1" Content="Update" Click="BtnUpdate_Click" />
-            <Button Name="btnDelete" Grid.Column="2" Content="Delete" Click="BtnDelete_Click" />
+            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="+" Click="BtnAdd_Click" />
+            <Button Name="btnUpdate" Grid.Column="1" Width="20" Content="*" Click="BtnUpdate_Click" />
+            <Button Name="btnDelete" Grid.Column="2" Width="20" Content="-" Click="BtnDelete_Click" />
         </Grid>
-
-        <Label Name="lblValue" Grid.Row="1" Grid.Column="0" Content="Value" />
-        <TextBox Name="txtBxValue" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding TargetValue}" />
-
-        <Label Name="lblFilters" Grid.Row="2" Grid.Column="0" Content="Filters" />
         
-        <ListView Name="lstFilters" Grid.Row="2" Grid.RowSpan="2" Grid.Column="1" Grid.ColumnSpan="3" MinHeight="20"
-                  SelectionMode="Single" SelectionChanged="LstFilters_SelectionChanged">
+        <ListView Name="lstFilters" Grid.Row="1" Grid.RowSpan="1" Grid.Column="0" Grid.ColumnSpan="3" MinHeight="20"
+                  SelectionMode="Single">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel></WrapPanel>
@@ -59,9 +152,31 @@
                 <DataTemplate>
                     <Border BorderBrush="SkyBlue" BorderThickness="1">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding FieldKey}" Margin="3" />
-                            <TextBlock Text="{Binding MatchOperator, Converter={StaticResource MatchOperatorToStringConverter}}" Margin="3" />
-                            <TextBlock Text="{Binding TargetValue}" Margin="3" />
+                            <StackPanel.Resources>
+                                <ResourceDictionary>
+                                    <Style x:Key="textWhenName" TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ConditionName, Converter={StaticResource ObjectNullOrEmptyConverter}}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                    <Style x:Key="textWhenNoName" TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ConditionName, Converter={StaticResource ObjectNullOrEmptyConverter}}" Value="False">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ResourceDictionary>
+                            </StackPanel.Resources>
+                            <TextBlock Text="{Binding ConditionName}" Margin="3" Style="{StaticResource textWhenName}" />
+                            <TextBlock Text="{Binding FieldKey}" Margin="3" Style="{StaticResource textWhenNoName}" />
+                            <TextBlock Text="{Binding MatchOperator, Converter={StaticResource MatchOperatorToStringConverter}}" Margin="3" Style="{StaticResource textWhenNoName}" />
+                            <TextBlock Text="{Binding TargetValue}" Margin="3" Style="{StaticResource textWhenNoName}" />
+                            <TextBlock Margin="3" Style="{StaticResource textInvert}" />
+                            <TextBlock Margin="3" Style="{StaticResource textDefault}" />
+                            <TextBlock Margin="3" Style="{StaticResource textDismiss}" />
                         </StackPanel>
                     </Border>
                 </DataTemplate>

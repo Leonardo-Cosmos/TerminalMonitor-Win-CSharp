@@ -17,7 +17,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TerminalMonitor.Matchers;
+using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
+using Condition = TerminalMonitor.Matchers.Models.Condition;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -26,38 +28,56 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class FilterListView : UserControl
     {
-        private readonly FilterItemVO currentFilter = new();
+        private readonly FilterListViewDataContextVO dataContextVO = new();
 
         private readonly ObservableCollection<FilterItemVO> filterVOs = new();
+
+        private readonly List<Condition> conditions = new();
 
         public FilterListView()
         {
             InitializeComponent();
 
-            DataContext = currentFilter;
-            cmbBxOperator.ItemsSource = Enum.GetValues(typeof(TextMatcher.MatchOperator));
+            DataContext = dataContextVO;
+
             lstFilters.ItemsSource = filterVOs;
         }
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            FilterItemVO item = new()
+            ConditionDetailWindow window = new();
+
+            if (window.ShowDialog() ?? false)
             {
-                FieldKey = currentFilter.FieldKey,
-                MatchOperator = currentFilter.MatchOperator,
-                TargetValue = currentFilter.TargetValue,
-            };
-            filterVOs.Add(item);
-            lstFilters.SelectedItem = item;
+                Condition condition = window.Condition;
+
+                FilterItemVO item = CreateFilterVO(condition);
+                filterVOs.Add(item);
+                lstFilters.SelectedItem = item;
+
+                conditions.Add(condition);
+            }
         }
 
         private void BtnUpdate_Click(object sender, RoutedEventArgs e)
         {
             if (lstFilters.SelectedItem is FilterItemVO selectedItem)
             {
-                selectedItem.FieldKey = currentFilter.FieldKey;
-                selectedItem.MatchOperator = currentFilter.MatchOperator;
-                selectedItem.TargetValue = currentFilter.TargetValue;
+                var index = filterVOs.IndexOf(selectedItem);
+                ConditionDetailWindow window = new()
+                {
+                    Condition = conditions[index],
+                };
+
+                if (window.ShowDialog() ?? false)
+                {
+                    Condition condition = window.Condition;
+
+                    FilterItemVO item = CreateFilterVO(condition);
+                    filterVOs[index] = item;
+
+                    conditions[index] = condition;
+                }
             }
         }
 
@@ -65,56 +85,79 @@ namespace TerminalMonitor.Windows.Controls
         {
             if (lstFilters.SelectedValue is FilterItemVO selectedItem)
             {
-                filterVOs.Remove(selectedItem);
+                var index = filterVOs.IndexOf(selectedItem);
+                filterVOs.RemoveAt(index);
+                conditions.RemoveAt(index);
             }
         }
 
-        private void LstFilters_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private static FilterItemVO CreateFilterVO(Condition condition)
         {
-            if (lstFilters.SelectedItem is FilterItemVO selectedItem)
+            FilterItemVO item;
+            if (!String.IsNullOrEmpty(condition.Name))
             {
-                currentFilter.FieldKey = selectedItem.FieldKey;
-                currentFilter.MatchOperator = selectedItem.MatchOperator;
-                currentFilter.TargetValue = selectedItem.TargetValue;
+                item = new()
+                {
+                    ConditionName = condition.Name,
+                };
+            }
+            else if (condition is FieldCondition fieldCondition)
+            {
+                item = new()
+                {
+                    FieldKey = fieldCondition.FieldKey,
+                    MatchOperator = fieldCondition.MatchOperator,
+                    TargetValue = fieldCondition.TargetValue,
+                };
             }
             else
             {
-                currentFilter.FieldKey = String.Empty;
-                currentFilter.MatchOperator = TextMatcher.MatchOperator.None;
-                currentFilter.TargetValue = String.Empty;
+                throw new NotImplementedException("Condition without name or field");
             }
+
+            item.IsInverted = condition.IsInverted;
+            item.DefaultResult = condition.DefaultResult;
+            item.IsDisabled = condition.IsDisabled;
+
+            return item;
         }
 
-        internal IEnumerable<FilterCondition> FilterConditions
+        internal GroupCondition Condition
         {
             get
             {
-                return filterVOs.Select(filterVO => new FilterCondition()
+                return new GroupCondition()
                 {
-                    Condition = new TextCondition()
-                    {
-                        FieldKey = filterVO.FieldKey,
-                        MatchOperator = filterVO.MatchOperator,
-                        TargetValue = filterVO.TargetValue,
-                    },
-
-                    Excluded = false,
-                });
+                    MatchMode = dataContextVO.MatchMode,
+                    IsInverted = dataContextVO.IsInverted,
+                    DefaultResult = dataContextVO.DefaultResult,
+                    IsDisabled = dataContextVO.IsDisabled,
+                    Conditions = conditions,
+                };
             }
 
             set
             {
                 filterVOs.Clear();
+                conditions.Clear();
+
                 if (value == null)
                 {
                     return;
                 }
-                value.Select(filter => new FilterItemVO()
+
+                dataContextVO.MatchMode = value.MatchMode;
+                dataContextVO.IsInverted = value.IsInverted;
+                dataContextVO.DefaultResult = value.DefaultResult;
+                dataContextVO.IsDisabled = value.IsDisabled;
+                if (value.Conditions != null)
                 {
-                    FieldKey = filter.Condition?.FieldKey,
-                    MatchOperator = filter.Condition?.MatchOperator ?? TextMatcher.MatchOperator.None,
-                    TargetValue = filter.Condition?.TargetValue,
-                }).ToList().ForEach(filterVO => filterVOs.Add(filterVO));
+                    foreach (Condition condition in value.Conditions)
+                    {
+                        conditions.Add(condition);
+                        filterVOs.Add(CreateFilterVO(condition));
+                    }
+                }
             }
         }
     }

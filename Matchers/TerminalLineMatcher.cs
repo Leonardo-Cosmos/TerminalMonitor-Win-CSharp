@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
 using TerminalMonitor.Windows.Controls;
 
@@ -11,51 +12,88 @@ namespace TerminalMonitor.Matchers
 {
     class TerminalLineMatcher
     {
-        private readonly IEnumerable<FilterCondition> filterConditions;
+        private readonly Condition matchCondition;
 
-        public TerminalLineMatcher(IEnumerable<FilterCondition> filterConditions)
+        public TerminalLineMatcher(Condition matchCondition)
         {
-            this.filterConditions = filterConditions;
+            this.matchCondition = matchCondition;
         }
 
         public bool IsMatch(TerminalLineDto terminalLineDto)
         {
-            return IsMatch(terminalLineDto, filterConditions);
+            return IsMatch(terminalLineDto, matchCondition);
         }
 
-        public static bool IsMatch(TerminalLineDto terminalLineDto, IEnumerable<FilterCondition> filterConditions)
+        public static bool IsMatch(TerminalLineDto terminalLineDto, Condition matchCondition)
         {
-            if (filterConditions == null || !filterConditions.Any())
+            if (matchCondition is GroupCondition groupCondition)
             {
-                return true;
+                return IsMatch(terminalLineDto, groupCondition);
             }
-
-            bool included = filterConditions
-                .Where(filterCondition => !filterCondition.Excluded)
-                .All(filterCondition => IsMatch(terminalLineDto, filterCondition.Condition));
-
-            bool excluded = filterConditions
-                .Where(filterConditions => filterConditions.Excluded)
-                .Any(filterCondition => IsMatch(terminalLineDto, filterCondition.Condition));
-
-            return included && !excluded;
-        }
-
-        public static bool IsMatch(TerminalLineDto terminalLineDto, TextCondition condition)
-        {
-            if (condition == null)
+            else if (matchCondition is FieldCondition fieldCondition)
+            {
+                return IsMatch(terminalLineDto, fieldCondition);
+            }
+            else
             {
                 return false;
             }
-            
-            if (terminalLineDto.LineFieldDict == null || !terminalLineDto.LineFieldDict.ContainsKey(condition.FieldKey))
+        }
+
+        public static bool IsMatch(TerminalLineDto terminalLineDto, GroupCondition groupCondition)
+        {
+            if (groupCondition == null)
             {
-                return false;
+                throw new ArgumentNullException(nameof(groupCondition));
             }
 
-            var jsonProperty = terminalLineDto.LineFieldDict[condition.FieldKey];
+            var conditions = groupCondition.Conditions?.Where(condition => !(condition?.IsDisabled ?? true)) ?? new List<Condition>();
 
-            return TextMatcher.IsMatch(jsonProperty.Text, condition.TargetValue, condition.MatchOperator);
+            bool groupMatched;
+            if (groupCondition.IsDisabled)
+            {
+                groupMatched = false;
+            }
+            else if (!conditions.Any())
+            {
+                groupMatched = groupCondition.DefaultResult;
+            }
+            else
+            {
+                groupMatched = groupCondition.MatchMode switch
+                {
+                    GroupMatchMode.All => conditions.All(condition => IsMatch(terminalLineDto, condition)),
+                    GroupMatchMode.Any => conditions.Any(condition => IsMatch(terminalLineDto, condition)),
+                    _ => false
+                };
+            }
+
+            return groupMatched ^ groupCondition.IsInverted;
+        }
+
+        public static bool IsMatch(TerminalLineDto terminalLineDto, FieldCondition fieldCondition)
+        {
+            if (fieldCondition == null)
+            {
+                throw new ArgumentNullException(nameof(fieldCondition));
+            }
+
+            bool fieldMatched;
+            if (fieldCondition.IsDisabled)
+            {
+                fieldMatched = false;
+            }
+            else if (terminalLineDto.LineFieldDict == null || !terminalLineDto.LineFieldDict.ContainsKey(fieldCondition.FieldKey))
+            {
+                fieldMatched = fieldCondition.DefaultResult;
+            }
+            else
+            {
+                var jsonProperty = terminalLineDto.LineFieldDict[fieldCondition.FieldKey];
+                fieldMatched = TextMatcher.IsMatch(jsonProperty.Text, fieldCondition.TargetValue, fieldCondition.MatchOperator);
+            }
+
+            return fieldMatched ^ fieldCondition.IsInverted;
         }
     }
 }

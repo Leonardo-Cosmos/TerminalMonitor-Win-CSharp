@@ -26,9 +26,9 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private TextMatcher.MatchOperator matchOperator;
+        private TextMatchOperator matchOperator;
 
-        public TextMatcher.MatchOperator MatchOperator
+        public TextMatchOperator MatchOperator
         {
             get { return matchOperator; }
 
@@ -51,17 +51,40 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private bool excluded;
+        private string conditionName;
 
-        public bool Excluded
+        public string ConditionName
         {
-            get { return excluded; }
-
+            get { return conditionName; }
             set
             {
-                excluded = value;
+                conditionName = value;
                 OnPropertyChanged();
             }
+        }
+
+        private bool isInverted;
+
+        public bool IsInverted
+        {
+            get => isInverted;
+            set { isInverted = value; OnPropertyChanged(); }
+        }
+
+        private bool defaultResult;
+
+        public bool DefaultResult
+        {
+            get => defaultResult;
+            set { defaultResult = value; OnPropertyChanged(); }
+        }
+
+        private bool isDisabled;
+
+        public bool IsDisabled
+        {
+            get => isDisabled;
+            set { isDisabled = value; OnPropertyChanged(); }
         }
     }
 }
