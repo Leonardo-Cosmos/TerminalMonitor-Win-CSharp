@@ -49,6 +49,7 @@ namespace TerminalMonitor.Windows.Controls
 
             DataContext = dataContextVO;
             listTerminal.DataContext = dataContextVO;
+            listTerminal.ContextMenu.DataContext = dataContextVO;
             ApplyVisibleField();
         }
 
