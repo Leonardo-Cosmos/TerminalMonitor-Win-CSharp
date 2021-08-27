@@ -7,6 +7,8 @@ namespace TerminalMonitor.Models
 {
     public class FieldDisplayDetail : ICloneable
     {
+        public string Id { get; init; }
+
         public string FieldKey { get; set; }
 
         public bool CustomizeStyle { get; set; }
@@ -19,6 +21,7 @@ namespace TerminalMonitor.Models
         {
             return new FieldDisplayDetail()
             {
+                Id = Guid.NewGuid().ToString(),
                 FieldKey = this.FieldKey,
                 CustomizeStyle = this.CustomizeStyle,
                 Style = (TextStyle)this.Style.Clone(),

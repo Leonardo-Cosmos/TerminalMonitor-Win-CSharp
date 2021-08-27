@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using TerminalMonitor.Clipboard;
 using TerminalMonitor.Execution;
 using TerminalMonitor.Models;
 using TerminalMonitor.Parsers;
@@ -38,6 +39,8 @@ namespace TerminalMonitor.Windows.Controls
         private int selectTabIndex = 0;
 
         private bool changingTab = false;
+
+        private readonly ItemClipboard<FieldDisplayDetail> fieldClipboard = new();
 
         public TerminalTabControl()
         {
@@ -257,6 +260,7 @@ namespace TerminalMonitor.Windows.Controls
             TerminalView terminalView = new();
             terminalView.VisibleFields = config.VisibleFields;
             terminalView.FilterCondition = config.FilterCondition;
+            terminalView.FieldClipboard = fieldClipboard;
             terminalView.LineSupervisor = this;
             tab.Content = terminalView;
 

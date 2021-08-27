@@ -137,6 +137,7 @@ namespace TerminalMonitor.Windows
             {
                 return new FieldDisplayDetail()
                 {
+                    Id = Guid.NewGuid().ToString(),
                     FieldKey = dataContextVO.FieldKey,
                     CustomizeStyle = dataContextVO.CustomizeStyle,
                     Style = dataContextVO.Style,

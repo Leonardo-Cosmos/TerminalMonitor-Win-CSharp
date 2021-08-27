@@ -24,15 +24,20 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="+" ToolTip="Add" Click="BtnAdd_Click" />
-            <Button Name="btnModify" Grid.Column="1" Width="20" Content="*" ToolTip="Modify" Click="BtnModify_Click" />
-            <Button Name="btnDelete" Grid.Column="2" Width="20" Content="-" ToolTip="Delete" Click="BtnDelete_Click" />
-            <Button Name="btnMoveLeft" Grid.Column="3" Width="20" Content="←" ToolTip="Move Left" Click="BtnMoveLeft_Click" />
-            <Button Name="btnMoveRight" Grid.Column="4" Width="20" Content="→" ToolTip="Move Right" Click="BtnMoveRight_Click" />
+            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Click="BtnAdd_Click" />
+            <Button Name="btnDelete" Grid.Column="1" Width="20" Content="➖" ToolTip="Delete" Click="BtnDelete_Click" />
+            <Button Name="btnModify" Grid.Column="2" Width="20" Content="⚙" ToolTip="Modify" Click="BtnModify_Click" />
+            <Button Name="btnCopy" Grid.Column="3" Width="20" Content="📄" ToolTip="Copy" Click="BtnCopy_Click" />
+            <Button Name="btnPaste" Grid.Column="4" Width="20" Content="📋" ToolTip="Paste" Click="BtnPaste_Click" />
+            <Button Name="btnMoveLeft" Grid.Column="5" Width="20" Content="←" ToolTip="Move Left" Click="BtnMoveLeft_Click" />
+            <Button Name="btnMoveRight" Grid.Column="6" Width="20" Content="→" ToolTip="Move Right" Click="BtnMoveRight_Click" />
         </Grid>
 
         <ListView Name="lstFields" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" MinHeight="25"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                   SelectionMode="Single">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>

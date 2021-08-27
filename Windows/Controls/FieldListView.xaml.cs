@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TerminalMonitor.Clipboard;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
@@ -48,12 +49,24 @@ namespace TerminalMonitor.Windows.Controls
 
                 FieldListItemVO item = new()
                 {
+                    Id = field.Id,
                     FieldKey = field.FieldKey
                 };
                 fieldVOs.Add(item);
                 lstFields.SelectedItem = item;
 
                 fields.Add(field);
+            }
+        }
+
+        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
+            {
+                var index = fieldVOs.IndexOf(selectedItem);
+                fieldVOs.RemoveAt(index);
+
+                fields.RemoveAt(index);
             }
         }
 
@@ -82,14 +95,33 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        private void BtnCopy_Click(object sender, RoutedEventArgs e)
         {
             if (lstFields.SelectedItem is FieldListItemVO selectedItem)
             {
                 var index = fieldVOs.IndexOf(selectedItem);
-                fieldVOs.RemoveAt(index);
 
-                fields.RemoveAt(index);
+                var field = fields[index];
+                FieldClipboard?.Copy(field);
+            }
+        }
+
+        private void BtnPaste_Click(object sender, RoutedEventArgs e)
+        {
+            var field = FieldClipboard?.Paste();
+            if (field != null)
+            {
+                field = (FieldDisplayDetail) field.Clone();
+
+                FieldListItemVO item = new()
+                {
+                    Id = field.Id,
+                    FieldKey = field.FieldKey
+                };
+                fieldVOs.Add(item);
+                lstFields.SelectedItem = item;
+
+                fields.Add(field);
             }
         }
 
@@ -154,6 +186,11 @@ namespace TerminalMonitor.Windows.Controls
                 }).ToList()
                 .ForEach(fieldVO => fieldVOs.Add(fieldVO));
             }
+        }
+
+        public ItemClipboard<FieldDisplayDetail> FieldClipboard
+        {
+            get; set;
         }
     }
 }

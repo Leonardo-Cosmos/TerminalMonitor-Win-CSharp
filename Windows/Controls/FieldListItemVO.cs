@@ -12,6 +12,8 @@ namespace TerminalMonitor.Windows.Controls
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        public string Id { get; init; }
+
         private string fieldKey;
 
         public string FieldKey

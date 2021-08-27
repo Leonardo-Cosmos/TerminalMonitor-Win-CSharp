@@ -1,11 +1,12 @@
 ﻿/* 2021/5/26 */
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record FieldDisplayDetailSetting(string FieldKey, bool CustomizeStyle,
+    record FieldDisplayDetailSetting(string Id, string FieldKey, bool CustomizeStyle,
         TextStyleSetting Style, List<TextStyleConditionSetting> Conditions);
 
     static class FieldDisplayDetailSettings
@@ -18,6 +19,7 @@ namespace TerminalMonitor.Settings.Models
             }
 
             return new FieldDisplayDetailSetting(
+                Id: obj.Id,
                 FieldKey: obj.FieldKey,
                 CustomizeStyle: obj.CustomizeStyle,
                 Style: TextStyleSettings.Save(obj.Style),
@@ -35,6 +37,7 @@ namespace TerminalMonitor.Settings.Models
 
             return new FieldDisplayDetail()
             {
+                Id = setting.Id ?? Guid.NewGuid().ToString(),
                 FieldKey = setting.FieldKey,
                 CustomizeStyle = setting.CustomizeStyle,
                 Style = TextStyleSettings.Load(setting.Style),
