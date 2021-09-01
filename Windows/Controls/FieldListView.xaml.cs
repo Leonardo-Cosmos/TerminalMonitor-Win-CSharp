@@ -129,18 +129,17 @@ namespace TerminalMonitor.Windows.Controls
         {
             if (lstFields.SelectedItem is FieldListItemVO selectedItem)
             {
-                var index = fieldVOs.IndexOf(selectedItem);
-                if (index > 0)
-                {
-                    fieldVOs.RemoveAt(index);
-                    fieldVOs.Insert(index - 1, selectedItem);
+                var srcIndex = fieldVOs.IndexOf(selectedItem);
+                var dstIndex = (srcIndex - 1 + fieldVOs.Count) % fieldVOs.Count;
 
-                    lstFields.SelectedItem = selectedItem;
+                fieldVOs.RemoveAt(srcIndex);
+                fieldVOs.Insert(dstIndex, selectedItem);
 
-                    var field = fields[index];
-                    fields.RemoveAt(index);
-                    fields.Insert(index - 1, field);
-                }
+                lstFields.SelectedItem = selectedItem;
+
+                var field = fields[srcIndex];
+                fields.RemoveAt(srcIndex);
+                fields.Insert(dstIndex, field);
             }
         }
 
@@ -148,18 +147,17 @@ namespace TerminalMonitor.Windows.Controls
         {
             if (lstFields.SelectedItem is FieldListItemVO selectedItem)
             {
-                var index = fieldVOs.IndexOf(selectedItem);
-                if (index < fieldVOs.Count - 1)
-                {
-                    fieldVOs.RemoveAt(index);
-                    fieldVOs.Insert(index + 1, selectedItem);
+                var srcIndex = fieldVOs.IndexOf(selectedItem);
+                var dstIndex = (srcIndex + 1) % fieldVOs.Count;
 
-                    lstFields.SelectedItem = selectedItem;
+                fieldVOs.RemoveAt(srcIndex);
+                fieldVOs.Insert(dstIndex, selectedItem);
 
-                    var field = fields[index];
-                    fields.RemoveAt(index);
-                    fields.Insert(index + 1, field);
-                }
+                lstFields.SelectedItem = selectedItem;
+
+                var field = fields[srcIndex];
+                fields.RemoveAt(srcIndex);
+                fields.Insert(dstIndex, field);
             }
         }
 
