@@ -6,7 +6,7 @@ using TerminalMonitor.Matchers.Models;
 namespace TerminalMonitor.Settings.Models
 {
     [JsonConverter(typeof(ConditionSettingConverter))]
-    abstract record ConditionSetting(string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
+    abstract record ConditionSetting(string Id, string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
     {
         public string ConditionType { get; set; }
     }

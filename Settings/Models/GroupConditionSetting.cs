@@ -8,8 +8,8 @@ using TerminalMonitor.Matchers.Models;
 namespace TerminalMonitor.Settings.Models
 {
     record GroupConditionSetting(string MatchMode, List<ConditionSetting> Conditions,
-         string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
-         : ConditionSetting(Name: Name,
+         string Id, string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
+         : ConditionSetting(Id: Id, Name: Name,
              IsInverted: IsInverted, DefaultResult: DefaultResult, IsDisabled: IsDisabled);
 
     static class GroupConditionSettings
@@ -57,6 +57,7 @@ namespace TerminalMonitor.Settings.Models
                 MatchMode: ModeToString(obj.MatchMode),
                 Conditions: obj.Conditions?
                     .Select(condition => ConditionSettings.Save(condition)).ToList(),
+                Id: obj.Id,
                 Name: obj.Name,
                 IsInverted: obj.IsInverted,
                 DefaultResult: obj.DefaultResult,
@@ -76,6 +77,7 @@ namespace TerminalMonitor.Settings.Models
                 MatchMode = StringToMode(setting.MatchMode),
                 Conditions = setting.Conditions?
                     .Select(condition => ConditionSettings.Load(condition)),
+                Id = setting.Id,
                 Name = setting.Name,
                 IsInverted = setting.IsInverted,
                 DefaultResult = setting.DefaultResult,

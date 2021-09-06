@@ -16,6 +16,7 @@ namespace TerminalMonitor.Matchers.Models
 
         protected Condition(Condition obj)
         {
+            Id = Guid.NewGuid().ToString();
             Name = obj.Name;
             IsInverted = obj.IsInverted;
             DefaultResult = obj.DefaultResult;
@@ -23,6 +24,8 @@ namespace TerminalMonitor.Matchers.Models
         }
 
         public abstract object Clone();
+
+        public string Id { get; init; }
 
         public string Name { get; set; }
 

@@ -21,6 +21,7 @@ using TerminalMonitor.Execution;
 using TerminalMonitor.Matchers;
 using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
+using Condition = TerminalMonitor.Matchers.Models.Condition;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -371,6 +372,19 @@ namespace TerminalMonitor.Windows.Controls
             set
             {
                 fieldListView.FieldClipboard = value;
+            }
+        }
+
+        public ItemClipboard<Condition> FilterClipboard
+        {
+            get
+            {
+                return filterView.FilterClipboard;
+            }
+
+            set
+            {
+                filterView.FilterClipboard = value;
             }
         }
     }

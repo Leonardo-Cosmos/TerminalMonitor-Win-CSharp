@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TerminalMonitor.Clipboard;
 using TerminalMonitor.Matchers;
 using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
@@ -59,7 +60,18 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void BtnUpdate_Click(object sender, RoutedEventArgs e)
+        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstFilters.SelectedValue is FilterItemVO selectedItem)
+            {
+                var index = filterVOs.IndexOf(selectedItem);
+                filterVOs.RemoveAt(index);
+
+                conditions.RemoveAt(index);
+            }
+        }
+
+        private void BtnModify_Click(object sender, RoutedEventArgs e)
         {
             if (lstFilters.SelectedItem is FilterItemVO selectedItem)
             {
@@ -81,13 +93,65 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        private void btnCopy_Click(object sender, RoutedEventArgs e)
         {
-            if (lstFilters.SelectedValue is FilterItemVO selectedItem)
+            if (lstFilters.SelectedItem is FilterItemVO selectedItem)
             {
                 var index = filterVOs.IndexOf(selectedItem);
-                filterVOs.RemoveAt(index);
-                conditions.RemoveAt(index);
+
+                var condition = conditions[index];
+                FilterClipboard?.Copy(condition);
+            }
+        }
+
+        private void btnPaste_Click(object sender, RoutedEventArgs e)
+        {
+            var condition = FilterClipboard?.Paste();
+            if (condition != null)
+            {
+                condition = (Condition)condition.Clone();
+
+                FilterItemVO item = CreateFilterVO(condition);
+                filterVOs.Add(item);
+                lstFilters.SelectedItem = item;
+
+                conditions.Add(condition);
+            }
+        }
+
+        private void btnMoveLeft_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstFilters.SelectedItem is FilterItemVO selectedItem)
+            {
+                var srcIndex = filterVOs.IndexOf(selectedItem);
+                var dstIndex = (srcIndex - 1 + filterVOs.Count) % filterVOs.Count;
+
+                filterVOs.RemoveAt(srcIndex);
+                filterVOs.Insert(dstIndex, selectedItem);
+
+                lstFilters.SelectedItem = selectedItem;
+
+                var condition = conditions[srcIndex];
+                conditions.RemoveAt(srcIndex);
+                conditions.Insert(dstIndex, condition);
+            }
+        }
+
+        private void btnMoveRight_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstFilters.SelectedItem is FilterItemVO selectedItem)
+            {
+                var srcIndex = filterVOs.IndexOf(selectedItem);
+                var dstIndex = (srcIndex + 1) % filterVOs.Count;
+
+                filterVOs.RemoveAt(srcIndex);
+                filterVOs.Insert(dstIndex, selectedItem);
+
+                lstFilters.SelectedItem = selectedItem;
+
+                var condition = conditions[srcIndex];
+                conditions.RemoveAt(srcIndex);
+                conditions.Insert(dstIndex, condition);
             }
         }
 
@@ -98,6 +162,7 @@ namespace TerminalMonitor.Windows.Controls
             {
                 item = new()
                 {
+                    Id = condition.Id,
                     ConditionName = condition.Name,
                 };
             }
@@ -105,6 +170,7 @@ namespace TerminalMonitor.Windows.Controls
             {
                 item = new()
                 {
+                    Id = condition.Id,
                     FieldKey = fieldCondition.FieldKey,
                     MatchOperator = fieldCondition.MatchOperator,
                     TargetValue = fieldCondition.TargetValue,
@@ -122,7 +188,7 @@ namespace TerminalMonitor.Windows.Controls
             return item;
         }
 
-        internal GroupCondition Condition
+        public GroupCondition Condition
         {
             get
             {
@@ -159,6 +225,11 @@ namespace TerminalMonitor.Windows.Controls
                     }
                 }
             }
+        }
+
+        public ItemClipboard<Condition> FilterClipboard
+        {
+            get; set;
         }
     }
 }

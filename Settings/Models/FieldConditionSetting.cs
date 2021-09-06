@@ -8,8 +8,8 @@ using TerminalMonitor.Matchers.Models;
 namespace TerminalMonitor.Settings.Models
 {
     record FieldConditionSetting(string FieldKey, string MatchOperator, string TargetValue,
-        string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
-        : ConditionSetting(Name: Name,
+        string Id, string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
+        : ConditionSetting(Id: Id, Name: Name,
             IsInverted: IsInverted, DefaultResult: DefaultResult, IsDisabled: IsDisabled);
 
     static class FieldConditionSettings
@@ -60,6 +60,7 @@ namespace TerminalMonitor.Settings.Models
                 FieldKey: obj.FieldKey,
                 MatchOperator: OperatorToString(obj.MatchOperator),
                 TargetValue: obj.TargetValue,
+                Id: obj.Id,
                 Name: obj.Name,
                 IsInverted: obj.IsInverted,
                 DefaultResult: obj.DefaultResult,
@@ -79,6 +80,7 @@ namespace TerminalMonitor.Settings.Models
                 FieldKey = setting.FieldKey,
                 MatchOperator = StringToOperator(setting.MatchOperator),
                 TargetValue = setting.TargetValue,
+                Id = setting.Id ?? Guid.NewGuid().ToString(),
                 Name = setting.Name,
                 IsInverted = setting.IsInverted,
                 DefaultResult = setting.DefaultResult,

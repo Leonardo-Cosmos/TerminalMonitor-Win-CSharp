@@ -18,6 +18,7 @@ using TerminalMonitor.Clipboard;
 using TerminalMonitor.Execution;
 using TerminalMonitor.Models;
 using TerminalMonitor.Parsers;
+using Condition = TerminalMonitor.Matchers.Models.Condition;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -41,6 +42,8 @@ namespace TerminalMonitor.Windows.Controls
         private bool changingTab = false;
 
         private readonly ItemClipboard<FieldDisplayDetail> fieldClipboard = new();
+
+        private readonly ItemClipboard<Condition> filterClipboard = new();
 
         public TerminalTabControl()
         {
@@ -261,6 +264,7 @@ namespace TerminalMonitor.Windows.Controls
             terminalView.VisibleFields = config.VisibleFields;
             terminalView.FilterCondition = config.FilterCondition;
             terminalView.FieldClipboard = fieldClipboard;
+            terminalView.FilterClipboard = filterClipboard;
             terminalView.LineSupervisor = this;
             tab.Content = terminalView;
 
