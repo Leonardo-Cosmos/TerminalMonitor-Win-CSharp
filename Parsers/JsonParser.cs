@@ -15,7 +15,8 @@ namespace TerminalMonitor.Parsers
         {
             try
             {
-                return JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+                var dict = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+                return dict ?? new();
             }
             catch (Exception ex)
             {
