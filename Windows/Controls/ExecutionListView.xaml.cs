@@ -1,6 +1,5 @@
 ﻿/* 2021/6/10 */
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -16,7 +15,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Windows.Threading;
 using TerminalMonitor.Execution;
 using TerminalMonitor.Models;
 
@@ -31,19 +29,11 @@ namespace TerminalMonitor.Windows.Controls
 
         private IExecutor executor;
 
-        private readonly DispatcherTimer refreshExecutionInfoTimer;
-
-        private readonly ConcurrentQueue<ExecutionInfoEventArgs> executionInfoQueue = new();
-
         public ExecutionListView()
         {
             InitializeComponent();
 
             lstExecutions.ItemsSource = executionVOs;
-
-            refreshExecutionInfoTimer = new();
-            refreshExecutionInfoTimer.Tick += RefreshExecutionInfoTimer_Tick;
-            refreshExecutionInfoTimer.Interval = new TimeSpan(0, 0, 0, 1);
         }
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)
@@ -53,69 +43,63 @@ namespace TerminalMonitor.Windows.Controls
             executor.Terminate(executionName);
         }
 
-        private void RefreshExecutionInfoTimer_Tick(object sender, EventArgs e)
+        private void UpdateExecutionInfo(ExecutionInfoEventArgs executionInfoEvent)
         {
-            while (!executionInfoQueue.IsEmpty)
+            if (executionInfoEvent.Execution.Status == ExecutionStatus.Started)
             {
-                if (executionInfoQueue.TryDequeue(out var executionInfoEvent))
+                var executionName = executionInfoEvent.Execution.Name;
+                Debug.WriteLine($"Add {executionName} to list.");
+
+                ExecutionListItemVO item = new()
                 {
-                    if (executionInfoEvent.Execution.Status == ExecutionStatus.Started)
-                    {
-                        var executionName = executionInfoEvent.Execution.Name;
-                        Debug.WriteLine($"Add {executionName} to list.");
+                    Name = executionName,
+                };
+                executionVOs.Add(item);
+            }
+            else if (executionInfoEvent.Execution.Status == ExecutionStatus.Completed)
+            {
+                var executionName = executionInfoEvent.Execution.Name;
+                Debug.WriteLine($"Remove {executionName} from list.");
 
-                        ExecutionListItemVO item = new()
-                        {
-                            Name = executionName,
-                        };
-                        executionVOs.Add(item);
-                    }
-                    else if (executionInfoEvent.Execution.Status == ExecutionStatus.Completed)
-                    {
-                        var executionName = executionInfoEvent.Execution.Name;
-                        Debug.WriteLine($"Remove {executionName} from list.");
+                ExecutionListItemVO item = executionVOs
+                    .FirstOrDefault(execution => execution.Name == executionName);
+                if (item != null)
+                {
+                    executionVOs.Remove(item);
+                    Debug.WriteLine($"Removed {executionName} from list.");
+                }
+            }
+            else if (executionInfoEvent.Execution.Status == ExecutionStatus.Error)
+            {
+                var executionName = executionInfoEvent.Execution.Name;
+                Debug.WriteLine($"Remove {executionName} from list.");
 
-                        ExecutionListItemVO item = executionVOs
-                            .FirstOrDefault(execution => execution.Name == executionName);
-                        if (item != null)
-                        {
-                            executionVOs.Remove(item);
-                            Debug.WriteLine($"Removed {executionName} from list.");
-                        }
-                    }
-                    else if (executionInfoEvent.Execution.Status == ExecutionStatus.Error)
-                    {
-                        var executionName = executionInfoEvent.Execution.Name;
-                        Debug.WriteLine($"Remove {executionName} from list.");
+                ExecutionListItemVO item = executionVOs
+                    .FirstOrDefault(execution => execution.Name == executionName);
+                if (item != null)
+                {
+                    executionVOs.Remove(item);
+                    Debug.WriteLine($"Removed {executionName} from list.");
+                }
 
-                        ExecutionListItemVO item = executionVOs
-                            .FirstOrDefault(execution => execution.Name == executionName);
-                        if (item != null)
-                        {
-                            executionVOs.Remove(item);
-                            Debug.WriteLine($"Removed {executionName} from list.");
-                        }
-
-                        if (executionInfoEvent.Exception != null)
-                        {
-                            Debug.WriteLine($"Execution exception: {executionInfoEvent.Exception.Message}");
-                            Debug.WriteLine(executionInfoEvent.Exception.StackTrace);
-                            MessageBox.Show(executionInfoEvent.Exception.Message, "Error during execution",
-                                MessageBoxButton.OK, MessageBoxImage.Warning);
-                        }
-                    }
+                if (executionInfoEvent.Exception != null)
+                {
+                    Debug.WriteLine($"Execution exception: {executionInfoEvent.Exception.Message}");
+                    Debug.WriteLine(executionInfoEvent.Exception.StackTrace);
+                    MessageBox.Show(executionInfoEvent.Exception.Message, "Error during execution",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
         }
 
         private void Executor_ExecutionStarted(object sender, ExecutionInfoEventArgs e)
         {
-            executionInfoQueue.Enqueue(e);
+            this.Dispatcher.Invoke(() => this.UpdateExecutionInfo(e));
         }
 
         private void Executor_ExecutionExited(object sender, ExecutionInfoEventArgs e)
         {
-            executionInfoQueue.Enqueue(e);
+            this.Dispatcher.Invoke(() => this.UpdateExecutionInfo(e));
         }
 
         public IExecutor Executor
@@ -135,12 +119,6 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     executor.ExecutionStarted += Executor_ExecutionStarted;
                     executor.ExecutionExited += Executor_ExecutionExited;
-
-                    refreshExecutionInfoTimer.Start();
-                }
-                else
-                {
-                    refreshExecutionInfoTimer.Stop();
                 }
             }
         }

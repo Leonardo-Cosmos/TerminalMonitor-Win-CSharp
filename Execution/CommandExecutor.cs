@@ -42,10 +42,11 @@ namespace TerminalMonitor.Execution
                 Debug.Print($"Executor {name} completed.");
             };
 
+            AddExecution(name, execution);
+
             execution.Start();
 
             Debug.Print($"Executor {name} is started");
-            AddExecution(name, execution);
         }
 
         public void Terminate(string executionName)
