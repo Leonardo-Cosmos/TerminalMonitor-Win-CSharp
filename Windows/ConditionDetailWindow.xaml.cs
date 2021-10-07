@@ -107,6 +107,8 @@ namespace TerminalMonitor.Windows
                 {
                     siblings.Remove(conditionNodeVO);
                     siblings.Insert(index - 1, conditionNodeVO);
+
+                    SelectConditionTreeNode(conditionNodeVO);
                 }
             }
         }
@@ -123,6 +125,8 @@ namespace TerminalMonitor.Windows
                 {
                     siblings.Remove(conditionNodeVO);
                     siblings.Insert(index + 1, conditionNodeVO);
+
+                    SelectConditionTreeNode(conditionNodeVO);
                 }
             }
         }
@@ -141,6 +145,17 @@ namespace TerminalMonitor.Windows
             }
 
             DialogResult = true;
+        }
+
+        private void SelectConditionTreeNode(ConditionNodeVO conditionVO)
+        {
+            var treeViewItem = 
+                trConditions.ItemContainerGenerator.ContainerFromItem(conditionVO) as TreeViewItem;
+
+            if (treeViewItem != null)
+            {
+                treeViewItem.IsSelected = true;
+            }
         }
 
         private static ConditionNodeVO ToVO(Condition condition)
