@@ -21,6 +21,7 @@ using TerminalMonitor.Execution;
 using TerminalMonitor.Matchers;
 using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
+using TerminalMonitor.Windows.Converters;
 using Condition = TerminalMonitor.Matchers.Models.Condition;
 
 namespace TerminalMonitor.Windows.Controls
@@ -44,6 +45,10 @@ namespace TerminalMonitor.Windows.Controls
         private readonly TerminalViewDataContextVO dataContextVO = new();
 
         private readonly Dictionary<string, bool> matchedLineDict = new();
+
+        private static readonly IntToHorizontalAlignmentConverter horizontalAlignmentConverter = new();
+
+        private static readonly IntToVerticalAlignmentConverter verticalAlignmentConverter = new();
 
         public TerminalView()
         {
@@ -145,6 +150,16 @@ namespace TerminalMonitor.Windows.Controls
             return $"{columnName!}__background";
         }
 
+        private static string GetTextHorizontalAlignmentColumnName(string columnName)
+        {
+            return $"{columnName!}__textHorizontalAlignment";
+        }
+
+        private static string GetTextVertialAlignmentColumnName(string columnName)
+        {
+            return $"{columnName!}__textVerticalAlignment";
+        }
+
         private void ApplyVisibleField()
         {
             GridView gridView = new();
@@ -221,22 +236,46 @@ namespace TerminalMonitor.Windows.Controls
             backgroundColumn.DataType = typeof(Brush);
             terminalDataTable.Columns.Add(backgroundColumn);
 
-            FrameworkElementFactory fef = new(typeof(TextBlock));
+            DataColumn textHorizontalAlignmentColumn = new(GetTextHorizontalAlignmentColumnName(visibleField.Id));
+            textHorizontalAlignmentColumn.DataType = typeof(HorizontalAlignment);
+            terminalDataTable.Columns.Add(textHorizontalAlignmentColumn);
+
+            DataColumn textVerticalAlignmentColumn = new(GetTextVertialAlignmentColumnName(visibleField.Id));
+            textVerticalAlignmentColumn.DataType = typeof(VerticalAlignment);
+            terminalDataTable.Columns.Add(textVerticalAlignmentColumn);
+
+            FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
 
             Binding textBinding = new();
             textBinding.Path = new PropertyPath(visibleField.Id, Array.Empty<object>());
-            fef.SetBinding(TextBlock.TextProperty, textBinding);
+            textBlockElement.SetBinding(TextBlock.TextProperty, textBinding);
 
             Binding foregroundBinding = new();
             foregroundBinding.Path = new PropertyPath(GetForegroundColumnName(visibleField.Id), Array.Empty<object>());
-            fef.SetBinding(TextBlock.ForegroundProperty, foregroundBinding);
+            textBlockElement.SetBinding(TextBlock.ForegroundProperty, foregroundBinding);
 
             Binding backgroundBinding = new();
             backgroundBinding.Path = new PropertyPath(GetBackgroundColumnName(visibleField.Id), Array.Empty<object>());
-            fef.SetBinding(TextBlock.BackgroundProperty, backgroundBinding);
+            textBlockElement.SetBinding(TextBlock.BackgroundProperty, backgroundBinding);
+
+            Binding textHorizontalAlignmentBinding = new();
+            textHorizontalAlignmentBinding.Path = 
+                new PropertyPath(GetTextHorizontalAlignmentColumnName(visibleField.Id), Array.Empty<object>());
+            textHorizontalAlignmentBinding.Converter = horizontalAlignmentConverter;
+            textBlockElement.SetBinding(TextBlock.HorizontalAlignmentProperty, textHorizontalAlignmentBinding);
+
+            Binding textVerticalAlignmentBinding = new();
+            textVerticalAlignmentBinding.Path =
+                new PropertyPath(GetTextVertialAlignmentColumnName(visibleField.Id), Array.Empty<object>());
+            textVerticalAlignmentBinding.Converter = verticalAlignmentConverter;
+            textBlockElement.SetBinding(TextBlock.VerticalAlignmentProperty, textVerticalAlignmentBinding);
+
+            FrameworkElementFactory panelElement = new(typeof(DockPanel));
+            panelElement.SetValue(DockPanel.BackgroundProperty, Brushes.Black);
+            panelElement.AppendChild(textBlockElement);
 
             DataTemplate dataTemplate = new();
-            dataTemplate.VisualTree = fef;
+            dataTemplate.VisualTree = panelElement;
             return dataTemplate;
         }
 
@@ -263,6 +302,8 @@ namespace TerminalMonitor.Windows.Controls
 
                         row[GetForegroundColumnName(visibleField.Id)] = new SolidColorBrush(textStyle.Foreground);
                         row[GetBackgroundColumnName(visibleField.Id)] = new SolidColorBrush(textStyle.Background);
+                        row[GetTextHorizontalAlignmentColumnName(visibleField.Id)] = HorizontalAlignment.Center;
+                        row[GetTextVertialAlignmentColumnName(visibleField.Id)] = VerticalAlignment.Center;
                     }
                 }
             }
