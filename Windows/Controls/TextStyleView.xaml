@@ -7,15 +7,35 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=local:TextStyleViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="800">
-
-    <WrapPanel Name="wrpPnl" Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-        <Label Name="lblForeground" Content="Foreground" />
-        <Rectangle Name="rctForeground" Width="10" Height="10" Margin="0, 0, 10, 0"
+    <StackPanel Orientation="Vertical">
+        <GroupBox Header="Color">
+            <WrapPanel Name="wrpPnl" Orientation="Horizontal">
+                <CheckBox Name="chkBxTextForeground" Content="Text foreground" VerticalAlignment="Center" />
+                <Rectangle Name="rctTextForeground" Width="10" Height="10" Margin="5, 0, 10, 0"
                    Fill="{Binding Foreground}" Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
                    MouseDown="RctForeground_MouseDown" />
-        <Label Name="lblBackground" Content="Background" />
-        <Rectangle Name="rctBackground" Width="10" Height="10" Margin="0, 0, 10, 0"
+                <CheckBox Name="chkBxTextBackground" Content="Text background" />
+                <Rectangle Name="rctTextBackground" Width="10" Height="10" Margin="5, 0, 10, 0"
                    Fill="{Binding Background}" Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
                    MouseDown="RctBackground_MouseDown" />
-    </WrapPanel>
+                <CheckBox Name="chkBoCellBackground" Content="Cell background" />
+                <Rectangle Name="rctCellBackground" Width="10" Height="10" Margin="5, 0, 10, 0"
+                   Fill="{Binding Background}" Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                   MouseDown="RctBackground_MouseDown" />
+            </WrapPanel>
+        </GroupBox>
+        <GroupBox Header="Alignment">
+            <StackPanel Orientation="Vertical">
+                <WrapPanel Orientation="Horizontal">
+                    <CheckBox Name="chkBoHorizontalAlignment" Content="Horizontal alignment" />
+                </WrapPanel>
+                <WrapPanel Orientation="Horizontal">
+                    <CheckBox Name="chkBoVerticalAlignment" Content="Vertical alignment" />
+                </WrapPanel>
+                <WrapPanel Orientation="Horizontal">
+                    <CheckBox Name="chkBoTextAlignment" Content="Text alignment" />
+                </WrapPanel>
+            </StackPanel>
+        </GroupBox>
+    </StackPanel>
 </UserControl>
