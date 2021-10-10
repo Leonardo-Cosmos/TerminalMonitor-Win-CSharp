@@ -24,7 +24,7 @@ namespace TerminalMonitor.Windows.Controls
     public partial class TextStyleView : UserControl
     {
         public static readonly DependencyProperty TextStyleProperty =
-            DependencyProperty.Register("TextStyle", typeof(TextStyle), typeof(TextStyleView),
+            DependencyProperty.Register(nameof(TextStyle), typeof(TextStyle), typeof(TextStyleView),
                 new PropertyMetadata(TextStyle.Empty, OnTextStyleChanged));
 
         private TextStyle textStyle;
@@ -33,13 +33,14 @@ namespace TerminalMonitor.Windows.Controls
         {
             Foreground = Brushes.Black,
             Background = Brushes.White,
+            CellBackground = Brushes.White,
         };
 
         public TextStyleView()
         {
             InitializeComponent();
 
-            wrpPnl.DataContext = dataContextVO;
+            pnl.DataContext = dataContextVO;
             dataContextVO.PropertyChanged += OnDataContextPropertyChanged;
         }
 
@@ -58,7 +59,6 @@ namespace TerminalMonitor.Windows.Controls
             }
             else
             {
-
                 return null;
             }
         }
@@ -81,16 +81,75 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private void RctCellBackground_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var brush = ShowColorDialog(dataContextVO.CellBackground as SolidColorBrush);
+            if (brush != null)
+            {
+                dataContextVO.CellBackground = brush;
+            }
+        }
+
         private void OnDataContextPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
-                case "Foreground":
+                case nameof(TextStyleViewDataContextVO.Foreground):
                     textStyle.Foreground = (dataContextVO.Foreground as SolidColorBrush).Color;
                     break;
-                case "Background":
+                case nameof(TextStyleViewDataContextVO.Background):
                     textStyle.Background = (dataContextVO.Background as SolidColorBrush).Color;
                     break;
+                case nameof(TextStyleViewDataContextVO.CellBackground):
+                    textStyle.CellBackground = (dataContextVO.CellBackground as SolidColorBrush).Color;
+                    break;
+                case nameof(TextStyleViewDataContextVO.HorizontalAlignment):
+                    textStyle.HorizontalAlignment = dataContextVO.HorizontalAlignment;
+                    break;
+                case nameof(TextStyleViewDataContextVO.VerticalAlignment):
+                    textStyle.VerticalAlignment = dataContextVO.VerticalAlignment;
+                    break;
+                case nameof(TextStyleViewDataContextVO.TextAlignment):
+                    textStyle.TextAlignment = dataContextVO.TextAlignment;
+                    break;
+
+                case nameof(TextStyleViewDataContextVO.EnableForeground):
+                    if (!dataContextVO.EnableForeground)
+                    {
+                        textStyle.Foreground = null;
+                    }
+                    break;
+                case nameof(TextStyleViewDataContextVO.EnableBackground):
+                    if (!dataContextVO.EnableBackground)
+                    {
+                        textStyle.Background = null;
+                    }
+                    break;
+                case nameof(TextStyleViewDataContextVO.EnableCellBackground):
+                    if (!dataContextVO.EnableCellBackground)
+                    {
+                        textStyle.CellBackground = null;
+                    }
+                    break;
+                case nameof(TextStyleViewDataContextVO.EnableHorizontalAlignment):
+                    if (!dataContextVO.EnableHorizontalAlignment)
+                    {
+                        textStyle.HorizontalAlignment = null;
+                    }
+                    break;
+                case nameof(TextStyleViewDataContextVO.EnableVerticalAlignment):
+                    if (!dataContextVO.EnableVerticalAlignment)
+                    {
+                        textStyle.VerticalAlignment = null;
+                    }
+                    break;
+                case nameof(TextStyleViewDataContextVO.EnableTextAlignment):
+                    if (!dataContextVO.EnableTextAlignment)
+                    {
+                        textStyle.TextAlignment = null;
+                    }
+                    break;
+
                 default:
                     break;
             }
@@ -107,15 +166,48 @@ namespace TerminalMonitor.Windows.Controls
             textStyle = e.NewValue as TextStyle;
             if (textStyle != null)
             {
-                dataContextVO.Foreground = new SolidColorBrush(textStyle.Foreground);
-                dataContextVO.Background = new SolidColorBrush(textStyle.Background);
+                dataContextVO.EnableForeground = textStyle.Foreground.HasValue;
+                if (textStyle.Foreground.HasValue)
+                {
+                    dataContextVO.Foreground = new SolidColorBrush(textStyle.Foreground.Value);
+                }
+
+                dataContextVO.EnableBackground = textStyle.Background.HasValue;
+                if (textStyle.Background.HasValue)
+                {
+                    dataContextVO.Background = new SolidColorBrush(textStyle.Background.Value);
+                }
+
+                dataContextVO.EnableCellBackground = textStyle.CellBackground.HasValue;
+                if (textStyle.CellBackground.HasValue)
+                {
+                    dataContextVO.CellBackground = new SolidColorBrush(textStyle.CellBackground.Value);
+                }
+
+                dataContextVO.EnableHorizontalAlignment = textStyle.HorizontalAlignment.HasValue;
+                if (textStyle.HorizontalAlignment.HasValue)
+                {
+                    dataContextVO.HorizontalAlignment = textStyle.HorizontalAlignment.Value;
+                }
+
+                dataContextVO.EnableVerticalAlignment = textStyle.VerticalAlignment.HasValue;
+                if (textStyle.VerticalAlignment.HasValue)
+                {
+                    dataContextVO.VerticalAlignment = textStyle.VerticalAlignment.Value;
+                }
+
+                dataContextVO.EnableTextAlignment = textStyle.TextAlignment.HasValue;
+                if (textStyle.TextAlignment.HasValue)
+                {
+                    dataContextVO.TextAlignment = textStyle.TextAlignment.Value;
+                }
             }
         }
 
         public TextStyle TextStyle
         {
-            get { return (TextStyle)GetValue(TextStyleProperty); }
-            set { SetValue(TextStyleProperty, value); }
+            get => (TextStyle)GetValue(TextStyleProperty);
+            set => SetValue(TextStyleProperty, value);
         }
     }
 }

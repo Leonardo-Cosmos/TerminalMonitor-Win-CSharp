@@ -46,10 +46,6 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly Dictionary<string, bool> matchedLineDict = new();
 
-        private static readonly IntToHorizontalAlignmentConverter horizontalAlignmentConverter = new();
-
-        private static readonly IntToVerticalAlignmentConverter verticalAlignmentConverter = new();
-
         public TerminalView()
         {
             InitializeComponent();
@@ -140,26 +136,6 @@ namespace TerminalMonitor.Windows.Controls
             AddMatchedTerminalLines();
         }
 
-        private static string GetForegroundColumnName(string columnName)
-        {
-            return $"{columnName!}__foreground";
-        }
-
-        private static string GetBackgroundColumnName(string columnName)
-        {
-            return $"{columnName!}__background";
-        }
-
-        private static string GetTextHorizontalAlignmentColumnName(string columnName)
-        {
-            return $"{columnName!}__textHorizontalAlignment";
-        }
-
-        private static string GetTextVertialAlignmentColumnName(string columnName)
-        {
-            return $"{columnName!}__textVerticalAlignment";
-        }
-
         private void ApplyVisibleField()
         {
             GridView gridView = new();
@@ -184,7 +160,7 @@ namespace TerminalMonitor.Windows.Controls
 
                     if (visibleField.CustomizeStyle)
                     {
-                        DataTemplate dataTemplate = BuildFieldDataTemplate(visibleField, terminalDataTable);
+                        DataTemplate dataTemplate = TerminalViewHelper.BuildFieldDataTemplate(visibleField, terminalDataTable);
 
                         gridView.Columns.Add(new GridViewColumn()
                         {
@@ -226,59 +202,6 @@ namespace TerminalMonitor.Windows.Controls
             listTerminal.SetBinding(ItemsControl.ItemsSourceProperty, binding);
         }
 
-        private static DataTemplate BuildFieldDataTemplate(FieldDisplayDetail visibleField, DataTable terminalDataTable)
-        {
-            DataColumn foregroundColumn = new(GetForegroundColumnName(visibleField.Id));
-            foregroundColumn.DataType = typeof(Brush);
-            terminalDataTable.Columns.Add(foregroundColumn);
-
-            DataColumn backgroundColumn = new(GetBackgroundColumnName(visibleField.Id));
-            backgroundColumn.DataType = typeof(Brush);
-            terminalDataTable.Columns.Add(backgroundColumn);
-
-            DataColumn textHorizontalAlignmentColumn = new(GetTextHorizontalAlignmentColumnName(visibleField.Id));
-            textHorizontalAlignmentColumn.DataType = typeof(HorizontalAlignment);
-            terminalDataTable.Columns.Add(textHorizontalAlignmentColumn);
-
-            DataColumn textVerticalAlignmentColumn = new(GetTextVertialAlignmentColumnName(visibleField.Id));
-            textVerticalAlignmentColumn.DataType = typeof(VerticalAlignment);
-            terminalDataTable.Columns.Add(textVerticalAlignmentColumn);
-
-            FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
-
-            Binding textBinding = new();
-            textBinding.Path = new PropertyPath(visibleField.Id, Array.Empty<object>());
-            textBlockElement.SetBinding(TextBlock.TextProperty, textBinding);
-
-            Binding foregroundBinding = new();
-            foregroundBinding.Path = new PropertyPath(GetForegroundColumnName(visibleField.Id), Array.Empty<object>());
-            textBlockElement.SetBinding(TextBlock.ForegroundProperty, foregroundBinding);
-
-            Binding backgroundBinding = new();
-            backgroundBinding.Path = new PropertyPath(GetBackgroundColumnName(visibleField.Id), Array.Empty<object>());
-            textBlockElement.SetBinding(TextBlock.BackgroundProperty, backgroundBinding);
-
-            Binding textHorizontalAlignmentBinding = new();
-            textHorizontalAlignmentBinding.Path = 
-                new PropertyPath(GetTextHorizontalAlignmentColumnName(visibleField.Id), Array.Empty<object>());
-            textHorizontalAlignmentBinding.Converter = horizontalAlignmentConverter;
-            textBlockElement.SetBinding(TextBlock.HorizontalAlignmentProperty, textHorizontalAlignmentBinding);
-
-            Binding textVerticalAlignmentBinding = new();
-            textVerticalAlignmentBinding.Path =
-                new PropertyPath(GetTextVertialAlignmentColumnName(visibleField.Id), Array.Empty<object>());
-            textVerticalAlignmentBinding.Converter = verticalAlignmentConverter;
-            textBlockElement.SetBinding(TextBlock.VerticalAlignmentProperty, textVerticalAlignmentBinding);
-
-            FrameworkElementFactory panelElement = new(typeof(DockPanel));
-            panelElement.SetValue(DockPanel.BackgroundProperty, Brushes.Black);
-            panelElement.AppendChild(textBlockElement);
-
-            DataTemplate dataTemplate = new();
-            dataTemplate.VisualTree = panelElement;
-            return dataTemplate;
-        }
-
         private void AddTerminalLine(TerminalLineDto terminalLineDto)
         {
             DataRow row = terminalDataTable.NewRow();
@@ -298,12 +221,8 @@ namespace TerminalMonitor.Windows.Controls
                     {
                         var matchedTextStyleCondition = visibleField.Conditions.FirstOrDefault(
                             textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineDto, textStyleCondition.Condition));
-                        var textStyle = matchedTextStyleCondition?.Style ?? visibleField.Style;
 
-                        row[GetForegroundColumnName(visibleField.Id)] = new SolidColorBrush(textStyle.Foreground);
-                        row[GetBackgroundColumnName(visibleField.Id)] = new SolidColorBrush(textStyle.Background);
-                        row[GetTextHorizontalAlignmentColumnName(visibleField.Id)] = HorizontalAlignment.Center;
-                        row[GetTextVertialAlignmentColumnName(visibleField.Id)] = VerticalAlignment.Center;
+                        TerminalViewHelper.BuildDataRowStyleCells(row, visibleField, matchedTextStyleCondition?.Style);
                     }
                 }
             }

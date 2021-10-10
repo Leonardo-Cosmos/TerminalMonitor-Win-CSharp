@@ -1,5 +1,6 @@
 ﻿/* 2021/5/22 */
 using System;
+using System.Windows;
 using System.Windows.Media;
 
 namespace TerminalMonitor.Models
@@ -8,13 +9,19 @@ namespace TerminalMonitor.Models
     {
         public static TextStyle Empty => new()
         {
-            Foreground = Colors.Black,
-            Background = Colors.White,
         };
 
-        public Color Foreground { get; set; }
+        public Color? Foreground { get; set; }
 
-        public Color Background { get; set; }
+        public Color? Background { get; set; }
+
+        public Color? CellBackground { get; set; }
+
+        public HorizontalAlignment? HorizontalAlignment { get; set; }
+
+        public VerticalAlignment? VerticalAlignment { get; set; }
+
+        public TextAlignment? TextAlignment { get; set; }
 
         public object Clone()
         {
@@ -22,6 +29,10 @@ namespace TerminalMonitor.Models
             {
                 Foreground = this.Foreground,
                 Background = this.Background,
+                CellBackground = this.CellBackground,
+                HorizontalAlignment = this.HorizontalAlignment,
+                VerticalAlignment = this.VerticalAlignment,
+                TextAlignment = this.TextAlignment,
             };
         }
     }

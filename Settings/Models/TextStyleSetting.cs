@@ -3,7 +3,8 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record TextStyleSetting(ColorSetting Foreground, ColorSetting Background);
+    record TextStyleSetting(ColorSetting Foreground, ColorSetting Background, ColorSetting CellBackground,
+        string HorizontalAlignment, string VerticalAlignment, string TextAlignment);
 
     static class TextStyleSettings
     {
@@ -16,7 +17,11 @@ namespace TerminalMonitor.Settings.Models
 
             return new TextStyleSetting(
                 Foreground: ColorSettings.Save(obj.Foreground),
-                Background: ColorSettings.Save(obj.Background)
+                Background: ColorSettings.Save(obj.Background),
+                CellBackground: ColorSettings.Save(obj.CellBackground),
+                HorizontalAlignment: HorizontalAlignmentSettings.Save(obj.HorizontalAlignment),
+                VerticalAlignment: VerticalAlignmentSettings.Save(obj.VerticalAlignment),
+                TextAlignment: TextAlignmentSettings.Save(obj.TextAlignment)
                 );
         }
 
@@ -31,6 +36,10 @@ namespace TerminalMonitor.Settings.Models
             {
                 Foreground = ColorSettings.Load(setting.Foreground),
                 Background = ColorSettings.Load(setting.Background),
+                CellBackground = ColorSettings.Load(setting.CellBackground),
+                HorizontalAlignment = HorizontalAlignmentSettings.Load(setting.HorizontalAlignment),
+                VerticalAlignment = VerticalAlignmentSettings.Load(setting.VerticalAlignment),
+                TextAlignment = TextAlignmentSettings.Load(setting.TextAlignment),
             };
         }
     }

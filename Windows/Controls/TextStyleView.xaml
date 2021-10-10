@@ -7,35 +7,96 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=local:TextStyleViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="800">
-    <StackPanel Orientation="Vertical">
+    <WrapPanel Name="pnl" Orientation="Horizontal">
+        <WrapPanel.Resources>
+            <ResourceDictionary>
+                <Style TargetType="CheckBox">
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+                <Style TargetType="Label">
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+                <Style TargetType="Rectangle">
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+                <Style TargetType="WrapPanel">
+                    <Setter Property="Margin" Value="0, 4, 0, 4" />
+                </Style>
+                <Style TargetType="StackPanel">
+                    <Setter Property="Margin" Value="4, 0, 8, 0" />
+                </Style>
+            </ResourceDictionary>
+        </WrapPanel.Resources>
+        
         <GroupBox Header="Color">
-            <WrapPanel Name="wrpPnl" Orientation="Horizontal">
-                <CheckBox Name="chkBxTextForeground" Content="Text foreground" VerticalAlignment="Center" />
-                <Rectangle Name="rctTextForeground" Width="10" Height="10" Margin="5, 0, 10, 0"
-                   Fill="{Binding Foreground}" Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                   MouseDown="RctForeground_MouseDown" />
-                <CheckBox Name="chkBxTextBackground" Content="Text background" />
-                <Rectangle Name="rctTextBackground" Width="10" Height="10" Margin="5, 0, 10, 0"
-                   Fill="{Binding Background}" Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                   MouseDown="RctBackground_MouseDown" />
-                <CheckBox Name="chkBoCellBackground" Content="Cell background" />
-                <Rectangle Name="rctCellBackground" Width="10" Height="10" Margin="5, 0, 10, 0"
-                   Fill="{Binding Background}" Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                   MouseDown="RctBackground_MouseDown" />
+            <WrapPanel Name="wrpPnlColor" Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Name="chkBxForeground" IsChecked="{Binding EnableForeground}"/>
+                    <Label Name="lblForeground" Content="Foreground" IsEnabled="{Binding EnableForeground}" />
+                    <Rectangle Name="rctForeground" Width="10" Height="10"
+                               Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                               Fill="{Binding Foreground}" IsEnabled="{Binding EnableForeground}"
+                               MouseDown="RctForeground_MouseDown" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Name="chkBxBackground" IsChecked="{Binding EnableBackground}" />
+                    <Label Name="lblBackground" Content="Background" IsEnabled="{Binding EnableBackground}" />
+                    <Rectangle Name="rctBackground" Width="10" Height="10"
+                               Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                               Fill="{Binding Background}" IsEnabled="{Binding EnableBackground}"
+                               MouseDown="RctBackground_MouseDown" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Name="chkBoCellBackground" IsChecked="{Binding EnableCellBackground}" />
+                    <Label Name="lblCellBackground" Content="Cell background" IsEnabled="{Binding EnableCellBackground}" />
+                    <Rectangle Name="rctCellBackground" Width="10" Height="10"
+                               Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                               Fill="{Binding CellBackground}" IsEnabled="{Binding EnableCellBackground}"
+                               MouseDown="RctCellBackground_MouseDown" />
+                </StackPanel>
             </WrapPanel>
         </GroupBox>
         <GroupBox Header="Alignment">
-            <StackPanel Orientation="Vertical">
-                <WrapPanel Orientation="Horizontal">
-                    <CheckBox Name="chkBoHorizontalAlignment" Content="Horizontal alignment" />
-                </WrapPanel>
-                <WrapPanel Orientation="Horizontal">
-                    <CheckBox Name="chkBoVerticalAlignment" Content="Vertical alignment" />
-                </WrapPanel>
-                <WrapPanel Orientation="Horizontal">
-                    <CheckBox Name="chkBoTextAlignment" Content="Text alignment" />
-                </WrapPanel>
-            </StackPanel>
+            <WrapPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Name="chkBoHorizontalAlignment" IsChecked="{Binding EnableHorizontalAlignment}" />
+                    <Label Name="lblHorizontalAlignment" Content="Horizontal alignment" IsEnabled="{Binding EnableHorizontalAlignment}" />
+                    <ComboBox Name="cmbBxHorizontalAlignment" IsEnabled="{Binding EnableHorizontalAlignment}"
+                              ItemsSource="{StaticResource HorizontalAlignmentValues}" SelectedValue="{Binding HorizontalAlignment}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource HorizontalAlignmentToStringConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Name="chkBoVerticalAlignment" IsChecked="{Binding EnableVerticalAlignment}" />
+                    <Label Name="lblVerticalAlignment" Content="Vertical alignment" IsEnabled="{Binding EnableVerticalAlignment}" />
+                    <ComboBox Name="cmbBxVerticalAlignment" IsEnabled="{Binding EnableVerticalAlignment}"
+                              ItemsSource="{StaticResource VerticalAlignmentValues}" SelectedValue="{Binding VerticalAlignment}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource VerticalAlignmentToStringConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Name="chkBoTextAlignment" IsChecked="{Binding EnableTextAlignment}" />
+                    <Label Name="lblTextAlignment" Content="Text alignment" IsEnabled="{Binding EnableTextAlignment}" />
+                    <ComboBox Name="cmbBxTextAlignment" IsEnabled="{Binding EnableTextAlignment}"
+                              ItemsSource="{StaticResource TextAlignmentValues}" SelectedValue="{Binding TextAlignment}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource TextAlignmentToStringConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+            </WrapPanel>
         </GroupBox>
-    </StackPanel>
+    </WrapPanel>
 </UserControl>

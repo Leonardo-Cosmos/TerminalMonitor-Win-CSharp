@@ -1,6 +1,7 @@
 ﻿/* 2021/5/23 */
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Media;
 
 namespace TerminalMonitor.Windows.Controls
@@ -14,14 +15,38 @@ namespace TerminalMonitor.Windows.Controls
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        private bool enableForeground;
+
+        public bool EnableForeground
+        {
+            get => enableForeground;
+            set
+            {
+                enableForeground = value;
+                OnPropertyChanged();
+            }
+        }
+
         private Brush foreground;
 
         public Brush Foreground
         {
-            get { return foreground; }
+            get => foreground;
             set
             {
                 foreground = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool enableBackground;
+
+        public bool EnableBackground
+        {
+            get => enableBackground;
+            set
+            {
+                enableBackground = value;
                 OnPropertyChanged();
             }
         }
@@ -30,10 +55,106 @@ namespace TerminalMonitor.Windows.Controls
 
         public Brush Background
         {
-            get { return background; }
+            get => background;
             set
             {
                 background = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool enableCellbackground;
+
+        public bool EnableCellBackground
+        {
+            get => enableCellbackground;
+            set
+            {
+                enableCellbackground = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Brush cellBackground;
+
+        public Brush CellBackground
+        {
+            get => cellBackground;
+            set
+            {
+                cellBackground = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool enableHorizontalAlignment;
+
+        public bool EnableHorizontalAlignment
+        {
+            get => enableHorizontalAlignment;
+            set
+            {
+                enableHorizontalAlignment = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private HorizontalAlignment horizontalAlignment;
+
+        public HorizontalAlignment HorizontalAlignment
+        {
+            get => horizontalAlignment;
+            set
+            {
+                horizontalAlignment = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool enableVerticalAlignment;
+
+        public bool EnableVerticalAlignment
+        {
+            get => enableVerticalAlignment;
+            set
+            {
+                enableVerticalAlignment = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private VerticalAlignment verticalAlignment;
+
+        public VerticalAlignment VerticalAlignment
+        {
+            get => verticalAlignment;
+            set
+            {
+                verticalAlignment = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool enableTextAlignment;
+
+        public bool EnableTextAlignment
+        {
+            get => enableTextAlignment;
+            set
+            {
+                enableTextAlignment = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private TextAlignment textAlignment;
+
+        public TextAlignment TextAlignment
+        {
+            get => textAlignment;
+            set
+            {
+                textAlignment = value;
                 OnPropertyChanged();
             }
         }

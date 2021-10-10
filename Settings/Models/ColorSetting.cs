@@ -7,21 +7,28 @@ namespace TerminalMonitor.Settings.Models
 
     static class ColorSettings
     {
-        public static ColorSetting Save(Color obj)
+        public static ColorSetting Save(Color? obj)
         {
-            return new ColorSetting(
-                A: obj.A,
-                R: obj.R,
-                G: obj.G,
-                B: obj.B
-            );
+            if (obj.HasValue)
+            {
+                var value = obj.Value;
+                return new ColorSetting(
+                    A: value.A,
+                    R: value.R,
+                    G: value.G,
+                    B: value.B
+                );
+            } else
+            {
+                return null;
+            }
         }
 
-        public static Color Load(ColorSetting setting)
+        public static Color? Load(ColorSetting setting)
         {
             if (setting == null)
             {
-                return Colors.Transparent;
+                return null;
             }
 
             return Color.FromArgb(setting.A, setting.R, setting.G, setting.B);
