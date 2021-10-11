@@ -22,4 +22,31 @@
     
     <converters:MatchModeToStringConverter x:Key="MatchModeToStringConverter" />
 
+    <x:Array x:Key="HorizontalAlignmentValues" Type="windows:HorizontalAlignment" xmlns:windows="clr-namespace:System.Windows;assembly=PresentationFramework">
+        <windows:HorizontalAlignment>Left</windows:HorizontalAlignment>
+        <windows:HorizontalAlignment>Center</windows:HorizontalAlignment>
+        <windows:HorizontalAlignment>Right</windows:HorizontalAlignment>
+        <windows:HorizontalAlignment>Stretch</windows:HorizontalAlignment>
+    </x:Array>
+
+    <converters:HorizontalAlignmentToStringConverter x:Key="HorizontalAlignmentToStringConverter" />
+
+    <x:Array x:Key="VerticalAlignmentValues" Type="windows:VerticalAlignment" xmlns:windows="clr-namespace:System.Windows;assembly=PresentationFramework">
+        <windows:VerticalAlignment>Top</windows:VerticalAlignment>
+        <windows:VerticalAlignment>Center</windows:VerticalAlignment>
+        <windows:VerticalAlignment>Bottom</windows:VerticalAlignment>
+        <windows:VerticalAlignment>Stretch</windows:VerticalAlignment>
+    </x:Array>
+
+    <converters:VerticalAlignmentToStringConverter x:Key="VerticalAlignmentToStringConverter" />
+
+    <x:Array x:Key="TextAlignmentValues" Type="windows:TextAlignment" xmlns:windows="clr-namespace:System.Windows;assembly=PresentationCore">
+        <windows:TextAlignment>Left</windows:TextAlignment>
+        <windows:TextAlignment>Right</windows:TextAlignment>
+        <windows:TextAlignment>Center</windows:TextAlignment>
+        <windows:TextAlignment>Justify</windows:TextAlignment>
+    </x:Array>
+
+    <converters:TextAlignmentToStringConverter x:Key="TextAlignmentToStringConverter" />
+
 </ResourceDictionary>

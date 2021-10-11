@@ -21,6 +21,7 @@ using TerminalMonitor.Execution;
 using TerminalMonitor.Matchers;
 using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
+using TerminalMonitor.Windows.Converters;
 using Condition = TerminalMonitor.Matchers.Models.Condition;
 
 namespace TerminalMonitor.Windows.Controls
@@ -135,16 +136,6 @@ namespace TerminalMonitor.Windows.Controls
             AddMatchedTerminalLines();
         }
 
-        private static string GetForegroundColumnName(string columnName)
-        {
-            return $"{columnName!}__foreground";
-        }
-
-        private static string GetBackgroundColumnName(string columnName)
-        {
-            return $"{columnName!}__background";
-        }
-
         private void ApplyVisibleField()
         {
             GridView gridView = new();
@@ -169,7 +160,7 @@ namespace TerminalMonitor.Windows.Controls
 
                     if (visibleField.CustomizeStyle)
                     {
-                        DataTemplate dataTemplate = BuildFieldDataTemplate(visibleField, terminalDataTable);
+                        DataTemplate dataTemplate = TerminalViewHelper.BuildFieldDataTemplate(visibleField, terminalDataTable);
 
                         gridView.Columns.Add(new GridViewColumn()
                         {
@@ -211,35 +202,6 @@ namespace TerminalMonitor.Windows.Controls
             listTerminal.SetBinding(ItemsControl.ItemsSourceProperty, binding);
         }
 
-        private static DataTemplate BuildFieldDataTemplate(FieldDisplayDetail visibleField, DataTable terminalDataTable)
-        {
-            DataColumn foregroundColumn = new(GetForegroundColumnName(visibleField.Id));
-            foregroundColumn.DataType = typeof(Brush);
-            terminalDataTable.Columns.Add(foregroundColumn);
-
-            DataColumn backgroundColumn = new(GetBackgroundColumnName(visibleField.Id));
-            backgroundColumn.DataType = typeof(Brush);
-            terminalDataTable.Columns.Add(backgroundColumn);
-
-            FrameworkElementFactory fef = new(typeof(TextBlock));
-
-            Binding textBinding = new();
-            textBinding.Path = new PropertyPath(visibleField.Id, Array.Empty<object>());
-            fef.SetBinding(TextBlock.TextProperty, textBinding);
-
-            Binding foregroundBinding = new();
-            foregroundBinding.Path = new PropertyPath(GetForegroundColumnName(visibleField.Id), Array.Empty<object>());
-            fef.SetBinding(TextBlock.ForegroundProperty, foregroundBinding);
-
-            Binding backgroundBinding = new();
-            backgroundBinding.Path = new PropertyPath(GetBackgroundColumnName(visibleField.Id), Array.Empty<object>());
-            fef.SetBinding(TextBlock.BackgroundProperty, backgroundBinding);
-
-            DataTemplate dataTemplate = new();
-            dataTemplate.VisualTree = fef;
-            return dataTemplate;
-        }
-
         private void AddTerminalLine(TerminalLineDto terminalLineDto)
         {
             DataRow row = terminalDataTable.NewRow();
@@ -259,10 +221,8 @@ namespace TerminalMonitor.Windows.Controls
                     {
                         var matchedTextStyleCondition = visibleField.Conditions.FirstOrDefault(
                             textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineDto, textStyleCondition.Condition));
-                        var textStyle = matchedTextStyleCondition?.Style ?? visibleField.Style;
 
-                        row[GetForegroundColumnName(visibleField.Id)] = new SolidColorBrush(textStyle.Foreground);
-                        row[GetBackgroundColumnName(visibleField.Id)] = new SolidColorBrush(textStyle.Background);
+                        TerminalViewHelper.BuildDataRowStyleCells(row, visibleField, matchedTextStyleCondition?.Style);
                     }
                 }
             }
