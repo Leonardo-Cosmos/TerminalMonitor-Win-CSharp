@@ -83,14 +83,16 @@
                                       ItemsSource="{Binding Conditions}">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0, 4">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto" />
-                                                <RowDefinition Height="Auto" />
-                                            </Grid.RowDefinitions>
-                                            <controls:FieldConditionView Grid.Row="0" FieldCondition="{Binding Condition}" />
-                                            <controls:TextStyleView Grid.Row="1" TextStyle="{Binding Style}" />
-                                        </Grid>
+                                        <Border BorderBrush="SkyBlue" BorderThickness="1" Margin="0, 4">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <controls:FieldConditionView Grid.Row="0" FieldCondition="{Binding Condition}" />
+                                                <controls:TextStyleView Grid.Row="1" TextStyle="{Binding Style}" />
+                                            </Grid>
+                                        </Border>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
