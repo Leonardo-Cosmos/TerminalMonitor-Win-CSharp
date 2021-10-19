@@ -11,4 +11,28 @@
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="3.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Properties\TerminalSettings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TerminalSettings.settings</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\WindowSettings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>WindowSettings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\TerminalSettings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>TerminalSettings.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="Properties\WindowSettings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>WindowSettings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
 </Project>

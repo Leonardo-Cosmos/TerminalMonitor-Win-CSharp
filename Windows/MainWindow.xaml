@@ -4,9 +4,19 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TerminalMonitor" 
+        xmlns:props="clr-namespace:TerminalMonitor.Properties"
         xmlns:controls="clr-namespace:TerminalMonitor.Windows.Controls"
         mc:Ignorable="d"
-        Title="TerminalMonitor" Height="450" Width="800" Loaded="Window_Loaded" Closing="Window_Closing">
+        Title="TerminalMonitor" 
+        Height="{Binding Source={x:Static props:WindowSettings.Default},
+            Path=WindowHeight, Mode=TwoWay}"
+        Width="{Binding Source={x:Static props:WindowSettings.Default},
+            Path=WindowWidth, Mode=TwoWay}" 
+        Top="{Binding Source={x:Static props:WindowSettings.Default},
+            Path=WindowTop, Mode=TwoWay}"
+        Left="{Binding Source={x:Static props:WindowSettings.Default},
+            Path=WindowLeft, Mode=TwoWay}"
+        Loaded="Window_Loaded" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

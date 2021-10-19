@@ -49,18 +49,27 @@ namespace TerminalMonitor.Windows.Controls
             var color = brush.Color;
             System.Windows.Forms.ColorDialog colorDialog = new();
 
+            var customColors = Properties.WindowSettings.Default.CustomColors ??= new();
+            var colors = new string[customColors.Count];
+            customColors.CopyTo(colors, 0);
+            colorDialog.CustomColors =
+                colors.Select(colorStr => Int32.Parse(colorStr)).ToArray();
+
             colorDialog.Color = System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+            SolidColorBrush solidColorBrush = null;
             if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
+                colors = colorDialog.CustomColors.Select(colorInt => colorInt.ToString()).ToArray();
+                customColors.Clear();
+                customColors.AddRange(colors);
+
                 var selectedColor = colorDialog.Color;
                 color = Color.FromArgb(selectedColor.A,
                     selectedColor.R, selectedColor.G, selectedColor.B);
-                return new SolidColorBrush(color);
+                solidColorBrush = new SolidColorBrush(color);
             }
-            else
-            {
-                return null;
-            }
+
+            return solidColorBrush;
         }
 
         private void RctForeground_MouseDown(object sender, MouseButtonEventArgs e)
