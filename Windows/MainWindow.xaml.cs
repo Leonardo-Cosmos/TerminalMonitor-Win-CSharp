@@ -65,6 +65,7 @@ namespace TerminalMonitor.Windows
             SettingSerializer.Save(setting);
 
             Properties.WindowSettings.Default.Save();
+            Properties.TerminalSettings.Default.Save();
         }
     }
 }

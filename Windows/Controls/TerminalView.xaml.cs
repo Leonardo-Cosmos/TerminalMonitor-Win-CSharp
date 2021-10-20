@@ -21,6 +21,7 @@ using TerminalMonitor.Execution;
 using TerminalMonitor.Matchers;
 using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
+using TerminalMonitor.Models.Settings;
 using TerminalMonitor.Windows.Converters;
 using Condition = TerminalMonitor.Matchers.Models.Condition;
 
@@ -45,6 +46,11 @@ namespace TerminalMonitor.Windows.Controls
         private readonly TerminalViewDataContextVO dataContextVO = new();
 
         private readonly Dictionary<string, bool> matchedLineDict = new();
+
+        /// <summary>
+        /// A dictionary between field ID and grid view column.
+        /// </summary>
+        private readonly Dictionary<string, GridViewColumn> gridViewColumnDict = new();
 
         public TerminalView()
         {
@@ -136,9 +142,36 @@ namespace TerminalMonitor.Windows.Controls
             AddMatchedTerminalLines();
         }
 
+        private IEnumerable<GridViewColumnSetting> GetGridViewColumnSettings()
+        {
+            return gridViewColumnDict.Select(keyValuePair =>
+            {
+                string fieldId = keyValuePair.Key;
+                var column = keyValuePair.Value;
+                return new GridViewColumnSetting(
+                    FieldId: fieldId,
+                    Width: column.ActualWidth
+                    );
+            }).ToArray();
+        }
+
+        private void SetGridViewColumnSettings(IEnumerable<GridViewColumnSetting> gridViewColumnSettings)
+        {
+            foreach (var columnSetting in gridViewColumnSettings)
+            {
+                if (gridViewColumnDict.ContainsKey(columnSetting.FieldId))
+                {
+                    gridViewColumnDict[columnSetting.FieldId].Width = columnSetting.Width;
+                }
+            }
+        }
+
         private void ApplyVisibleField()
         {
+            var gridViewColumnSettings = GetGridViewColumnSettings();
+
             GridView gridView = new();
+            gridViewColumnDict.Clear();
 
             terminalDataTable.Columns.Clear();
             terminalDataTable.Rows.Clear();
@@ -158,24 +191,28 @@ namespace TerminalMonitor.Windows.Controls
                     column.DataType = typeof(string);
                     terminalDataTable.Columns.Add(column);
 
+                    GridViewColumn viewColumn = null;
                     if (visibleField.CustomizeStyle)
                     {
                         DataTemplate dataTemplate = TerminalViewHelper.BuildFieldDataTemplate(visibleField, terminalDataTable);
 
-                        gridView.Columns.Add(new GridViewColumn()
+                        viewColumn = new()
                         {
                             Header = visibleField.FieldKey,
                             CellTemplate = dataTemplate,
-                        });
+                        };
                     }
                     else
                     {
-                        gridView.Columns.Add(new GridViewColumn()
+                        viewColumn = new()
                         {
                             Header = visibleField.FieldKey,
                             DisplayMemberBinding = new Binding(visibleField.Id),
-                        });
+                        };
                     }
+
+                    gridView.Columns.Add(viewColumn);
+                    gridViewColumnDict[visibleField.Id] = viewColumn;
                 }
             }
             else
@@ -193,6 +230,8 @@ namespace TerminalMonitor.Windows.Controls
                     DisplayMemberBinding = new Binding(plaintextColumnName),
                 });
             }
+
+            SetGridViewColumnSettings(gridViewColumnSettings);
 
             AddMatchedTerminalLines();
 
@@ -305,6 +344,12 @@ namespace TerminalMonitor.Windows.Controls
                 visibleFields = value.ToArray();
                 ApplyVisibleField();
             }
+        }
+
+        public IEnumerable<GridViewColumnSetting> ColumnSettings
+        {
+            get => GetGridViewColumnSettings();
+            set => SetGridViewColumnSettings(value);
         }
 
         public GroupCondition FilterCondition

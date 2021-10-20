@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,6 +18,7 @@ using System.Windows.Threading;
 using TerminalMonitor.Clipboard;
 using TerminalMonitor.Execution;
 using TerminalMonitor.Models;
+using TerminalMonitor.Models.Settings;
 using TerminalMonitor.Parsers;
 using Condition = TerminalMonitor.Matchers.Models.Condition;
 
@@ -155,7 +157,7 @@ namespace TerminalMonitor.Windows.Controls
             var terminalConfig = GetTabConfig(tab);
             var index = tbCtrl.Items.IndexOf(tab);
 
-            TerminalConfig config = (TerminalConfig) terminalConfig.Clone();
+            TerminalConfig config = (TerminalConfig)terminalConfig.Clone();
             config.Name = $"{terminalConfig.Name} (Copy)";
             config.Id = Guid.NewGuid().ToString();
 
@@ -282,7 +284,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             var tab = CreateTab(config);
 
-            if (index < 0 || index > tbCtrl.Items.Count -1)
+            if (index < 0 || index > tbCtrl.Items.Count - 1)
             {
                 index = tbCtrl.Items.Count - 1;
             }
@@ -319,6 +321,99 @@ namespace TerminalMonitor.Windows.Controls
 
                 RemoveTab(removedItem);
             }
+        }
+
+        private IEnumerable<TerminalConfig> GetTerminalConfigs()
+        {
+            var columnSettingDict = JsonSerializer.Deserialize<Dictionary<string, GridViewColumnSetting[]>>(
+                Properties.TerminalSettings.Default.GridViewColumns);
+
+            List<TerminalConfig> terminalConfigs = new();
+            var tabCount = tbCtrl.Items.Count;
+            for (var i = 0; i < tabCount - 1; i++)
+            {
+                var tab = tbCtrl.Items[i] as TabItem;
+
+                var terminalConfig = GetTabConfig(tab);
+                terminalConfigs.Add(terminalConfig);
+
+                /*
+                 * Update terminal view UI settings when it is valid.
+                 */
+                var terminalView = GetTabTerminalView(tab);
+                var columnSettings = terminalView.ColumnSettings;
+                var isValidColumnSettings = columnSettings.Any(columnSetting => columnSetting.Width > 0);
+                if (isValidColumnSettings)
+                {
+                    columnSettingDict[terminalConfig.Id] = columnSettings.ToArray();
+                }
+            }
+
+            Properties.TerminalSettings.Default.GridViewColumns =
+                JsonSerializer.Serialize<Dictionary<string, GridViewColumnSetting[]>>(columnSettingDict);
+
+            return terminalConfigs.AsEnumerable();
+        }
+
+        private void SetTerminalConfigs(IEnumerable<TerminalConfig> value)
+        {
+            var columnSettingDict = JsonSerializer.Deserialize<Dictionary<string, GridViewColumnSetting[]>>(
+                Properties.TerminalSettings.Default.GridViewColumns);
+
+            changingTab = true;
+
+            /*
+             * Remove existing tabs.
+             */
+            List<TabItem> removeTabs = new();
+            var tabCount = tbCtrl.Items.Count;
+            for (var i = 0; i < tabCount - 1; i++)
+            {
+                var tab = tbCtrl.Items[i] as TabItem;
+
+                removeTabs.Add(tab);
+            }
+            foreach (var tab in removeTabs)
+            {
+                RemoveTab(tab);
+            }
+
+
+            if (value == null)
+            {
+                // Add default tab.
+                AddTab(new()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = "Default",
+                });
+
+                tbCtrl.SelectedIndex = 0;
+
+                return;
+            }
+
+            /*
+             * Add new tabs.
+             */
+            foreach (var terminalConfig in value)
+            {
+                AddTab(terminalConfig);
+
+                /*
+                 * Set terminal view UI settings if it was saved.
+                 */
+                if (columnSettingDict.ContainsKey(terminalConfig.Id))
+                {
+                    var tab = GetTab(terminalConfig.Id);
+                    var terminalView = GetTabTerminalView(tab);
+                    terminalView.ColumnSettings = columnSettingDict[terminalConfig.Id];
+                }
+            }
+
+            tbCtrl.SelectedIndex = 0;
+
+            changingTab = false;
         }
 
         protected void OnTerminalLineAdded(TerminalLineDto terminalLineDto)
@@ -368,66 +463,8 @@ namespace TerminalMonitor.Windows.Controls
 
         public IEnumerable<TerminalConfig> Terminals
         {
-            get
-            {
-                List<TerminalConfig> terminalConfigs = new();
-                var tabCount = tbCtrl.Items.Count;
-                for (var i = 0; i < tabCount - 1; i++)
-                {
-                    var tab = tbCtrl.Items[i] as TabItem;
-
-                    terminalConfigs.Add(GetTabConfig(tab));
-                }
-                return terminalConfigs.AsEnumerable();
-            }
-
-            set
-            {
-                changingTab = true;
-
-                /*
-                 * Remove existing tabs.
-                 */
-                List<TabItem> removeTabs = new();
-                var tabCount = tbCtrl.Items.Count;
-                for (var i = 0; i < tabCount - 1; i++)
-                {
-                    var tab = tbCtrl.Items[i] as TabItem;
-
-                    removeTabs.Add(tab);
-                }
-                foreach (var tab in removeTabs)
-                {
-                    RemoveTab(tab);
-                }
-
-
-                if (value == null)
-                {
-                    // Add default tab.
-                    AddTab(new()
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        Name = "Default",
-                    });
-
-                    tbCtrl.SelectedIndex = 0;
-
-                    return;
-                }
-
-                /*
-                 * Add new tabs.
-                 */
-                foreach (var terminalConfig in value)
-                {
-                    AddTab(terminalConfig);
-                }
-
-                tbCtrl.SelectedIndex = 0;
-
-                changingTab = false;
-            }
+            get => GetTerminalConfigs();
+            set => SetTerminalConfigs(value);
         }
     }
 }

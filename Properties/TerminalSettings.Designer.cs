@@ -25,13 +25,13 @@ namespace TerminalMonitor.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string Fields {
+        [global::System.Configuration.DefaultSettingValueAttribute("{}")]
+        public string GridViewColumns {
             get {
-                return ((string)(this["Fields"]));
+                return ((string)(this["GridViewColumns"]));
             }
             set {
-                this["Fields"] = value;
+                this["GridViewColumns"] = value;
             }
         }
     }
