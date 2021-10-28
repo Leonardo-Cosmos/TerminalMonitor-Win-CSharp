@@ -20,7 +20,7 @@ namespace TerminalMonitor.Models
         {
             TerminalConfig clone = new()
             {
-                Id = this.Id,
+                Id = Guid.NewGuid().ToString(),
                 Name = this.Name,
                 VisibleFields = this.VisibleFields?.Select(field => (FieldDisplayDetail)field.Clone()),
                 FilterCondition = this.FilterCondition?.Clone() as GroupCondition,

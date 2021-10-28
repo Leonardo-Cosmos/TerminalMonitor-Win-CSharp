@@ -63,6 +63,9 @@ namespace TerminalMonitor.Windows
                 .Select(terminal => TerminalConfigSettings.Save(terminal)).ToList();
 
             SettingSerializer.Save(setting);
+
+            Properties.WindowSettings.Default.Save();
+            Properties.TerminalSettings.Default.Save();
         }
     }
 }
