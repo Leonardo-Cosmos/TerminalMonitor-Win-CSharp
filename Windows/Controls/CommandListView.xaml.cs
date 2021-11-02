@@ -23,6 +23,8 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class CommandListView : UserControl
     {
+        private readonly CommandListViewDataContextVO dataContext = new();
+        
         private readonly ObservableCollection<CommandListItemVO> commandVOs = new();
 
         private readonly List<CommandConfig> commands = new();
@@ -31,65 +33,31 @@ namespace TerminalMonitor.Windows.Controls
         {
             InitializeComponent();
 
+            DataContext = dataContext;
+
             lstCommands.ItemsSource = commandVOs;
+        }
+
+        private void LstCommands_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var count = lstCommands.SelectedItems.Count;
+            dataContext.IsSingleSelected = count == 1;
+            dataContext.IsAnySelected = count > 0;
         }
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            var existingCommandNames = commands.Select(config => config.Name);
-            CommandDetailWindow window = new()
-            {
-                ExistingCommandNames = existingCommandNames,
-            };
-            if (window.ShowDialog() ?? false)
-            {
-                var command = window.Command;
-
-                CommandListItemVO item = new()
-                {
-                    Name = command.Name,
-                };
-                commandVOs.Add(item);
-                lstCommands.SelectedItem = item;
-
-                commands.Add(command);
-            }
-        }
-
-        private void BtnModify_Click(object sender, RoutedEventArgs e)
-        {
-            if (lstCommands.SelectedItem is CommandListItemVO selectedItem)
-            {
-                var index = commandVOs.IndexOf(selectedItem);
-
-                var command = commands[index];
-                var existingCommandNames = commands
-                    .Select(command => command.Name)
-                    .Where(commandName => commandName != command.Name);
-                CommandDetailWindow window = new()
-                {
-                    Command = command,
-                    ExistingCommandNames = existingCommandNames,
-                };
-                if (window.ShowDialog() ?? false)
-                {
-                    command = window.Command;
-                    commands[index] = command;
-
-                    commandVOs[index].Name = command.Name;
-                }
-            }
+            AddCommand();
         }
 
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
-            if (lstCommands.SelectedItem is CommandListItemVO selectedItem)
-            {
-                var index = commandVOs.IndexOf(selectedItem);
-                commandVOs.RemoveAt(index);
+            DeleteCommand();
+        }
 
-                commands.RemoveAt(index);
-            }
+        private void BtnModify_Click(object sender, RoutedEventArgs e)
+        {
+            ModifyCommand();
         }
 
         private void BtnMoveUp_Click(object sender, RoutedEventArgs e)
@@ -130,7 +98,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void BtnRun_Click(object sender, RoutedEventArgs e)
+        private void BtnStart_Click(object sender, RoutedEventArgs e)
         {
             if (lstCommands.SelectedItem is CommandListItemVO selectedItem)
             {
@@ -141,6 +109,64 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     Command = command
                 });
+            }
+        }
+
+        private void AddCommand()
+        {
+            var existingCommandNames = commands.Select(config => config.Name);
+            CommandDetailWindow window = new()
+            {
+                ExistingCommandNames = existingCommandNames,
+            };
+            if (window.ShowDialog() ?? false)
+            {
+                var command = window.Command;
+
+                CommandListItemVO item = new()
+                {
+                    Name = command.Name,
+                };
+                commandVOs.Add(item);
+                lstCommands.SelectedItem = item;
+
+                commands.Add(command);
+            }
+        }
+
+        private void DeleteCommand()
+        {
+            if (lstCommands.SelectedItem is CommandListItemVO selectedItem)
+            {
+                var index = commandVOs.IndexOf(selectedItem);
+                commandVOs.RemoveAt(index);
+
+                commands.RemoveAt(index);
+            }
+        }
+
+        private void ModifyCommand()
+        {
+            if (lstCommands.SelectedItem is CommandListItemVO selectedItem)
+            {
+                var index = commandVOs.IndexOf(selectedItem);
+
+                var command = commands[index];
+                var existingCommandNames = commands
+                    .Select(command => command.Name)
+                    .Where(commandName => commandName != command.Name);
+                CommandDetailWindow window = new()
+                {
+                    Command = command,
+                    ExistingCommandNames = existingCommandNames,
+                };
+                if (window.ShowDialog() ?? false)
+                {
+                    command = window.Command;
+                    commands[index] = command;
+
+                    commandVOs[index].Name = command.Name;
+                }
             }
         }
 
