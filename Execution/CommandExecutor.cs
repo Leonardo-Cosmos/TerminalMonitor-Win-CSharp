@@ -13,9 +13,20 @@ namespace TerminalMonitor.Execution
 {
     class CommandExecutor : IExecutor, ITerminalLineProducer
     {
+        /// <summary>
+        /// A list of names of running executions.
+        /// </summary>
         private readonly List<string> executionNames = new();
 
+        /// <summary>
+        /// A dictionary from execution name to execution detail.
+        /// </summary>
         private readonly Dictionary<string, Execution> executionDict = new();
+
+        /// <summary>
+        /// A dictionary from command ID to execution detail.
+        /// </summary>
+        private readonly Dictionary<string, Exception> commandExecutionDict = new();
 
         private readonly ConcurrentQueue<TerminalLine> terminalLineQueue = new();
 
@@ -47,6 +58,11 @@ namespace TerminalMonitor.Execution
             execution.Start();
 
             Debug.Print($"Executor {name} is started");
+        }
+
+        public void TerminateAll(string commandId)
+        {
+
         }
 
         public void Terminate(string executionName)

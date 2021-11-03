@@ -5,6 +5,11 @@ namespace TerminalMonitor.Models
     public class CommandConfig
     {
         /// <summary>
+        /// Unique ID of command.
+        /// </summary>
+        public string Id { get; set; }
+
+        /// <summary>
         /// The name of command. This value is required and unique.
         /// </summary>
         public string Name { get; set; }
