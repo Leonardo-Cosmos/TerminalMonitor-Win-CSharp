@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,7 +25,7 @@ namespace TerminalMonitor.Windows.Controls
     public partial class CommandListView : UserControl
     {
         private readonly CommandListViewDataContextVO dataContext = new();
-        
+
         private readonly ObservableCollection<CommandListItemVO> commandVOs = new();
 
         private readonly List<CommandConfig> commands = new();
@@ -45,6 +46,11 @@ namespace TerminalMonitor.Windows.Controls
             dataContext.IsAnySelected = count > 0;
         }
 
+        private void LstCommands_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ForSelectedItem(ModifyCommand);
+        }
+
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
             AddCommand();
@@ -52,63 +58,65 @@ namespace TerminalMonitor.Windows.Controls
 
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
-            DeleteCommand();
+            ForEachSelectedItem(DeleteCommand);
         }
 
         private void BtnModify_Click(object sender, RoutedEventArgs e)
         {
-            ModifyCommand();
+            ForEachSelectedItem(ModifyCommand);
         }
 
         private void BtnMoveUp_Click(object sender, RoutedEventArgs e)
         {
-            if (lstCommands.SelectedItem is CommandListItemVO selectedItem)
-            {
-                var index = commandVOs.IndexOf(selectedItem);
-                if (index > 0)
-                {
-                    commandVOs.RemoveAt(index);
-                    commandVOs.Insert(index - 1, selectedItem);
-
-                    lstCommands.SelectedItem = selectedItem;
-
-                    var command = commands[index];
-                    commands.RemoveAt(index);
-                    commands.Insert(index - 1, command);
-                }
-            }
+            ForEachSelectedItem(MoveCommandUp, byOrder: true, recoverSelection: true);
         }
 
         private void BtnMoveDown_Click(object sender, RoutedEventArgs e)
         {
-            if (lstCommands.SelectedItem is CommandListItemVO selectedItem)
-            {
-                var index = commandVOs.IndexOf(selectedItem);
-                if (index < commandVOs.Count - 1)
-                {
-                    commandVOs.RemoveAt(index);
-                    commandVOs.Insert(index + 1, selectedItem);
-
-                    lstCommands.SelectedItem = selectedItem;
-
-                    var command = commands[index];
-                    commands.RemoveAt(index);
-                    commands.Insert(index + 1, command);
-                }
-            }
+            ForEachSelectedItem(MoveCommandDown, byOrder: true, reverseOrder: true, recoverSelection: true);
         }
 
         private void BtnStart_Click(object sender, RoutedEventArgs e)
         {
-            if (lstCommands.SelectedItem is CommandListItemVO selectedItem)
-            {
-                var index = commandVOs.IndexOf(selectedItem);
+            ForEachSelectedItem(StartCommand);
+        }
 
-                var command = commands[index];
-                OnCommandRun(new()
+        private void ForSelectedItem(Action<CommandListItemVO> action)
+        {
+            if (lstCommands.SelectedItem is CommandListItemVO itemVO)
+            {
+                action(itemVO);
+            }
+        }
+
+        private void ForEachSelectedItem(Action<CommandListItemVO> action,
+            bool byOrder = false, bool reverseOrder = false, bool recoverSelection = false)
+        {
+            List<CommandListItemVO> itemVOs = new();
+            foreach (var selectedItem in lstCommands.SelectedItems)
+            {
+                if (selectedItem is CommandListItemVO itemVO)
                 {
-                    Command = command
-                });
+                    itemVOs.Add(itemVO);
+                }
+            }
+
+            if (byOrder)
+            {
+                itemVOs.Sort((itemX, itemY) =>
+                    commandVOs.IndexOf(itemX) - commandVOs.IndexOf(itemY));
+            }
+
+            if (reverseOrder)
+            {
+                itemVOs.Reverse();
+            }
+
+            itemVOs.ForEach(action);
+
+            if (recoverSelection)
+            {
+                itemVOs.ForEach(itemVO => lstCommands.SelectedItems.Add(itemVO));
             }
         }
 
@@ -119,7 +127,15 @@ namespace TerminalMonitor.Windows.Controls
             {
                 ExistingCommandNames = existingCommandNames,
             };
-            if (window.ShowDialog() ?? false)
+
+            window.Closing += AddCommandWindow_Closing;
+            window.Show();
+        }
+
+        private void AddCommandWindow_Closing(object sender, CancelEventArgs e)
+        {
+            var window = (CommandDetailWindow)sender;
+            if (window.Saved)
             {
                 var command = window.Command;
 
@@ -134,48 +150,83 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void DeleteCommand()
+        private void DeleteCommand(CommandListItemVO itemVO)
         {
-            if (lstCommands.SelectedItem is CommandListItemVO selectedItem)
+            var index = commandVOs.IndexOf(itemVO);
+            commandVOs.RemoveAt(index);
+
+            commands.RemoveAt(index);
+        }
+
+        private void ModifyCommand(CommandListItemVO itemVO)
+        {
+            var index = commandVOs.IndexOf(itemVO);
+
+            var command = commands[index];
+            var existingCommandNames = commands
+                .Select(command => command.Name)
+                .Where(commandName => commandName != command.Name);
+            CommandDetailWindow window = new()
             {
-                var index = commandVOs.IndexOf(selectedItem);
-                commandVOs.RemoveAt(index);
+                Command = command,
+                ExistingCommandNames = existingCommandNames,
+            };
 
-                commands.RemoveAt(index);
-            }
-        }
-
-        private void ModifyCommand()
-        {
-            if (lstCommands.SelectedItem is CommandListItemVO selectedItem)
+            window.Closing += (sender, e) =>
             {
-                var index = commandVOs.IndexOf(selectedItem);
+                itemVO.Name = command.Name;
+            };
 
-                var command = commands[index];
-                var existingCommandNames = commands
-                    .Select(command => command.Name)
-                    .Where(commandName => commandName != command.Name);
-                CommandDetailWindow window = new()
-                {
-                    Command = command,
-                    ExistingCommandNames = existingCommandNames,
-                };
-                if (window.ShowDialog() ?? false)
-                {
-                    command = window.Command;
-                    commands[index] = command;
-
-                    commandVOs[index].Name = command.Name;
-                }
-            }
+            window.Show();
         }
 
-        protected void OnCommandRun(CommandRunEventArgs e)
+        private void MoveCommandUp(CommandListItemVO itemVO)
         {
-            CommandRun?.Invoke(this, e);
+            var srcIndex = commandVOs.IndexOf(itemVO);
+            var dstIndex = (srcIndex - 1 + commandVOs.Count) % commandVOs.Count;
+
+            commandVOs.RemoveAt(srcIndex);
+            commandVOs.Insert(dstIndex, itemVO);
+
+            lstCommands.SelectedItem = itemVO;
+
+            var command = commands[srcIndex];
+            commands.RemoveAt(srcIndex);
+            commands.Insert(dstIndex, command);
         }
 
-        public event CommandRunEventHandler CommandRun;
+        private void MoveCommandDown(CommandListItemVO itemVO)
+        {
+            var srcIndex = commandVOs.IndexOf(itemVO);
+            var dstIndex = (srcIndex + 1) % commandVOs.Count;
+
+            commandVOs.RemoveAt(srcIndex);
+            commandVOs.Insert(dstIndex, itemVO);
+
+            lstCommands.SelectedItem = itemVO;
+
+            var command = commands[srcIndex];
+            commands.RemoveAt(srcIndex);
+            commands.Insert(dstIndex, command);
+        }
+
+        private void StartCommand(CommandListItemVO itemVO)
+        {
+            var index = commandVOs.IndexOf(itemVO);
+
+            var command = commands[index];
+            OnCommandStarted(new()
+            {
+                Command = command
+            });
+        }
+
+        protected void OnCommandStarted(CommandRunEventArgs e)
+        {
+            CommandStarted?.Invoke(this, e);
+        }
+
+        public event CommandRunEventHandler CommandStarted;
 
         public IEnumerable<CommandConfig> Commands
         {
@@ -189,7 +240,7 @@ namespace TerminalMonitor.Windows.Controls
                 commands.Clear();
                 commandVOs.Clear();
                 if (value == null)
-                { 
+                {
                     return;
                 }
 

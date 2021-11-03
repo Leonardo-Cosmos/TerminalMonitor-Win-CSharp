@@ -8,10 +8,11 @@
              d:DataContext="{d:DesignInstance Type=local:CommandListViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="800">
     <StackPanel>
-        <ListView Name="lstCommands" MinHeight="30" SelectionChanged="LstCommands_SelectionChanged">
+        <ListView Name="lstCommands" MinHeight="30" SelectionChanged="LstCommands_SelectionChanged"
+                  MouseDoubleClick="LstCommands_MouseDoubleClick">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Name}" mouse />
+                    <TextBlock Text="{Binding Name}" />
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
@@ -21,14 +22,14 @@
                     <Style x:Key="buttonSingleSelected" TargetType="Button" BasedOn="{StaticResource button}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsSingleSelected}" Value="False">
-                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Setter Property="IsEnabled" Value="False" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                     <Style x:Key="buttonAnySelected" TargetType="Button" BasedOn="{StaticResource button}">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsAnySelected}" Value="False">
-                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Setter Property="IsEnabled" Value="False" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -38,7 +39,7 @@
                     Content="➕" ToolTip="Add" Click="BtnAdd_Click" />
             <Button Name="btnDelete" Width="20" Style="{StaticResource buttonAnySelected}"
                     Content="➖" ToolTip="Delete" Click="BtnDelete_Click" />
-            <Button Name="btnModify" Width="20" Style="{StaticResource buttonSingleSelected}" 
+            <Button Name="btnModify" Width="20" Style="{StaticResource buttonAnySelected}" 
                     Content="⚙" ToolTip="Modify" Click="BtnModify_Click" />
             <Button Name="btnMoveUp" Width="20" Style="{StaticResource buttonAnySelected}"
                     Content="↑" ToolTip="Move Up" Click="BtnMoveUp_Click" />
