@@ -7,7 +7,7 @@
         xmlns:controls="clr-namespace:TerminalMonitor.Windows.Controls"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:FieldDisplayDetailWindowDataContextVO}"
-        Title="Field Detail" Height="600" Width="1100">
+        Title="Field Detail" Height="600" Width="1100" Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -73,14 +73,17 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Button Name="btnAdd" Grid.Column="0" Width="20" Content="+" ToolTip="Add" Click="BtnAdd_Click" />
-                                <Button Name="btnDelete" Grid.Column="1" Width="20" Content="-" ToolTip="Delete" Click="BtnDelete_Click" />
-                                <Button Name="btnMoveUp" Grid.Column="2" Width="20" Content="↑" ToolTip="Move Up" Click="BtnMoveUp_Click" />
-                                <Button Name="btnMoveDown" Grid.Column="3" Width="20" Content="↓" ToolTip="Move Down" Click="BtnMoveDown_Click" />
+                                <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Click="BtnAdd_Click" />
+                                <Button Name="btnDelete" Grid.Column="1" Width="20" Content="➖" ToolTip="Delete"
+                                        IsEnabled="{Binding IsAnyConditionSelected}" Click="BtnDelete_Click" />
+                                <Button Name="btnMoveUp" Grid.Column="2" Width="20" Content="↑" ToolTip="Move Up"
+                                        IsEnabled="{Binding IsAnyConditionSelected}" Click="BtnMoveUp_Click" />
+                                <Button Name="btnMoveDown" Grid.Column="3" Width="20" Content="↓" ToolTip="Move Down"
+                                        IsEnabled="{Binding IsAnyConditionSelected}" Click="BtnMoveDown_Click" />
                             </Grid>
 
                             <ListView Name="lstStyleCondtions" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" MinHeight="30"
-                                      ItemsSource="{Binding Conditions}">
+                                      ItemsSource="{Binding Conditions}" SelectionChanged="LstStyleCondtions_SelectionChanged">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="SkyBlue" BorderThickness="1" Margin="0, 4">

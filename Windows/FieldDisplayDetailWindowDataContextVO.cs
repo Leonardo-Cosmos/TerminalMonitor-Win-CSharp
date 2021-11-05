@@ -43,6 +43,18 @@ namespace TerminalMonitor.Windows
             set { style = value; OnPropertyChanged(); }
         }
 
+        private bool isAnyConditionSelected;
+
+        public bool IsAnyConditionSelected
+        {
+            get => isAnyConditionSelected;
+            set
+            {
+                isAnyConditionSelected = value;
+                OnPropertyChanged();
+            }
+        }
+
         private readonly ObservableCollection<TextStyleCondition> conditions = new();
 
         public ObservableCollection<TextStyleCondition> Conditions

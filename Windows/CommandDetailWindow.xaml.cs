@@ -131,7 +131,7 @@ namespace TerminalMonitor.Windows
             };
         }
 
-        public bool Saved { get;set; }
+        public bool Saved { get; set; }
 
         public IEnumerable<string> ExistingCommandNames
         {
@@ -148,10 +148,7 @@ namespace TerminalMonitor.Windows
 
         public CommandConfig Command
         {
-            get
-            {
-                return command ?? CreateCommand();
-            }
+            get => command ?? CreateCommand();
 
             set
             {

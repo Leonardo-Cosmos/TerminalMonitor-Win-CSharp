@@ -88,7 +88,7 @@ namespace TerminalMonitor.Windows
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
             var selectedItem = trConditions.SelectedItem;
-            
+
             if (selectedItem is ConditionNodeVO conditionNodeVO)
             {
                 conditionNodeVO.Siblings.Remove(conditionNodeVO);
@@ -149,7 +149,7 @@ namespace TerminalMonitor.Windows
 
         private void SelectConditionTreeNode(ConditionNodeVO conditionVO)
         {
-            var treeViewItem = 
+            var treeViewItem =
                 trConditions.ItemContainerGenerator.ContainerFromItem(conditionVO) as TreeViewItem;
 
             if (treeViewItem != null)
@@ -279,8 +279,8 @@ namespace TerminalMonitor.Windows
                         MatchMode = dataContextVO.MatchMode,
                         Conditions = rootConditions
                             .Select(conditionNodeVO => FromVO(conditionNodeVO)).ToList(),
-                    };                    
-                  
+                    };
+
                     return groupCondition;
                 }
             }

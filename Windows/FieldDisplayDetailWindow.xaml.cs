@@ -31,6 +31,8 @@ namespace TerminalMonitor.Windows
 
         private readonly List<string> existingFieldKeys = new();
 
+        private FieldDisplayDetail fieldDetail;
+
         public FieldDisplayDetailWindow()
         {
             InitializeComponent();
@@ -40,64 +42,73 @@ namespace TerminalMonitor.Windows
             Binding fieldKeyBinding = new("FieldKey");
             fieldKeyBinding.Source = dataContextVO;
             fieldKeyBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-            fieldKeyBinding.ValidationRules.Add(new UniqueItemRule()
+            fieldKeyBinding.ValidationRules.Add(new NotEmptyRule()
             {
-                ExistingValues = existingFieldKeys,
-                ErrorMessage = "Field key has been used already",
+                ErrorMessage = "Field key should not be empty",
             });
             txtBxKey.SetBinding(TextBox.TextProperty, fieldKeyBinding);
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            Saved = false;
+        }
+
+        private void LstStyleCondtions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var count = lstStyleCondtions.SelectedItems.Count;
+            dataContextVO.IsAnyConditionSelected = count > 0;
+        }
+
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            var conditions = dataContextVO.Conditions;
-            TextStyleCondition item = new()
-            {
-                Style = TextStyle.Empty,
-                Condition = FieldCondition.Empty,
-            };
-            conditions.Add(item);
-            lstStyleCondtions.SelectedItem = item;
+            AddCondition();
         }
 
         private void BtnDelete_Click(object sender, RoutedEventArgs e)
         {
-            var conditions = dataContextVO.Conditions;
-            if (lstStyleCondtions.SelectedItem is TextStyleCondition selectedItem)
-            {
-                conditions.Remove(selectedItem);
-            }
+            ForEachSelectedCondition(DeleteCondition);
         }
 
         private void BtnMoveUp_Click(object sender, RoutedEventArgs e)
         {
-            var conditions = dataContextVO.Conditions;
-            if (lstStyleCondtions.SelectedItem is TextStyleCondition selectedItem)
-            {
-                var index = conditions.IndexOf(selectedItem);
-                if (index > 0)
-                {
-                    conditions.Remove(selectedItem);
-                    conditions.Insert(index - 1, selectedItem);
-
-                    lstStyleCondtions.SelectedItem = selectedItem;
-                }
-            }
+            ForEachSelectedCondition(MoveConditionUp, byOrder: true, recoverSelection: true);
         }
 
         private void BtnMoveDown_Click(object sender, RoutedEventArgs e)
         {
-            var conditions = dataContextVO.Conditions;
-            if (lstStyleCondtions.SelectedItem is TextStyleCondition selectedItem)
-            {
-                var index = conditions.IndexOf(selectedItem);
-                if (index < conditions.Count - 1)
-                {
-                    conditions.Remove(selectedItem);
-                    conditions.Insert(index + 1, selectedItem);
+            ForEachSelectedCondition(MoveConditionDown, byOrder: true, reverseOrder: true, recoverSelection: true);
+        }
 
-                    lstStyleCondtions.SelectedItem = selectedItem;
+        private void ForEachSelectedCondition(Action<TextStyleCondition> action,
+            bool byOrder = false, bool reverseOrder = false, bool recoverSelection = false)
+        {
+            List<TextStyleCondition> items = new();
+            foreach (var selectedItem in lstStyleCondtions.SelectedItems)
+            {
+                if (selectedItem is TextStyleCondition item)
+                {
+                    items.Add(item);
                 }
+            }
+
+            if (byOrder)
+            {
+                var conditions = dataContextVO.Conditions;
+                items.Sort((itemX, itemY) =>
+                    conditions.IndexOf(itemX) - conditions.IndexOf(itemY));
+            }
+
+            if (reverseOrder)
+            {
+                items.Reverse();
+            }
+
+            items.ForEach(action);
+
+            if (recoverSelection)
+            {
+                items.ForEach(item => lstStyleCondtions.SelectedItems.Add(item));
             }
         }
 
@@ -111,8 +122,93 @@ namespace TerminalMonitor.Windows
                 return;
             }
 
-            DialogResult = true;
+            SaveFieldDetail();
+            Saved = true;
+            Close();
         }
+
+        private void AddCondition()
+        {
+            var conditions = dataContextVO.Conditions;
+            TextStyleCondition item = new()
+            {
+                Style = TextStyle.Empty,
+                Condition = FieldCondition.Empty,
+            };
+            conditions.Add(item);
+            lstStyleCondtions.SelectedItem = item;
+        }
+
+        private void DeleteCondition(TextStyleCondition condition)
+        {
+            var conditions = dataContextVO.Conditions;
+            conditions.Remove(condition);
+        }
+
+        private void MoveConditionUp(TextStyleCondition condition)
+        {
+            var conditions = dataContextVO.Conditions;
+
+            var srcIndex = conditions.IndexOf(condition);
+            var dstIndex = (srcIndex - 1 + conditions.Count) % conditions.Count;
+
+            conditions.RemoveAt(srcIndex);
+            conditions.Insert(dstIndex, condition);
+
+        }
+
+        private void MoveConditionDown(TextStyleCondition condition)
+        {
+            var conditions = dataContextVO.Conditions;
+
+            var srcIndex = conditions.IndexOf(condition);
+            var dstIndex = (srcIndex + 1) % conditions.Count;
+
+            conditions.RemoveAt(srcIndex);
+            conditions.Insert(dstIndex, condition);
+        }
+
+        private void LoadFieldDetail()
+        {
+            if (fieldDetail != null)
+            {
+                dataContextVO.FieldKey = fieldDetail.FieldKey;
+                dataContextVO.CustomizeStyle = fieldDetail.CustomizeStyle;
+
+                dataContextVO.Style = fieldDetail.Style ?? TextStyle.Empty;
+
+                dataContextVO.Conditions.Clear();
+                foreach (var condition in fieldDetail.Conditions ?? Array.Empty<TextStyleCondition>())
+                {
+                    dataContextVO.Conditions.Add(condition);
+                }
+            }
+        }
+
+        private void SaveFieldDetail()
+        {
+            if (fieldDetail != null)
+            {
+                fieldDetail.FieldKey = dataContextVO.FieldKey;
+                fieldDetail.CustomizeStyle = dataContextVO.CustomizeStyle;
+                fieldDetail.Style = dataContextVO.Style;
+                fieldDetail.Conditions = dataContextVO.Conditions.ToArray();
+            }
+        }
+
+        private FieldDisplayDetail CreateFieldDetail()
+        {
+            return new FieldDisplayDetail()
+            {
+                Id = Guid.NewGuid().ToString(),
+                FieldKey = dataContextVO.FieldKey,
+                CustomizeStyle = dataContextVO.CustomizeStyle,
+                Style = dataContextVO.Style,
+                Conditions = dataContextVO.Conditions.ToArray(),
+            };
+        }
+
+        public bool Saved { get; set; }
 
         public IEnumerable<string> ExistingFieldKeys
         {
@@ -131,34 +227,14 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        public FieldDisplayDetail Field
+        public FieldDisplayDetail FieldDetail
         {
-            get
-            {
-                return new FieldDisplayDetail()
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    FieldKey = dataContextVO.FieldKey,
-                    CustomizeStyle = dataContextVO.CustomizeStyle,
-                    Style = dataContextVO.Style,
-                    Conditions = dataContextVO.Conditions.ToArray(),
-                };
-            }
+            get => fieldDetail ?? CreateFieldDetail();
+
             set
             {
-                if (value != null)
-                {
-                    dataContextVO.FieldKey = value.FieldKey;
-                    dataContextVO.CustomizeStyle = value.CustomizeStyle;
-
-                    dataContextVO.Style = value.Style ?? TextStyle.Empty;
-
-                    dataContextVO.Conditions.Clear();
-                    foreach(var condition in value.Conditions ?? Array.Empty<TextStyleCondition>())
-                    {
-                        dataContextVO.Conditions.Add(condition);
-                    }
-                }
+                fieldDetail = value;
+                LoadFieldDetail();
             }
         }
     }

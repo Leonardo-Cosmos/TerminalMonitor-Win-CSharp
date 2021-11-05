@@ -45,7 +45,7 @@ namespace TerminalMonitor.Windows.Controls
             };
             if (window.ShowDialog() ?? false)
             {
-                var field = window.Field;
+                var field = window.FieldDetail;
 
                 FieldListItemVO item = new()
                 {
@@ -82,12 +82,12 @@ namespace TerminalMonitor.Windows.Controls
                     .Where(fieldKey => fieldKey != field.FieldKey);
                 FieldDisplayDetailWindow window = new()
                 {
-                    Field = field,
+                    FieldDetail = field,
                     ExistingFieldKeys = existingFieldKeys,
                 };
                 if (window.ShowDialog() ?? false)
                 {
-                    field = window.Field;
+                    field = window.FieldDetail;
                     fields[index] = field;
 
                     fieldVOs[index].FieldKey = field.FieldKey;
