@@ -25,6 +25,8 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class ExecutionListView : UserControl
     {
+        private readonly ExecutionListViewDataContextVO dataContext = new();
+
         private readonly ObservableCollection<ExecutionListItemVO> executionVOs = new();
 
         private IExecutor executor;
@@ -33,14 +35,39 @@ namespace TerminalMonitor.Windows.Controls
         {
             InitializeComponent();
 
+            DataContext = dataContext;
+
             lstExecutions.ItemsSource = executionVOs;
+        }
+
+        private void LstExecutions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var count = lstExecutions.SelectedItems.Count;
+            dataContext.IsAnySelected = count > 0;
         }
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)
         {
-            var tag = (sender as Button).Tag;
-            var executionName = tag as string;
-            executor.Terminate(executionName);
+            ForEachSelectedItem(StopExecution);
+        }
+
+        private void ForEachSelectedItem(Action<ExecutionListItemVO> action)
+        {
+            List<ExecutionListItemVO> itemVOs = new();
+            foreach (var selectedItem in lstExecutions.SelectedItems)
+            {
+                if (selectedItem is ExecutionListItemVO itemVO)
+                {
+                    itemVOs.Add(itemVO);
+                }
+            }
+
+            itemVOs.ForEach(action);
+        }
+
+        private void StopExecution(ExecutionListItemVO itemVO)
+        {
+            executor.Terminate(itemVO.Name);
         }
 
         private void UpdateExecutionInfo(ExecutionInfoEventArgs executionInfoEvent)
