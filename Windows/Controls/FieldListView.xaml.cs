@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,18 +25,109 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class FieldListView : UserControl
     {
+        private readonly FieldListViewDataContextVO dataContextVO = new();
+
         private readonly ObservableCollection<FieldListItemVO> fieldVOs = new();
 
         private readonly List<FieldDisplayDetail> fields = new();
+
+        private ItemClipboard<FieldDisplayDetail> fieldClipboard;
 
         public FieldListView()
         {
             InitializeComponent();
 
+            DataContext = dataContextVO;
+
             lstFields.ItemsSource = fieldVOs;
         }
 
+        private void LstFields_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var count = lstFields.SelectedItems.Count;
+            dataContextVO.IsAnySelected = count > 0;
+        }
+
+        private void LstFields_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ForSelectedItem(ModifyFieldDetail);
+        }
+
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        {
+            AddFieldDetail();
+        }
+
+        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            ForEachSelectedItem(DeleteFieldDetail);
+        }
+
+        private void BtnModify_Click(object sender, RoutedEventArgs e)
+        {
+            ForEachSelectedItem(ModifyFieldDetail);
+        }
+
+        private void BtnCopy_Click(object sender, RoutedEventArgs e)
+        {
+            CopyFieldDetails();
+        }
+
+        private void BtnPaste_Click(object sender, RoutedEventArgs e)
+        {
+            PasteFieldDetails();
+        }
+
+        private void BtnMoveLeft_Click(object sender, RoutedEventArgs e)
+        {
+            ForEachSelectedItem(MoveFieldDetailUp, byOrder: true, recoverSelection: true);
+        }
+
+        private void BtnMoveRight_Click(object sender, RoutedEventArgs e)
+        {
+            ForEachSelectedItem(MoveFieldDetailDown, byOrder: true, reverseOrder: true, recoverSelection: true);
+        }
+
+        private void ForSelectedItem(Action<FieldListItemVO> action)
+        {
+            if (lstFields.SelectedItem is FieldListItemVO itemVO)
+            {
+                action(itemVO);
+            }
+        }
+
+        private void ForEachSelectedItem(Action<FieldListItemVO> action,
+            bool byOrder = false, bool reverseOrder = false, bool recoverSelection = false)
+        {
+            List<FieldListItemVO> itemVOs = new();
+            foreach (var selectedItem in lstFields.SelectedItems)
+            {
+                if (selectedItem is FieldListItemVO itemVO)
+                {
+                    itemVOs.Add(itemVO);
+                }
+            }
+
+            if (byOrder)
+            {
+                itemVOs.Sort((itemX, itemY) =>
+                    fieldVOs.IndexOf(itemX) - fieldVOs.IndexOf(itemY));
+            }
+
+            if (reverseOrder)
+            {
+                itemVOs.Reverse();
+            }
+
+            itemVOs.ForEach(action);
+
+            if (recoverSelection)
+            {
+                itemVOs.ForEach(itemVO => lstFields.SelectedItems.Add(itemVO));
+            }
+        }
+
+        private void AddFieldDetail()
         {
             var existingFieldKeys = fields
                     .Select(field => field.FieldKey);
@@ -43,122 +135,131 @@ namespace TerminalMonitor.Windows.Controls
             {
                 ExistingFieldKeys = existingFieldKeys,
             };
-            if (window.ShowDialog() ?? false)
+
+            window.Closing += (object sender, CancelEventArgs e) =>
             {
-                var field = window.FieldDetail;
-
-                FieldListItemVO item = new()
+                if (window.Saved)
                 {
-                    Id = field.Id,
-                    FieldKey = field.FieldKey
-                };
-                fieldVOs.Add(item);
-                lstFields.SelectedItem = item;
+                    var fieldDetail = window.FieldDetail;
 
-                fields.Add(field);
-            }
+                    FieldListItemVO item = new()
+                    {
+                        Id = fieldDetail.Id,
+                        FieldKey = fieldDetail.FieldKey
+                    };
+                    fieldVOs.Add(item);
+                    lstFields.SelectedItem = item;
+
+                    fields.Add(fieldDetail);
+                }
+            };
+
+            window.Show();
         }
 
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        private void DeleteFieldDetail(FieldListItemVO itemVO)
         {
-            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
-            {
-                var index = fieldVOs.IndexOf(selectedItem);
-                fieldVOs.RemoveAt(index);
+            var index = fieldVOs.IndexOf(itemVO);
+            fieldVOs.RemoveAt(index);
 
-                fields.RemoveAt(index);
-            }
+            fields.RemoveAt(index);
         }
 
-        private void BtnModify_Click(object sender, RoutedEventArgs e)
+        private void ModifyFieldDetail(FieldListItemVO itemVO)
         {
-            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
+            var index = fieldVOs.IndexOf(itemVO);
+
+            var fieldDetail = fields[index];
+            var existingFieldKeys = fields
+                .Select(field => field.FieldKey)
+                .Where(fieldKey => fieldKey != fieldDetail.FieldKey);
+            FieldDisplayDetailWindow window = new()
             {
-                var index = fieldVOs.IndexOf(selectedItem);
+                FieldDetail = fieldDetail,
+                ExistingFieldKeys = existingFieldKeys,
+            };
 
-                var field = fields[index];
-                var existingFieldKeys = fields
-                    .Select(field => field.FieldKey)
-                    .Where(fieldKey => fieldKey != field.FieldKey);
-                FieldDisplayDetailWindow window = new()
-                {
-                    FieldDetail = field,
-                    ExistingFieldKeys = existingFieldKeys,
-                };
-                if (window.ShowDialog() ?? false)
-                {
-                    field = window.FieldDetail;
-                    fields[index] = field;
+            window.Closing += (object sender, CancelEventArgs e) =>
+            {
+                itemVO.FieldKey = fieldDetail.FieldKey;
+            };
 
-                    fieldVOs[index].FieldKey = field.FieldKey;
+            window.Show();
+        }
+
+        private void MoveFieldDetailUp(FieldListItemVO itemVO)
+        {
+            var srcIndex = fieldVOs.IndexOf(itemVO);
+            var dstIndex = (srcIndex - 1 + fieldVOs.Count) % fieldVOs.Count;
+
+            fieldVOs.RemoveAt(srcIndex);
+            fieldVOs.Insert(dstIndex, itemVO);
+
+            var fieldDetail = fields[srcIndex];
+            fields.RemoveAt(srcIndex);
+            fields.Insert(dstIndex, fieldDetail);
+        }
+
+        private void MoveFieldDetailDown(FieldListItemVO itemVO)
+        {
+            var srcIndex = fieldVOs.IndexOf(itemVO);
+            var dstIndex = (srcIndex + 1) % fieldVOs.Count;
+
+            fieldVOs.RemoveAt(srcIndex);
+            fieldVOs.Insert(dstIndex, itemVO);
+
+            var fieldDetail = fields[srcIndex];
+            fields.RemoveAt(srcIndex);
+            fields.Insert(dstIndex, fieldDetail);
+        }
+
+        private void CopyFieldDetails()
+        {
+            List<FieldDisplayDetail> fieldDetails = new();
+            foreach (var selectedItem in lstFields.SelectedItems)
+            {
+                if (selectedItem is FieldListItemVO itemVO)
+                {
+                    var index = fieldVOs.IndexOf(itemVO);
+
+                    var fieldDetail = fields[index];
+                    fieldDetails.Add(fieldDetail);
+                }
+            }
+
+            fieldClipboard?.Copy(fieldDetails.ToArray());
+        }
+
+        private void PasteFieldDetails()
+        {
+            var fieldDetails = fieldClipboard?.Paste();
+            if (fieldDetails != null)
+            {
+                foreach (var fieldDetail in fieldDetails)
+                {
+                    var fieldDetailClone = (FieldDisplayDetail)fieldDetail.Clone();
+
+                    FieldListItemVO item = new()
+                    {
+                        Id = fieldDetailClone.Id,
+                        FieldKey = fieldDetailClone.FieldKey
+                    };
+                    fieldVOs.Add(item);
+                    lstFields.SelectedItem = item;
+
+                    fields.Add(fieldDetailClone);
                 }
             }
         }
 
-        private void BtnCopy_Click(object sender, RoutedEventArgs e)
+        private void FieldClipboard_ItemCopied(object sender, EventArgs e)
         {
-            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
-            {
-                var index = fieldVOs.IndexOf(selectedItem);
-
-                var field = fields[index];
-                FieldClipboard?.Copy(field);
-            }
+            dataContextVO.IsAnyFieldInClipboard = !fieldClipboard?.IsEmpty ?? false;
         }
 
-        private void BtnPaste_Click(object sender, RoutedEventArgs e)
+        private void FieldClipboard_ItemPasted(object sender, EventArgs e)
         {
-            var field = FieldClipboard?.Paste();
-            if (field != null)
-            {
-                field = (FieldDisplayDetail) field.Clone();
-
-                FieldListItemVO item = new()
-                {
-                    Id = field.Id,
-                    FieldKey = field.FieldKey
-                };
-                fieldVOs.Add(item);
-                lstFields.SelectedItem = item;
-
-                fields.Add(field);
-            }
-        }
-
-        private void BtnMoveLeft_Click(object sender, RoutedEventArgs e)
-        {
-            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
-            {
-                var srcIndex = fieldVOs.IndexOf(selectedItem);
-                var dstIndex = (srcIndex - 1 + fieldVOs.Count) % fieldVOs.Count;
-
-                fieldVOs.RemoveAt(srcIndex);
-                fieldVOs.Insert(dstIndex, selectedItem);
-
-                lstFields.SelectedItem = selectedItem;
-
-                var field = fields[srcIndex];
-                fields.RemoveAt(srcIndex);
-                fields.Insert(dstIndex, field);
-            }
-        }
-
-        private void BtnMoveRight_Click(object sender, RoutedEventArgs e)
-        {
-            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
-            {
-                var srcIndex = fieldVOs.IndexOf(selectedItem);
-                var dstIndex = (srcIndex + 1) % fieldVOs.Count;
-
-                fieldVOs.RemoveAt(srcIndex);
-                fieldVOs.Insert(dstIndex, selectedItem);
-
-                lstFields.SelectedItem = selectedItem;
-
-                var field = fields[srcIndex];
-                fields.RemoveAt(srcIndex);
-                fields.Insert(dstIndex, field);
-            }
+            dataContextVO.IsAnyFieldInClipboard = !fieldClipboard?.IsEmpty ?? false;
         }
 
         public IEnumerable<FieldDisplayDetail> Fields
@@ -188,7 +289,30 @@ namespace TerminalMonitor.Windows.Controls
 
         public ItemClipboard<FieldDisplayDetail> FieldClipboard
         {
-            get; set;
+            get => fieldClipboard;
+
+            set
+            {
+                if (fieldClipboard == value)
+                {
+                    return;
+                }
+
+                if (fieldClipboard != null)
+                {
+                    fieldClipboard.ItemCopied -= FieldClipboard_ItemCopied;
+                    fieldClipboard.ItemPasted -= FieldClipboard_ItemPasted;
+
+                }
+
+                fieldClipboard = value;
+
+                if (fieldClipboard != null)
+                {
+                    fieldClipboard.ItemCopied += FieldClipboard_ItemCopied;
+                    fieldClipboard.ItemPasted += FieldClipboard_ItemPasted;
+                }
+            }
         }
     }
 }

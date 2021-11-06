@@ -154,7 +154,6 @@ namespace TerminalMonitor.Windows
 
             conditions.RemoveAt(srcIndex);
             conditions.Insert(dstIndex, condition);
-
         }
 
         private void MoveConditionDown(TextStyleCondition condition)

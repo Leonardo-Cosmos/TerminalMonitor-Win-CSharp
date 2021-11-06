@@ -73,7 +73,8 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Click="BtnAdd_Click" />
+                                <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add"
+                                        Click="BtnAdd_Click" />
                                 <Button Name="btnDelete" Grid.Column="1" Width="20" Content="➖" ToolTip="Delete"
                                         IsEnabled="{Binding IsAnyConditionSelected}" Click="BtnDelete_Click" />
                                 <Button Name="btnMoveUp" Grid.Column="2" Width="20" Content="↑" ToolTip="Move Up"

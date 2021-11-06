@@ -106,17 +106,17 @@ namespace TerminalMonitor.Windows.Controls
 
         private void btnPaste_Click(object sender, RoutedEventArgs e)
         {
-            var condition = FilterClipboard?.Paste();
-            if (condition != null)
-            {
-                condition = (Condition)condition.Clone();
+            //var condition = FilterClipboard?.Paste();
+            //if (condition != null)
+            //{
+            //    condition = (Condition)condition.Clone();
 
-                FilterItemVO item = CreateFilterVO(condition);
-                filterVOs.Add(item);
-                lstFilters.SelectedItem = item;
+            //    FilterItemVO item = CreateFilterVO(condition);
+            //    filterVOs.Add(item);
+            //    lstFilters.SelectedItem = item;
 
-                conditions.Add(condition);
-            }
+            //    conditions.Add(condition);
+            //}
         }
 
         private void btnMoveLeft_Click(object sender, RoutedEventArgs e)

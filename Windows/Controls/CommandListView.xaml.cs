@@ -24,7 +24,7 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class CommandListView : UserControl
     {
-        private readonly CommandListViewDataContextVO dataContext = new();
+        private readonly CommandListViewDataContextVO dataContextVO = new();
 
         private readonly ObservableCollection<CommandListItemVO> commandVOs = new();
 
@@ -34,7 +34,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             InitializeComponent();
 
-            DataContext = dataContext;
+            DataContext = dataContextVO;
 
             lstCommands.ItemsSource = commandVOs;
         }
@@ -42,8 +42,8 @@ namespace TerminalMonitor.Windows.Controls
         private void LstCommands_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var count = lstCommands.SelectedItems.Count;
-            dataContext.IsSingleSelected = count == 1;
-            dataContext.IsAnySelected = count > 0;
+            dataContextVO.IsSingleSelected = count == 1;
+            dataContextVO.IsAnySelected = count > 0;
         }
 
         private void LstCommands_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -122,32 +122,30 @@ namespace TerminalMonitor.Windows.Controls
 
         private void AddCommand()
         {
-            var existingCommandNames = commands.Select(config => config.Name);
+            var existingCommandNames = commands.Select(command => command.Name);
             CommandDetailWindow window = new()
             {
                 ExistingCommandNames = existingCommandNames,
             };
 
-            window.Closing += AddCommandWindow_Closing;
-            window.Show();
-        }
-
-        private void AddCommandWindow_Closing(object sender, CancelEventArgs e)
-        {
-            var window = (CommandDetailWindow)sender;
-            if (window.Saved)
+            window.Closing += (object sender, CancelEventArgs e) =>
             {
-                var command = window.Command;
-
-                CommandListItemVO item = new()
+                if (window.Saved)
                 {
-                    Name = command.Name,
-                };
-                commandVOs.Add(item);
-                lstCommands.SelectedItem = item;
+                    var commandConfig = window.Command;
 
-                commands.Add(command);
-            }
+                    CommandListItemVO item = new()
+                    {
+                        Name = commandConfig.Name,
+                    };
+                    commandVOs.Add(item);
+                    lstCommands.SelectedItem = item;
+
+                    commands.Add(commandConfig);
+                }
+            };
+
+            window.Show();
         }
 
         private void DeleteCommand(CommandListItemVO itemVO)
@@ -162,19 +160,19 @@ namespace TerminalMonitor.Windows.Controls
         {
             var index = commandVOs.IndexOf(itemVO);
 
-            var command = commands[index];
+            var commandConfig = commands[index];
             var existingCommandNames = commands
                 .Select(command => command.Name)
-                .Where(commandName => commandName != command.Name);
+                .Where(commandName => commandName != commandConfig.Name);
             CommandDetailWindow window = new()
             {
-                Command = command,
+                Command = commandConfig,
                 ExistingCommandNames = existingCommandNames,
             };
 
-            window.Closing += (sender, e) =>
+            window.Closing += (object sender, CancelEventArgs e) =>
             {
-                itemVO.Name = command.Name;
+                itemVO.Name = commandConfig.Name;
             };
 
             window.Show();
@@ -188,11 +186,9 @@ namespace TerminalMonitor.Windows.Controls
             commandVOs.RemoveAt(srcIndex);
             commandVOs.Insert(dstIndex, itemVO);
 
-            lstCommands.SelectedItem = itemVO;
-
-            var command = commands[srcIndex];
+            var commandConfig = commands[srcIndex];
             commands.RemoveAt(srcIndex);
-            commands.Insert(dstIndex, command);
+            commands.Insert(dstIndex, commandConfig);
         }
 
         private void MoveCommandDown(CommandListItemVO itemVO)
@@ -203,11 +199,9 @@ namespace TerminalMonitor.Windows.Controls
             commandVOs.RemoveAt(srcIndex);
             commandVOs.Insert(dstIndex, itemVO);
 
-            lstCommands.SelectedItem = itemVO;
-
-            var command = commands[srcIndex];
+            var commandConfig = commands[srcIndex];
             commands.RemoveAt(srcIndex);
-            commands.Insert(dstIndex, command);
+            commands.Insert(dstIndex, commandConfig);
         }
 
         private void StartCommand(CommandListItemVO itemVO)
