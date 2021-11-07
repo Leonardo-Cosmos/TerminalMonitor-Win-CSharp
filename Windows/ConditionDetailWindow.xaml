@@ -77,7 +77,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <controls:FieldConditionView x:Name="conditionView" Grid.Row="1" />
+                <controls:FieldConditionView x:Name="fieldConditionView" Grid.Row="1" />
             </Grid>
         </GroupBox>
 

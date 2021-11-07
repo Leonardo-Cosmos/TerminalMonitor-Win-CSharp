@@ -27,6 +27,8 @@ namespace TerminalMonitor.Windows
 
         private readonly ObservableCollection<ConditionNodeVO> rootConditions = new();
 
+        private Condition condition;
+
         public ConditionDetailWindow()
         {
             InitializeComponent();
@@ -34,7 +36,7 @@ namespace TerminalMonitor.Windows
             DataContext = dataContextVO;
 
             rdBtnSingle.IsChecked = true;
-            conditionView.FieldCondition = new FieldCondition();
+            fieldConditionView.FieldCondition = new FieldCondition();
             trConditions.ItemsSource = rootConditions;
         }
 
@@ -144,7 +146,9 @@ namespace TerminalMonitor.Windows
                 }
             }
 
-            DialogResult = true;
+            SaveCondition();
+            IsSaved = true;
+            Close();
         }
 
         private void SelectConditionTreeNode(ConditionNodeVO conditionVO)
@@ -260,18 +264,90 @@ namespace TerminalMonitor.Windows
             return groupCondition;
         }
 
-        public Condition Condition
+        private void LoadCondition(Condition condition)
         {
-            get
+            this.condition = condition;
+            IsSaved = false;
+
+            if (condition == null)
             {
-                if (rdBtnSingle.IsChecked ?? false)
+                rdBtnSingle.IsChecked = true;
+
+                /*
+                 * Clear single condition.
+                 */
+                fieldConditionView.FieldCondition = new FieldCondition();
+
+                /*
+                 * Clear multiple condtion.
+                 */
+                rootConditions.Clear();
+
+                return;
+            }
+
+            if (condition is FieldCondition fieldCondition)
+            {
+                rdBtnSingle.IsChecked = true;
+                fieldConditionView.FieldCondition = fieldCondition;
+
+                /*
+                 * Clear multiple condtion.
+                 */
+                rootConditions.Clear();
+            }
+            else if (condition is GroupCondition groupCondition)
+            {
+                rdBtnMultiple.IsChecked = true;
+                dataContextVO.ConditionName = groupCondition.Name;
+                dataContextVO.IsInverted = groupCondition.IsInverted;
+                dataContextVO.DefaultResult = groupCondition.DefaultResult;
+                dataContextVO.IsDisabled = groupCondition.IsDisabled;
+                dataContextVO.MatchMode = groupCondition.MatchMode;
+                rootConditions.Clear();
+                groupCondition.Conditions?
+                    .Select(condition => ToVO(condition))
+                    .ToList()
+                    .ForEach(conditionNodeVO =>
+                    {
+                        conditionNodeVO.Siblings = rootConditions;
+                        rootConditions.Add(conditionNodeVO);
+                    });
+
+                /*
+                 * Clear single condition.
+                 */
+                fieldConditionView.FieldCondition = new FieldCondition();
+            }
+            else
+            {
+                throw new NotImplementedException("Unknown condition type");
+            }
+        }
+
+        private void SaveCondition()
+        {
+            if (rdBtnSingle.IsChecked ?? false)
+            {
+                condition = fieldConditionView.FieldCondition;
+            }
+            else
+            {
+                if (condition is GroupCondition groupCondition)
                 {
-                    return conditionView.FieldCondition;
+                    groupCondition.Name = dataContextVO.ConditionName;
+                    groupCondition.IsInverted = dataContextVO.IsInverted;
+                    groupCondition.DefaultResult = dataContextVO.DefaultResult;
+                    groupCondition.IsDisabled = dataContextVO.IsDisabled;
+                    groupCondition.MatchMode = dataContextVO.MatchMode;
+                    groupCondition.Conditions = rootConditions
+                        .Select(conditionNodeVO => FromVO(conditionNodeVO)).ToList();
                 }
                 else
                 {
-                    var groupCondition = new GroupCondition()
+                    condition = new GroupCondition()
                     {
+                        Id = Guid.NewGuid().ToString(),
                         Name = dataContextVO.ConditionName,
                         IsInverted = dataContextVO.IsInverted,
                         DefaultResult = dataContextVO.DefaultResult,
@@ -280,68 +356,16 @@ namespace TerminalMonitor.Windows
                         Conditions = rootConditions
                             .Select(conditionNodeVO => FromVO(conditionNodeVO)).ToList(),
                     };
-
-                    return groupCondition;
                 }
             }
+        }
 
-            set
-            {
-                if (value == null)
-                {
-                    rdBtnSingle.IsChecked = true;
+        public bool IsSaved { get; set; }
 
-                    /*
-                     * Clear single condition.
-                     */
-                    conditionView.FieldCondition = new FieldCondition();
-
-                    /*
-                     * Clear multiple condtion.
-                     */
-                    rootConditions.Clear();
-
-                    return;
-                }
-
-                if (value is FieldCondition fieldCondition)
-                {
-                    rdBtnSingle.IsChecked = true;
-                    conditionView.FieldCondition = fieldCondition;
-
-                    /*
-                     * Clear multiple condtion.
-                     */
-                    rootConditions.Clear();
-                }
-                else if (value is GroupCondition groupCondition)
-                {
-                    rdBtnMultiple.IsChecked = true;
-                    dataContextVO.ConditionName = groupCondition.Name;
-                    dataContextVO.IsInverted = groupCondition.IsInverted;
-                    dataContextVO.DefaultResult = groupCondition.DefaultResult;
-                    dataContextVO.IsDisabled = groupCondition.IsDisabled;
-                    dataContextVO.MatchMode = groupCondition.MatchMode;
-                    rootConditions.Clear();
-                    groupCondition.Conditions?
-                        .Select(condition => ToVO(condition))
-                        .ToList()
-                        .ForEach(conditionNodeVO =>
-                        {
-                            conditionNodeVO.Siblings = rootConditions;
-                            rootConditions.Add(conditionNodeVO);
-                        });
-
-                    /*
-                     * Clear single condition.
-                     */
-                    conditionView.FieldCondition = new FieldCondition();
-                }
-                else
-                {
-                    throw new NotImplementedException("Unknown condition type");
-                }
-            }
+        public Condition Condition
+        {
+            get => condition;
+            set => LoadCondition(value);
         }
     }
 }

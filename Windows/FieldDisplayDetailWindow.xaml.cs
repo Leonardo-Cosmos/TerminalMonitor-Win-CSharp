@@ -49,11 +49,6 @@ namespace TerminalMonitor.Windows
             txtBxKey.SetBinding(TextBox.TextProperty, fieldKeyBinding);
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            Saved = false;
-        }
-
         private void LstStyleCondtions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var count = lstStyleCondtions.SelectedItems.Count;
@@ -123,7 +118,7 @@ namespace TerminalMonitor.Windows
             }
 
             SaveFieldDetail();
-            Saved = true;
+            IsSaved = true;
             Close();
         }
 
@@ -167,8 +162,11 @@ namespace TerminalMonitor.Windows
             conditions.Insert(dstIndex, condition);
         }
 
-        private void LoadFieldDetail()
+        private void LoadFieldDetail(FieldDisplayDetail fieldDetail)
         {
+            this.fieldDetail = fieldDetail;
+            IsSaved = false;
+
             if (fieldDetail != null)
             {
                 dataContextVO.FieldKey = fieldDetail.FieldKey;
@@ -193,21 +191,20 @@ namespace TerminalMonitor.Windows
                 fieldDetail.Style = dataContextVO.Style;
                 fieldDetail.Conditions = dataContextVO.Conditions.ToArray();
             }
-        }
-
-        private FieldDisplayDetail CreateFieldDetail()
-        {
-            return new FieldDisplayDetail()
+            else
             {
-                Id = Guid.NewGuid().ToString(),
-                FieldKey = dataContextVO.FieldKey,
-                CustomizeStyle = dataContextVO.CustomizeStyle,
-                Style = dataContextVO.Style,
-                Conditions = dataContextVO.Conditions.ToArray(),
-            };
+                fieldDetail = new FieldDisplayDetail()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    FieldKey = dataContextVO.FieldKey,
+                    CustomizeStyle = dataContextVO.CustomizeStyle,
+                    Style = dataContextVO.Style,
+                    Conditions = dataContextVO.Conditions.ToArray(),
+                };
+            }
         }
 
-        public bool Saved { get; set; }
+        public bool IsSaved { get; set; }
 
         public IEnumerable<string> ExistingFieldKeys
         {
@@ -228,13 +225,8 @@ namespace TerminalMonitor.Windows
 
         public FieldDisplayDetail FieldDetail
         {
-            get => fieldDetail ?? CreateFieldDetail();
-
-            set
-            {
-                fieldDetail = value;
-                LoadFieldDetail();
-            }
+            get => fieldDetail;
+            set => LoadFieldDetail(value);
         }
     }
 }

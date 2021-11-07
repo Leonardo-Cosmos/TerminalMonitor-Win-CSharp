@@ -7,7 +7,7 @@
         xmlns:controls="clr-namespace:TerminalMonitor.Windows.Controls"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:FieldDisplayDetailWindowDataContextVO}"
-        Title="Field Detail" Height="600" Width="1100" Loaded="Window_Loaded">
+        Title="Field Detail" Height="600" Width="1100">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

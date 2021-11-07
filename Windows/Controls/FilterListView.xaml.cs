@@ -93,7 +93,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void btnCopy_Click(object sender, RoutedEventArgs e)
+        private void BtnCopy_Click(object sender, RoutedEventArgs e)
         {
             if (lstFilters.SelectedItem is FilterItemVO selectedItem)
             {
@@ -104,7 +104,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void btnPaste_Click(object sender, RoutedEventArgs e)
+        private void BtnPaste_Click(object sender, RoutedEventArgs e)
         {
             //var condition = FilterClipboard?.Paste();
             //if (condition != null)
@@ -119,7 +119,7 @@ namespace TerminalMonitor.Windows.Controls
             //}
         }
 
-        private void btnMoveLeft_Click(object sender, RoutedEventArgs e)
+        private void BtnMoveLeft_Click(object sender, RoutedEventArgs e)
         {
             if (lstFilters.SelectedItem is FilterItemVO selectedItem)
             {
@@ -137,7 +137,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void btnMoveRight_Click(object sender, RoutedEventArgs e)
+        private void BtnMoveRight_Click(object sender, RoutedEventArgs e)
         {
             if (lstFilters.SelectedItem is FilterItemVO selectedItem)
             {

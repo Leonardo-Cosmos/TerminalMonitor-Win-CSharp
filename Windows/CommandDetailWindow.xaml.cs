@@ -53,11 +53,6 @@ namespace TerminalMonitor.Windows
             txtBxName.SetBinding(TextBox.TextProperty, commandNameBinding);
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            Saved = false;
-        }
-
         private void BtnBrowseWorkDir_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new VistaFolderBrowserDialog()
@@ -94,12 +89,15 @@ namespace TerminalMonitor.Windows
             }
 
             SaveCommand();
-            Saved = true;
+            IsSaved = true;
             Close();
         }
 
-        private void LoadCommand()
+        private void LoadCommand(CommandConfig command)
         {
+            this.command = command;
+            IsSaved = false;
+
             if (command != null)
             {
                 dataContextVO.Name = command.Name;
@@ -118,20 +116,19 @@ namespace TerminalMonitor.Windows
                 command.Arguments = dataContextVO.Arguments;
                 command.WorkDirectory = dataContextVO.WorkDirectory;
             }
-        }
-
-        private CommandConfig CreateCommand()
-        {
-            return new()
+            else
             {
-                Name = dataContextVO.Name,
-                StartFile = dataContextVO.StartFile,
-                Arguments = dataContextVO.Arguments,
-                WorkDirectory = dataContextVO.WorkDirectory,
-            };
+                command = new()
+                {
+                    Name = dataContextVO.Name,
+                    StartFile = dataContextVO.StartFile,
+                    Arguments = dataContextVO.Arguments,
+                    WorkDirectory = dataContextVO.WorkDirectory,
+                };
+            }
         }
 
-        public bool Saved { get; set; }
+        public bool IsSaved { get; set; }
 
         public IEnumerable<string> ExistingCommandNames
         {
@@ -148,13 +145,8 @@ namespace TerminalMonitor.Windows
 
         public CommandConfig Command
         {
-            get => command ?? CreateCommand();
-
-            set
-            {
-                command = value;
-                LoadCommand();
-            }
+            get => command;
+            set => LoadCommand(value);
         }
     }
 }
