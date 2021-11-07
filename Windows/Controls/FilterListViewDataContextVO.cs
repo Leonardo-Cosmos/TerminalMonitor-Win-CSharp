@@ -14,6 +14,30 @@ namespace TerminalMonitor.Windows.Controls
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        private bool isAnySelected;
+
+        public bool IsAnySelected
+        {
+            get => isAnySelected;
+            set
+            {
+                isAnySelected = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool isAnyConditionInClipboard;
+
+        public bool IsAnyConditionInClipboard
+        {
+            get => isAnyConditionInClipboard;
+            set
+            {
+                isAnyConditionInClipboard = value;
+                OnPropertyChanged();
+            }
+        }
+
         private bool isInverted;
 
         public bool IsInverted

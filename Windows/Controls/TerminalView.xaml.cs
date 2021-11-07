@@ -375,12 +375,12 @@ namespace TerminalMonitor.Windows.Controls
         {
             get
             {
-                return filterView.FilterClipboard;
+                return filterView.ConditionClipboard;
             }
 
             set
             {
-                filterView.FilterClipboard = value;
+                filterView.ConditionClipboard = value;
             }
         }
     }

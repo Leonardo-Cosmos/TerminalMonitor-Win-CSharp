@@ -88,6 +88,16 @@ namespace TerminalMonitor.Windows.Controls
             ForEachSelectedItem(MoveFieldDetailDown, byOrder: true, reverseOrder: true, recoverSelection: true);
         }
 
+        private void FieldClipboard_ItemCopied(object sender, EventArgs e)
+        {
+            dataContextVO.IsAnyFieldInClipboard = !fieldClipboard?.IsEmpty ?? false;
+        }
+
+        private void FieldClipboard_ItemPasted(object sender, EventArgs e)
+        {
+            dataContextVO.IsAnyFieldInClipboard = !fieldClipboard?.IsEmpty ?? false;
+        }
+
         private void ForSelectedItem(Action<FieldListItemVO> action)
         {
             if (lstFields.SelectedItem is FieldListItemVO itemVO)
@@ -181,7 +191,10 @@ namespace TerminalMonitor.Windows.Controls
 
             window.Closing += (object sender, CancelEventArgs e) =>
             {
-                itemVO.FieldKey = fieldDetail.FieldKey;
+                if (window.IsSaved)
+                {
+                    itemVO.FieldKey = fieldDetail.FieldKey;
+                }
             };
 
             window.Show();
@@ -215,7 +228,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void CopyFieldDetails()
         {
-            List<FieldDisplayDetail> fieldDetails = new();
+            List<FieldDisplayDetail> copiedFieldDetails = new();
             foreach (var selectedItem in lstFields.SelectedItems)
             {
                 if (selectedItem is FieldListItemVO itemVO)
@@ -223,43 +236,34 @@ namespace TerminalMonitor.Windows.Controls
                     var index = fieldVOs.IndexOf(itemVO);
 
                     var fieldDetail = fields[index];
-                    fieldDetails.Add(fieldDetail);
+                    copiedFieldDetails.Add(fieldDetail);
                 }
             }
 
-            fieldClipboard?.Copy(fieldDetails.ToArray());
+            fieldClipboard?.Copy(copiedFieldDetails.ToArray());
         }
 
         private void PasteFieldDetails()
         {
-            var fieldDetails = fieldClipboard?.Paste();
-            if (fieldDetails != null)
+            var pastedFieldDetails = fieldClipboard?.Paste();
+            if (pastedFieldDetails != null)
             {
-                foreach (var fieldDetail in fieldDetails)
+                lstFields.SelectedItems.Clear();
+                foreach (var pastedFieldDetail in pastedFieldDetails)
                 {
-                    var fieldDetailClone = (FieldDisplayDetail)fieldDetail.Clone();
+                    var fieldDetail = (FieldDisplayDetail)pastedFieldDetail.Clone();
 
-                    FieldListItemVO item = new()
+                    FieldListItemVO itemVO = new()
                     {
-                        Id = fieldDetailClone.Id,
-                        FieldKey = fieldDetailClone.FieldKey
+                        Id = fieldDetail.Id,
+                        FieldKey = fieldDetail.FieldKey
                     };
-                    fieldVOs.Add(item);
-                    lstFields.SelectedItem = item;
+                    fieldVOs.Add(itemVO);
+                    lstFields.SelectedItems.Add(itemVO);
 
-                    fields.Add(fieldDetailClone);
+                    fields.Add(fieldDetail);
                 }
             }
-        }
-
-        private void FieldClipboard_ItemCopied(object sender, EventArgs e)
-        {
-            dataContextVO.IsAnyFieldInClipboard = !fieldClipboard?.IsEmpty ?? false;
-        }
-
-        private void FieldClipboard_ItemPasted(object sender, EventArgs e)
-        {
-            dataContextVO.IsAnyFieldInClipboard = !fieldClipboard?.IsEmpty ?? false;
         }
 
         public List<FieldDisplayDetail> Fields

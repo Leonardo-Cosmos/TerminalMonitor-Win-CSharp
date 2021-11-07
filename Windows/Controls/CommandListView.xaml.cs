@@ -172,7 +172,10 @@ namespace TerminalMonitor.Windows.Controls
 
             window.Closing += (object sender, CancelEventArgs e) =>
             {
-                itemVO.Name = commandConfig.Name;
+                if (window.IsSaved)
+                {
+                    itemVO.Name = commandConfig.Name;
+                }
             };
 
             window.Show();
