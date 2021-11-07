@@ -37,7 +37,7 @@ namespace TerminalMonitor.Settings.Models
                 Id = setting.Id,
                 Name = setting.Name,
                 VisibleFields = setting.VisibleFields?
-                    .Select(field => FieldDisplayDetailSettings.Load(field)),
+                    .Select(field => FieldDisplayDetailSettings.Load(field)).ToArray(),
                 FilterCondition = GroupConditionSettings.Load(setting.FilterCondition),
             };
         }

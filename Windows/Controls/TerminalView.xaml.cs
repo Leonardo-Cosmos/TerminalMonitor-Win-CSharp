@@ -40,7 +40,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly DataTable terminalDataTable = new();
 
-        private IEnumerable<FieldDisplayDetail> visibleFields = Array.Empty<FieldDisplayDetail>();
+        private List<FieldDisplayDetail> visibleFields = new();
+
         private GroupCondition filterCondition = new();
 
         private readonly TerminalViewDataContextVO dataContextVO = new();
@@ -64,7 +65,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void ButtonApplyFields_Click(object sender, RoutedEventArgs e)
         {
-            visibleFields = fieldListView.Fields.ToArray();
+            visibleFields = fieldListView.Fields;
             ApplyVisibleField();
         }
 
@@ -324,24 +325,14 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public IEnumerable<FieldDisplayDetail> VisibleFields
+        public List<FieldDisplayDetail> VisibleFields
         {
-            get
-            {
-                List<FieldDisplayDetail> fieldList = new();
-                fieldList.AddRange(visibleFields);
-                return new ReadOnlyCollection<FieldDisplayDetail>(fieldList);
-            }
-
+            get => visibleFields;
             set
             {
-                if (value == null)
-                {
-                    return;
-                }
+                visibleFields = value ?? new();
 
-                fieldListView.Fields = value;
-                visibleFields = value.ToArray();
+                fieldListView.Fields = visibleFields;
                 ApplyVisibleField();
             }
         }

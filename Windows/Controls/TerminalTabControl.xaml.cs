@@ -263,7 +263,7 @@ namespace TerminalMonitor.Windows.Controls
             tab.Header = config.Name ?? "Unknown View";
 
             TerminalView terminalView = new();
-            terminalView.VisibleFields = config.VisibleFields;
+            terminalView.VisibleFields = config.VisibleFields.ToList();
             terminalView.FilterCondition = config.FilterCondition;
             terminalView.FieldClipboard = fieldClipboard;
             terminalView.FilterClipboard = filterClipboard;

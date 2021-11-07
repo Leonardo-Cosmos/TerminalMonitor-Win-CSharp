@@ -76,7 +76,7 @@ namespace TerminalMonitor.Settings.Models
             {
                 MatchMode = StringToMode(setting.MatchMode),
                 Conditions = setting.Conditions?
-                    .Select(condition => ConditionSettings.Load(condition)),
+                    .Select(condition => ConditionSettings.Load(condition)).ToArray(),
                 Id = setting.Id,
                 Name = setting.Name,
                 IsInverted = setting.IsInverted,

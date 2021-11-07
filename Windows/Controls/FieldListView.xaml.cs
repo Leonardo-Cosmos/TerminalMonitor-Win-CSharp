@@ -29,7 +29,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly ObservableCollection<FieldListItemVO> fieldVOs = new();
 
-        private readonly List<FieldDisplayDetail> fields = new();
+        private List<FieldDisplayDetail> fields = new();
 
         private ItemClipboard<FieldDisplayDetail> fieldClipboard;
 
@@ -262,24 +262,16 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.IsAnyFieldInClipboard = !fieldClipboard?.IsEmpty ?? false;
         }
 
-        public IEnumerable<FieldDisplayDetail> Fields
+        public List<FieldDisplayDetail> Fields
         {
-            get
-            {
-                return new ReadOnlyCollection<FieldDisplayDetail>(fields.ToArray());
-            }
+            get => fields;
 
             set
             {
-                fields.Clear();
-                fieldVOs.Clear();
-                if (value == null)
-                {
-                    return;
-                }
+                fields = value ?? new();
 
-                fields.AddRange(value);
-                value.Select(field => new FieldListItemVO()
+                fieldVOs.Clear();
+                fields.Select(field => new FieldListItemVO()
                 {
                     FieldKey = field.FieldKey,
                 }).ToList()
