@@ -33,7 +33,9 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly ObservableCollection<FilterItemVO> filterVOs = new();
 
-        private readonly List<Condition> conditions = new();
+        private List<Condition> conditions;
+
+        private GroupCondition groupCondition;
 
         private ItemClipboard<Condition> conditionClipboard;
 
@@ -41,9 +43,40 @@ namespace TerminalMonitor.Windows.Controls
         {
             InitializeComponent();
 
+            conditions = new();
+            groupCondition = new()
+            {
+                Id = Guid.NewGuid().ToString(),
+                Conditions = conditions,
+            };
+
             DataContext = dataContextVO;
+            dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
 
             lstFilters.ItemsSource = filterVOs;
+        }
+
+        private void DataContextVO_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(GroupCondition.MatchMode):
+                    groupCondition.MatchMode = dataContextVO.MatchMode;
+                    break;
+                case nameof(GroupCondition.IsInverted):
+                    groupCondition.IsInverted = dataContextVO.IsInverted;
+                    break;
+                case nameof(GroupCondition.DefaultResult):
+                    groupCondition.DefaultResult = dataContextVO.DefaultResult;
+                    break;
+                case nameof(GroupCondition.IsDisabled):
+                    groupCondition.IsDisabled = dataContextVO.IsDisabled;
+                    break;
+                case nameof(GroupCondition.Conditions):
+                    groupCondition.Conditions = conditions; break;
+                default:
+                    break;
+            }
         }
 
         private void LstFilters_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -293,40 +326,27 @@ namespace TerminalMonitor.Windows.Controls
 
         public GroupCondition Condition
         {
-            get
-            {
-                return new GroupCondition()
-                {
-                    MatchMode = dataContextVO.MatchMode,
-                    IsInverted = dataContextVO.IsInverted,
-                    DefaultResult = dataContextVO.DefaultResult,
-                    IsDisabled = dataContextVO.IsDisabled,
-                    Conditions = conditions,
-                };
-            }
+            get => groupCondition;
 
             set
             {
                 filterVOs.Clear();
-                conditions.Clear();
 
-                if (value == null)
+                dataContextVO.PropertyChanged -= DataContextVO_PropertyChanged;
+                groupCondition = value ?? new();
+                dataContextVO.MatchMode = groupCondition.MatchMode;
+                dataContextVO.IsInverted = groupCondition.IsInverted;
+                dataContextVO.DefaultResult = groupCondition.DefaultResult;
+                dataContextVO.IsDisabled = groupCondition.IsDisabled;
+
+                groupCondition.Conditions ??= new();
+                conditions = groupCondition.Conditions;
+                foreach (Condition condition in conditions)
                 {
-                    return;
+                    filterVOs.Add(CreateFilterVO(condition));
                 }
 
-                dataContextVO.MatchMode = value.MatchMode;
-                dataContextVO.IsInverted = value.IsInverted;
-                dataContextVO.DefaultResult = value.DefaultResult;
-                dataContextVO.IsDisabled = value.IsDisabled;
-                if (value.Conditions != null)
-                {
-                    foreach (Condition condition in value.Conditions)
-                    {
-                        conditions.Add(condition);
-                        filterVOs.Add(CreateFilterVO(condition));
-                    }
-                }
+                dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
             }
         }
 

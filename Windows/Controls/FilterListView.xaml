@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=local:FilterListViewDataContextVO}"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="150" d:DesignWidth="800">
     <Grid>
         <Grid.Resources>
             <ResourceDictionary>
@@ -189,7 +189,7 @@
             <Button Name="btnCopy" Grid.Column="3" Width="20" Content="📄" ToolTip="Copy"
                     IsEnabled="{Binding IsAnySelected}" Click="BtnCopy_Click" />
             <Button Name="btnPaste" Grid.Column="4" Width="20" Content="📋" ToolTip="Paste"
-                    IsEnabled="{Binding IsAnySelected}" Click="BtnPaste_Click" />
+                    IsEnabled="{Binding IsAnyConditionInClipboard}" Click="BtnPaste_Click" />
             <Button Name="btnMoveLeft" Grid.Column="5" Width="20" Content="←" ToolTip="Move Left"
                     IsEnabled="{Binding IsAnySelected}" Click="BtnMoveLeft_Click" />
             <Button Name="btnMoveRight" Grid.Column="6" Width="20" Content="→" ToolTip="Move Right"

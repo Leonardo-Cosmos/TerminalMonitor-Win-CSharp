@@ -345,11 +345,7 @@ namespace TerminalMonitor.Windows.Controls
 
         public GroupCondition FilterCondition
         {
-            get
-            {
-                return filterCondition;
-            }
-
+            get => filterCondition;
             set
             {
                 filterCondition = value ?? new GroupCondition();

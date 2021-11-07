@@ -254,7 +254,7 @@ namespace TerminalMonitor.Windows
             {
                 MatchMode = groupConditionVO.MatchMode,
                 Conditions = groupConditionVO.Conditions
-                    .Select(conditionVO => FromVO(conditionVO)),
+                    .Select(conditionVO => FromVO(conditionVO)).ToList(),
 
                 IsInverted = groupConditionVO.IsInverted,
                 DefaultResult = groupConditionVO.DefaultResult,
