@@ -17,36 +17,18 @@
             </ListView.ItemTemplate>
         </ListView>
         <WrapPanel Orientation="Horizontal">
-            <WrapPanel.Resources>
-                <ResourceDictionary>
-                    <Style x:Key="buttonSingleSelected" TargetType="Button" BasedOn="{StaticResource button}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsSingleSelected}" Value="False">
-                                <Setter Property="IsEnabled" Value="False" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                    <Style x:Key="buttonAnySelected" TargetType="Button" BasedOn="{StaticResource button}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsAnySelected}" Value="False">
-                                <Setter Property="IsEnabled" Value="False" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ResourceDictionary>
-            </WrapPanel.Resources>
-            <Button Name="btnAdd" Width="20"
-                    Content="➕" ToolTip="Add" Click="BtnAdd_Click" />
-            <Button Name="btnDelete" Width="20" Style="{StaticResource buttonAnySelected}"
-                    Content="➖" ToolTip="Delete" Click="BtnDelete_Click" />
-            <Button Name="btnModify" Width="20" Style="{StaticResource buttonAnySelected}" 
-                    Content="⚙" ToolTip="Modify" Click="BtnModify_Click" />
-            <Button Name="btnMoveUp" Width="20" Style="{StaticResource buttonAnySelected}"
-                    Content="↑" ToolTip="Move Up" Click="BtnMoveUp_Click" />
-            <Button Name="btnMoveDown" Width="20" Style="{StaticResource buttonAnySelected}"
-                    Content="↓" ToolTip="Move Down" Click="BtnMoveDown_Click" />
-            <Button Name="btnStart" Width="20" Style="{StaticResource buttonAnySelected}"
-                    Content="▷" ToolTip="Start" Click="BtnStart_Click" />
+            <Button Name="btnAdd" Width="20" Content="➕" ToolTip="Add"
+                    Click="BtnAdd_Click" />
+            <Button Name="btnDelete" Width="20" Content="➖" ToolTip="Delete"
+                    IsEnabled="{Binding IsAnySelected}" Click="BtnDelete_Click" />
+            <Button Name="btnModify" Width="20" Content="⚙" ToolTip="Modify"
+                    IsEnabled="{Binding IsAnySelected}" Click="BtnModify_Click" />
+            <Button Name="btnMoveUp" Width="20" Content="↑" ToolTip="Move Up"
+                    IsEnabled="{Binding IsAnySelected}" Click="BtnMoveUp_Click" />
+            <Button Name="btnMoveDown" Width="20" Content="↓" ToolTip="Move Down"
+                    IsEnabled="{Binding IsAnySelected}" Click="BtnMoveDown_Click" />
+            <Button Name="btnStart" Width="20" Content="▷" ToolTip="Start"
+                    IsEnabled="{Binding IsAnySelected}" Click="BtnStart_Click" />
         </WrapPanel>
     </StackPanel>
 </UserControl>
