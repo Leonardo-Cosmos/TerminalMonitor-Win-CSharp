@@ -42,16 +42,13 @@ namespace TerminalMonitor.Windows.Controls
 
         private List<FieldDisplayDetail> visibleFields = new();
 
+        private readonly TerminalViewColumnSettingHelper columnSettingHelper = new();
+
         private GroupCondition filterCondition = new();
 
         private readonly TerminalViewDataContextVO dataContextVO = new();
 
         private readonly Dictionary<string, bool> matchedLineDict = new();
-
-        /// <summary>
-        /// A dictionary between field ID and grid view column.
-        /// </summary>
-        private readonly Dictionary<string, GridViewColumn> gridViewColumnDict = new();
 
         public TerminalView()
         {
@@ -65,13 +62,11 @@ namespace TerminalMonitor.Windows.Controls
 
         private void ButtonApplyFields_Click(object sender, RoutedEventArgs e)
         {
-            visibleFields = fieldListView.Fields;
             ApplyVisibleField();
         }
 
         private void ButtonFilter_Click(object sender, RoutedEventArgs e)
         {
-            filterCondition = filterView.Condition;
             FilterTerminal();
         }
 
@@ -125,6 +120,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private void FilterTerminal()
         {
+            filterCondition = (GroupCondition)filterView.Condition.Clone();
+
             if (lineSupervisor == null)
             {
                 return;
@@ -143,36 +140,14 @@ namespace TerminalMonitor.Windows.Controls
             AddMatchedTerminalLines();
         }
 
-        private IEnumerable<GridViewColumnSetting> GetGridViewColumnSettings()
-        {
-            return gridViewColumnDict.Select(keyValuePair =>
-            {
-                string fieldId = keyValuePair.Key;
-                var column = keyValuePair.Value;
-                return new GridViewColumnSetting(
-                    FieldId: fieldId,
-                    Width: column.ActualWidth
-                    );
-            }).ToArray();
-        }
-
-        private void SetGridViewColumnSettings(IEnumerable<GridViewColumnSetting> gridViewColumnSettings)
-        {
-            foreach (var columnSetting in gridViewColumnSettings)
-            {
-                if (gridViewColumnDict.ContainsKey(columnSetting.FieldId))
-                {
-                    gridViewColumnDict[columnSetting.FieldId].Width = columnSetting.Width;
-                }
-            }
-        }
-
         private void ApplyVisibleField()
         {
-            var gridViewColumnSettings = GetGridViewColumnSettings();
+            // Save current column settings before reload grid.
+            var gridViewColumnSettings = columnSettingHelper.GetGridViewColumnSettings();
+
+            visibleFields = columnSettingHelper.Init(fieldListView.Fields);
 
             GridView gridView = new();
-            gridViewColumnDict.Clear();
 
             terminalDataTable.Columns.Clear();
             terminalDataTable.Rows.Clear();
@@ -192,7 +167,7 @@ namespace TerminalMonitor.Windows.Controls
                     column.DataType = typeof(string);
                     terminalDataTable.Columns.Add(column);
 
-                    GridViewColumn viewColumn = null;
+                    GridViewColumn viewColumn;
                     if (visibleField.CustomizeStyle)
                     {
                         DataTemplate dataTemplate = TerminalViewHelper.BuildFieldDataTemplate(visibleField, terminalDataTable);
@@ -213,7 +188,7 @@ namespace TerminalMonitor.Windows.Controls
                     }
 
                     gridView.Columns.Add(viewColumn);
-                    gridViewColumnDict[visibleField.Id] = viewColumn;
+                    columnSettingHelper.AddColumn(visibleField.Id, viewColumn);
                 }
             }
             else
@@ -232,7 +207,8 @@ namespace TerminalMonitor.Windows.Controls
                 });
             }
 
-            SetGridViewColumnSettings(gridViewColumnSettings);
+            // Recover column settings. 
+            columnSettingHelper.SetGridViewColumnSettings(gridViewColumnSettings);
 
             AddMatchedTerminalLines();
 
@@ -327,29 +303,26 @@ namespace TerminalMonitor.Windows.Controls
 
         public List<FieldDisplayDetail> VisibleFields
         {
-            get => visibleFields;
+            get => fieldListView.Fields;
             set
             {
-                visibleFields = value ?? new();
-
-                fieldListView.Fields = visibleFields;
+                fieldListView.Fields = value;
                 ApplyVisibleField();
             }
         }
 
         public IEnumerable<GridViewColumnSetting> ColumnSettings
         {
-            get => GetGridViewColumnSettings();
-            set => SetGridViewColumnSettings(value);
+            get => columnSettingHelper.GetGridViewColumnSettings();
+            set => columnSettingHelper.SetGridViewColumnSettings(value);
         }
 
         public GroupCondition FilterCondition
         {
-            get => filterCondition;
+            get => filterView.Condition;
             set
             {
-                filterCondition = value ?? new GroupCondition();
-                filterView.Condition = filterCondition;
+                filterView.Condition = value;
                 FilterTerminal();
             }
         }

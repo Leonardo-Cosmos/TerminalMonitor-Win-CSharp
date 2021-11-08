@@ -37,29 +37,29 @@ namespace TerminalMonitor.Windows.Controls
             textBinding.Path = new PropertyPath(visibleField.Id, Array.Empty<object>());
             textBlockElement.SetBinding(TextBlock.TextProperty, textBinding);
 
-            SetStyleElelmentProperty(visibleField, textBlockElement, TextBlock.ForegroundProperty,
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.ForegroundProperty,
                 null, convertColorToBrush,
                 textStyle => textStyle.Foreground, GetForegroundColumnName);
 
-            SetStyleElelmentProperty(visibleField, textBlockElement, TextBlock.BackgroundProperty,
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.BackgroundProperty,
                 null, convertColorToBrush,
                 textStyle => textStyle.Background, GetBackgroundColumnName);
 
-            SetStyleElelmentProperty(visibleField, textBlockElement, TextBlock.HorizontalAlignmentProperty,
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.HorizontalAlignmentProperty,
                 horizontalAlignmentConverter, null,
                 textStyle => textStyle.HorizontalAlignment, GetHorizontalAlignmentColumnName);
 
-            SetStyleElelmentProperty(visibleField, textBlockElement, TextBlock.VerticalAlignmentProperty,
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.VerticalAlignmentProperty,
                 verticalAlignmentConverter, null,
                 textStyle => textStyle.VerticalAlignment, GetVertialAlignmentColumnName);
 
-            SetStyleElelmentProperty(visibleField, textBlockElement, TextBlock.TextAlignmentProperty,
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.TextAlignmentProperty,
                 textAlignmentConverter, null,
                 textStyle => textStyle.TextAlignment, GetTextAlignmentColumnName);
 
             FrameworkElementFactory panelElement = new(typeof(DockPanel));
 
-            SetStyleElelmentProperty(visibleField, panelElement, DockPanel.BackgroundProperty,
+            SetElementStyleProperty(visibleField, panelElement, DockPanel.BackgroundProperty,
                 null, convertColorToBrush,
                 textStyle => textStyle.CellBackground, GetCellBackgroundColumnName);
 
@@ -108,12 +108,12 @@ namespace TerminalMonitor.Windows.Controls
             columns.Add(styleColumn);
         }
 
-        private static void SetStyleElelmentProperty(FieldDisplayDetail visibleField, FrameworkElementFactory elementFactory,
+        private static void SetElementStyleProperty(FieldDisplayDetail visibleField, FrameworkElementFactory elementFactory,
             DependencyProperty dependencyProperty, IValueConverter bindingConverter, Func<object, object> convertToValue,
             Func<TextStyle, object> getStyleProperty, Func<string, string> getStyleColumnName)
         {
-            object styleProperty = GetStaticStyleProperty(visibleField, getStyleProperty);
-            if (styleProperty == null)
+            object staticStyleProperty = GetStaticStyleProperty(visibleField, getStyleProperty);
+            if (staticStyleProperty == null)
             {
                 Binding binding = new();
                 binding.Path = new PropertyPath(getStyleColumnName(visibleField.Id), Array.Empty<object>());
@@ -127,11 +127,11 @@ namespace TerminalMonitor.Windows.Controls
             {
                 if (convertToValue == null)
                 {
-                    elementFactory.SetValue(dependencyProperty, styleProperty);
+                    elementFactory.SetValue(dependencyProperty, staticStyleProperty);
                 }
                 else
                 {
-                    elementFactory.SetValue(dependencyProperty, convertToValue(styleProperty));
+                    elementFactory.SetValue(dependencyProperty, convertToValue(staticStyleProperty));
                 }
             }
         }
@@ -163,25 +163,25 @@ namespace TerminalMonitor.Windows.Controls
             TextStyle matchedTextStyle)
         {
             var fieldId = visibleField.Id;
-            GetFinalStyleProperty(fieldId, visibleField.Style, matchedTextStyle,
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.Foreground, GetForegroundColumnName, row,
                 convertColorToBrush);
-            GetFinalStyleProperty(fieldId, visibleField.Style, matchedTextStyle,
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.Background, GetBackgroundColumnName, row,
                 convertColorToBrush);
-            GetFinalStyleProperty(fieldId, visibleField.Style, matchedTextStyle,
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.CellBackground, GetCellBackgroundColumnName, row,
                 convertColorToBrush);
 
-            GetFinalStyleProperty(fieldId, visibleField.Style, matchedTextStyle,
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.HorizontalAlignment, GetHorizontalAlignmentColumnName, row, null);
-            GetFinalStyleProperty(fieldId, visibleField.Style, matchedTextStyle,
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.VerticalAlignment, GetVertialAlignmentColumnName, row, null);
-            GetFinalStyleProperty(fieldId, visibleField.Style, matchedTextStyle,
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.TextAlignment, GetTextAlignmentColumnName, row, null);
         }
 
-        private static void GetFinalStyleProperty(string fieldId, TextStyle defaultStyle, TextStyle conditionalStyle,
+        private static void BuildFinalStyleCell(string fieldId, TextStyle defaultStyle, TextStyle conditionalStyle,
             Func<TextStyle, object> getStyleProperty, Func<string, string> getStyleColumnName, DataRow dataRow,
             Func<object, object> convert)
         {
