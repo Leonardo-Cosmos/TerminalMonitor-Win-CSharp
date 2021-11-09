@@ -7,6 +7,13 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=local:FilterListViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="800">
+    <UserControl.CommandBindings>
+        <CommandBinding x:Name="cmdNew" Command="ApplicationCommands.New" CanExecute="CmdNew_CanExecute" Executed="CmdNew_Executed" />
+        <CommandBinding x:Name="cmdDelete" Command="ApplicationCommands.Delete" CanExecute="CmdDelete_CanExecute" Executed="CmdDelete_Executed" />
+        <CommandBinding x:Name="cmdOpen" Command="ApplicationCommands.Open" CanExecute="CmdOpen_CanExecute" Executed="CmdOpen_Executed" />
+        <CommandBinding x:Name="cmdCopy" Command="ApplicationCommands.Copy" CanExecute="CmdCopy_CanExecute" Executed="CmdCopy_Executed" />
+        <CommandBinding x:Name="cmdPaste" Command="ApplicationCommands.Paste" CanExecute="CmdPaste_CanExecute" Executed="CmdPaste_Executed" />
+    </UserControl.CommandBindings>
     <Grid>
         <Grid.Resources>
             <ResourceDictionary>
@@ -129,7 +136,19 @@
         </StackPanel>
         
         <ListView Name="lstFilters" Grid.Row="1" Grid.RowSpan="1" Grid.Column="0" Grid.ColumnSpan="3" MinHeight="20"
-                  SelectionChanged="LstFilters_SelectionChanged" MouseDoubleClick="LstFilters_MouseDoubleClick">
+                  SelectionChanged="LstFilters_SelectionChanged"
+                  MouseDown="LstFilters_MouseDown" MouseDoubleClick="LstFilters_MouseDoubleClick">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Command="ApplicationCommands.Open" />
+                    <Separator />
+                    <MenuItem Command="ApplicationCommands.Copy" />
+                    <MenuItem Command="ApplicationCommands.Paste" />
+                    <Separator />
+                    <MenuItem Command="ApplicationCommands.New" />
+                    <MenuItem Command="ApplicationCommands.Delete" />
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel></WrapPanel>
@@ -177,22 +196,13 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add"
-                    Click="BtnAdd_Click" />
-            <Button Name="btnDelete" Grid.Column="1" Width="20" Content="➖" ToolTip="Delete"
-                    IsEnabled="{Binding IsAnySelected}" Click="BtnDelete_Click" />
-            <Button Name="btnModify" Grid.Column="2" Width="20" Content="⚙" ToolTip="Modify"
-                    IsEnabled="{Binding IsAnySelected}" Click="BtnModify_Click" />
-            <Button Name="btnCopy" Grid.Column="3" Width="20" Content="📄" ToolTip="Copy"
-                    IsEnabled="{Binding IsAnySelected}" Click="BtnCopy_Click" />
-            <Button Name="btnPaste" Grid.Column="4" Width="20" Content="📋" ToolTip="Paste"
-                    IsEnabled="{Binding IsAnyConditionInClipboard}" Click="BtnPaste_Click" />
-            <Button Name="btnMoveLeft" Grid.Column="5" Width="20" Content="←" ToolTip="Move Left"
+            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Command="ApplicationCommands.New" />
+            <Button Name="btnRemove" Grid.Column="1" Width="20" Content="➖" ToolTip="Remove" Command="ApplicationCommands.Delete" />
+            <Button Name="btnEdit" Grid.Column="2" Width="20" Content="✏" ToolTip="Edit" Command="ApplicationCommands.Open" />
+            <Button Name="btnMoveLeft" Grid.Column="3" Width="20" Content="←" ToolTip="Move Left"
                     IsEnabled="{Binding IsAnySelected}" Click="BtnMoveLeft_Click" />
-            <Button Name="btnMoveRight" Grid.Column="6" Width="20" Content="→" ToolTip="Move Right"
+            <Button Name="btnMoveRight" Grid.Column="4" Width="20" Content="→" ToolTip="Move Right"
                     IsEnabled="{Binding IsAnySelected}" Click="BtnMoveRight_Click" />
         </Grid>
     </Grid>

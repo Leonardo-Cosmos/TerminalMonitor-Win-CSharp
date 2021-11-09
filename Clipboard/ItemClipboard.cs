@@ -65,9 +65,9 @@ namespace TerminalMonitor.Clipboard
             ItemPasted?.Invoke(this, EventArgs.Empty);
         }
 
-        public bool IsEmpty
+        public bool ContainsItem
         {
-            get => status == ItemClipboardStatus.Empty;
+            get => status != ItemClipboardStatus.Empty;
         }
 
         public event EventHandler ItemCut;

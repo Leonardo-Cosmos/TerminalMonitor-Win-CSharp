@@ -48,34 +48,18 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.IsAnySelected = count > 0;
         }
 
+        private void LstFields_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            HitTestResult hitResult = VisualTreeHelper.HitTest(this, e.GetPosition(this));
+            if (hitResult.VisualHit.GetType() != typeof(ListBoxItem))
+            {
+                lstFields.UnselectAll();
+            }
+        }
+
         private void LstFields_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ForSelectedItem(ModifyFieldDetail);
-        }
-
-        private void BtnAdd_Click(object sender, RoutedEventArgs e)
-        {
-            AddFieldDetail();
-        }
-
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
-        {
-            ForEachSelectedItem(DeleteFieldDetail);
-        }
-
-        private void BtnModify_Click(object sender, RoutedEventArgs e)
-        {
-            ForEachSelectedItem(ModifyFieldDetail);
-        }
-
-        private void BtnCopy_Click(object sender, RoutedEventArgs e)
-        {
-            CopyFieldDetails();
-        }
-
-        private void BtnPaste_Click(object sender, RoutedEventArgs e)
-        {
-            PasteFieldDetails();
+            ForSelectedItem(EditFieldDetail);
         }
 
         private void BtnMoveLeft_Click(object sender, RoutedEventArgs e)
@@ -88,14 +72,64 @@ namespace TerminalMonitor.Windows.Controls
             ForEachSelectedItem(MoveFieldDetailDown, byOrder: true, reverseOrder: true, recoverSelection: true);
         }
 
+        private void CmdNew_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = !dataContextVO.IsAnySelected;
+        }
+
+        private void CmdNew_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            AddFieldDetail();
+        }
+
+        private void CmdDelete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = dataContextVO.IsAnySelected;
+        }
+
+        private void CmdDelete_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ForEachSelectedItem(RemoveFieldDetail);
+        }
+
+        private void CmdOpen_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = dataContextVO.IsAnySelected;
+        }
+
+        private void CmdOpen_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ForEachSelectedItem(EditFieldDetail);
+        }
+
+        private void CmdCopy_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = dataContextVO.IsAnySelected;
+        }
+
+        private void CmdCopy_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            CopyFieldDetails();
+        }
+
+        private void CmdPaste_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = dataContextVO.IsAnyFieldInClipboard;
+        }
+
+        private void CmdPaste_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            PasteFieldDetails();
+        }
+
         private void FieldClipboard_ItemCopied(object sender, EventArgs e)
         {
-            dataContextVO.IsAnyFieldInClipboard = !fieldClipboard?.IsEmpty ?? false;
+            dataContextVO.IsAnyFieldInClipboard = fieldClipboard?.ContainsItem ?? false;
         }
 
         private void FieldClipboard_ItemPasted(object sender, EventArgs e)
         {
-            dataContextVO.IsAnyFieldInClipboard = !fieldClipboard?.IsEmpty ?? false;
+            dataContextVO.IsAnyFieldInClipboard = fieldClipboard?.ContainsItem ?? false;
         }
 
         private void ForSelectedItem(Action<FieldListItemVO> action)
@@ -167,7 +201,7 @@ namespace TerminalMonitor.Windows.Controls
             window.Show();
         }
 
-        private void DeleteFieldDetail(FieldListItemVO itemVO)
+        private void RemoveFieldDetail(FieldListItemVO itemVO)
         {
             var index = fieldVOs.IndexOf(itemVO);
             fieldVOs.RemoveAt(index);
@@ -175,7 +209,7 @@ namespace TerminalMonitor.Windows.Controls
             fields.RemoveAt(index);
         }
 
-        private void ModifyFieldDetail(FieldListItemVO itemVO)
+        private void EditFieldDetail(FieldListItemVO itemVO)
         {
             var index = fieldVOs.IndexOf(itemVO);
 

@@ -85,34 +85,18 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.IsAnySelected = count > 0;
         }
 
+        private void LstFilters_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            HitTestResult hitResult = VisualTreeHelper.HitTest(this, e.GetPosition(this));
+            if (hitResult.VisualHit.GetType() != typeof(ListBoxItem))
+            {
+                lstFilters.UnselectAll();
+            }
+        }
+
         private void LstFilters_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ForSelectedItem(ModifyCondition);
-        }
-
-        private void BtnAdd_Click(object sender, RoutedEventArgs e)
-        {
-            AddCondition();
-        }
-
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
-        {
-            ForEachSelectedItem(DeleteCondition);
-        }
-
-        private void BtnModify_Click(object sender, RoutedEventArgs e)
-        {
-            ForEachSelectedItem(ModifyCondition);
-        }
-
-        private void BtnCopy_Click(object sender, RoutedEventArgs e)
-        {
-            CopyConditions();
-        }
-
-        private void BtnPaste_Click(object sender, RoutedEventArgs e)
-        {
-            PasteConditions();
+            ForSelectedItem(EditCondition);
         }
 
         private void BtnMoveLeft_Click(object sender, RoutedEventArgs e)
@@ -125,14 +109,65 @@ namespace TerminalMonitor.Windows.Controls
             ForEachSelectedItem(MoveConditionRight, byOrder: true, reverseOrder: true, recoverSelection: true);
         }
 
+        private void CmdNew_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = !dataContextVO.IsAnySelected;
+        }
+
+        private void CmdNew_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            AddCondition();
+        }
+
+        private void CmdDelete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = dataContextVO.IsAnySelected;
+        }
+
+        private void CmdDelete_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ForEachSelectedItem(RemoveCondition);
+        }
+
+        private void CmdOpen_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = dataContextVO.IsAnySelected;
+        }
+
+        private void CmdOpen_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ForEachSelectedItem(EditCondition);
+        }
+
+        private void CmdCopy_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = dataContextVO.IsAnySelected;
+        }
+
+        private void CmdCopy_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            CopyConditions();
+        }
+
+        private void CmdPaste_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = dataContextVO.IsAnyConditionInClipboard;
+        }
+
+        private void CmdPaste_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            PasteConditions();
+        }
+
         private void ConditionClipboard_ItemCopied(object sender, EventArgs e)
         {
-            dataContextVO.IsAnyConditionInClipboard = !conditionClipboard?.IsEmpty ?? false;
+            dataContextVO.IsAnyConditionInClipboard = conditionClipboard?.ContainsItem ?? false;
+            var command = cmdPaste.Command;
         }
 
         private void ConditionClipboard_ItemPasted(object sender, EventArgs e)
         {
-            dataContextVO.IsAnyConditionInClipboard = !conditionClipboard?.IsEmpty ?? false;
+            dataContextVO.IsAnyConditionInClipboard = conditionClipboard?.ContainsItem ?? false;
         }
 
         private void ForSelectedItem(Action<FilterItemVO> action)
@@ -195,7 +230,7 @@ namespace TerminalMonitor.Windows.Controls
             window.Show();
         }
 
-        private void DeleteCondition(FilterItemVO itemVO)
+        private void RemoveCondition(FilterItemVO itemVO)
         {
             var index = filterVOs.IndexOf(itemVO);
             filterVOs.RemoveAt(index);
@@ -203,7 +238,7 @@ namespace TerminalMonitor.Windows.Controls
             conditions.RemoveAt(index);
         }
 
-        private void ModifyCondition(FilterItemVO itemVO)
+        private void EditCondition(FilterItemVO itemVO)
         {
             var index = filterVOs.IndexOf(itemVO);
 
