@@ -7,13 +7,6 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=local:FilterListViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="800">
-    <UserControl.CommandBindings>
-        <CommandBinding x:Name="cmdNew" Command="ApplicationCommands.New" CanExecute="CmdNew_CanExecute" Executed="CmdNew_Executed" />
-        <CommandBinding x:Name="cmdDelete" Command="ApplicationCommands.Delete" CanExecute="CmdDelete_CanExecute" Executed="CmdDelete_Executed" />
-        <CommandBinding x:Name="cmdOpen" Command="ApplicationCommands.Open" CanExecute="CmdOpen_CanExecute" Executed="CmdOpen_Executed" />
-        <CommandBinding x:Name="cmdCopy" Command="ApplicationCommands.Copy" CanExecute="CmdCopy_CanExecute" Executed="CmdCopy_Executed" />
-        <CommandBinding x:Name="cmdPaste" Command="ApplicationCommands.Paste" CanExecute="CmdPaste_CanExecute" Executed="CmdPaste_Executed" />
-    </UserControl.CommandBindings>
     <Grid>
         <Grid.Resources>
             <ResourceDictionary>
@@ -140,13 +133,13 @@
                   MouseDown="LstFilters_MouseDown" MouseDoubleClick="LstFilters_MouseDoubleClick">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Command="ApplicationCommands.Open" />
+                    <MenuItem Header="Edit" Command="{Binding Path=EditCommand}" />
                     <Separator />
-                    <MenuItem Command="ApplicationCommands.Copy" />
-                    <MenuItem Command="ApplicationCommands.Paste" />
+                    <MenuItem Header="Copy" Command="{Binding Path=CopyCommand}" />
+                    <MenuItem Header="Paste" Command="{Binding Path=PasteCommnad}" />
                     <Separator />
-                    <MenuItem Command="ApplicationCommands.New" />
-                    <MenuItem Command="ApplicationCommands.Delete" />
+                    <MenuItem Header="Add" Command="{Binding Path=AddCommand}" />
+                    <MenuItem Header="Remove" Command="{Binding Path=RemoveCommand}" />
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.ItemsPanel>
@@ -197,13 +190,11 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Command="ApplicationCommands.New" />
-            <Button Name="btnRemove" Grid.Column="1" Width="20" Content="➖" ToolTip="Remove" Command="ApplicationCommands.Delete" />
-            <Button Name="btnEdit" Grid.Column="2" Width="20" Content="✏" ToolTip="Edit" Command="ApplicationCommands.Open" />
-            <Button Name="btnMoveLeft" Grid.Column="3" Width="20" Content="←" ToolTip="Move Left"
-                    IsEnabled="{Binding IsAnySelected}" Click="BtnMoveLeft_Click" />
-            <Button Name="btnMoveRight" Grid.Column="4" Width="20" Content="→" ToolTip="Move Right"
-                    IsEnabled="{Binding IsAnySelected}" Click="BtnMoveRight_Click" />
+            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Command="{Binding Path=AddCommand}" />
+            <Button Name="btnRemove" Grid.Column="1" Width="20" Content="➖" ToolTip="Remove" Command="{Binding Path=RemoveCommand}" />
+            <Button Name="btnEdit" Grid.Column="2" Width="20" Content="✏" ToolTip="Edit" Command="{Binding Path=EditCommand}" />
+            <Button Name="btnMoveLeft" Grid.Column="3" Width="20" Content="←" ToolTip="Move Left" Command="{Binding Path=MoveLeftCommand}" />
+            <Button Name="btnMoveRight" Grid.Column="4" Width="20" Content="→" ToolTip="Move Right" Command="{Binding Path=MoveRightCommand}" />
         </Grid>
     </Grid>
 </UserControl>

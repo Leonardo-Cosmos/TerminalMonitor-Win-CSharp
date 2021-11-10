@@ -1,4 +1,5 @@
 ﻿/* 2021/4/21 */
+using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -29,7 +30,7 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class FilterListView : UserControl
     {
-        private readonly FilterListViewDataContextVO dataContextVO = new();
+        private readonly FilterListViewDataContextVO dataContextVO;
 
         private readonly ObservableCollection<FilterItemVO> filterVOs = new();
 
@@ -42,6 +43,17 @@ namespace TerminalMonitor.Windows.Controls
         public FilterListView()
         {
             InitializeComponent();
+
+            dataContextVO = new()
+            {
+                AddCommand = new RelayCommand(AddCondition, () => !dataContextVO.IsAnySelected),
+                RemoveCommand = new RelayCommand(RemoveSelectedConditions, () => dataContextVO.IsAnySelected),
+                EditCommand = new RelayCommand(EditSelectedConditions, () => dataContextVO.IsAnySelected),
+                MoveLeftCommand = new RelayCommand(MoveSelectedConditionsLeft, () => dataContextVO.IsAnySelected),
+                MoveRightCommand = new RelayCommand(MoveSelectedConditionsRight, () => dataContextVO.IsAnySelected),
+                CopyCommand = new RelayCommand(CopySelectedConditions, () => dataContextVO.IsAnySelected),
+                PasteCommnad = new RelayCommand(PasteConditions, () => dataContextVO.IsAnyConditionInClipboard),
+            };
 
             conditions = new();
             groupCondition = new()
@@ -60,20 +72,29 @@ namespace TerminalMonitor.Windows.Controls
         {
             switch (e.PropertyName)
             {
-                case nameof(GroupCondition.MatchMode):
+                case nameof(FilterListViewDataContextVO.MatchMode):
                     groupCondition.MatchMode = dataContextVO.MatchMode;
                     break;
-                case nameof(GroupCondition.IsInverted):
+                case nameof(FilterListViewDataContextVO.IsInverted):
                     groupCondition.IsInverted = dataContextVO.IsInverted;
                     break;
-                case nameof(GroupCondition.DefaultResult):
+                case nameof(FilterListViewDataContextVO.DefaultResult):
                     groupCondition.DefaultResult = dataContextVO.DefaultResult;
                     break;
-                case nameof(GroupCondition.IsDisabled):
+                case nameof(FilterListViewDataContextVO.IsDisabled):
                     groupCondition.IsDisabled = dataContextVO.IsDisabled;
                     break;
-                case nameof(GroupCondition.Conditions):
-                    groupCondition.Conditions = conditions; break;
+                case nameof(FilterListViewDataContextVO.IsAnySelected):
+                    (dataContextVO.AddCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.EditCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveLeftCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveRightCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                case nameof(FilterListViewDataContextVO.IsAnyConditionInClipboard):
+                    (dataContextVO.PasteCommnad as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
                 default:
                     break;
             }
@@ -96,73 +117,12 @@ namespace TerminalMonitor.Windows.Controls
 
         private void LstFilters_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ForSelectedItem(EditCondition);
-        }
-
-        private void BtnMoveLeft_Click(object sender, RoutedEventArgs e)
-        {
-            ForEachSelectedItem(MoveConditionLeft, byOrder: true, recoverSelection: true);
-        }
-
-        private void BtnMoveRight_Click(object sender, RoutedEventArgs e)
-        {
-            ForEachSelectedItem(MoveConditionRight, byOrder: true, reverseOrder: true, recoverSelection: true);
-        }
-
-        private void CmdNew_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = !dataContextVO.IsAnySelected;
-        }
-
-        private void CmdNew_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            AddCondition();
-        }
-
-        private void CmdDelete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = dataContextVO.IsAnySelected;
-        }
-
-        private void CmdDelete_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            ForEachSelectedItem(RemoveCondition);
-        }
-
-        private void CmdOpen_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = dataContextVO.IsAnySelected;
-        }
-
-        private void CmdOpen_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            ForEachSelectedItem(EditCondition);
-        }
-
-        private void CmdCopy_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = dataContextVO.IsAnySelected;
-        }
-
-        private void CmdCopy_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            CopyConditions();
-        }
-
-        private void CmdPaste_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = dataContextVO.IsAnyConditionInClipboard;
-        }
-
-        private void CmdPaste_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            PasteConditions();
+            EditSelectedCondition();
         }
 
         private void ConditionClipboard_ItemCopied(object sender, EventArgs e)
         {
             dataContextVO.IsAnyConditionInClipboard = conditionClipboard?.ContainsItem ?? false;
-            var command = cmdPaste.Command;
         }
 
         private void ConditionClipboard_ItemPasted(object sender, EventArgs e)
@@ -230,12 +190,27 @@ namespace TerminalMonitor.Windows.Controls
             window.Show();
         }
 
+        private void RemoveSelectedConditions()
+        {
+            ForEachSelectedItem(RemoveCondition);
+        }
+
         private void RemoveCondition(FilterItemVO itemVO)
         {
             var index = filterVOs.IndexOf(itemVO);
             filterVOs.RemoveAt(index);
 
             conditions.RemoveAt(index);
+        }
+
+        private void EditSelectedCondition()
+        {
+            ForSelectedItem(EditCondition);
+        }
+
+        private void EditSelectedConditions()
+        {
+            ForEachSelectedItem(EditCondition);
         }
 
         private void EditCondition(FilterItemVO itemVO)
@@ -264,6 +239,11 @@ namespace TerminalMonitor.Windows.Controls
             window.Show();
         }
 
+        private void MoveSelectedConditionsLeft()
+        {
+            ForEachSelectedItem(MoveConditionLeft, byOrder: true, recoverSelection: true);
+        }
+
         private void MoveConditionLeft(FilterItemVO itemVO)
         {
             var srcIndex = filterVOs.IndexOf(itemVO);
@@ -275,6 +255,11 @@ namespace TerminalMonitor.Windows.Controls
             var condition = conditions[srcIndex];
             conditions.RemoveAt(srcIndex);
             conditions.Insert(dstIndex, condition);
+        }
+
+        private void MoveSelectedConditionsRight()
+        {
+            ForEachSelectedItem(MoveConditionRight, byOrder: true, reverseOrder: true, recoverSelection: true);
         }
 
         private void MoveConditionRight(FilterItemVO itemVO)
@@ -290,7 +275,7 @@ namespace TerminalMonitor.Windows.Controls
             conditions.Insert(dstIndex, condition);
         }
 
-        private void CopyConditions()
+        private void CopySelectedConditions()
         {
             List<Condition> selectedConditions = new();
             foreach (var selectedItem in lstFilters.SelectedItems)
@@ -303,7 +288,7 @@ namespace TerminalMonitor.Windows.Controls
                     selectedConditions.Add(condition);
                 }
             }
-
+            
             conditionClipboard?.Copy(selectedConditions.ToArray());
         }
 
