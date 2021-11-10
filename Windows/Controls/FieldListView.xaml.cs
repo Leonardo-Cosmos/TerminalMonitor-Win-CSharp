@@ -1,4 +1,5 @@
 ﻿/* 2021/5/12 */
+using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -25,7 +26,7 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class FieldListView : UserControl
     {
-        private readonly FieldListViewDataContextVO dataContextVO = new();
+        private readonly FieldListViewDataContextVO dataContextVO;
 
         private readonly ObservableCollection<FieldListItemVO> fieldVOs = new();
 
@@ -37,9 +38,41 @@ namespace TerminalMonitor.Windows.Controls
         {
             InitializeComponent();
 
+            dataContextVO = new()
+            {
+                AddCommand = new RelayCommand(AddFieldDetail, () => !dataContextVO.IsAnySelected),
+                RemoveCommand = new RelayCommand(RemoveSelectedFieldDetails, () => dataContextVO.IsAnySelected),
+                EditCommand = new RelayCommand(EditSelectedFieldDetails, () => dataContextVO.IsAnySelected),
+                MoveLeftCommand = new RelayCommand(MoveSelectedFieldDetailsLeft, () => dataContextVO.IsAnySelected),
+                MoveRightCommand = new RelayCommand(MoveSelectedFieldDetailsRight, () => dataContextVO.IsAnySelected),
+                CopyCommand = new RelayCommand(CopySelectedFieldDetails, () => dataContextVO.IsAnySelected),
+                PasteCommnad = new RelayCommand(PasteFieldDetails, () => dataContextVO.IsAnyFieldInClipboard),
+            };
+
+            dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
             DataContext = dataContextVO;
 
             lstFields.ItemsSource = fieldVOs;
+        }
+
+        private void DataContextVO_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(FieldListViewDataContextVO.IsAnySelected):
+                    (dataContextVO.AddCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.EditCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveLeftCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveRightCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                case nameof(FieldListViewDataContextVO.IsAnyFieldInClipboard):
+                    (dataContextVO.PasteCommnad as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void LstFields_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -59,67 +92,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void LstFields_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ForSelectedItem(EditFieldDetail);
-        }
-
-        private void BtnMoveLeft_Click(object sender, RoutedEventArgs e)
-        {
-            ForEachSelectedItem(MoveFieldDetailUp, byOrder: true, recoverSelection: true);
-        }
-
-        private void BtnMoveRight_Click(object sender, RoutedEventArgs e)
-        {
-            ForEachSelectedItem(MoveFieldDetailDown, byOrder: true, reverseOrder: true, recoverSelection: true);
-        }
-
-        private void CmdNew_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = !dataContextVO.IsAnySelected;
-        }
-
-        private void CmdNew_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            AddFieldDetail();
-        }
-
-        private void CmdDelete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = dataContextVO.IsAnySelected;
-        }
-
-        private void CmdDelete_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            ForEachSelectedItem(RemoveFieldDetail);
-        }
-
-        private void CmdOpen_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = dataContextVO.IsAnySelected;
-        }
-
-        private void CmdOpen_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            ForEachSelectedItem(EditFieldDetail);
-        }
-
-        private void CmdCopy_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = dataContextVO.IsAnySelected;
-        }
-
-        private void CmdCopy_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            CopyFieldDetails();
-        }
-
-        private void CmdPaste_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = dataContextVO.IsAnyFieldInClipboard;
-        }
-
-        private void CmdPaste_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            PasteFieldDetails();
+            EditSelectedFieldDetail();
         }
 
         private void FieldClipboard_ItemCopied(object sender, EventArgs e)
@@ -201,12 +174,27 @@ namespace TerminalMonitor.Windows.Controls
             window.Show();
         }
 
+        private void RemoveSelectedFieldDetails()
+        {
+            ForEachSelectedItem(RemoveFieldDetail);
+        }
+
         private void RemoveFieldDetail(FieldListItemVO itemVO)
         {
             var index = fieldVOs.IndexOf(itemVO);
             fieldVOs.RemoveAt(index);
 
             fields.RemoveAt(index);
+        }
+
+        private void EditSelectedFieldDetail()
+        {
+            ForSelectedItem(EditFieldDetail);
+        }
+
+        private void EditSelectedFieldDetails()
+        {
+            ForEachSelectedItem(EditFieldDetail);
         }
 
         private void EditFieldDetail(FieldListItemVO itemVO)
@@ -234,7 +222,12 @@ namespace TerminalMonitor.Windows.Controls
             window.Show();
         }
 
-        private void MoveFieldDetailUp(FieldListItemVO itemVO)
+        private void MoveSelectedFieldDetailsLeft()
+        {
+            ForEachSelectedItem(MoveFieldDetailLeft, byOrder: true, recoverSelection: true);
+        }
+
+        private void MoveFieldDetailLeft(FieldListItemVO itemVO)
         {
             var srcIndex = fieldVOs.IndexOf(itemVO);
             var dstIndex = (srcIndex - 1 + fieldVOs.Count) % fieldVOs.Count;
@@ -247,7 +240,12 @@ namespace TerminalMonitor.Windows.Controls
             fields.Insert(dstIndex, fieldDetail);
         }
 
-        private void MoveFieldDetailDown(FieldListItemVO itemVO)
+        private void MoveSelectedFieldDetailsRight()
+        {
+            ForEachSelectedItem(MoveFieldDetailRight, byOrder: true, reverseOrder: true, recoverSelection: true);
+        }
+
+        private void MoveFieldDetailRight(FieldListItemVO itemVO)
         {
             var srcIndex = fieldVOs.IndexOf(itemVO);
             var dstIndex = (srcIndex + 1) % fieldVOs.Count;
@@ -260,7 +258,7 @@ namespace TerminalMonitor.Windows.Controls
             fields.Insert(dstIndex, fieldDetail);
         }
 
-        private void CopyFieldDetails()
+        private void CopySelectedFieldDetails()
         {
             List<FieldDisplayDetail> copiedFieldDetails = new();
             foreach (var selectedItem in lstFields.SelectedItems)

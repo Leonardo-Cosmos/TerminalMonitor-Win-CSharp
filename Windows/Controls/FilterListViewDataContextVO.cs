@@ -39,20 +39,6 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public ICommand AddCommand { get; init; }
-
-        public ICommand RemoveCommand { get; init; }
-
-        public ICommand EditCommand { get; init; }
-
-        public ICommand MoveLeftCommand { get; init; }
-
-        public ICommand MoveRightCommand { get; init; }
-
-        public ICommand CopyCommand { get; init; }
-
-        public ICommand PasteCommnad { get; init; }
-
         private bool isInverted;
 
         public bool IsInverted
@@ -84,5 +70,19 @@ namespace TerminalMonitor.Windows.Controls
             get => matchMode;
             set { matchMode = value; OnPropertyChanged(); }
         }
+
+        public ICommand AddCommand { get; init; }
+
+        public ICommand RemoveCommand { get; init; }
+
+        public ICommand EditCommand { get; init; }
+
+        public ICommand MoveLeftCommand { get; init; }
+
+        public ICommand MoveRightCommand { get; init; }
+
+        public ICommand CopyCommand { get; init; }
+
+        public ICommand PasteCommnad { get; init; }
     }
 }

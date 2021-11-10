@@ -44,6 +44,13 @@ namespace TerminalMonitor.Windows.Controls
         {
             InitializeComponent();
 
+            conditions = new();
+            groupCondition = new()
+            {
+                Id = Guid.NewGuid().ToString(),
+                Conditions = conditions,
+            };
+
             dataContextVO = new()
             {
                 AddCommand = new RelayCommand(AddCondition, () => !dataContextVO.IsAnySelected),
@@ -55,15 +62,8 @@ namespace TerminalMonitor.Windows.Controls
                 PasteCommnad = new RelayCommand(PasteConditions, () => dataContextVO.IsAnyConditionInClipboard),
             };
 
-            conditions = new();
-            groupCondition = new()
-            {
-                Id = Guid.NewGuid().ToString(),
-                Conditions = conditions,
-            };
-
-            DataContext = dataContextVO;
             dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
+            DataContext = dataContextVO;
 
             lstFilters.ItemsSource = filterVOs;
         }

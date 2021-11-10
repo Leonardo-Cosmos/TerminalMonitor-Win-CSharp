@@ -1,6 +1,7 @@
 ﻿/* 2021/11/6 */
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -36,5 +37,19 @@ namespace TerminalMonitor.Windows.Controls
                 OnPropertyChanged();
             }
         }
+
+        public ICommand AddCommand { get; init; }
+
+        public ICommand RemoveCommand { get; init; }
+
+        public ICommand EditCommand { get; init; }
+
+        public ICommand MoveLeftCommand { get; init; }
+
+        public ICommand MoveRightCommand { get; init; }
+
+        public ICommand CopyCommand { get; init; }
+
+        public ICommand PasteCommnad { get; init; }
     }
 }
