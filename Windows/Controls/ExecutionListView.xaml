@@ -7,16 +7,22 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=local:ExecutionListViewDataContextVO}"
              d:DesignHeight="450" d:DesignWidth="800">
-    <StackPanel Orientation="Vertical">
-        <ListView Name="lstExecutions" MinHeight="30" SelectionChanged="LstExecutions_SelectionChanged">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <ListView Name="lstExecutions" Grid.Row="1" MinHeight="30" SelectionChanged="LstExecutions_SelectionChanged">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Name}" />
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <WrapPanel Orientation="Horizontal">
+        
+        <WrapPanel Grid.Row="0" Orientation="Horizontal">
             <Button Name="btnStop" Width="20" Content="□" ToolTip="Stop" IsEnabled="{Binding IsAnySelected}" Click="BtnStop_Click" />
         </WrapPanel>
-    </StackPanel>
+    </Grid>
 </UserControl>

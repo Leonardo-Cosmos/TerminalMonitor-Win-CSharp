@@ -7,8 +7,13 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=local:CommandListViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="800">
-    <StackPanel>
-        <ListView Name="lstCommands" MinHeight="30" SelectionChanged="LstCommands_SelectionChanged"
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <ListView Name="lstCommands" Grid.Row="1" MinHeight="30" SelectionChanged="LstCommands_SelectionChanged"
                   MouseDoubleClick="LstCommands_MouseDoubleClick">
             <ListView.ItemTemplate>
                 <DataTemplate>
@@ -16,7 +21,8 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <WrapPanel Orientation="Horizontal">
+        
+        <WrapPanel Grid.Row="0" Orientation="Horizontal">
             <Button Name="btnAdd" Width="20" Content="➕" ToolTip="Add"
                     Click="BtnAdd_Click" />
             <Button Name="btnDelete" Width="20" Content="➖" ToolTip="Delete"
@@ -30,5 +36,6 @@
             <Button Name="btnStart" Width="20" Content="▷" ToolTip="Start"
                     IsEnabled="{Binding IsAnySelected}" Click="BtnStart_Click" />
         </WrapPanel>
-    </StackPanel>
+        
+    </Grid>
 </UserControl>

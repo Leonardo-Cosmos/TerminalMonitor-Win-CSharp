@@ -149,7 +149,7 @@
             </ListView.ItemsPanel>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border BorderBrush="SkyBlue" BorderThickness="1">
+                    <Border BorderBrush="{x:Static SystemParameters.WindowGlassBrush}" BorderThickness="1">
                         <StackPanel Orientation="Horizontal">
                             <StackPanel.Resources>
                                 <ResourceDictionary>
@@ -182,12 +182,13 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <Grid Name="grdButton" Grid.Row="2" Grid.Column="2">
+        <Grid Name="grdButton" Grid.Row="2" Grid.Column="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Command="{Binding Path=AddCommand}" />
