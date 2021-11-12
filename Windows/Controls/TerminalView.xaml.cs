@@ -329,28 +329,20 @@ namespace TerminalMonitor.Windows.Controls
 
         public ItemClipboard<FieldDisplayDetail> FieldClipboard
         {
-            get
-            {
-                return fieldListView.FieldClipboard;
-            }
-
-            set
-            {
-                fieldListView.FieldClipboard = value;
-            }
+            get => fieldListView.FieldClipboard;
+            set => fieldListView.FieldClipboard = value;
         }
 
-        public ItemClipboard<Condition> FilterClipboard
+        public ItemClipboard<Condition> FilterListClipboard
         {
-            get
-            {
-                return filterView.ConditionClipboard;
-            }
+            get => filterView.ConditionListClipboard;
+            set => filterView.ConditionListClipboard = value;
+        }
 
-            set
-            {
-                filterView.ConditionClipboard = value;
-            }
+        public ItemClipboard<Condition> FilterTreeClipboard
+        {
+            get => filterView.ConditionTreeClipboard;
+            set => filterView.ConditionTreeClipboard = value;
         }
     }
 }

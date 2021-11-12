@@ -40,12 +40,12 @@ namespace TerminalMonitor.Windows.Controls
 
             dataContextVO = new()
             {
-                AddCommand = new RelayCommand(AddFieldDetail, () => !dataContextVO.IsAnySelected),
-                RemoveCommand = new RelayCommand(RemoveSelectedFieldDetails, () => dataContextVO.IsAnySelected),
-                EditCommand = new RelayCommand(EditSelectedFieldDetails, () => dataContextVO.IsAnySelected),
-                MoveLeftCommand = new RelayCommand(MoveSelectedFieldDetailsLeft, () => dataContextVO.IsAnySelected),
-                MoveRightCommand = new RelayCommand(MoveSelectedFieldDetailsRight, () => dataContextVO.IsAnySelected),
-                CopyCommand = new RelayCommand(CopySelectedFieldDetails, () => dataContextVO.IsAnySelected),
+                AddCommand = new RelayCommand(AddFieldDetail, () => !dataContextVO.IsAnyFieldSelected),
+                RemoveCommand = new RelayCommand(RemoveSelectedFieldDetails, () => dataContextVO.IsAnyFieldSelected),
+                EditCommand = new RelayCommand(EditSelectedFieldDetails, () => dataContextVO.IsAnyFieldSelected),
+                MoveLeftCommand = new RelayCommand(MoveSelectedFieldDetailsLeft, () => dataContextVO.IsAnyFieldSelected),
+                MoveRightCommand = new RelayCommand(MoveSelectedFieldDetailsRight, () => dataContextVO.IsAnyFieldSelected),
+                CopyCommand = new RelayCommand(CopySelectedFieldDetails, () => dataContextVO.IsAnyFieldSelected),
                 PasteCommnad = new RelayCommand(PasteFieldDetails, () => dataContextVO.IsAnyFieldInClipboard),
             };
 
@@ -59,7 +59,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             switch (e.PropertyName)
             {
-                case nameof(FieldListViewDataContextVO.IsAnySelected):
+                case nameof(FieldListViewDataContextVO.IsAnyFieldSelected):
                     (dataContextVO.AddCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.EditCommand as RelayCommand)?.NotifyCanExecuteChanged();
@@ -78,7 +78,7 @@ namespace TerminalMonitor.Windows.Controls
         private void LstFields_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var count = lstFields.SelectedItems.Count;
-            dataContextVO.IsAnySelected = count > 0;
+            dataContextVO.IsAnyFieldSelected = count > 0;
         }
 
         private void LstFields_MouseDown(object sender, MouseButtonEventArgs e)

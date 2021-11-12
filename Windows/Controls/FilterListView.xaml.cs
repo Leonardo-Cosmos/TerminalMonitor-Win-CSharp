@@ -38,7 +38,9 @@ namespace TerminalMonitor.Windows.Controls
 
         private GroupCondition groupCondition;
 
-        private ItemClipboard<Condition> conditionClipboard;
+        private ItemClipboard<Condition> conditionListClipboard;
+
+        private ItemClipboard<Condition> conditionTreeClipboard;
 
         public FilterListView()
         {
@@ -53,12 +55,12 @@ namespace TerminalMonitor.Windows.Controls
 
             dataContextVO = new()
             {
-                AddCommand = new RelayCommand(AddCondition, () => !dataContextVO.IsAnySelected),
-                RemoveCommand = new RelayCommand(RemoveSelectedConditions, () => dataContextVO.IsAnySelected),
-                EditCommand = new RelayCommand(EditSelectedConditions, () => dataContextVO.IsAnySelected),
-                MoveLeftCommand = new RelayCommand(MoveSelectedConditionsLeft, () => dataContextVO.IsAnySelected),
-                MoveRightCommand = new RelayCommand(MoveSelectedConditionsRight, () => dataContextVO.IsAnySelected),
-                CopyCommand = new RelayCommand(CopySelectedConditions, () => dataContextVO.IsAnySelected),
+                AddCommand = new RelayCommand(AddCondition, () => !dataContextVO.IsAnyConditionSelected),
+                RemoveCommand = new RelayCommand(RemoveSelectedConditions, () => dataContextVO.IsAnyConditionSelected),
+                EditCommand = new RelayCommand(EditSelectedConditions, () => dataContextVO.IsAnyConditionSelected),
+                MoveLeftCommand = new RelayCommand(MoveSelectedConditionsLeft, () => dataContextVO.IsAnyConditionSelected),
+                MoveRightCommand = new RelayCommand(MoveSelectedConditionsRight, () => dataContextVO.IsAnyConditionSelected),
+                CopyCommand = new RelayCommand(CopySelectedConditions, () => dataContextVO.IsAnyConditionSelected),
                 PasteCommnad = new RelayCommand(PasteConditions, () => dataContextVO.IsAnyConditionInClipboard),
             };
 
@@ -84,7 +86,7 @@ namespace TerminalMonitor.Windows.Controls
                 case nameof(FilterListViewDataContextVO.IsDisabled):
                     groupCondition.IsDisabled = dataContextVO.IsDisabled;
                     break;
-                case nameof(FilterListViewDataContextVO.IsAnySelected):
+                case nameof(FilterListViewDataContextVO.IsAnyConditionSelected):
                     (dataContextVO.AddCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.EditCommand as RelayCommand)?.NotifyCanExecuteChanged();
@@ -103,7 +105,7 @@ namespace TerminalMonitor.Windows.Controls
         private void LstFilters_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var count = lstFilters.SelectedItems.Count;
-            dataContextVO.IsAnySelected = count > 0;
+            dataContextVO.IsAnyConditionSelected = count > 0;
         }
 
         private void LstFilters_MouseDown(object sender, MouseButtonEventArgs e)
@@ -122,12 +124,12 @@ namespace TerminalMonitor.Windows.Controls
 
         private void ConditionClipboard_ItemCopied(object sender, EventArgs e)
         {
-            dataContextVO.IsAnyConditionInClipboard = conditionClipboard?.ContainsItem ?? false;
+            dataContextVO.IsAnyConditionInClipboard = conditionListClipboard?.ContainsItem ?? false;
         }
 
         private void ConditionClipboard_ItemPasted(object sender, EventArgs e)
         {
-            dataContextVO.IsAnyConditionInClipboard = conditionClipboard?.ContainsItem ?? false;
+            dataContextVO.IsAnyConditionInClipboard = conditionListClipboard?.ContainsItem ?? false;
         }
 
         private void ForSelectedItem(Action<FilterItemVO> action)
@@ -171,7 +173,10 @@ namespace TerminalMonitor.Windows.Controls
 
         private void AddCondition()
         {
-            ConditionDetailWindow window = new();
+            ConditionDetailWindow window = new()
+            {
+                ConditionClipboard = conditionTreeClipboard,
+            };
 
             window.Closing += (object sender, CancelEventArgs e) =>
             {
@@ -221,6 +226,7 @@ namespace TerminalMonitor.Windows.Controls
             ConditionDetailWindow window = new()
             {
                 Condition = condition,
+                ConditionClipboard = conditionTreeClipboard,
             };
 
             window.Closing += (object sender, CancelEventArgs e) =>
@@ -289,12 +295,12 @@ namespace TerminalMonitor.Windows.Controls
                 }
             }
             
-            conditionClipboard?.Copy(selectedConditions.ToArray());
+            conditionListClipboard?.Copy(selectedConditions.ToArray());
         }
 
         private void PasteConditions()
         {
-            var pastedConditions = conditionClipboard?.Paste();
+            var pastedConditions = conditionListClipboard?.Paste();
             if (pastedConditions != null)
             {
                 lstFilters.SelectedItems.Clear();
@@ -370,31 +376,37 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public ItemClipboard<Condition> ConditionClipboard
+        public ItemClipboard<Condition> ConditionListClipboard
         {
-            get => conditionClipboard;
+            get => conditionListClipboard;
 
             set
             {
-                if (conditionClipboard == value)
+                if (conditionListClipboard == value)
                 {
                     return;
                 }
 
-                if (conditionClipboard != null)
+                if (conditionListClipboard != null)
                 {
-                    conditionClipboard.ItemCopied -= ConditionClipboard_ItemCopied;
-                    conditionClipboard.ItemPasted -= ConditionClipboard_ItemPasted;
+                    conditionListClipboard.ItemCopied -= ConditionClipboard_ItemCopied;
+                    conditionListClipboard.ItemPasted -= ConditionClipboard_ItemPasted;
                 }
 
-                conditionClipboard = value;
+                conditionListClipboard = value;
 
-                if (conditionClipboard != null)
+                if (conditionListClipboard != null)
                 {
-                    conditionClipboard.ItemCopied += ConditionClipboard_ItemCopied;
-                    conditionClipboard.ItemPasted += ConditionClipboard_ItemPasted;
+                    conditionListClipboard.ItemCopied += ConditionClipboard_ItemCopied;
+                    conditionListClipboard.ItemPasted += ConditionClipboard_ItemPasted;
                 }
             }
+        }
+
+        public ItemClipboard<Condition> ConditionTreeClipboard
+        {
+            get => conditionTreeClipboard;
+            set => conditionTreeClipboard = value;
         }
     }
 }

@@ -15,14 +15,14 @@ namespace TerminalMonitor.Windows.Controls
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private bool isAnySelected;
+        private bool isAnyConditionSelected;
 
-        public bool IsAnySelected
+        public bool IsAnyConditionSelected
         {
-            get => isAnySelected;
+            get => isAnyConditionSelected;
             set
             {
-                isAnySelected = value;
+                isAnyConditionSelected = value;
                 OnPropertyChanged();
             }
         }

@@ -133,18 +133,29 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Button Name="btnAddField" Grid.Column="0" Width="20" Content="+" Click="BtnAddField_Click" />
-                        <Button Name="btnAddGroup" Grid.Column="1" Width="20" Content="+{}" Click="BtnAddGroup_Click" />
-                        <Button Name="btnDelete" Grid.Column="2" Width="20" Content="-" Click="BtnDelete_Click" />
-                        <Button Name="btnMoveUp" Grid.Column="3"  Width="20" Content="↑" ToolTip="Move Up" Click="BtnMoveUp_Click" />
-                        <Button Name="btnMoveDown" Grid.Column="4"  Width="20" Content="↓" ToolTip="Move Down" Click="BtnMoveDown_Click" />
+                        <Button Name="btnAddField" Grid.Column="0" Width="20" Content="➕" Command="{Binding Path=AddFieldCommand}" />
+                        <Button Name="btnAddGroup" Grid.Column="1" Width="30" Content="➕{}" Command="{Binding Path=AddGroupCommand}" />
+                        <Button Name="btnRemove" Grid.Column="2" Width="20" Content="➖" Command="{Binding Path=RemoveCommand}" />
+                        <Button Name="btnMoveUp" Grid.Column="3"  Width="20" Content="↑" ToolTip="Move Up" Command="{Binding Path=MoveUpCommand}" />
+                        <Button Name="btnMoveDown" Grid.Column="4"  Width="20" Content="↓" ToolTip="Move Down" Command="{Binding Path=MoveDownCommand}" />
                     </Grid>
                 </Grid>
 
-                <TreeView Name="trConditions" MinHeight="50">
+                <TreeView Name="trConditions" MinHeight="50" SelectedItemChanged="TrConditions_SelectedItemChanged" MouseDown="TrConditions_MouseDown">
+                    <TreeView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Cut" Command="{Binding Path=CutCommand}" />
+                            <MenuItem Header="Copy" Command="{Binding Path=CopyCommand}" />
+                            <MenuItem Header="Paste" Command="{Binding Path=PasteCommnad}" />
+                            <Separator />
+                            <MenuItem Header="Add Field" Command="{Binding Path=AddFieldCommand}" />
+                            <MenuItem Header="Add Group" Command="{Binding Path=AddGroupCommand}" />
+                            <MenuItem Header="Remove" Command="{Binding Path=RemoveCommand}" />
+                        </ContextMenu>
+                    </TreeView.ContextMenu>
                     <TreeView.Resources>
                         <HierarchicalDataTemplate DataType="{x:Type local:GroupConditionNodeVO}" ItemsSource="{Binding Conditions}">
-                            <Border BorderBrush="GreenYellow" BorderThickness="1">
+                            <Border BorderBrush="{x:Static SystemParameters.WindowGlassBrush}" BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">
                                     <ComboBox ItemsSource="{StaticResource GroupMatchModes}" SelectedValue="{Binding MatchMode}">
                                         <ComboBox.ItemTemplate>
@@ -161,7 +172,7 @@
                         </HierarchicalDataTemplate>
                         
                         <DataTemplate DataType="{x:Type local:FieldConditionNodeVO}">
-                            <Border BorderBrush="SkyBlue" BorderThickness="1">
+                            <Border BorderBrush="{x:Static SystemParameters.WindowGlassBrush}" BorderThickness="1">
                                 <StackPanel Orientation="Horizontal">
                                     <Label Name="lblKey" Content="Key" />
                                     <TextBox Name="txtBxKey" MinWidth="100" MaxWidth="200" Margin="0, 0, 10, 0" Text="{Binding FieldKey}" />
