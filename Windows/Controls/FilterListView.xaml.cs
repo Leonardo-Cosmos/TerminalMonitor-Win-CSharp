@@ -300,19 +300,23 @@ namespace TerminalMonitor.Windows.Controls
 
         private void PasteConditions()
         {
-            var pastedConditions = conditionListClipboard?.Paste();
-            if (pastedConditions != null)
+            if (conditionListClipboard != null)
             {
-                lstFilters.SelectedItems.Clear();
-                foreach (var pastedCondition in pastedConditions)
+                (var pastedConditions, _) = conditionListClipboard.Paste();
+
+                if (pastedConditions != null)
                 {
-                    var condition = (Condition)pastedCondition.Clone();
+                    lstFilters.SelectedItems.Clear();
+                    foreach (var pastedCondition in pastedConditions)
+                    {
+                        var condition = (Condition)pastedCondition.Clone();
 
-                    FilterItemVO itemVO = CreateFilterVO(condition);
-                    filterVOs.Add(itemVO);
-                    lstFilters.SelectedItems.Add(itemVO);
+                        FilterItemVO itemVO = CreateFilterVO(condition);
+                        filterVOs.Add(itemVO);
+                        lstFilters.SelectedItems.Add(itemVO);
 
-                    conditions.Add(condition);
+                        conditions.Add(condition);
+                    }
                 }
             }
         }

@@ -277,23 +277,27 @@ namespace TerminalMonitor.Windows.Controls
 
         private void PasteFieldDetails()
         {
-            var pastedFieldDetails = fieldClipboard?.Paste();
-            if (pastedFieldDetails != null)
+            if (fieldClipboard != null)
             {
-                lstFields.SelectedItems.Clear();
-                foreach (var pastedFieldDetail in pastedFieldDetails)
+                (var pastedFieldDetails, _) = fieldClipboard.Paste();
+
+                if (pastedFieldDetails != null)
                 {
-                    var fieldDetail = (FieldDisplayDetail)pastedFieldDetail.Clone();
-
-                    FieldListItemVO itemVO = new()
+                    lstFields.SelectedItems.Clear();
+                    foreach (var pastedFieldDetail in pastedFieldDetails)
                     {
-                        Id = fieldDetail.Id,
-                        FieldKey = fieldDetail.FieldKey
-                    };
-                    fieldVOs.Add(itemVO);
-                    lstFields.SelectedItems.Add(itemVO);
+                        var fieldDetail = (FieldDisplayDetail)pastedFieldDetail.Clone();
 
-                    fields.Add(fieldDetail);
+                        FieldListItemVO itemVO = new()
+                        {
+                            Id = fieldDetail.Id,
+                            FieldKey = fieldDetail.FieldKey
+                        };
+                        fieldVOs.Add(itemVO);
+                        lstFields.SelectedItems.Add(itemVO);
+
+                        fields.Add(fieldDetail);
+                    }
                 }
             }
         }

@@ -25,9 +25,10 @@ namespace TerminalMonitor.Clipboard
             OnItemCopied();
         }
 
-        public T[] Paste()
+        public (T[], ItemClipboardStatus status) Paste()
         {
             T[] results;
+            var pasteStatus = status;
             switch (status)
             {
                 case ItemClipboardStatus.Move:
@@ -47,7 +48,7 @@ namespace TerminalMonitor.Clipboard
                     results = default;
                     break;
             }
-            return results;
+            return (results, pasteStatus);
         }
 
         protected void OnItemCut()

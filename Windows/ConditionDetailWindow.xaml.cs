@@ -220,7 +220,15 @@ namespace TerminalMonitor.Windows
 
         private void CutSelectedCondition()
         {
+            var selectedItem = trConditions.SelectedItem;
+            if (selectedItem is ConditionNodeVO conditionNodeVO)
+            {
+                var selectedCondition = FromVO(conditionNodeVO);
 
+                conditionClipboard?.Cut(selectedCondition);
+            }
+
+            RemoveSelectedCondition();
         }
 
         private void CopySelectedCondition()
@@ -236,17 +244,29 @@ namespace TerminalMonitor.Windows
 
         private void PasteCondition()
         {
-            var pastedConditions = conditionClipboard?.Paste();
-            if (pastedConditions != null && pastedConditions.Length > 0)
+            if (conditionClipboard != null)
             {
-                var pastedCondition = (Condition)pastedConditions[0].Clone();
+                (var pastedConditions, var status) = conditionClipboard.Paste();
 
-                var conditionVO = ToVO(pastedCondition);
-                AddCondition(conditions =>
+                if (pastedConditions != null && pastedConditions.Length > 0)
                 {
-                    conditions.Add(conditionVO);
-                    conditionVO.Siblings = conditions;
-                });
+                    Condition pastedCondition;
+                    if (status == ItemClipboardStatus.Move)
+                    {
+                        pastedCondition = pastedConditions[0];
+                    }
+                    else
+                    {
+                        pastedCondition = (Condition)pastedConditions[0].Clone();
+                    }
+
+                    var conditionVO = ToVO(pastedCondition);
+                    AddCondition(conditions =>
+                    {
+                        conditions.Add(conditionVO);
+                        conditionVO.Siblings = conditions;
+                    });
+                }
             }
         }
 
