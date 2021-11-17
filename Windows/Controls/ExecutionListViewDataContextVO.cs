@@ -1,6 +1,7 @@
 ﻿/* 2021/11/5 */
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -15,7 +16,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private bool isAnySelected;
 
-        public bool IsAnySelected
+        public bool IsAnyExecutionSelected
         {
             get => isAnySelected;
             set
@@ -24,5 +25,7 @@ namespace TerminalMonitor.Windows.Controls
                 OnPropertyChanged();
             }
         }
+
+        public ICommand StopCommand { get; init; }
     }
 }

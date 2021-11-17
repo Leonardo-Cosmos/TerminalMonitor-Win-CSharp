@@ -14,27 +14,46 @@
         </Grid.RowDefinitions>
         
         <ListView Name="lstCommands" Grid.Row="1" MinHeight="30" SelectionChanged="LstCommands_SelectionChanged"
-                  MouseDoubleClick="LstCommands_MouseDoubleClick">
+                  MouseDown="LstCommands_MouseDown" MouseDoubleClick="LstCommands_MouseDoubleClick">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Start" Icon="▷" Command="{Binding Path=StartCommand}" />
+                    <Separator />
+                    <MenuItem Header="Edit" Icon="✏" Command="{Binding Path=EditCommand}" />
+                    <Separator />
+                    <MenuItem Header="Add" Icon="➕" Command="{Binding Path=AddCommand}" />
+                    <MenuItem Header="Remove" Icon="➖" Command="{Binding Path=RemoveCommand}" />
+                </ContextMenu>
+            </ListView.ContextMenu>
+            
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Name}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding Name}" />
+                        <Button Name="btnStart" Grid.Column="2" Width="20" Content="▷" Tag="{Binding Name}" Click="BtnStart_Click" />
+                    </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
         
         <WrapPanel Grid.Row="0" Orientation="Horizontal">
-            <Button Name="btnAdd" Width="20" Content="➕" ToolTip="Add"
-                    Click="BtnAdd_Click" />
-            <Button Name="btnDelete" Width="20" Content="➖" ToolTip="Delete"
-                    IsEnabled="{Binding IsAnySelected}" Click="BtnDelete_Click" />
-            <Button Name="btnModify" Width="20" Content="⚙" ToolTip="Modify"
-                    IsEnabled="{Binding IsAnySelected}" Click="BtnModify_Click" />
-            <Button Name="btnMoveUp" Width="20" Content="↑" ToolTip="Move Up"
-                    IsEnabled="{Binding IsAnySelected}" Click="BtnMoveUp_Click" />
-            <Button Name="btnMoveDown" Width="20" Content="↓" ToolTip="Move Down"
-                    IsEnabled="{Binding IsAnySelected}" Click="BtnMoveDown_Click" />
-            <Button Name="btnStart" Width="20" Content="▷" ToolTip="Start"
-                    IsEnabled="{Binding IsAnySelected}" Click="BtnStart_Click" />
+            <Button Name="btnAdd" Width="20" Content="➕" ToolTip="Add" Command="{Binding Path=AddCommand}" />
+            <Button Name="btnRemove" Width="20" Content="➖" ToolTip="Delete" Command="{Binding Path=RemoveCommand}" />
+            <Button Name="btnEdit" Width="20" Content="✏" ToolTip="Edit" Command="{Binding Path=EditCommand}" />
+            <Button Name="btnMoveUp" Width="20" Content="↑" ToolTip="Move Up" Command="{Binding Path=MoveUpCommand}" />
+            <Button Name="btnMoveDown" Width="20" Content="↓" ToolTip="Move Down" Command="{Binding Path=MoveDownCommand}" />
         </WrapPanel>
         
     </Grid>

@@ -9,20 +9,38 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         
-        <ListView Name="lstExecutions" Grid.Row="1" MinHeight="30" SelectionChanged="LstExecutions_SelectionChanged">
+        <ListView Name="lstExecutions" Grid.Row="0" MinHeight="30"
+                  SelectionChanged="LstExecutions_SelectionChanged"
+                  MouseDown="LstExecutions_MouseDown">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Stop" Icon="□" Command="{Binding Path=StopCommand}" />
+                </ContextMenu>
+            </ListView.ContextMenu>
+            
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Name}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding Name}" />
+                        <Button Name="btnStop" Grid.Column="2" Width="20" Content="□" Tag="{Binding Name}" Click="BtnStop_Click" />
+                    </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        
-        <WrapPanel Grid.Row="0" Orientation="Horizontal">
-            <Button Name="btnStop" Width="20" Content="□" ToolTip="Stop" IsEnabled="{Binding IsAnySelected}" Click="BtnStop_Click" />
-        </WrapPanel>
     </Grid>
 </UserControl>

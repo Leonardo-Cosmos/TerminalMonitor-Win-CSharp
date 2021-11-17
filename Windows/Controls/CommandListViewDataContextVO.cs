@@ -1,6 +1,7 @@
 ﻿/* 2021/11/2 */
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -13,28 +14,28 @@ namespace TerminalMonitor.Windows.Controls
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private bool isSingleSelected;
+        private bool isAnyCommandSelected;
 
-        public bool IsSingleSelected
+        public bool IsAnyCommandSelected
         {
-            get => isSingleSelected;
+            get => isAnyCommandSelected;
             set
             {
-                isSingleSelected = value;
+                isAnyCommandSelected = value;
                 OnPropertyChanged();
             }
         }
 
-        private bool isAnySelected;
+        public ICommand AddCommand { get; init; }
 
-        public bool IsAnySelected
-        {
-            get => isAnySelected;
-            set
-            {
-                isAnySelected = value;
-                OnPropertyChanged();
-            }
-        }
+        public ICommand RemoveCommand { get; init; }
+
+        public ICommand EditCommand { get; init; }
+
+        public ICommand MoveUpCommand { get; init; }
+
+        public ICommand MoveDownCommand { get; init; }
+
+        public ICommand StartCommand { get; init; }
     }
 }

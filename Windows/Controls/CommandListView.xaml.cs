@@ -1,4 +1,5 @@
 ﻿/* 2021/5/30 */
+using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,7 +25,7 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class CommandListView : UserControl
     {
-        private readonly CommandListViewDataContextVO dataContextVO = new();
+        private readonly CommandListViewDataContextVO dataContextVO;
 
         private readonly ObservableCollection<CommandListItemVO> commandVOs = new();
 
@@ -34,51 +35,65 @@ namespace TerminalMonitor.Windows.Controls
         {
             InitializeComponent();
 
+            dataContextVO = new()
+            {
+                AddCommand = new RelayCommand(AddCommand, () => !dataContextVO.IsAnyCommandSelected),
+                RemoveCommand = new RelayCommand(RemoveSelectedCommands, () => dataContextVO.IsAnyCommandSelected),
+                EditCommand = new RelayCommand(EditSelectedCommands, () => dataContextVO.IsAnyCommandSelected),
+                MoveUpCommand = new RelayCommand(MoveSelectedCommandsUp, () => dataContextVO.IsAnyCommandSelected),
+                MoveDownCommand = new RelayCommand(MoveSelectedCommandsDown, () => dataContextVO.IsAnyCommandSelected),
+                StartCommand = new RelayCommand(StartSelectedCommands, () => dataContextVO.IsAnyCommandSelected),
+            };
+
+            dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
             DataContext = dataContextVO;
 
             lstCommands.ItemsSource = commandVOs;
         }
 
+        private void DataContextVO_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(CommandListViewDataContextVO.IsAnyCommandSelected):
+                    (dataContextVO.AddCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.EditCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveUpCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveDownCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.StartCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                default:
+                    break;
+            }
+        }
+
         private void LstCommands_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var count = lstCommands.SelectedItems.Count;
-            dataContextVO.IsSingleSelected = count == 1;
-            dataContextVO.IsAnySelected = count > 0;
+            dataContextVO.IsAnyCommandSelected = count > 0;
+        }
+
+        private void LstCommands_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            HitTestResult hitResult = VisualTreeHelper.HitTest(this, e.GetPosition(this));
+            if (hitResult.VisualHit.GetType() != typeof(CommandListItemVO))
+            {
+                lstCommands.UnselectAll();
+            }
         }
 
         private void LstCommands_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ForSelectedItem(ModifyCommand);
-        }
-
-        private void BtnAdd_Click(object sender, RoutedEventArgs e)
-        {
-            AddCommand();
-        }
-
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
-        {
-            ForEachSelectedItem(DeleteCommand);
-        }
-
-        private void BtnModify_Click(object sender, RoutedEventArgs e)
-        {
-            ForEachSelectedItem(ModifyCommand);
-        }
-
-        private void BtnMoveUp_Click(object sender, RoutedEventArgs e)
-        {
-            ForEachSelectedItem(MoveCommandUp, byOrder: true, recoverSelection: true);
-        }
-
-        private void BtnMoveDown_Click(object sender, RoutedEventArgs e)
-        {
-            ForEachSelectedItem(MoveCommandDown, byOrder: true, reverseOrder: true, recoverSelection: true);
+            EditSelectedCommand();
         }
 
         private void BtnStart_Click(object sender, RoutedEventArgs e)
         {
-            ForEachSelectedItem(StartCommand);
+            var tag = (sender as Button).Tag;
+            var commandName = tag as string;
+            var commandVO = commandVOs.First(itemVO => itemVO.Name == commandName);
+            StartCommand(commandVO);
         }
 
         private void ForSelectedItem(Action<CommandListItemVO> action)
@@ -148,7 +163,12 @@ namespace TerminalMonitor.Windows.Controls
             window.Show();
         }
 
-        private void DeleteCommand(CommandListItemVO itemVO)
+        private void RemoveSelectedCommands()
+        {
+            ForEachSelectedItem(RemoveCommand);
+        }
+
+        private void RemoveCommand(CommandListItemVO itemVO)
         {
             var index = commandVOs.IndexOf(itemVO);
             commandVOs.RemoveAt(index);
@@ -156,7 +176,17 @@ namespace TerminalMonitor.Windows.Controls
             commands.RemoveAt(index);
         }
 
-        private void ModifyCommand(CommandListItemVO itemVO)
+        private void EditSelectedCommand()
+        {
+            ForSelectedItem(EditCommand);
+        }
+
+        private void EditSelectedCommands()
+        {
+            ForEachSelectedItem(EditCommand);
+        }
+
+        private void EditCommand(CommandListItemVO itemVO)
         {
             var index = commandVOs.IndexOf(itemVO);
 
@@ -181,6 +211,11 @@ namespace TerminalMonitor.Windows.Controls
             window.Show();
         }
 
+        private void MoveSelectedCommandsUp()
+        {
+            ForEachSelectedItem(MoveCommandUp, byOrder: true, recoverSelection: true);
+        }
+
         private void MoveCommandUp(CommandListItemVO itemVO)
         {
             var srcIndex = commandVOs.IndexOf(itemVO);
@@ -194,6 +229,11 @@ namespace TerminalMonitor.Windows.Controls
             commands.Insert(dstIndex, commandConfig);
         }
 
+        private void MoveSelectedCommandsDown()
+        {
+            ForEachSelectedItem(MoveCommandDown, byOrder: true, reverseOrder: true, recoverSelection: true);
+        }
+
         private void MoveCommandDown(CommandListItemVO itemVO)
         {
             var srcIndex = commandVOs.IndexOf(itemVO);
@@ -205,6 +245,11 @@ namespace TerminalMonitor.Windows.Controls
             var commandConfig = commands[srcIndex];
             commands.RemoveAt(srcIndex);
             commands.Insert(dstIndex, commandConfig);
+        }
+
+        private void StartSelectedCommands()
+        {
+            ForEachSelectedItem(StartCommand);
         }
 
         private void StartCommand(CommandListItemVO itemVO)
