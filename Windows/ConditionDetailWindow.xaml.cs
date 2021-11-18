@@ -142,29 +142,33 @@ namespace TerminalMonitor.Windows
 
         private void AddFieldCondition()
         {
-            AddCondition(conditions => conditions.Add(new FieldConditionNodeVO() { Siblings = conditions }));
+            AddCondition(conditions => new FieldConditionNodeVO() { Siblings = conditions });
         }
 
         private void AddGroupCondition()
         {
-            AddCondition(conditions => conditions.Add(new GroupConditionNodeVO() { Siblings = conditions }));
+            AddCondition(conditions => new GroupConditionNodeVO() { Siblings = conditions });
         }
 
-        private void AddCondition(Action<ObservableCollection<ConditionNodeVO>> addNodeVO)
+        private void AddCondition(Func<ObservableCollection<ConditionNodeVO>, ConditionNodeVO> createNodeVO)
         {
             var selectedItem = trConditions.SelectedItem;
 
             if (selectedItem == null)
             {
-                addNodeVO(rootConditions);
+                var conditionNodeVO = createNodeVO(rootConditions);
+                rootConditions.Add(conditionNodeVO);
             }
             else if (selectedItem is GroupConditionNodeVO groupNodeVO)
             {
-                addNodeVO(groupNodeVO.Conditions);
+                var conditionNodeVO = createNodeVO(groupNodeVO.Conditions);
+                groupNodeVO.Conditions.Add(conditionNodeVO);
             }
             else if (selectedItem is FieldConditionNodeVO fieldNodeVO)
             {
-                addNodeVO(fieldNodeVO.Siblings);
+                var conditionNodeVO = createNodeVO(fieldNodeVO.Siblings);
+                var index = fieldNodeVO.Siblings.IndexOf(fieldNodeVO);
+                fieldNodeVO.Siblings.Insert(index, conditionNodeVO);
             }
             else
             {
@@ -263,8 +267,8 @@ namespace TerminalMonitor.Windows
                     var conditionVO = ToVO(pastedCondition);
                     AddCondition(conditions =>
                     {
-                        conditions.Add(conditionVO);
                         conditionVO.Siblings = conditions;
+                        return conditionVO;
                     });
                 }
             }
