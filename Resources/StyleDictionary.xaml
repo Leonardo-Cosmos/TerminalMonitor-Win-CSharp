@@ -4,7 +4,6 @@
     <Style TargetType="Button">
         <Style.Setters>
             <Setter Property="Margin" Value="2" />
-            <Setter Property="BorderBrush" Value="{x:Static SystemParameters.WindowGlassBrush}" />
         </Style.Setters>
     </Style>
 
@@ -15,7 +14,6 @@
     <Style x:Key="buttonCommon" TargetType="Button">
         <Style.Setters>
             <Setter Property="Margin" Value="2" />
-            <Setter Property="BorderBrush" Value="{x:Static SystemParameters.WindowGlassBrush}" />
         </Style.Setters>
     </Style>
 

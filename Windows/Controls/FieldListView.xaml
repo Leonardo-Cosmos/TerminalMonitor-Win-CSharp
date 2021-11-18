@@ -38,13 +38,13 @@
                   MouseDown="LstFields_MouseDown" MouseDoubleClick="LstFields_MouseDoubleClick">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Edit" Command="{Binding Path=EditCommand}" />
+                    <MenuItem Header="Edit" Icon="✏" Command="{Binding Path=EditCommand}" />
                     <Separator />
-                    <MenuItem Header="Copy" Command="{Binding Path=CopyCommand}" />
-                    <MenuItem Header="Paste" Command="{Binding Path=PasteCommnad}" />
+                    <MenuItem Header="Copy" Icon="📄" Command="{Binding Path=CopyCommand}" />
+                    <MenuItem Header="Paste" Icon="📋" Command="{Binding Path=PasteCommnad}" />
                     <Separator />
-                    <MenuItem Header="Add" Command="{Binding Path=AddCommand}" />
-                    <MenuItem Header="Remove" Command="{Binding Path=RemoveCommand}" />
+                    <MenuItem Header="Add" Icon="➕" Command="{Binding Path=AddCommand}" />
+                    <MenuItem Header="Remove" Icon="➖" Command="{Binding Path=RemoveCommand}" />
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.ItemsPanel>
@@ -54,7 +54,7 @@
             </ListView.ItemsPanel>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border BorderBrush="{x:Static SystemParameters.WindowGlassBrush}" BorderThickness="1">
+                    <Border BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" BorderThickness="1">
                         <TextBlock Text="{Binding FieldKey}" Margin="3" />
                     </Border>
                 </DataTemplate>
