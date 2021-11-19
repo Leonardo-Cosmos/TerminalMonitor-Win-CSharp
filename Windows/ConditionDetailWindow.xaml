@@ -144,13 +144,13 @@
                 <TreeView Name="trConditions" MinHeight="50" SelectedItemChanged="TrConditions_SelectedItemChanged" MouseDown="TrConditions_MouseDown">
                     <TreeView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Cut" Command="{Binding Path=CutCommand}" />
-                            <MenuItem Header="Copy" Command="{Binding Path=CopyCommand}" />
-                            <MenuItem Header="Paste" Command="{Binding Path=PasteCommnad}" />
+                            <MenuItem Header="Cut" Icon="✂" Command="{Binding Path=CutCommand}" />
+                            <MenuItem Header="Copy" Icon="📄" Command="{Binding Path=CopyCommand}" />
+                            <MenuItem Header="Paste" Icon="📋" Command="{Binding Path=PasteCommnad}" />
                             <Separator />
-                            <MenuItem Header="Add Field" Command="{Binding Path=AddFieldCommand}" />
-                            <MenuItem Header="Add Group" Command="{Binding Path=AddGroupCommand}" />
-                            <MenuItem Header="Remove" Command="{Binding Path=RemoveCommand}" />
+                            <MenuItem Header="Add Field" Icon="➕" Command="{Binding Path=AddFieldCommand}" />
+                            <MenuItem Header="Add Group" Icon="➕{}" Command="{Binding Path=AddGroupCommand}" />
+                            <MenuItem Header="Remove" Icon="➖" Command="{Binding Path=RemoveCommand}" />
                         </ContextMenu>
                     </TreeView.ContextMenu>
                     <TreeView.Resources>

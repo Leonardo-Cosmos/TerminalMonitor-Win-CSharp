@@ -39,6 +39,18 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private bool isAnyConditionCutInClipboard;
+
+        public bool IsAnyConditionCutInClipboard
+        {
+            get => isAnyConditionCutInClipboard;
+            set
+            {
+                isAnyConditionCutInClipboard = value;
+                OnPropertyChanged();
+            }
+        }
+
         private bool isInverted;
 
         public bool IsInverted
@@ -80,6 +92,8 @@ namespace TerminalMonitor.Windows.Controls
         public ICommand MoveLeftCommand { get; init; }
 
         public ICommand MoveRightCommand { get; init; }
+
+        public ICommand CutCommand { get; init; }
 
         public ICommand CopyCommand { get; init; }
 

@@ -48,6 +48,9 @@ namespace TerminalMonitor.Clipboard
                     results = default;
                     break;
             }
+
+            OnItemPasted();
+
             return (results, pasteStatus);
         }
 
@@ -66,10 +69,9 @@ namespace TerminalMonitor.Clipboard
             ItemPasted?.Invoke(this, EventArgs.Empty);
         }
 
-        public bool ContainsItem
-        {
-            get => status != ItemClipboardStatus.Empty;
-        }
+        public ItemClipboardStatus Status => status;
+
+        public bool ContainsItem => status != ItemClipboardStatus.Empty;
 
         public event EventHandler ItemCut;
 

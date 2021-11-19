@@ -135,6 +135,7 @@
                 <ContextMenu>
                     <MenuItem Header="Edit" Icon="✏" Command="{Binding Path=EditCommand}" />
                     <Separator />
+                    <MenuItem Header="Cut" Icon="✂" Command="{Binding Path=CutCommand}" />
                     <MenuItem Header="Copy" Icon="📄" Command="{Binding Path=CopyCommand}" />
                     <MenuItem Header="Paste" Icon="📋" Command="{Binding Path=PasteCommnad}" />
                     <Separator />

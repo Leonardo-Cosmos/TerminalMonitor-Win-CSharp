@@ -38,6 +38,18 @@ namespace TerminalMonitor.Windows
             }
         }
 
+        private bool isAnyConditionCutInClipboard;
+
+        public bool IsConditionCutInClipboard
+        {
+            get => isAnyConditionCutInClipboard;
+            set
+            {
+                isAnyConditionCutInClipboard = value;
+                OnPropertyChanged();
+            }
+        }
+
         private string conditionName;
 
         public string ConditionName

@@ -38,6 +38,18 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private bool isAnyFieldCutInClipboard;
+
+        public bool IsAnyFieldCutInClipboard
+        {
+            get => isAnyFieldCutInClipboard;
+            set
+            {
+                isAnyFieldCutInClipboard = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ICommand AddCommand { get; init; }
 
         public ICommand RemoveCommand { get; init; }
@@ -47,6 +59,8 @@ namespace TerminalMonitor.Windows.Controls
         public ICommand MoveLeftCommand { get; init; }
 
         public ICommand MoveRightCommand { get; init; }
+
+        public ICommand CutCommand { get; init; }
 
         public ICommand CopyCommand { get; init; }
 

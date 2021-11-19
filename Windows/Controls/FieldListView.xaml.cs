@@ -40,12 +40,15 @@ namespace TerminalMonitor.Windows.Controls
 
             dataContextVO = new()
             {
-                AddCommand = new RelayCommand(AddFieldDetail, () => !dataContextVO.IsAnyFieldSelected),
+                AddCommand = new RelayCommand(AddFieldDetail, () => true),
                 RemoveCommand = new RelayCommand(RemoveSelectedFieldDetails, () => dataContextVO.IsAnyFieldSelected),
                 EditCommand = new RelayCommand(EditSelectedFieldDetails, () => dataContextVO.IsAnyFieldSelected),
                 MoveLeftCommand = new RelayCommand(MoveSelectedFieldDetailsLeft, () => dataContextVO.IsAnyFieldSelected),
                 MoveRightCommand = new RelayCommand(MoveSelectedFieldDetailsRight, () => dataContextVO.IsAnyFieldSelected),
-                CopyCommand = new RelayCommand(CopySelectedFieldDetails, () => dataContextVO.IsAnyFieldSelected),
+                CutCommand = new RelayCommand(CutSelectedFieldDetails,
+                    () => dataContextVO.IsAnyFieldSelected && !dataContextVO.IsAnyFieldCutInClipboard),
+                CopyCommand = new RelayCommand(CopySelectedFieldDetails,
+                    () => dataContextVO.IsAnyFieldSelected && !dataContextVO.IsAnyFieldCutInClipboard),
                 PasteCommnad = new RelayCommand(PasteFieldDetails, () => dataContextVO.IsAnyFieldInClipboard),
             };
 
@@ -60,15 +63,19 @@ namespace TerminalMonitor.Windows.Controls
             switch (e.PropertyName)
             {
                 case nameof(FieldListViewDataContextVO.IsAnyFieldSelected):
-                    (dataContextVO.AddCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.EditCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.MoveLeftCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.MoveRightCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     break;
                 case nameof(FieldListViewDataContextVO.IsAnyFieldInClipboard):
                     (dataContextVO.PasteCommnad as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                case nameof(FieldListViewDataContextVO.IsAnyFieldCutInClipboard):
+                    (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     break;
                 default:
                     break;
@@ -95,14 +102,15 @@ namespace TerminalMonitor.Windows.Controls
             EditSelectedFieldDetail();
         }
 
-        private void FieldClipboard_ItemCopied(object sender, EventArgs e)
+        private void FieldClipboard_StatusChanged(object sender, EventArgs e)
         {
-            dataContextVO.IsAnyFieldInClipboard = fieldClipboard?.ContainsItem ?? false;
+            UpdateClipboardStatus();
         }
 
-        private void FieldClipboard_ItemPasted(object sender, EventArgs e)
+        private void UpdateClipboardStatus()
         {
             dataContextVO.IsAnyFieldInClipboard = fieldClipboard?.ContainsItem ?? false;
+            dataContextVO.IsAnyFieldCutInClipboard = fieldClipboard?.Status == ItemClipboardStatus.Move;
         }
 
         private void ForSelectedItem(Action<FieldListItemVO> action)
@@ -144,6 +152,34 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private void InsertAtSelectedItem(params (FieldDisplayDetail fieldDetail, FieldListItemVO itemVO)[] fieldTuples)
+        {
+            var selectedIndex = lstFields.SelectedIndex;
+            if (selectedIndex == -1)
+            {
+                foreach (var (fieldDetail, itemVO) in fieldTuples)
+                {
+                    fieldVOs.Add(itemVO);
+                    lstFields.SelectedItems.Add(itemVO);
+
+                    fields.Add(fieldDetail);
+                }
+            }
+            else
+            {
+                lstFields.SelectedItems.Clear();
+
+                var reversedFieldTuples = fieldTuples.Reverse().ToArray();
+                foreach (var (fieldDetail, itemVO) in reversedFieldTuples)
+                {
+                    fieldVOs.Insert(selectedIndex, itemVO);
+                    lstFields.SelectedItems.Add(itemVO);
+
+                    fields.Insert(selectedIndex, fieldDetail);
+                }
+            }
+        }
+
         private void AddFieldDetail()
         {
             var existingFieldKeys = fields
@@ -159,15 +195,13 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     var fieldDetail = window.FieldDetail;
 
-                    FieldListItemVO item = new()
+                    FieldListItemVO itemVO = new()
                     {
                         Id = fieldDetail.Id,
                         FieldKey = fieldDetail.FieldKey
                     };
-                    fieldVOs.Add(item);
-                    lstFields.SelectedItem = item;
 
-                    fields.Add(fieldDetail);
+                    InsertAtSelectedItem((fieldDetail, itemVO));
                 }
             };
 
@@ -258,6 +292,24 @@ namespace TerminalMonitor.Windows.Controls
             fields.Insert(dstIndex, fieldDetail);
         }
 
+        private void CutSelectedFieldDetails()
+        {
+            List<FieldDisplayDetail> cutFieldDetails = new();
+            foreach (var selectedItem in lstFields.SelectedItems)
+            {
+                if (selectedItem is FieldListItemVO itemVO)
+                {
+                    var index = fieldVOs.IndexOf(itemVO);
+
+                    var fieldDetail = fields[index];
+                    cutFieldDetails.Add(fieldDetail);
+                }
+            }
+
+            fieldClipboard?.Cut(cutFieldDetails.ToArray());
+            RemoveSelectedFieldDetails();
+        }
+
         private void CopySelectedFieldDetails()
         {
             List<FieldDisplayDetail> copiedFieldDetails = new();
@@ -279,25 +331,25 @@ namespace TerminalMonitor.Windows.Controls
         {
             if (fieldClipboard != null)
             {
-                (var pastedFieldDetails, _) = fieldClipboard.Paste();
+                (var pastedFieldDetails, var clipboardStatus) = fieldClipboard.Paste();
 
                 if (pastedFieldDetails != null)
                 {
-                    lstFields.SelectedItems.Clear();
-                    foreach (var pastedFieldDetail in pastedFieldDetails)
+                    var fieldTuples = pastedFieldDetails.Select(pastedFieldDetail =>
                     {
-                        var fieldDetail = (FieldDisplayDetail)pastedFieldDetail.Clone();
+                        var fieldDetail = clipboardStatus == ItemClipboardStatus.Move ?
+                            pastedFieldDetail : (FieldDisplayDetail)pastedFieldDetail.Clone();
 
                         FieldListItemVO itemVO = new()
                         {
                             Id = fieldDetail.Id,
                             FieldKey = fieldDetail.FieldKey
                         };
-                        fieldVOs.Add(itemVO);
-                        lstFields.SelectedItems.Add(itemVO);
 
-                        fields.Add(fieldDetail);
-                    }
+                        return (fieldDetail, itemVO);
+                    }).ToArray();
+
+                    InsertAtSelectedItem(fieldTuples);
                 }
             }
         }
@@ -332,17 +384,20 @@ namespace TerminalMonitor.Windows.Controls
 
                 if (fieldClipboard != null)
                 {
-                    fieldClipboard.ItemCopied -= FieldClipboard_ItemCopied;
-                    fieldClipboard.ItemPasted -= FieldClipboard_ItemPasted;
-
+                    fieldClipboard.ItemCut -= FieldClipboard_StatusChanged;
+                    fieldClipboard.ItemCopied -= FieldClipboard_StatusChanged;
+                    fieldClipboard.ItemPasted -= FieldClipboard_StatusChanged;
                 }
 
                 fieldClipboard = value;
 
                 if (fieldClipboard != null)
                 {
-                    fieldClipboard.ItemCopied += FieldClipboard_ItemCopied;
-                    fieldClipboard.ItemPasted += FieldClipboard_ItemPasted;
+                    fieldClipboard.ItemCut += FieldClipboard_StatusChanged;
+                    fieldClipboard.ItemCopied += FieldClipboard_StatusChanged;
+                    fieldClipboard.ItemPasted += FieldClipboard_StatusChanged;
+
+                    UpdateClipboardStatus();
                 }
             }
         }

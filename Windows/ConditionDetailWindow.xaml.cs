@@ -44,8 +44,10 @@ namespace TerminalMonitor.Windows
                 RemoveCommand = new RelayCommand(RemoveSelectedCondition, () => dataContextVO.IsConditionSelected),
                 MoveUpCommand = new RelayCommand(MoveSelectedConditionUp, () => dataContextVO.IsConditionSelected),
                 MoveDownCommand = new RelayCommand(MoveSelectedConditionDown, () => dataContextVO.IsConditionSelected),
-                CutCommand = new RelayCommand(CutSelectedCondition, () => dataContextVO.IsConditionSelected),
-                CopyCommand = new RelayCommand(CopySelectedCondition, () => dataContextVO.IsConditionSelected),
+                CutCommand = new RelayCommand(CutSelectedCondition,
+                    () => dataContextVO.IsConditionSelected && !dataContextVO.IsConditionCutInClipboard),
+                CopyCommand = new RelayCommand(CopySelectedCondition,
+                    () => dataContextVO.IsConditionSelected && !dataContextVO.IsConditionCutInClipboard),
                 PasteCommnad = new RelayCommand(PasteCondition, () => dataContextVO.IsConditionInClipboard),
             };
 
@@ -70,6 +72,10 @@ namespace TerminalMonitor.Windows
                     break;
                 case nameof(ConditionDetailWindowDataContextVO.IsConditionInClipboard):
                     (dataContextVO.PasteCommnad as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                case nameof(ConditionDetailWindowDataContextVO.IsConditionCutInClipboard):
+                    (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     break;
                 default:
                     break;
@@ -125,19 +131,15 @@ namespace TerminalMonitor.Windows
             Close();
         }
 
-        private void ConditionClipboard_ItemCut(object sender, EventArgs e)
+        private void ConditionClipboard_StatusChanged(object sender, EventArgs e)
         {
-            dataContextVO.IsConditionInClipboard = conditionClipboard?.ContainsItem ?? false;
+            UpdateClipboardStatus();
         }
 
-        private void ConditionClipboard_ItemCopied(object sender, EventArgs e)
+        private void UpdateClipboardStatus()
         {
-            dataContextVO.IsConditionInClipboard = conditionClipboard?.ContainsItem ?? false;
-        }
-
-        private void ConditionClipboard_ItemPasted(object sender, EventArgs e)
-        {
-            dataContextVO.IsConditionInClipboard = conditionClipboard?.ContainsItem ?? false;
+            dataContextVO.IsConditionInClipboard = conditionClipboard.ContainsItem;
+            dataContextVO.IsConditionCutInClipboard = conditionClipboard.Status == ItemClipboardStatus.Move;
         }
 
         private void AddFieldCondition()
@@ -250,19 +252,12 @@ namespace TerminalMonitor.Windows
         {
             if (conditionClipboard != null)
             {
-                (var pastedConditions, var status) = conditionClipboard.Paste();
+                (var pastedConditions, var clipboardStatus) = conditionClipboard.Paste();
 
                 if (pastedConditions != null && pastedConditions.Length > 0)
                 {
-                    Condition pastedCondition;
-                    if (status == ItemClipboardStatus.Move)
-                    {
-                        pastedCondition = pastedConditions[0];
-                    }
-                    else
-                    {
-                        pastedCondition = (Condition)pastedConditions[0].Clone();
-                    }
+                    var pastedCondition = clipboardStatus == ItemClipboardStatus.Move ?
+                        pastedConditions[0] : (Condition)pastedConditions[0].Clone();
 
                     var conditionVO = ToVO(pastedCondition);
                     AddCondition(conditions =>
@@ -515,18 +510,20 @@ namespace TerminalMonitor.Windows
 
                 if (conditionClipboard != null)
                 {
-                    conditionClipboard.ItemCut -= ConditionClipboard_ItemCut;
-                    conditionClipboard.ItemCopied -= ConditionClipboard_ItemCopied;
-                    conditionClipboard.ItemPasted -= ConditionClipboard_ItemPasted;
+                    conditionClipboard.ItemCut -= ConditionClipboard_StatusChanged;
+                    conditionClipboard.ItemCopied -= ConditionClipboard_StatusChanged;
+                    conditionClipboard.ItemPasted -= ConditionClipboard_StatusChanged;
                 }
 
                 conditionClipboard = value;
 
                 if (conditionClipboard != null)
                 {
-                    conditionClipboard.ItemCut += ConditionClipboard_ItemCut;
-                    conditionClipboard.ItemCopied += ConditionClipboard_ItemCopied;
-                    conditionClipboard.ItemPasted += ConditionClipboard_ItemPasted;
+                    conditionClipboard.ItemCut += ConditionClipboard_StatusChanged;
+                    conditionClipboard.ItemCopied += ConditionClipboard_StatusChanged;
+                    conditionClipboard.ItemPasted += ConditionClipboard_StatusChanged;
+
+                    UpdateClipboardStatus();
                 }
             }
         }
