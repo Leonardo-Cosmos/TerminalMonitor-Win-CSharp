@@ -37,7 +37,7 @@ namespace TerminalMonitor.Windows.Controls
 
             dataContextVO = new()
             {
-                AddCommand = new RelayCommand(AddCommand, () => !dataContextVO.IsAnyCommandSelected),
+                AddCommand = new RelayCommand(AddCommand, () => true),
                 RemoveCommand = new RelayCommand(RemoveSelectedCommands, () => dataContextVO.IsAnyCommandSelected),
                 EditCommand = new RelayCommand(EditSelectedCommands, () => dataContextVO.IsAnyCommandSelected),
                 MoveUpCommand = new RelayCommand(MoveSelectedCommandsUp, () => dataContextVO.IsAnyCommandSelected),
@@ -56,7 +56,6 @@ namespace TerminalMonitor.Windows.Controls
             switch (e.PropertyName)
             {
                 case nameof(CommandListViewDataContextVO.IsAnyCommandSelected):
-                    (dataContextVO.AddCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.EditCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.MoveUpCommand as RelayCommand)?.NotifyCanExecuteChanged();
@@ -135,6 +134,34 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private void InsertAtSelectedItem(params (CommandConfig commandConfig, CommandListItemVO itemVO)[] commandTuples)
+        {
+            var selectedIndex = lstCommands.SelectedIndex;
+            if (selectedIndex == -1)
+            {
+                foreach (var (commandConfig, itemVO) in commandTuples)
+                {
+                    commandVOs.Add(itemVO);
+                    lstCommands.SelectedItems.Add(itemVO);
+
+                    commands.Add(commandConfig);
+                }
+            }
+            else
+            {
+                lstCommands.SelectedItems.Clear();
+
+                var reversedConditionTuples = commandTuples.Reverse().ToArray();
+                foreach (var (commandConfig, itemVO) in reversedConditionTuples)
+                {
+                    commandVOs.Insert(selectedIndex, itemVO);
+                    lstCommands.SelectedItems.Add(itemVO);
+
+                    commands.Insert(selectedIndex, commandConfig);
+                }
+            }
+        }
+
         private void AddCommand()
         {
             var existingCommandNames = commands.Select(command => command.Name);
@@ -149,14 +176,12 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     var commandConfig = window.Command;
 
-                    CommandListItemVO item = new()
+                    CommandListItemVO itemVO = new()
                     {
                         Name = commandConfig.Name,
                     };
-                    commandVOs.Add(item);
-                    lstCommands.SelectedItem = item;
 
-                    commands.Add(commandConfig);
+                    InsertAtSelectedItem((commandConfig, itemVO));
                 }
             };
 
