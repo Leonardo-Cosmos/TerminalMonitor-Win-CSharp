@@ -317,37 +317,43 @@ namespace TerminalMonitor.Windows.Controls
 
         private void CutSelectedConditions()
         {
-            List<Condition> selectedConditions = new();
-            foreach (var selectedItem in lstFilters.SelectedItems)
+            if (conditionListClipboard != null)
             {
-                if (selectedItem is FilterItemVO itemVO)
+                List<Condition> selectedConditions = new();
+                foreach (var selectedItem in lstFilters.SelectedItems)
                 {
-                    var index = filterVOs.IndexOf(itemVO);
+                    if (selectedItem is FilterItemVO itemVO)
+                    {
+                        var index = filterVOs.IndexOf(itemVO);
 
-                    var condition = conditions[index];
-                    selectedConditions.Add(condition);
+                        var condition = conditions[index];
+                        selectedConditions.Add(condition);
+                    }
                 }
-            }
 
-            conditionListClipboard?.Cut(selectedConditions.ToArray());
-            RemoveSelectedConditions();
+                conditionListClipboard.Cut(selectedConditions.ToArray());
+                RemoveSelectedConditions();
+            }
         }
 
         private void CopySelectedConditions()
         {
-            List<Condition> copiedConditions = new();
-            foreach (var selectedItem in lstFilters.SelectedItems)
+            if (conditionListClipboard != null)
             {
-                if (selectedItem is FilterItemVO itemVO)
+                List<Condition> copiedConditions = new();
+                foreach (var selectedItem in lstFilters.SelectedItems)
                 {
-                    var index = filterVOs.IndexOf(itemVO);
+                    if (selectedItem is FilterItemVO itemVO)
+                    {
+                        var index = filterVOs.IndexOf(itemVO);
 
-                    var condition = conditions[index];
-                    copiedConditions.Add(condition);
+                        var condition = conditions[index];
+                        copiedConditions.Add(condition);
+                    }
                 }
-            }
 
-            conditionListClipboard?.Copy(copiedConditions.ToArray());
+                conditionListClipboard.Copy(copiedConditions.ToArray());
+            }
         }
 
         private void PasteConditions()

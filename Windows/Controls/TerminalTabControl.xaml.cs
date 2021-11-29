@@ -45,6 +45,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly ItemClipboard<FieldDisplayDetail> fieldClipboard = new();
 
+        private readonly ItemClipboard<TextStyleCondition> styleConditionClipboard = new();
+
         private readonly ItemClipboard<Condition> filterListClipboard = new();
 
         private readonly ItemClipboard<Condition> filterTreeClipboard = new();
@@ -268,6 +270,7 @@ namespace TerminalMonitor.Windows.Controls
             terminalView.VisibleFields = config.VisibleFields.ToList();
             terminalView.FilterCondition = config.FilterCondition;
             terminalView.FieldClipboard = fieldClipboard;
+            terminalView.StyleConditionClipboard = styleConditionClipboard;
             terminalView.FilterListClipboard = filterListClipboard;
             terminalView.FilterTreeClipboard = filterTreeClipboard;
             terminalView.LineSupervisor = this;

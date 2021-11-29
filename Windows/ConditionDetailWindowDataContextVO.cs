@@ -96,8 +96,6 @@ namespace TerminalMonitor.Windows
 
         public ICommand RemoveCommand { get; init; }
 
-        public ICommand EditCommand { get; init; }
-
         public ICommand MoveUpCommand { get; init; }
 
         public ICommand MoveDownCommand { get; init; }

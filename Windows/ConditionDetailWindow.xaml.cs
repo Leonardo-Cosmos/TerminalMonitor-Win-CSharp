@@ -226,25 +226,31 @@ namespace TerminalMonitor.Windows
 
         private void CutSelectedCondition()
         {
-            var selectedItem = trConditions.SelectedItem;
-            if (selectedItem is ConditionNodeVO conditionNodeVO)
+            if (conditionClipboard != null)
             {
-                var selectedCondition = FromVO(conditionNodeVO);
+                var selectedItem = trConditions.SelectedItem;
+                if (selectedItem is ConditionNodeVO conditionNodeVO)
+                {
+                    var selectedCondition = FromVO(conditionNodeVO);
 
-                conditionClipboard?.Cut(selectedCondition);
+                    conditionClipboard.Cut(selectedCondition);
+                }
+
+                RemoveSelectedCondition();
             }
-
-            RemoveSelectedCondition();
         }
 
         private void CopySelectedCondition()
         {
-            var selectedItem = trConditions.SelectedItem;
-            if (selectedItem is ConditionNodeVO conditionNodeVO)
+            if (conditionClipboard != null)
             {
-                var selectedCondition = FromVO(conditionNodeVO);
+                var selectedItem = trConditions.SelectedItem;
+                if (selectedItem is ConditionNodeVO conditionNodeVO)
+                {
+                    var selectedCondition = FromVO(conditionNodeVO);
 
-                conditionClipboard?.Copy(selectedCondition);
+                    conditionClipboard.Copy(selectedCondition);
+                }
             }
         }
 

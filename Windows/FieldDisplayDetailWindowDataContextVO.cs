@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows
@@ -55,12 +56,42 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private readonly ObservableCollection<TextStyleCondition> conditions = new();
+        private bool isAnyConditionInClipboard;
 
-        public ObservableCollection<TextStyleCondition> Conditions
+        public bool IsAnyConditionInClipboard
         {
-            get => conditions;
+            get => isAnyConditionInClipboard;
+            set
+            {
+                isAnyConditionInClipboard = value;
+                OnPropertyChanged();
+            }
         }
 
+        private bool isAnyConditionCutInClipboard;
+
+        public bool IsAnyConditionCutInClipboard
+        {
+            get => isAnyConditionCutInClipboard;
+            set
+            {
+                isAnyConditionCutInClipboard = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ICommand AddCommand { get; init; }
+
+        public ICommand RemoveCommand { get; init; }
+
+        public ICommand MoveUpCommand { get; init; }
+
+        public ICommand MoveDownCommand { get; init; }
+
+        public ICommand CutCommand { get; init; }
+
+        public ICommand CopyCommand { get; init; }
+
+        public ICommand PasteCommnad { get; init; }
     }
 }

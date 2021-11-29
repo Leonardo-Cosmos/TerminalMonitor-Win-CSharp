@@ -34,6 +34,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private ItemClipboard<FieldDisplayDetail> fieldClipboard;
 
+        private ItemClipboard<TextStyleCondition> styleConditionClipboard;
+
         public FieldListView()
         {
             InitializeComponent();
@@ -187,6 +189,7 @@ namespace TerminalMonitor.Windows.Controls
             FieldDisplayDetailWindow window = new()
             {
                 ExistingFieldKeys = existingFieldKeys,
+                StyleConditionClipboard = styleConditionClipboard,
             };
 
             window.Closing += (object sender, CancelEventArgs e) =>
@@ -243,6 +246,7 @@ namespace TerminalMonitor.Windows.Controls
             {
                 FieldDetail = fieldDetail,
                 ExistingFieldKeys = existingFieldKeys,
+                StyleConditionClipboard = styleConditionClipboard,
             };
 
             window.Closing += (object sender, CancelEventArgs e) =>
@@ -294,37 +298,43 @@ namespace TerminalMonitor.Windows.Controls
 
         private void CutSelectedFieldDetails()
         {
-            List<FieldDisplayDetail> cutFieldDetails = new();
-            foreach (var selectedItem in lstFields.SelectedItems)
+            if (fieldClipboard != null)
             {
-                if (selectedItem is FieldListItemVO itemVO)
+                List<FieldDisplayDetail> cutFieldDetails = new();
+                foreach (var selectedItem in lstFields.SelectedItems)
                 {
-                    var index = fieldVOs.IndexOf(itemVO);
+                    if (selectedItem is FieldListItemVO itemVO)
+                    {
+                        var index = fieldVOs.IndexOf(itemVO);
 
-                    var fieldDetail = fields[index];
-                    cutFieldDetails.Add(fieldDetail);
+                        var fieldDetail = fields[index];
+                        cutFieldDetails.Add(fieldDetail);
+                    }
                 }
-            }
 
-            fieldClipboard?.Cut(cutFieldDetails.ToArray());
-            RemoveSelectedFieldDetails();
+                fieldClipboard.Cut(cutFieldDetails.ToArray());
+                RemoveSelectedFieldDetails();
+            }
         }
 
         private void CopySelectedFieldDetails()
         {
-            List<FieldDisplayDetail> copiedFieldDetails = new();
-            foreach (var selectedItem in lstFields.SelectedItems)
+            if (fieldClipboard != null)
             {
-                if (selectedItem is FieldListItemVO itemVO)
+                List<FieldDisplayDetail> copiedFieldDetails = new();
+                foreach (var selectedItem in lstFields.SelectedItems)
                 {
-                    var index = fieldVOs.IndexOf(itemVO);
+                    if (selectedItem is FieldListItemVO itemVO)
+                    {
+                        var index = fieldVOs.IndexOf(itemVO);
 
-                    var fieldDetail = fields[index];
-                    copiedFieldDetails.Add(fieldDetail);
+                        var fieldDetail = fields[index];
+                        copiedFieldDetails.Add(fieldDetail);
+                    }
                 }
-            }
 
-            fieldClipboard?.Copy(copiedFieldDetails.ToArray());
+                fieldClipboard.Copy(copiedFieldDetails.ToArray());
+            }
         }
 
         private void PasteFieldDetails()
@@ -400,6 +410,12 @@ namespace TerminalMonitor.Windows.Controls
                     UpdateClipboardStatus();
                 }
             }
+        }
+
+        public ItemClipboard<TextStyleCondition> StyleConditionClipboard
+        {
+            get => styleConditionClipboard;
+            set => styleConditionClipboard = value;
         }
     }
 }

@@ -333,6 +333,12 @@ namespace TerminalMonitor.Windows.Controls
             set => fieldListView.FieldClipboard = value;
         }
 
+        public ItemClipboard<TextStyleCondition> StyleConditionClipboard
+        {
+            get => fieldListView.StyleConditionClipboard;
+            set => fieldListView.StyleConditionClipboard = value;
+        }
+
         public ItemClipboard<Condition> FilterListClipboard
         {
             get => filterView.ConditionListClipboard;
