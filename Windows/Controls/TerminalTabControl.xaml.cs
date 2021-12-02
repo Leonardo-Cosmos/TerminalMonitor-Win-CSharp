@@ -181,10 +181,8 @@ namespace TerminalMonitor.Windows.Controls
             readTerminalTimer.Tick += (sender, e) =>
             {
                 var terminalLines = producer.ReadTerminalLines();
-                foreach (var terminalLine in terminalLines)
-                {
-                    ParseTerminalLine(terminalLine.Text, terminalLine.ExecutionName);
-                }
+
+                ParseTerminalLine(terminalLines);
 
                 if (producer.IsCompleted)
                 {
@@ -219,14 +217,20 @@ namespace TerminalMonitor.Windows.Controls
             readTerminalTimer.Start();
         }
 
-        private void ParseTerminalLine(string text, string executionName)
+        private void ParseTerminalLine(IEnumerable<ITerminalLineProducer.TerminalLine> terminalLines)
         {
-            TerminalLineDto terminalLineDto =
-                TerminalLineParser.ParseTerminalLine(text, executionName);
+            List<TerminalLineDto> parsedTerminalLineDtos = new(terminalLines.Count());
+            foreach (var terminalLine in terminalLines)
+            {
+                TerminalLineDto terminalLineDto =
+                    TerminalLineParser.ParseTerminalLine(terminalLine.Text, terminalLine.ExecutionName);
 
-            terminalLineDtos.Add(terminalLineDto);
+                parsedTerminalLineDtos.Add(terminalLineDto);
+            }
 
-            OnTerminalLineAdded(terminalLineDto);
+            terminalLineDtos.AddRange(parsedTerminalLineDtos);
+
+            OnTerminalLineAdded(parsedTerminalLineDtos.ToArray());
         }
 
         private static TerminalConfig GetTabConfig(TabItem tab)
@@ -422,14 +426,14 @@ namespace TerminalMonitor.Windows.Controls
             changingTab = false;
         }
 
-        protected void OnTerminalLineAdded(TerminalLineDto terminalLineDto)
+        protected void OnTerminalLineAdded(TerminalLineDto[] terminalLineDtos)
         {
-            TerminalLineEventArgs e = new()
+            TerminalLinesEventArgs e = new()
             {
-                TerminalLine = terminalLineDto,
+                TerminalLines = terminalLineDtos,
             };
 
-            TerminalLineAdded?.Invoke(this, e);
+            TerminalLinesAdded?.Invoke(this, e);
         }
 
         public TerminalLineCollection TerminalLines
@@ -440,7 +444,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public event TerminalLineEventHandler TerminalLineAdded;
+        public event TerminalLinesEventHandler TerminalLinesAdded;
 
         private void LineProducer_Started(object sender, EventArgs e)
         {

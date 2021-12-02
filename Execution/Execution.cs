@@ -36,7 +36,7 @@ namespace TerminalMonitor.Execution
             }
 
             started = true;
-            processTask = Start(commandConfig.StartFile, commandConfig.Arguments, commandConfig.WorkDirectory);
+            processTask = Task.Run(() => Start(commandConfig.StartFile, commandConfig.Arguments, commandConfig.WorkDirectory));
             processTask.ContinueWith(task => {                
                 OnExited(task.Exception);
             });
@@ -83,6 +83,7 @@ namespace TerminalMonitor.Execution
                 {
                     if (!String.IsNullOrEmpty(e.Data))
                     {
+                        Debug.Print($"Error data: {e.Data}");
                         OnLineReceived(e.Data);
                     }
                 };
