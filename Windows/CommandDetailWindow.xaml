@@ -7,7 +7,7 @@
         xmlns:rules="clr-namespace:TerminalMonitor.Windows.ValidationRules"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:CommandDetailWindowDataContextVO}"
-        Title="CommandDetailWindow" Height="450" Width="800">
+        Title="Command Detail" Height="450" Width="800">
     <StackPanel>
         <Grid Name="grdCommand">
             <Grid.ColumnDefinitions>

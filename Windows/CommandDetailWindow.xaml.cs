@@ -28,6 +28,10 @@ namespace TerminalMonitor.Windows
 
         private readonly List<string> existingCommandNames = new();
 
+        private IEnumerable<string> latestExistingCommandNames;
+
+        private CommandConfig command;
+
         public CommandDetailWindow()
         {
             InitializeComponent();
@@ -63,6 +67,12 @@ namespace TerminalMonitor.Windows
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
+            existingCommandNames.Clear();
+            if (latestExistingCommandNames != null)
+            {
+                existingCommandNames.AddRange(latestExistingCommandNames);
+            }
+
             txtBxName.GetBindingExpression(TextBox.TextProperty).UpdateSource();
             txtBxCommand.GetBindingExpression(TextBox.TextProperty).UpdateSource();
 
@@ -78,8 +88,47 @@ namespace TerminalMonitor.Windows
                 return;
             }
 
-            DialogResult = true;
+            SaveCommand();
+            IsSaved = true;
+            Close();
         }
+
+        private void LoadCommand(CommandConfig command)
+        {
+            this.command = command;
+            IsSaved = false;
+
+            if (command != null)
+            {
+                dataContextVO.Name = command.Name;
+                dataContextVO.StartFile = command.StartFile;
+                dataContextVO.Arguments = command.Arguments;
+                dataContextVO.WorkDirectory = command.WorkDirectory;
+            }
+        }
+
+        private void SaveCommand()
+        {
+            if (command != null)
+            {
+                command.Name = dataContextVO.Name;
+                command.StartFile = dataContextVO.StartFile;
+                command.Arguments = dataContextVO.Arguments;
+                command.WorkDirectory = dataContextVO.WorkDirectory;
+            }
+            else
+            {
+                command = new()
+                {
+                    Name = dataContextVO.Name,
+                    StartFile = dataContextVO.StartFile,
+                    Arguments = dataContextVO.Arguments,
+                    WorkDirectory = dataContextVO.WorkDirectory,
+                };
+            }
+        }
+
+        public bool IsSaved { get; set; }
 
         public IEnumerable<string> ExistingCommandNames
         {
@@ -90,38 +139,14 @@ namespace TerminalMonitor.Windows
 
             set
             {
-                existingCommandNames.Clear();
-                if (value != null)
-                {
-                    existingCommandNames.AddRange(value);
-                }
+                latestExistingCommandNames = value;
             }
         }
 
         public CommandConfig Command
         {
-            get
-            {
-                return new() { 
-                    Name = dataContextVO.Name,
-                    StartFile = dataContextVO.StartFile,
-                    Arguments = dataContextVO.Arguments,
-                    WorkDirectory = dataContextVO.WorkDirectory,
-                };
-            }
-
-            set
-            {
-                if (value == null)
-                {
-                    return;
-                }
-
-                dataContextVO.Name = value.Name;
-                dataContextVO.StartFile = value.StartFile;
-                dataContextVO.Arguments = value.Arguments;
-                dataContextVO.WorkDirectory = value.WorkDirectory;
-            }
+            get => command;
+            set => LoadCommand(value);
         }
     }
 }

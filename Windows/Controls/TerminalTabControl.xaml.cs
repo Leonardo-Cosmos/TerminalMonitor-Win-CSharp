@@ -45,7 +45,11 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly ItemClipboard<FieldDisplayDetail> fieldClipboard = new();
 
-        private readonly ItemClipboard<Condition> filterClipboard = new();
+        private readonly ItemClipboard<TextStyleCondition> styleConditionClipboard = new();
+
+        private readonly ItemClipboard<Condition> filterListClipboard = new();
+
+        private readonly ItemClipboard<Condition> filterTreeClipboard = new();
 
         public TerminalTabControl()
         {
@@ -263,10 +267,12 @@ namespace TerminalMonitor.Windows.Controls
             tab.Header = config.Name ?? "Unknown View";
 
             TerminalView terminalView = new();
-            terminalView.VisibleFields = config.VisibleFields;
+            terminalView.VisibleFields = config.VisibleFields.ToList();
             terminalView.FilterCondition = config.FilterCondition;
             terminalView.FieldClipboard = fieldClipboard;
-            terminalView.FilterClipboard = filterClipboard;
+            terminalView.StyleConditionClipboard = styleConditionClipboard;
+            terminalView.FilterListClipboard = filterListClipboard;
+            terminalView.FilterTreeClipboard = filterTreeClipboard;
             terminalView.LineSupervisor = this;
             tab.Content = terminalView;
 

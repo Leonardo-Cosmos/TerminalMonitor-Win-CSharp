@@ -1,4 +1,5 @@
 ﻿/* 2021/4/21 */
+using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -29,129 +30,356 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class FilterListView : UserControl
     {
-        private readonly FilterListViewDataContextVO dataContextVO = new();
+        private readonly FilterListViewDataContextVO dataContextVO;
 
         private readonly ObservableCollection<FilterItemVO> filterVOs = new();
 
-        private readonly List<Condition> conditions = new();
+        private List<Condition> conditions;
+
+        private GroupCondition groupCondition;
+
+        private ItemClipboard<Condition> conditionListClipboard;
+
+        private ItemClipboard<Condition> conditionTreeClipboard;
 
         public FilterListView()
         {
             InitializeComponent();
 
+            conditions = new();
+            groupCondition = new()
+            {
+                Id = Guid.NewGuid().ToString(),
+                Conditions = conditions,
+            };
+
+            dataContextVO = new()
+            {
+                AddCommand = new RelayCommand(AddCondition, () => true),
+                RemoveCommand = new RelayCommand(RemoveSelectedConditions, () => dataContextVO.IsAnyConditionSelected),
+                EditCommand = new RelayCommand(EditSelectedConditions, () => dataContextVO.IsAnyConditionSelected),
+                MoveLeftCommand = new RelayCommand(MoveSelectedConditionsLeft, () => dataContextVO.IsAnyConditionSelected),
+                MoveRightCommand = new RelayCommand(MoveSelectedConditionsRight, () => dataContextVO.IsAnyConditionSelected),
+                CutCommand = new RelayCommand(CutSelectedConditions,
+                    () => dataContextVO.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
+                CopyCommand = new RelayCommand(CopySelectedConditions,
+                    () => dataContextVO.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
+                PasteCommnad = new RelayCommand(PasteConditions, () => dataContextVO.IsAnyConditionInClipboard),
+            };
+
+            dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
             DataContext = dataContextVO;
 
             lstFilters.ItemsSource = filterVOs;
         }
 
-        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        private void DataContextVO_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            ConditionDetailWindow window = new();
-
-            if (window.ShowDialog() ?? false)
+            switch (e.PropertyName)
             {
-                Condition condition = window.Condition;
-
-                FilterItemVO item = CreateFilterVO(condition);
-                filterVOs.Add(item);
-                lstFilters.SelectedItem = item;
-
-                conditions.Add(condition);
+                case nameof(FilterListViewDataContextVO.MatchMode):
+                    groupCondition.MatchMode = dataContextVO.MatchMode;
+                    break;
+                case nameof(FilterListViewDataContextVO.IsInverted):
+                    groupCondition.IsInverted = dataContextVO.IsInverted;
+                    break;
+                case nameof(FilterListViewDataContextVO.DefaultResult):
+                    groupCondition.DefaultResult = dataContextVO.DefaultResult;
+                    break;
+                case nameof(FilterListViewDataContextVO.IsDisabled):
+                    groupCondition.IsDisabled = dataContextVO.IsDisabled;
+                    break;
+                case nameof(FilterListViewDataContextVO.IsAnyConditionSelected):
+                    (dataContextVO.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.EditCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveLeftCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveRightCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                case nameof(FilterListViewDataContextVO.IsAnyConditionInClipboard):
+                    (dataContextVO.PasteCommnad as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                case nameof(FilterListViewDataContextVO.IsAnyConditionCutInClipboard):
+                    (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                default:
+                    break;
             }
         }
 
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        private void LstFilters_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (lstFilters.SelectedValue is FilterItemVO selectedItem)
-            {
-                var index = filterVOs.IndexOf(selectedItem);
-                filterVOs.RemoveAt(index);
+            var count = lstFilters.SelectedItems.Count;
+            dataContextVO.IsAnyConditionSelected = count > 0;
+        }
 
-                conditions.RemoveAt(index);
+        private void LstFilters_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            HitTestResult hitResult = VisualTreeHelper.HitTest(this, e.GetPosition(this));
+            if (hitResult.VisualHit.GetType() != typeof(ListBoxItem))
+            {
+                lstFilters.UnselectAll();
             }
         }
 
-        private void BtnModify_Click(object sender, RoutedEventArgs e)
+        private void LstFilters_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (lstFilters.SelectedItem is FilterItemVO selectedItem)
+            EditSelectedCondition();
+        }
+
+        private void ConditionClipboard_StatusChanged(object sender, EventArgs e)
+        {
+            UpdateClipboardStatus();
+        }
+
+        private void UpdateClipboardStatus()
+        {
+            dataContextVO.IsAnyConditionInClipboard = conditionListClipboard.ContainsItem;
+            dataContextVO.IsAnyConditionCutInClipboard = conditionListClipboard.Status == ItemClipboardStatus.Move;
+        }
+
+        private void ForSelectedItem(Action<FilterItemVO> action)
+        {
+            if (lstFilters.SelectedItem is FilterItemVO itemVO)
             {
-                var index = filterVOs.IndexOf(selectedItem);
-                ConditionDetailWindow window = new()
+                action(itemVO);
+            }
+        }
+
+        private void ForEachSelectedItem(Action<FilterItemVO> action,
+            bool byOrder = false, bool reverseOrder = false, bool recoverSelection = false)
+        {
+            List<FilterItemVO> itemVOs = new();
+            foreach (var selectedItem in lstFilters.SelectedItems)
+            {
+                if (selectedItem is FilterItemVO itemVO)
                 {
-                    Condition = conditions[index],
-                };
+                    itemVOs.Add(itemVO);
+                }
+            }
 
-                if (window.ShowDialog() ?? false)
+            if (byOrder)
+            {
+                itemVOs.Sort((itemX, itemY) =>
+                    filterVOs.IndexOf(itemX) - filterVOs.IndexOf(itemY));
+            }
+
+            if (reverseOrder)
+            {
+                itemVOs.Reverse();
+            }
+
+            itemVOs.ForEach(action);
+
+            if (recoverSelection)
+            {
+                itemVOs.ForEach(itemVO => lstFilters.SelectedItems.Add(itemVO));
+            }
+        }
+
+        private void InsertAtSelectedItem(params (Condition condition, FilterItemVO itemVO)[] conditionTuples)
+        {
+            var selectedIndex = lstFilters.SelectedIndex;
+            if (selectedIndex == -1)
+            {
+                foreach (var (condition, itemVO) in conditionTuples)
                 {
-                    Condition condition = window.Condition;
+                    filterVOs.Add(itemVO);
+                    lstFilters.SelectedItems.Add(itemVO);
 
-                    FilterItemVO item = CreateFilterVO(condition);
-                    filterVOs[index] = item;
+                    conditions.Add(condition);
+                }
+            }
+            else
+            {
+                lstFilters.SelectedItems.Clear();
 
-                    conditions[index] = condition;
+                var reversedConditionTuples = conditionTuples.Reverse().ToArray();
+                foreach (var (condition, itemVO) in reversedConditionTuples)
+                {
+                    filterVOs.Insert(selectedIndex, itemVO);
+                    lstFilters.SelectedItems.Add(itemVO);
+
+                    conditions.Insert(selectedIndex, condition);
                 }
             }
         }
 
-        private void btnCopy_Click(object sender, RoutedEventArgs e)
+        private void AddCondition()
         {
-            if (lstFilters.SelectedItem is FilterItemVO selectedItem)
+            ConditionDetailWindow window = new()
             {
-                var index = filterVOs.IndexOf(selectedItem);
+                ConditionClipboard = conditionTreeClipboard,
+            };
 
-                var condition = conditions[index];
-                FilterClipboard?.Copy(condition);
+            window.Closing += (object sender, CancelEventArgs e) =>
+            {
+                if (window.IsSaved)
+                {
+                    var condition = window.Condition;
+
+                    FilterItemVO itemVO = CreateFilterVO(condition);
+
+                    InsertAtSelectedItem((condition, itemVO));
+                }
+            };
+
+            window.Show();
+        }
+
+        private void RemoveSelectedConditions()
+        {
+            ForEachSelectedItem(RemoveCondition);
+        }
+
+        private void RemoveCondition(FilterItemVO itemVO)
+        {
+            var index = filterVOs.IndexOf(itemVO);
+            filterVOs.RemoveAt(index);
+
+            conditions.RemoveAt(index);
+        }
+
+        private void EditSelectedCondition()
+        {
+            ForSelectedItem(EditCondition);
+        }
+
+        private void EditSelectedConditions()
+        {
+            ForEachSelectedItem(EditCondition);
+        }
+
+        private void EditCondition(FilterItemVO itemVO)
+        {
+            var index = filterVOs.IndexOf(itemVO);
+
+            var condition = conditions[index];
+            ConditionDetailWindow window = new()
+            {
+                Condition = condition,
+                ConditionClipboard = conditionTreeClipboard,
+            };
+
+            window.Closing += (object sender, CancelEventArgs e) =>
+            {
+                if (window.IsSaved)
+                {
+                    var condition = window.Condition;
+
+                    FilterItemVO item = CreateFilterVO(condition);
+
+                    var newIndex = filterVOs.IndexOf(itemVO);
+                    if (newIndex > -1)
+                    {
+                        filterVOs[newIndex] = item;
+                        conditions[newIndex] = condition;
+                    }
+                }
+            };
+
+            window.Show();
+        }
+
+        private void MoveSelectedConditionsLeft()
+        {
+            ForEachSelectedItem(MoveConditionLeft, byOrder: true, recoverSelection: true);
+        }
+
+        private void MoveConditionLeft(FilterItemVO itemVO)
+        {
+            var srcIndex = filterVOs.IndexOf(itemVO);
+            var dstIndex = (srcIndex - 1 + filterVOs.Count) % filterVOs.Count;
+
+            filterVOs.RemoveAt(srcIndex);
+            filterVOs.Insert(dstIndex, itemVO);
+
+            var condition = conditions[srcIndex];
+            conditions.RemoveAt(srcIndex);
+            conditions.Insert(dstIndex, condition);
+        }
+
+        private void MoveSelectedConditionsRight()
+        {
+            ForEachSelectedItem(MoveConditionRight, byOrder: true, reverseOrder: true, recoverSelection: true);
+        }
+
+        private void MoveConditionRight(FilterItemVO itemVO)
+        {
+            var srcIndex = filterVOs.IndexOf(itemVO);
+            var dstIndex = (srcIndex + 1) % filterVOs.Count;
+
+            filterVOs.RemoveAt(srcIndex);
+            filterVOs.Insert(dstIndex, itemVO);
+
+            var condition = conditions[srcIndex];
+            conditions.RemoveAt(srcIndex);
+            conditions.Insert(dstIndex, condition);
+        }
+
+        private void CutSelectedConditions()
+        {
+            if (conditionListClipboard != null)
+            {
+                List<Condition> selectedConditions = new();
+                foreach (var selectedItem in lstFilters.SelectedItems)
+                {
+                    if (selectedItem is FilterItemVO itemVO)
+                    {
+                        var index = filterVOs.IndexOf(itemVO);
+
+                        var condition = conditions[index];
+                        selectedConditions.Add(condition);
+                    }
+                }
+
+                conditionListClipboard.Cut(selectedConditions.ToArray());
+                RemoveSelectedConditions();
             }
         }
 
-        private void btnPaste_Click(object sender, RoutedEventArgs e)
+        private void CopySelectedConditions()
         {
-            var condition = FilterClipboard?.Paste();
-            if (condition != null)
+            if (conditionListClipboard != null)
             {
-                condition = (Condition)condition.Clone();
+                List<Condition> copiedConditions = new();
+                foreach (var selectedItem in lstFilters.SelectedItems)
+                {
+                    if (selectedItem is FilterItemVO itemVO)
+                    {
+                        var index = filterVOs.IndexOf(itemVO);
 
-                FilterItemVO item = CreateFilterVO(condition);
-                filterVOs.Add(item);
-                lstFilters.SelectedItem = item;
+                        var condition = conditions[index];
+                        copiedConditions.Add(condition);
+                    }
+                }
 
-                conditions.Add(condition);
+                conditionListClipboard.Copy(copiedConditions.ToArray());
             }
         }
 
-        private void btnMoveLeft_Click(object sender, RoutedEventArgs e)
+        private void PasteConditions()
         {
-            if (lstFilters.SelectedItem is FilterItemVO selectedItem)
+            if (conditionListClipboard != null)
             {
-                var srcIndex = filterVOs.IndexOf(selectedItem);
-                var dstIndex = (srcIndex - 1 + filterVOs.Count) % filterVOs.Count;
+                (var pastedConditions, var clipboardStatus) = conditionListClipboard.Paste();
 
-                filterVOs.RemoveAt(srcIndex);
-                filterVOs.Insert(dstIndex, selectedItem);
+                if (pastedConditions != null)
+                {
+                    var conditionTuples = pastedConditions.Select(pastedCondition =>
+                    {
+                        var condition = clipboardStatus == ItemClipboardStatus.Move ?
+                            pastedCondition : (Condition)pastedCondition.Clone();
 
-                lstFilters.SelectedItem = selectedItem;
+                        FilterItemVO itemVO = CreateFilterVO(condition);
 
-                var condition = conditions[srcIndex];
-                conditions.RemoveAt(srcIndex);
-                conditions.Insert(dstIndex, condition);
-            }
-        }
+                        return (condition, itemVO);
+                    }).ToArray();
 
-        private void btnMoveRight_Click(object sender, RoutedEventArgs e)
-        {
-            if (lstFilters.SelectedItem is FilterItemVO selectedItem)
-            {
-                var srcIndex = filterVOs.IndexOf(selectedItem);
-                var dstIndex = (srcIndex + 1) % filterVOs.Count;
-
-                filterVOs.RemoveAt(srcIndex);
-                filterVOs.Insert(dstIndex, selectedItem);
-
-                lstFilters.SelectedItem = selectedItem;
-
-                var condition = conditions[srcIndex];
-                conditions.RemoveAt(srcIndex);
-                conditions.Insert(dstIndex, condition);
+                    InsertAtSelectedItem(conditionTuples);
+                }
             }
         }
 
@@ -190,46 +418,65 @@ namespace TerminalMonitor.Windows.Controls
 
         public GroupCondition Condition
         {
-            get
-            {
-                return new GroupCondition()
-                {
-                    MatchMode = dataContextVO.MatchMode,
-                    IsInverted = dataContextVO.IsInverted,
-                    DefaultResult = dataContextVO.DefaultResult,
-                    IsDisabled = dataContextVO.IsDisabled,
-                    Conditions = conditions,
-                };
-            }
+            get => groupCondition;
 
             set
             {
                 filterVOs.Clear();
-                conditions.Clear();
 
-                if (value == null)
+                dataContextVO.PropertyChanged -= DataContextVO_PropertyChanged;
+                groupCondition = value ?? new();
+                dataContextVO.MatchMode = groupCondition.MatchMode;
+                dataContextVO.IsInverted = groupCondition.IsInverted;
+                dataContextVO.DefaultResult = groupCondition.DefaultResult;
+                dataContextVO.IsDisabled = groupCondition.IsDisabled;
+
+                groupCondition.Conditions ??= new();
+                conditions = groupCondition.Conditions;
+                foreach (Condition condition in conditions)
+                {
+                    filterVOs.Add(CreateFilterVO(condition));
+                }
+
+                dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
+            }
+        }
+
+        public ItemClipboard<Condition> ConditionListClipboard
+        {
+            get => conditionListClipboard;
+
+            set
+            {
+                if (conditionListClipboard == value)
                 {
                     return;
                 }
 
-                dataContextVO.MatchMode = value.MatchMode;
-                dataContextVO.IsInverted = value.IsInverted;
-                dataContextVO.DefaultResult = value.DefaultResult;
-                dataContextVO.IsDisabled = value.IsDisabled;
-                if (value.Conditions != null)
+                if (conditionListClipboard != null)
                 {
-                    foreach (Condition condition in value.Conditions)
-                    {
-                        conditions.Add(condition);
-                        filterVOs.Add(CreateFilterVO(condition));
-                    }
+                    conditionListClipboard.ItemCut -= ConditionClipboard_StatusChanged;
+                    conditionListClipboard.ItemCopied -= ConditionClipboard_StatusChanged;
+                    conditionListClipboard.ItemPasted -= ConditionClipboard_StatusChanged;
+                }
+
+                conditionListClipboard = value;
+
+                if (conditionListClipboard != null)
+                {
+                    conditionListClipboard.ItemCut += ConditionClipboard_StatusChanged;
+                    conditionListClipboard.ItemCopied += ConditionClipboard_StatusChanged;
+                    conditionListClipboard.ItemPasted += ConditionClipboard_StatusChanged;
+
+                    UpdateClipboardStatus();
                 }
             }
         }
 
-        public ItemClipboard<Condition> FilterClipboard
+        public ItemClipboard<Condition> ConditionTreeClipboard
         {
-            get; set;
+            get => conditionTreeClipboard;
+            set => conditionTreeClipboard = value;
         }
     }
 }

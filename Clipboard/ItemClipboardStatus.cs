@@ -2,7 +2,7 @@
 
 namespace TerminalMonitor.Clipboard
 {
-    internal enum ItemClipboardStatus
+    public enum ItemClipboardStatus
     {
         Empty,
         Move,

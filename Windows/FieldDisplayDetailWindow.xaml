@@ -73,17 +73,27 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Button Name="btnAdd" Grid.Column="0" Width="20" Content="+" ToolTip="Add" Click="BtnAdd_Click" />
-                                <Button Name="btnDelete" Grid.Column="1" Width="20" Content="-" ToolTip="Delete" Click="BtnDelete_Click" />
-                                <Button Name="btnMoveUp" Grid.Column="2" Width="20" Content="↑" ToolTip="Move Up" Click="BtnMoveUp_Click" />
-                                <Button Name="btnMoveDown" Grid.Column="3" Width="20" Content="↓" ToolTip="Move Down" Click="BtnMoveDown_Click" />
+                                <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Command="{Binding AddCommand}" />
+                                <Button Name="btnRemove" Grid.Column="1" Width="20" Content="➖" ToolTip="Remove" Command="{Binding RemoveCommand}" />
+                                <Button Name="btnMoveUp" Grid.Column="2" Width="20" Content="↑" ToolTip="Move Up" Command="{Binding MoveUpCommand}" />
+                                <Button Name="btnMoveDown" Grid.Column="3" Width="20" Content="↓" ToolTip="Move Down" Command="{Binding MoveDownCommand}" />
                             </Grid>
 
                             <ListView Name="lstStyleCondtions" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" MinHeight="30"
-                                      ItemsSource="{Binding Conditions}">
+                                      SelectionChanged="LstStyleCondtions_SelectionChanged">
+                                <ListView.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Cut" Icon="✂" Command="{Binding Path=CutCommand}" />
+                                        <MenuItem Header="Copy" Icon="📄" Command="{Binding Path=CopyCommand}" />
+                                        <MenuItem Header="Paste" Icon="📋" Command="{Binding Path=PasteCommnad}" />
+                                        <Separator />
+                                        <MenuItem Header="Add" Icon="➕" Command="{Binding Path=AddCommand}" />
+                                        <MenuItem Header="Remove" Icon="➖" Command="{Binding Path=RemoveCommand}" />
+                                    </ContextMenu>
+                                </ListView.ContextMenu>
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="SkyBlue" BorderThickness="1" Margin="0, 4">
+                                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" BorderThickness="1" Margin="0, 4">
                                             <Grid>
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto" />

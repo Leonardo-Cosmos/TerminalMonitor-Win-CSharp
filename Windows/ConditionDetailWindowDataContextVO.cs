@@ -1,6 +1,7 @@
 ﻿/* 2021/7/28 */
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 using TerminalMonitor.Matchers.Models;
 
 namespace TerminalMonitor.Windows
@@ -11,6 +12,42 @@ namespace TerminalMonitor.Windows
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        private bool isConditionSelected;
+
+        public bool IsConditionSelected
+        {
+            get => isConditionSelected;
+            set
+            {
+                isConditionSelected = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool isConditionInClipboard;
+
+        public bool IsConditionInClipboard
+        {
+            get => isConditionInClipboard;
+            set
+            {
+                isConditionInClipboard = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool isAnyConditionCutInClipboard;
+
+        public bool IsConditionCutInClipboard
+        {
+            get => isAnyConditionCutInClipboard;
+            set
+            {
+                isAnyConditionCutInClipboard = value;
+                OnPropertyChanged();
+            }
         }
 
         private string conditionName;
@@ -52,5 +89,21 @@ namespace TerminalMonitor.Windows
             get => matchMode;
             set { matchMode = value; OnPropertyChanged(); }
         }
+
+        public ICommand AddFieldCommand { get; init; }
+
+        public ICommand AddGroupCommand { get; init; }
+
+        public ICommand RemoveCommand { get; init; }
+
+        public ICommand MoveUpCommand { get; init; }
+
+        public ICommand MoveDownCommand { get; init; }
+
+        public ICommand CutCommand { get; init; }
+
+        public ICommand CopyCommand { get; init; }
+
+        public ICommand PasteCommnad { get; init; }
     }
 }

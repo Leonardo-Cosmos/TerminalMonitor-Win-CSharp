@@ -42,7 +42,7 @@ namespace TerminalMonitor.Settings.Models
                 CustomizeStyle = setting.CustomizeStyle,
                 Style = TextStyleSettings.Load(setting.Style),
                 Conditions = setting.Conditions?
-                    .Select(condition => TextStyleConditionSettings.Load(condition)),
+                    .Select(condition => TextStyleConditionSettings.Load(condition)).ToArray(),
             };
         }
     }

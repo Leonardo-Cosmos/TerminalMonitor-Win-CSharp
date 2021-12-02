@@ -32,7 +32,7 @@ namespace TerminalMonitor.Windows
         {
             InitializeComponent();
 
-            commandListView.CommandRun += (sender, e) =>
+            commandListView.CommandStarted += (sender, e) =>
             {
                 commandExecutor.Execute(e.Command);
             };

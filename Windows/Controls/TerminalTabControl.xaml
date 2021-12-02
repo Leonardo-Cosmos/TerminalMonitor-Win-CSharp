@@ -40,7 +40,8 @@
                                                           VerticalAlignment="Center"
                                                           HorizontalAlignment="Center"
                                                           ContentSource="Header" />
-                                        <Button Name="btnClose" Grid.Column="1" Content="×" Background="Transparent"
+                                        <Button Name="btnClose" Grid.Column="1" Content="❌" 
+                                                Style="{StaticResource buttonNormal}" Background="#7FFFFFFF" BorderThickness="0"
                                                 Tag="{Binding RelativeSource={RelativeSource AncestorType=TabItem}, Path=Tag}"
                                                 Click="BtnClose_Click" />
                                     </Grid>

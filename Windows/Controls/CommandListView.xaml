@@ -5,22 +5,56 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=local:CommandListViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="800">
-    <StackPanel>
-        <ListView Name="lstCommands" MinHeight="30">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <ListView Name="lstCommands" Grid.Row="1" MinHeight="30" SelectionChanged="LstCommands_SelectionChanged"
+                  MouseDown="LstCommands_MouseDown" MouseDoubleClick="LstCommands_MouseDoubleClick">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Start" Icon="▷" Command="{Binding Path=StartCommand}" />
+                    <Separator />
+                    <MenuItem Header="Edit" Icon="✏" Command="{Binding Path=EditCommand}" />
+                    <Separator />
+                    <MenuItem Header="Add" Icon="➕" Command="{Binding Path=AddCommand}" />
+                    <MenuItem Header="Remove" Icon="➖" Command="{Binding Path=RemoveCommand}" />
+                </ContextMenu>
+            </ListView.ContextMenu>
+            
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Name}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding Name}" />
+                        <Button Name="btnStart" Grid.Column="2" Width="20" Content="▷" Tag="{Binding Name}" Click="BtnStart_Click" />
+                    </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        <WrapPanel Orientation="Horizontal">
-            <Button Name="btnAdd" Width="20" Content="+" ToolTip="Add" Click="BtnAdd_Click" />
-            <Button Name="btnModify" Width="20" Content="*" ToolTip="Modify" Click="BtnModify_Click" />
-            <Button Name="btnDelete" Width="20" Content="-" ToolTip="Delete" Click="BtnDelete_Click" />
-            <Button Name="btnMoveUp" Width="20" Content="↑" ToolTip="Move Up" Click="BtnMoveUp_Click" />
-            <Button Name="btnMoveDown" Width="20" Content="↓" ToolTip="Move Down" Click="BtnMoveDown_Click" />
-            <Button Name="btnRun" Width="20" Content="▷" ToolTip="Run" Click="BtnRun_Click" />
+        
+        <WrapPanel Grid.Row="0" Orientation="Horizontal">
+            <Button Name="btnAdd" Width="20" Content="➕" ToolTip="Add" Command="{Binding Path=AddCommand}" />
+            <Button Name="btnRemove" Width="20" Content="➖" ToolTip="Delete" Command="{Binding Path=RemoveCommand}" />
+            <Button Name="btnEdit" Width="20" Content="✏" ToolTip="Edit" Command="{Binding Path=EditCommand}" />
+            <Button Name="btnMoveUp" Width="20" Content="↑" ToolTip="Move Up" Command="{Binding Path=MoveUpCommand}" />
+            <Button Name="btnMoveDown" Width="20" Content="↓" ToolTip="Move Down" Command="{Binding Path=MoveDownCommand}" />
         </WrapPanel>
-    </StackPanel>
+        
+    </Grid>
 </UserControl>
