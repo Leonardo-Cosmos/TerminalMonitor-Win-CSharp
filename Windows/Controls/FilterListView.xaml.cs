@@ -270,9 +270,13 @@ namespace TerminalMonitor.Windows.Controls
                     var condition = window.Condition;
 
                     FilterItemVO item = CreateFilterVO(condition);
-                    filterVOs[index] = item;
 
-                    conditions[index] = condition;
+                    var newIndex = filterVOs.IndexOf(itemVO);
+                    if (newIndex > -1)
+                    {
+                        filterVOs[newIndex] = item;
+                        conditions[newIndex] = condition;
+                    }
                 }
             };
 
