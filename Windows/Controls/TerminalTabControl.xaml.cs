@@ -180,9 +180,11 @@ namespace TerminalMonitor.Windows.Controls
             readTerminalTimer = new();
             readTerminalTimer.Tick += (sender, e) =>
             {
-                var terminalLines = producer.ReadTerminalLines();
+                var readTerminalLineDtos = producer.ReadTerminalLines();
 
-                ParseTerminalLine(terminalLines);
+                terminalLineDtos.AddRange(readTerminalLineDtos);
+
+                OnTerminalLineAdded(readTerminalLineDtos.ToArray());
 
                 if (producer.IsCompleted)
                 {
@@ -215,22 +217,6 @@ namespace TerminalMonitor.Windows.Controls
                 return;
             }
             readTerminalTimer.Start();
-        }
-
-        private void ParseTerminalLine(IEnumerable<ITerminalLineProducer.TerminalLine> terminalLines)
-        {
-            List<TerminalLineDto> parsedTerminalLineDtos = new(terminalLines.Count());
-            foreach (var terminalLine in terminalLines)
-            {
-                TerminalLineDto terminalLineDto =
-                    TerminalLineParser.ParseTerminalLine(terminalLine.Text, terminalLine.ExecutionName);
-
-                parsedTerminalLineDtos.Add(terminalLineDto);
-            }
-
-            terminalLineDtos.AddRange(parsedTerminalLineDtos);
-
-            OnTerminalLineAdded(parsedTerminalLineDtos.ToArray());
         }
 
         private static TerminalConfig GetTabConfig(TabItem tab)

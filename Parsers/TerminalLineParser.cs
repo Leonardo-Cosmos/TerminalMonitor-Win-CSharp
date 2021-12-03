@@ -16,8 +16,20 @@ namespace TerminalMonitor.Parsers
             var id = Guid.NewGuid().ToString();
             var timestamp = DateTime.Now;
 
-            var jsonDict = JsonParser.ParseTerminalLine(text);
-            var jsonProperties = JsonParser.FlattenJsonPath(jsonDict);
+            Dictionary<string, object> jsonDict;
+            Dictionary<string, object> jsonProperties;
+            var trimmedText = text.Trim();
+            if ((trimmedText.StartsWith("{") && trimmedText.EndsWith("}")) ||
+                (trimmedText.StartsWith("[") && trimmedText.EndsWith("]")))
+            {
+                jsonDict = JsonParser.ParseTerminalLine(text);
+                jsonProperties = JsonParser.FlattenJsonPath(jsonDict);
+            }
+            else
+            {
+                jsonDict = new(0);
+                jsonProperties = new(0);
+            }
 
             Dictionary<string, object> systemFieldDict = new()
             {

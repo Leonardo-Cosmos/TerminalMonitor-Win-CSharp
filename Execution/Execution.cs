@@ -83,7 +83,6 @@ namespace TerminalMonitor.Execution
                 {
                     if (!String.IsNullOrEmpty(e.Data))
                     {
-                        Debug.Print($"Error data: {e.Data}");
                         OnLineReceived(e.Data);
                     }
                 };
