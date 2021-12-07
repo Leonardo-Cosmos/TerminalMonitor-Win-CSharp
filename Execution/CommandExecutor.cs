@@ -24,7 +24,7 @@ namespace TerminalMonitor.Execution
 
         public CommandExecutor()
         {
-
+            _ = Task.Run(ParseTerminalLine);
         }
 
         public void Execute(CommandConfig commandConfig)
@@ -170,9 +170,6 @@ namespace TerminalMonitor.Execution
         protected void OnStarted()
         {
             IsCompleted = false;
-
-            _ = Task.Run(ParseTerminalLine);
-
             Started?.Invoke(this, EventArgs.Empty);
         }
 
