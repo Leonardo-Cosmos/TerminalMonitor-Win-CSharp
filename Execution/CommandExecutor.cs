@@ -84,6 +84,12 @@ namespace TerminalMonitor.Execution
             executionDict.Clear();
         }
 
+        public void Shutdown()
+        {
+            TerminateAll();
+            terminalLineCollection.CompleteAdding();
+        }
+
         private string GetValidExecutionName(string configName)
         {
             if (!executionDict.ContainsKey(configName))
@@ -165,7 +171,7 @@ namespace TerminalMonitor.Execution
         {
             IsCompleted = false;
 
-            Task.Run(ParseTerminalLine);
+            _ = Task.Run(ParseTerminalLine);
 
             Started?.Invoke(this, EventArgs.Empty);
         }
@@ -193,8 +199,6 @@ namespace TerminalMonitor.Execution
 
         protected void OnCompleted()
         {
-            terminalLineCollection.CompleteAdding();
-
             IsCompleted = true;
             Completed?.Invoke(this, EventArgs.Empty);
         }
