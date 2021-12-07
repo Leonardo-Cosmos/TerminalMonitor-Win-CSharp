@@ -1,5 +1,6 @@
 ﻿/* 2021/5/9 */
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
@@ -50,6 +51,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly Dictionary<string, bool> matchedLineDict = new();
 
+        private readonly BlockingCollection<TerminalLineDto> terminalLineCollection = new();
+
         public TerminalView()
         {
             InitializeComponent();
@@ -57,6 +60,21 @@ namespace TerminalMonitor.Windows.Controls
             DataContext = dataContextVO;
             listTerminal.DataContext = dataContextVO;
             listTerminal.ContextMenu.DataContext = dataContextVO;
+
+            _ = Task.Run(() =>
+              {
+                  try
+                  {
+                      var terminalLineDto = terminalLineCollection.Take();
+                      var row = BuildDataRow(terminalLineDto);
+                      this.Dispatcher.Invoke(() => terminalDataTable.Rows.Add(row));
+                  }
+                  catch (InvalidOperationException)
+                  {
+
+                  }
+              });
+
             ApplyVisibleField();
         }
 
@@ -110,17 +128,17 @@ namespace TerminalMonitor.Windows.Controls
 
                 if (matched)
                 {
-                    AddTerminalLine(terminalLineDto);
+                    terminalLineCollection.Add(terminalLineDto);
                     isAnyAdded = true;
                 }
             }
 
-            if (isAnyAdded && dataContextVO.AutoScroll)
-            {
-                var itemCount = listTerminal.Items.Count;
-                var lastItem = listTerminal.Items[itemCount - 1];
-                listTerminal.ScrollIntoView(lastItem);
-            }
+            //if (isAnyAdded && dataContextVO.AutoScroll)
+            //{
+            //    var itemCount = listTerminal.Items.Count;
+            //    var lastItem = listTerminal.Items[itemCount - 1];
+            //    listTerminal.ScrollIntoView(lastItem);
+            //}
         }
 
         private void FilterTerminal()
@@ -225,6 +243,11 @@ namespace TerminalMonitor.Windows.Controls
 
         private void AddTerminalLine(TerminalLineDto terminalLineDto)
         {
+            terminalLineCollection.Add(terminalLineDto);
+        }
+
+        private DataRow BuildDataRow(TerminalLineDto terminalLineDto)
+        {
             DataRow row = terminalDataTable.NewRow();
 
             row[idColumnName] = terminalLineDto.Id;
@@ -252,7 +275,7 @@ namespace TerminalMonitor.Windows.Controls
                 row[plaintextColumnName] = terminalLineDto.PlainText;
             }
 
-            terminalDataTable.Rows.Add(row);
+            return row;
         }
 
         private void AddMatchedTerminalLines()
