@@ -180,11 +180,11 @@ namespace TerminalMonitor.Windows.Controls
             readTerminalTimer = new();
             readTerminalTimer.Tick += (sender, e) =>
             {
-                var terminalLines = producer.ReadTerminalLines();
-                foreach (var terminalLine in terminalLines)
-                {
-                    ParseTerminalLine(terminalLine.Text, terminalLine.ExecutionName);
-                }
+                var readTerminalLineDtos = producer.ReadTerminalLines();
+
+                terminalLineDtos.AddRange(readTerminalLineDtos);
+
+                OnTerminalLineAdded(readTerminalLineDtos.ToArray());
 
                 if (producer.IsCompleted)
                 {
@@ -217,16 +217,6 @@ namespace TerminalMonitor.Windows.Controls
                 return;
             }
             readTerminalTimer.Start();
-        }
-
-        private void ParseTerminalLine(string text, string executionName)
-        {
-            TerminalLineDto terminalLineDto =
-                TerminalLineParser.ParseTerminalLine(text, executionName);
-
-            terminalLineDtos.Add(terminalLineDto);
-
-            OnTerminalLineAdded(terminalLineDto);
         }
 
         private static TerminalConfig GetTabConfig(TabItem tab)
@@ -422,14 +412,14 @@ namespace TerminalMonitor.Windows.Controls
             changingTab = false;
         }
 
-        protected void OnTerminalLineAdded(TerminalLineDto terminalLineDto)
+        protected void OnTerminalLineAdded(TerminalLineDto[] terminalLineDtos)
         {
-            TerminalLineEventArgs e = new()
+            TerminalLinesEventArgs e = new()
             {
-                TerminalLine = terminalLineDto,
+                TerminalLines = terminalLineDtos,
             };
 
-            TerminalLineAdded?.Invoke(this, e);
+            TerminalLinesAdded?.Invoke(this, e);
         }
 
         public TerminalLineCollection TerminalLines
@@ -440,7 +430,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public event TerminalLineEventHandler TerminalLineAdded;
+        public event TerminalLinesEventHandler TerminalLinesAdded;
 
         private void LineProducer_Started(object sender, EventArgs e)
         {

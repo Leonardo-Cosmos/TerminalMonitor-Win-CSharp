@@ -13,7 +13,7 @@ namespace TerminalMonitor.Windows.Controls
     {
         TerminalLineCollection TerminalLines { get; }
 
-        event TerminalLineEventHandler TerminalLineAdded;
+        event TerminalLinesEventHandler TerminalLinesAdded;
     }
 
     public class TerminalLineCollection : IEnumerable<TerminalLineDto>

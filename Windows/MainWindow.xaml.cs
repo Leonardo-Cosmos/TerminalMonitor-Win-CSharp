@@ -54,7 +54,7 @@ namespace TerminalMonitor.Windows
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            commandExecutor.TerminateAll();
+            commandExecutor.Shutdown();
 
             setting.Commands = commandListView.Commands
                 .Select(command => CommandConfigSettings.Save(command)).ToList();

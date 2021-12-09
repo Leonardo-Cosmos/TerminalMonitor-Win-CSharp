@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TerminalMonitor.Models;
+using TerminalMonitor.Parsers;
 using static TerminalMonitor.Execution.ITerminalLineProducer;
 
 namespace TerminalMonitor.Execution
@@ -17,11 +18,13 @@ namespace TerminalMonitor.Execution
 
         private readonly Dictionary<string, Execution> executionDict = new();
 
-        private readonly ConcurrentQueue<TerminalLine> terminalLineQueue = new();
+        private readonly ConcurrentQueue<TerminalLineDto> terminalLineQueue = new();
+
+        private readonly BlockingCollection<TerminalLine> terminalLineCollection = new();
 
         public CommandExecutor()
         {
-
+            _ = Task.Run(ParseTerminalLine);
         }
 
         public void Execute(CommandConfig commandConfig)
@@ -32,7 +35,7 @@ namespace TerminalMonitor.Execution
             execution.LineReceived += (sender, e) =>
             {
                 TerminalLine terminalLine = new(Text: e.Line, ExecutionName: name);
-                terminalLineQueue.Enqueue(terminalLine);
+                terminalLineCollection.Add(terminalLine);
             };
 
             execution.Exited += (sender, e) =>
@@ -79,6 +82,12 @@ namespace TerminalMonitor.Execution
 
             executionNames.Clear();
             executionDict.Clear();
+        }
+
+        public void Shutdown()
+        {
+            TerminateAll();
+            terminalLineCollection.CompleteAdding();
         }
 
         private string GetValidExecutionName(string configName)
@@ -164,6 +173,27 @@ namespace TerminalMonitor.Execution
             Started?.Invoke(this, EventArgs.Empty);
         }
 
+        private void ParseTerminalLine()
+        {
+            while (true)
+            {
+                TerminalLine terminalLine;
+                try
+                {
+                    terminalLine = terminalLineCollection.Take();
+                }
+                catch (InvalidOperationException)
+                {
+                    Debug.WriteLine("Parse task done");
+                    break;
+                }
+
+                TerminalLineDto terminalLineDto =
+                    TerminalLineParser.ParseTerminalLine(terminalLine.Text, terminalLine.ExecutionName);
+                terminalLineQueue.Enqueue(terminalLineDto);
+            }
+        }
+
         protected void OnCompleted()
         {
             IsCompleted = true;
@@ -178,9 +208,9 @@ namespace TerminalMonitor.Execution
 
         public event EventHandler Completed;
 
-        public IEnumerable<TerminalLine> ReadTerminalLines()
+        public IEnumerable<TerminalLineDto> ReadTerminalLines()
         {
-            List<TerminalLine> terminalLines = new();
+            List<TerminalLineDto> terminalLines = new();
             while (!terminalLineQueue.IsEmpty)
             {
                 if (terminalLineQueue.TryDequeue(out var terminalLine))

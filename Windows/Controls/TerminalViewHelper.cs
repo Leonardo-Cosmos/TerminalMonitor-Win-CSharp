@@ -59,7 +59,7 @@ namespace TerminalMonitor.Windows.Controls
 
             FrameworkElementFactory panelElement = new(typeof(DockPanel));
 
-            SetElementStyleProperty(visibleField, panelElement, DockPanel.BackgroundProperty,
+            SetElementStyleProperty(visibleField, panelElement, Panel.BackgroundProperty,
                 null, convertColorToBrush,
                 textStyle => textStyle.CellBackground, GetCellBackgroundColumnName);
 

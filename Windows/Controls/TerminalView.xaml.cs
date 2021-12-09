@@ -100,21 +100,26 @@ namespace TerminalMonitor.Windows.Controls
             terminalDataTable.Rows.Clear();
         }
 
-        public void AddNewTerminalLine(TerminalLineDto terminalLineDto)
+        public void AddNewTerminalLines(IEnumerable<TerminalLineDto> terminalLineDtos)
         {
-            var matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterCondition);
-            matchedLineDict.Add(terminalLineDto.Id, matched);
-
-            if (matched)
+            var isAnyAdded = false;
+            foreach (var terminalLineDto in terminalLineDtos)
             {
-                AddTerminalLine(terminalLineDto);
+                var matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterCondition);
+                matchedLineDict.Add(terminalLineDto.Id, matched);
 
-                if (dataContextVO.AutoScroll)
+                if (matched)
                 {
-                    var itemCount = listTerminal.Items.Count;
-                    var lastItem = listTerminal.Items[itemCount - 1];
-                    listTerminal.ScrollIntoView(lastItem);
+                    AddTerminalLine(terminalLineDto);
+                    isAnyAdded = true;
                 }
+            }
+
+            if (isAnyAdded && dataContextVO.AutoScroll)
+            {
+                var itemCount = listTerminal.Items.Count;
+                var lastItem = listTerminal.Items[itemCount - 1];
+                listTerminal.ScrollIntoView(lastItem);
             }
         }
 
@@ -277,9 +282,9 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void Supervisor_TerminalLineAdded(object sender, TerminalLineEventArgs e)
+        private void Supervisor_TerminalLinesAdded(object sender, TerminalLinesEventArgs e)
         {
-            AddNewTerminalLine(e.TerminalLine);
+            AddNewTerminalLines(e.TerminalLines);
         }
 
         public ITerminalLineSupervisor LineSupervisor
@@ -289,14 +294,14 @@ namespace TerminalMonitor.Windows.Controls
             {
                 if (lineSupervisor != value && lineSupervisor != null)
                 {
-                    lineSupervisor.TerminalLineAdded -= Supervisor_TerminalLineAdded;
+                    lineSupervisor.TerminalLinesAdded -= Supervisor_TerminalLinesAdded;
                 }
 
                 lineSupervisor = value;
 
                 if (lineSupervisor != null)
                 {
-                    lineSupervisor.TerminalLineAdded += Supervisor_TerminalLineAdded;
+                    lineSupervisor.TerminalLinesAdded += Supervisor_TerminalLinesAdded;
                 }
             }
         }
