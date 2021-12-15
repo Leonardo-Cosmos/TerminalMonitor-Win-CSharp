@@ -1,10 +1,7 @@
 ﻿/* 2021/6/20 */
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
@@ -16,17 +13,28 @@ namespace TerminalMonitor.Windows.Controls
         event TerminalLinesEventHandler TerminalLinesAdded;
     }
 
-    public class TerminalLineCollection : IEnumerable<TerminalLineDto>
+    public class TerminalLineCollection : IReadOnlyList<TerminalLineDto>
     {
-        private readonly IEnumerable<TerminalLineDto> terminalLines;
+        private readonly IReadOnlyList<TerminalLineDto> terminalLines;
 
         public TerminalLineCollection(IEnumerable<TerminalLineDto> terminalLines)
         {
-            this.terminalLines = terminalLines!;
+            if (terminalLines is IReadOnlyList<TerminalLineDto> terminalLineList)
+            {
+                this.terminalLines = terminalLineList;
+            }
+            else
+            {
+                this.terminalLines = terminalLines.ToList();
+            }
         }
 
         public TerminalLineDto this[string id] =>
             terminalLines.FirstOrDefault(terminalLine => terminalLine.Id == id!);
+
+        public TerminalLineDto this[int index] => terminalLines[index];
+
+        public int Count => terminalLines.Count;
 
         public IEnumerator<TerminalLineDto> GetEnumerator()
         {

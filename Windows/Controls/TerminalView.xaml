@@ -14,6 +14,8 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -36,7 +38,7 @@
 
         <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
 
-        <Grid Name="gridFilters" Grid.Row="2">
+        <Grid Name="gridFilter" Grid.Row="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
@@ -46,8 +48,8 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Expander Name="expanderFilters" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" Header="Filters" IsExpanded="True">
-                <controls:FilterListView x:Name="filterView" />
+            <Expander Name="expanderFilter" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" Header="Filter" IsExpanded="True">
+                <controls:FilterListView x:Name="filterConditionListView" />
             </Expander>
 
             <Button Name="buttonFilter" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" Content="Filter" Click="ButtonFilter_Click" />
@@ -55,7 +57,37 @@
 
         <GridSplitter Grid.Row="3" Height="5" HorizontalAlignment="Stretch" />
 
-        <ListView Name="listTerminal" Grid.Row="4">
+        <Grid Name="gridFind" Grid.Row="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Expander Name="expanderFind" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" Header="Find" IsExpanded="True">
+                <controls:FilterListView x:Name="findConditionListView" />
+            </Expander>
+
+            <Grid Name="gridFindButton" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <Button Name="buttonFind" Grid.Column="0" Content="Find" Click="ButtonFind_Click" />
+                <Button Name="buttonFindPrevious" Grid.Column="1" Content="↑" Click="ButtonFindPrevious_Click" />
+                <Button Name="buttonFindNext" Grid.Column="2" Content="↓" Click="ButtonFindNext_Click" />
+            </Grid>
+        </Grid>
+
+        <GridSplitter Grid.Row="5" Height="5" HorizontalAlignment="Stretch" />
+
+        <ListView Name="listTerminal" Grid.Row="6">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
