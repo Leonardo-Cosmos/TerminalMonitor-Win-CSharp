@@ -33,7 +33,7 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class TerminalView : UserControl
     {
-        private ITerminalLineSupervisor lineSupervisor;
+        private ITerminalLineSupervisor terminalLineSupervisor;
 
         private const string idColumnName = "Id";
 
@@ -97,7 +97,7 @@ namespace TerminalMonitor.Windows.Controls
             if (listTerminal.SelectedValue is DataRowView item)
             {
                 var id = (string)item[idColumnName];
-                var terminalLine = lineSupervisor.TerminalLines[id];
+                var terminalLine = terminalLineSupervisor.TerminalLines[id];
 
                 TerminalLineDetailWindow window = new()
                 {
@@ -150,7 +150,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             filterCondition = (GroupCondition)filterConditionListView.Condition.Clone();
 
-            if (lineSupervisor == null)
+            if (terminalLineSupervisor == null)
             {
                 return;
             }
@@ -160,7 +160,7 @@ namespace TerminalMonitor.Windows.Controls
             shownLineDict.Clear();
             shownLines.Clear();
             TerminalLineMatcher matcher = new(filterCondition);
-            foreach (var terminalLineDto in lineSupervisor.TerminalLines)
+            foreach (var terminalLineDto in terminalLineSupervisor.TerminalLines)
             {
                 var matched = matcher.IsMatch(terminalLineDto);
                 shownLineDict.Add(terminalLineDto.Id, matched);
@@ -210,7 +210,7 @@ namespace TerminalMonitor.Windows.Controls
             }
 
             listTerminal.SelectedIndex = lineTuple.shownIndex;
-            listTerminal.ScrollIntoView(lineTuple.terminalLine);
+            listTerminal.ScrollIntoView(listTerminal.SelectedItem);
         }
 
         private void FindNext()
@@ -237,7 +237,7 @@ namespace TerminalMonitor.Windows.Controls
             }
 
             listTerminal.SelectedIndex = lineTuple.shownIndex;
-            listTerminal.ScrollIntoView(lineTuple.terminalLine);
+            listTerminal.ScrollIntoView(listTerminal.SelectedItem);
         }
 
         private void ApplyVisibleField()
@@ -352,12 +352,12 @@ namespace TerminalMonitor.Windows.Controls
 
         private void AddMatchedTerminalLines()
         {
-            if (lineSupervisor == null)
+            if (terminalLineSupervisor == null)
             {
                 return;
             }
 
-            foreach (var terminalLineDto in lineSupervisor.TerminalLines)
+            foreach (var terminalLineDto in terminalLineSupervisor.TerminalLines)
             {
                 bool matched;
                 if (shownLineDict.ContainsKey(terminalLineDto.Id))
@@ -383,21 +383,21 @@ namespace TerminalMonitor.Windows.Controls
             AddNewTerminalLines(e.TerminalLines);
         }
 
-        public ITerminalLineSupervisor LineSupervisor
+        public ITerminalLineSupervisor TerminalLineSupervisor
         {
-            get => lineSupervisor;
+            get => terminalLineSupervisor;
             set
             {
-                if (lineSupervisor != value && lineSupervisor != null)
+                if (terminalLineSupervisor != value && terminalLineSupervisor != null)
                 {
-                    lineSupervisor.TerminalLinesAdded -= Supervisor_TerminalLinesAdded;
+                    terminalLineSupervisor.TerminalLinesAdded -= Supervisor_TerminalLinesAdded;
                 }
 
-                lineSupervisor = value;
+                terminalLineSupervisor = value;
 
-                if (lineSupervisor != null)
+                if (terminalLineSupervisor != null)
                 {
-                    lineSupervisor.TerminalLinesAdded += Supervisor_TerminalLinesAdded;
+                    terminalLineSupervisor.TerminalLinesAdded += Supervisor_TerminalLinesAdded;
                 }
             }
         }

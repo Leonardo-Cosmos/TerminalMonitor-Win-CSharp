@@ -29,11 +29,11 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class TerminalTabControl : UserControl
     {
-        private ITerminalLineProducer lineProducer;
+        private ITerminalLineProducer terminalLineProducer;
 
         private DispatcherTimer readTerminalTimer;
 
-        private TerminalLineSupervisor lineSupervisor = new();
+        private readonly TerminalLineSupervisor terminalLineSupervisor = new();
 
         private readonly DispatcherTimer selectTabTimer;
 
@@ -54,7 +54,7 @@ namespace TerminalMonitor.Windows.Controls
             InitializeComponent();
 
             var defaultTab = tbCtrl.Items[0] as TabItem;
-            GetTabTerminalView(defaultTab).LineSupervisor = lineSupervisor;
+            GetTabTerminalView(defaultTab).TerminalLineSupervisor = terminalLineSupervisor;
 
             selectTabTimer = new();
             selectTabTimer.Tick += (sender, e) =>
@@ -180,7 +180,7 @@ namespace TerminalMonitor.Windows.Controls
             {
                 var readTerminalLineDtos = producer.ReadTerminalLines();
 
-                lineSupervisor.AddTerminalLines(readTerminalLineDtos);
+                terminalLineSupervisor.AddTerminalLines(readTerminalLineDtos);
 
                 if (producer.IsCompleted)
                 {
@@ -263,7 +263,7 @@ namespace TerminalMonitor.Windows.Controls
             terminalView.FilterTreeClipboard = conditionTreeClipboard;
             terminalView.FindListClipboard = conditionListClipboard;
             terminalView.FindTreeClipboard = conditionTreeClipboard;
-            terminalView.LineSupervisor = lineSupervisor;
+            terminalView.TerminalLineSupervisor = terminalLineSupervisor;
             tab.Content = terminalView;
 
             return tab;
@@ -291,7 +291,7 @@ namespace TerminalMonitor.Windows.Controls
         private void RemoveTab(TabItem tab)
         {
             var terminalView = GetTabTerminalView(tab);
-            terminalView.LineSupervisor = null;
+            terminalView.TerminalLineSupervisor = null;
 
             tbCtrl.Items.Remove(tab);
         }
@@ -414,25 +414,25 @@ namespace TerminalMonitor.Windows.Controls
 
         private void LineProducer_Started(object sender, EventArgs e)
         {
-            StartTimer(lineProducer);
+            StartTimer(terminalLineProducer);
         }
 
-        public ITerminalLineProducer LineProducer
+        public ITerminalLineProducer TerminalLineProducer
         {
-            get => lineProducer;
+            get => terminalLineProducer;
             set
             {
-                if (lineProducer != value && lineProducer != null)
+                if (terminalLineProducer != value && terminalLineProducer != null)
                 {
                     StopTimer();
-                    lineProducer.Started -= LineProducer_Started;
+                    terminalLineProducer.Started -= LineProducer_Started;
                 }
 
-                lineProducer = value;
+                terminalLineProducer = value;
 
-                if (lineProducer != null)
+                if (terminalLineProducer != null)
                 {
-                    lineProducer.Started += LineProducer_Started;
+                    terminalLineProducer.Started += LineProducer_Started;
                 }
             }
         }
