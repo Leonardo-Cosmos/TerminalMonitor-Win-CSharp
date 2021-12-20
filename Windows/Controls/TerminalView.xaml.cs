@@ -173,6 +173,7 @@ namespace TerminalMonitor.Windows.Controls
         private void FindInTerminal()
         {
             findCondition = (GroupCondition)findConditionListView.Condition.Clone();
+            foundLines.Clear();
 
             TerminalLineMatcher matcher = new(findCondition);
             for (var i = 0; i < shownLines.Count; i++)
