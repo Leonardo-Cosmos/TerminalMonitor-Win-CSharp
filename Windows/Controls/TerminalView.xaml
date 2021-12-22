@@ -77,11 +77,15 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 
-                <Button Name="buttonFind" Grid.Column="0" Content="Find" Click="ButtonFind_Click" />
-                <Button Name="buttonFindPrevious" Grid.Column="1" Content="↑" Click="ButtonFindPrevious_Click" />
-                <Button Name="buttonFindNext" Grid.Column="2" Content="↓" Click="ButtonFindNext_Click" />
+                <Button Name="buttonFind" Grid.Column="0" Content="Find" ToolTip="Find" Click="ButtonFind_Click" />
+                <Button Name="buttonFindFirst" Grid.Column="1" Width="20" Content="⬆" ToolTip="Find First" Click="ButtonFindFirst_Click" />
+                <Button Name="buttonFindPrevious" Grid.Column="2" Width="20" Content="↑" ToolTip="Find Previous" Click="ButtonFindPrevious_Click" />
+                <Button Name="buttonFindNext" Grid.Column="3" Width="20" Content="↓" ToolTip="Find Next" Click="ButtonFindNext_Click" />
+                <Button Name="buttonFindLast" Grid.Column="4" Width="20" Content="⬇" ToolTip="Find Last" Click="ButtonFindLast_Click" />
             </Grid>
         </Grid>
 

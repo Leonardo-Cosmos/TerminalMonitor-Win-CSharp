@@ -51,7 +51,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly TerminalViewDataContextVO dataContextVO = new();
 
-        private readonly Dictionary<string, bool> shownLineDict = new();
+        private readonly Dictionary<string, bool> lineFilterDict = new();
 
         private readonly List<TerminalLineDto> shownLines = new();
 
@@ -92,6 +92,16 @@ namespace TerminalMonitor.Windows.Controls
             FindNext();
         }
 
+        private void ButtonFindFirst_Click(object sender, RoutedEventArgs e)
+        {
+            FindFirst();
+        }
+
+        private void ButtonFindLast_Click(object sender, RoutedEventArgs e)
+        {
+            FindLast();
+        }
+
         private void MenuItemShowDetail_Click(object sender, RoutedEventArgs e)
         {
             if (listTerminal.SelectedValue is DataRowView item)
@@ -128,11 +138,11 @@ namespace TerminalMonitor.Windows.Controls
             foreach (var terminalLineDto in terminalLineDtos)
             {
                 var matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterCondition);
-                shownLineDict.Add(terminalLineDto.Id, matched);
-                shownLines.Add(terminalLineDto);
+                lineFilterDict.Add(terminalLineDto.Id, matched);
 
                 if (matched)
                 {
+                    shownLines.Add(terminalLineDto);
                     AddTerminalLine(terminalLineDto);
                     isAnyAdded = true;
                 }
@@ -157,14 +167,18 @@ namespace TerminalMonitor.Windows.Controls
 
             terminalDataTable.Rows.Clear();
 
-            shownLineDict.Clear();
+            lineFilterDict.Clear();
             shownLines.Clear();
             TerminalLineMatcher matcher = new(filterCondition);
             foreach (var terminalLineDto in terminalLineSupervisor.TerminalLines)
             {
                 var matched = matcher.IsMatch(terminalLineDto);
-                shownLineDict.Add(terminalLineDto.Id, matched);
-                shownLines.Add(terminalLineDto);
+                lineFilterDict.Add(terminalLineDto.Id, matched);
+
+                if (matched)
+                {
+                    shownLines.Add(terminalLineDto);
+                }
             }
 
             AddMatchedTerminalLines();
@@ -239,6 +253,42 @@ namespace TerminalMonitor.Windows.Controls
 
             listTerminal.SelectedIndex = lineTuple.shownIndex;
             listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+        }
+
+        private void FindFirst()
+        {
+            if (foundLines.Count == 0)
+            {
+                return;
+            }
+
+            var selectedIndex = listTerminal.SelectedIndex;
+
+            (TerminalLineDto terminalLine, int shownIndex) lineTuple = foundLines.First();
+
+            if (selectedIndex != lineTuple.shownIndex)
+            {
+                listTerminal.SelectedIndex = lineTuple.shownIndex;
+                listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+            }
+        }
+
+        private void FindLast()
+        {
+            if (foundLines.Count == 0)
+            {
+                return;
+            }
+
+            var selectedIndex = listTerminal.SelectedIndex;
+
+            (TerminalLineDto terminalLine, int shownIndex) lineTuple = foundLines.Last();
+
+            if (selectedIndex != lineTuple.shownIndex)
+            {
+                listTerminal.SelectedIndex = lineTuple.shownIndex;
+                listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+            }
         }
 
         private void ApplyVisibleField()
@@ -361,15 +411,18 @@ namespace TerminalMonitor.Windows.Controls
             foreach (var terminalLineDto in terminalLineSupervisor.TerminalLines)
             {
                 bool matched;
-                if (shownLineDict.ContainsKey(terminalLineDto.Id))
+                if (lineFilterDict.ContainsKey(terminalLineDto.Id))
                 {
-                    matched = shownLineDict[terminalLineDto.Id];
+                    matched = lineFilterDict[terminalLineDto.Id];
                 }
                 else
                 {
                     matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterCondition);
-                    shownLineDict.Add(terminalLineDto.Id, matched);
-                    shownLines.Add(terminalLineDto);
+                    lineFilterDict.Add(terminalLineDto.Id, matched);
+                    if (matched)
+                    {
+                        shownLines.Add(terminalLineDto);
+                    }
                 }
 
                 if (matched)
