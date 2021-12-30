@@ -199,6 +199,8 @@ namespace TerminalMonitor.Windows.Controls
                     foundLines.Add((terminalLine: terminalLineDto, shownIndex: i));
                 }
             }
+
+            dataContextVO.FoundCount = foundLines.Count;
         }
 
         private void FindPrevious()
@@ -210,22 +212,26 @@ namespace TerminalMonitor.Windows.Controls
 
             var selectedIndex = listTerminal.SelectedIndex;
 
-            (TerminalLineDto terminalLine, int shownIndex) lineTuple;
             if (selectedIndex == -1)
             {
-                lineTuple = foundLines.Last();
+                FindLast();
+                return;
             }
-            else
+
+            for (int i = foundLines.Count - 1; i >= 0; i--)
             {
-                lineTuple = foundLines.AsEnumerable().Reverse().FirstOrDefault(tuple => tuple.shownIndex < selectedIndex);
-                if (lineTuple == default)
+                var lineTuple = foundLines[i];
+                if (lineTuple.shownIndex < selectedIndex)
                 {
-                    lineTuple = foundLines.Last();
+                    listTerminal.SelectedIndex = lineTuple.shownIndex;
+                    listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+
+                    dataContextVO.FoundSelectedNumber = i + 1;
+                    return;
                 }
             }
 
-            listTerminal.SelectedIndex = lineTuple.shownIndex;
-            listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+            FindLast();
         }
 
         private void FindNext()
@@ -237,22 +243,26 @@ namespace TerminalMonitor.Windows.Controls
 
             var selectedIndex = listTerminal.SelectedIndex;
 
-            (TerminalLineDto terminalLine, int shownIndex) lineTuple;
             if (selectedIndex == -1)
             {
-                lineTuple = foundLines.First();
+                FindFirst();
+                return;
             }
-            else
+
+            for (int i = 0; i < foundLines.Count; i++)
             {
-                lineTuple = foundLines.FirstOrDefault(tuple => tuple.shownIndex > selectedIndex);
-                if (lineTuple == default)
+                var lineTuple = foundLines[i];
+                if (lineTuple.shownIndex > selectedIndex)
                 {
-                    lineTuple = foundLines.First();
+                    listTerminal.SelectedIndex = lineTuple.shownIndex;
+                    listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+
+                    dataContextVO.FoundSelectedNumber = i + 1;
+                    return;
                 }
             }
 
-            listTerminal.SelectedIndex = lineTuple.shownIndex;
-            listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+            FindFirst();
         }
 
         private void FindFirst()
@@ -271,6 +281,8 @@ namespace TerminalMonitor.Windows.Controls
                 listTerminal.SelectedIndex = lineTuple.shownIndex;
                 listTerminal.ScrollIntoView(listTerminal.SelectedItem);
             }
+
+            dataContextVO.FoundSelectedNumber = 1;
         }
 
         private void FindLast()
@@ -289,6 +301,8 @@ namespace TerminalMonitor.Windows.Controls
                 listTerminal.SelectedIndex = lineTuple.shownIndex;
                 listTerminal.ScrollIntoView(listTerminal.SelectedItem);
             }
+
+            dataContextVO.FoundSelectedNumber = foundLines.Count;
         }
 
         private void ApplyVisibleField()
