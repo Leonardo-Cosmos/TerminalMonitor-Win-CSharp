@@ -43,9 +43,9 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private int foundSelectedNumber;
+        private string foundSelectedNumber;
 
-        public int FoundSelectedNumber
+        public string FoundSelectedNumber
         {
             get => foundSelectedNumber;
 

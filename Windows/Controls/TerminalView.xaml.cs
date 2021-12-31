@@ -39,6 +39,12 @@ namespace TerminalMonitor.Windows.Controls
 
         private const string plaintextColumnName = "PlainText";
 
+        private const string invalidNumber = "?";
+
+        private const string beforeLineNumber = "-";
+
+        private const string afterLineNumber = "+";
+
         private readonly DataTable terminalDataTable = new();
 
         private List<FieldDisplayDetail> visibleFields = new();
@@ -49,7 +55,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private GroupCondition findCondition = new();
 
-        private readonly TerminalViewDataContextVO dataContextVO = new();
+        private readonly TerminalViewDataContextVO dataContextVO;
 
         private readonly Dictionary<string, bool> lineFilterDict = new();
 
@@ -60,6 +66,12 @@ namespace TerminalMonitor.Windows.Controls
         public TerminalView()
         {
             InitializeComponent();
+
+            dataContextVO = new()
+            {
+                FoundSelectedNumber = invalidNumber,
+                FoundCount = 0,
+            };
 
             DataContext = dataContextVO;
             listTerminal.DataContext = dataContextVO;
@@ -125,6 +137,11 @@ namespace TerminalMonitor.Windows.Controls
         private void MenuItemAutoScroll_Click(object sender, RoutedEventArgs e)
         {
             dataContextVO.AutoScroll = !dataContextVO.AutoScroll;
+        }
+
+        private void ListTerminal_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateFoundSelectedNumber();
         }
 
         private void ClearTerminal()
@@ -201,6 +218,52 @@ namespace TerminalMonitor.Windows.Controls
             }
 
             dataContextVO.FoundCount = foundLines.Count;
+
+            UpdateFoundSelectedNumber();
+        }
+
+        private void UpdateFoundSelectedNumber()
+        {
+            if (!foundLines.Any())
+            {
+                dataContextVO.FoundSelectedNumber = invalidNumber;
+                return;
+            }
+
+            var selectedIndex = listTerminal.SelectedIndex;
+
+            if (selectedIndex == -1)
+            {
+                dataContextVO.FoundSelectedNumber = invalidNumber;
+            }
+            else if (selectedIndex < foundLines.First().shownIndex)
+            {
+                dataContextVO.FoundSelectedNumber = beforeLineNumber;
+            }
+            else if (selectedIndex > foundLines.Last().shownIndex)
+            {
+                dataContextVO.FoundSelectedNumber = afterLineNumber;
+            }
+            else
+            {
+
+                for (int i = 0; i < foundLines.Count; i++)
+                {
+                    var lineTuple = foundLines[i];
+
+                    if (lineTuple.shownIndex == selectedIndex)
+                    {
+                        dataContextVO.FoundSelectedNumber = (i + 1).ToString();
+
+                        break;
+                    }
+                    else if (lineTuple.shownIndex > selectedIndex)
+                    {
+                        dataContextVO.FoundSelectedNumber = $"{i}{afterLineNumber}";
+                        break;
+                    }
+                }
+            }
         }
 
         private void FindPrevious()
@@ -226,7 +289,7 @@ namespace TerminalMonitor.Windows.Controls
                     listTerminal.SelectedIndex = lineTuple.shownIndex;
                     listTerminal.ScrollIntoView(listTerminal.SelectedItem);
 
-                    dataContextVO.FoundSelectedNumber = i + 1;
+                    dataContextVO.FoundSelectedNumber = (i + 1).ToString();
                     return;
                 }
             }
@@ -257,7 +320,7 @@ namespace TerminalMonitor.Windows.Controls
                     listTerminal.SelectedIndex = lineTuple.shownIndex;
                     listTerminal.ScrollIntoView(listTerminal.SelectedItem);
 
-                    dataContextVO.FoundSelectedNumber = i + 1;
+                    dataContextVO.FoundSelectedNumber = (i + 1).ToString();
                     return;
                 }
             }
@@ -282,7 +345,7 @@ namespace TerminalMonitor.Windows.Controls
                 listTerminal.ScrollIntoView(listTerminal.SelectedItem);
             }
 
-            dataContextVO.FoundSelectedNumber = 1;
+            dataContextVO.FoundSelectedNumber = 1.ToString();
         }
 
         private void FindLast()
@@ -302,7 +365,7 @@ namespace TerminalMonitor.Windows.Controls
                 listTerminal.ScrollIntoView(listTerminal.SelectedItem);
             }
 
-            dataContextVO.FoundSelectedNumber = foundLines.Count;
+            dataContextVO.FoundSelectedNumber = foundLines.Count.ToString();
         }
 
         private void ApplyVisibleField()
