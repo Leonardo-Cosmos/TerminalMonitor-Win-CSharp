@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TerminalMonitor.Windows"
         mc:Ignorable="d"
-        Title="Detail" Height="450" Width="800">
+        Title="Terminal Line Detail" Height="450" Width="800">
     <Grid>
         <ListView Name="lstFields">
             <ListView.Resources>
@@ -13,6 +13,13 @@
                     <Setter Property="Visibility" Value="Collapsed" />
                 </Style>-->
             </ListView.Resources>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Name="btnCopyListItem" Header="Copy as Condition List Item" Click="BtnCopyListItem_Click" />
+                    <MenuItem Name="btnCopyTreeFieldNode" Header="Copy as Condition Tree Field Node" Click="BtnCopyTreeFieldNode_Click" />
+                    <MenuItem Name="btnCopyTreeGroupNode" Header="Copy as Condition Tree Group Node" Click="BtnCopyTreeGroupNode_Click" />
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Key" DisplayMemberBinding="{Binding FieldKey}" />

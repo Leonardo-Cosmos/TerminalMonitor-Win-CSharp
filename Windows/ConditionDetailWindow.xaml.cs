@@ -260,17 +260,21 @@ namespace TerminalMonitor.Windows
             {
                 (var pastedConditions, var clipboardStatus) = conditionClipboard.Paste();
 
-                if (pastedConditions != null && pastedConditions.Length > 0)
+                if (pastedConditions?.Length > 0)
                 {
-                    var pastedCondition = clipboardStatus == ItemClipboardStatus.Move ?
-                        pastedConditions[0] : (Condition)pastedConditions[0].Clone();
+                    var addedConditions = clipboardStatus == ItemClipboardStatus.Move ?
+                        pastedConditions :
+                        pastedConditions.Select(condition => (Condition)condition.Clone()).ToArray();
 
-                    var conditionVO = ToVO(pastedCondition);
-                    AddCondition(conditions =>
+                    foreach (var addedCondition in addedConditions)
                     {
-                        conditionVO.Siblings = conditions;
-                        return conditionVO;
-                    });
+                        var conditionVO = ToVO(addedCondition);
+                        AddCondition(conditions =>
+                        {
+                            conditionVO.Siblings = conditions;
+                            return conditionVO;
+                        });
+                    }
                 }
             }
         }

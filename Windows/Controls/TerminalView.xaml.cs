@@ -116,17 +116,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void MenuItemShowDetail_Click(object sender, RoutedEventArgs e)
         {
-            if (listTerminal.SelectedValue is DataRowView item)
-            {
-                var id = (string)item[idColumnName];
-                var terminalLine = terminalLineSupervisor.TerminalLines[id];
-
-                TerminalLineDetailWindow window = new()
-                {
-                    TerminalLine = terminalLine,
-                };
-                window.Show();
-            }
+            ShowDetailWindow();
         }
 
         private void MenuItemClear_Click(object sender, RoutedEventArgs e)
@@ -144,9 +134,31 @@ namespace TerminalMonitor.Windows.Controls
             UpdateFoundSelectedNumber();
         }
 
+        private void ListTerminal_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ShowDetailWindow();
+        }
+
         private void ClearTerminal()
         {
             terminalDataTable.Rows.Clear();
+        }
+
+        private void ShowDetailWindow()
+        {
+            if (listTerminal.SelectedValue is DataRowView item)
+            {
+                var id = (string)item[idColumnName];
+                var terminalLine = terminalLineSupervisor.TerminalLines[id];
+
+                TerminalLineDetailWindow window = new()
+                {
+                    TerminalLine = terminalLine,
+                    ConditionListClipboard = findConditionListView.ConditionListClipboard,
+                    ConditionTreeClipboard = findConditionListView.ConditionTreeClipboard,
+                };
+                window.Show();
+            }
         }
 
         public void AddNewTerminalLines(IEnumerable<TerminalLineDto> terminalLineDtos)

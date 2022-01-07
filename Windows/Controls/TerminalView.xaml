@@ -99,7 +99,7 @@
 
         <GridSplitter Grid.Row="5" Height="5" HorizontalAlignment="Stretch" />
 
-        <ListView Name="listTerminal" Grid.Row="6" SelectionChanged="ListTerminal_SelectionChanged">
+        <ListView Name="listTerminal" Grid.Row="6" SelectionMode="Single" SelectionChanged="ListTerminal_SelectionChanged" MouseDoubleClick="ListTerminal_MouseDoubleClick">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
