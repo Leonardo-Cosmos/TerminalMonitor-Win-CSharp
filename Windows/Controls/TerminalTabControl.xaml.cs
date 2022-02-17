@@ -20,6 +20,7 @@ using TerminalMonitor.Execution;
 using TerminalMonitor.Models;
 using TerminalMonitor.Models.Settings;
 using TerminalMonitor.Parsers;
+using TerminalMonitor.Terminal;
 using Condition = TerminalMonitor.Matchers.Models.Condition;
 
 namespace TerminalMonitor.Windows.Controls
@@ -33,7 +34,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private DispatcherTimer readTerminalTimer;
 
-        private readonly TerminalLineSupervisor terminalLineSupervisor = new();
+        private readonly TerminalSupervisor terminalLineSupervisor = new();
 
         private readonly DispatcherTimer selectTabTimer;
 

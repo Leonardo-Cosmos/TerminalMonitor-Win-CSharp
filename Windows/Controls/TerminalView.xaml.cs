@@ -23,6 +23,7 @@ using TerminalMonitor.Matchers;
 using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
 using TerminalMonitor.Models.Settings;
+using TerminalMonitor.Terminal;
 using TerminalMonitor.Windows.Converters;
 using Condition = TerminalMonitor.Matchers.Models.Condition;
 
@@ -33,7 +34,7 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class TerminalView : UserControl
     {
-        private ITerminalLineSupervisor terminalLineSupervisor;
+        private ITerminalSupervisor terminalLineSupervisor;
 
         private const string idColumnName = "Id";
 
@@ -141,7 +142,11 @@ namespace TerminalMonitor.Windows.Controls
 
         private void ClearTerminal()
         {
-            terminalDataTable.Rows.Clear();
+            if (listTerminal.SelectedValue is DataRowView item)
+            {
+                var id = (string)item[idColumnName];
+                terminalLineSupervisor.RemoveTerminalLinesUntil(id);
+            }
         }
 
         private void ShowDetailWindow()
@@ -521,12 +526,17 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void Supervisor_TerminalLinesAdded(object sender, TerminalLinesEventArgs e)
+        private void Supervisor_TerminalLinesAdded(object sender, TerminalLineDtosEventArgs e)
         {
             AddNewTerminalLines(e.TerminalLines);
         }
 
-        public ITerminalLineSupervisor TerminalLineSupervisor
+        private void Supervisor_TerminalLinesRemoved(object sender, TerminalLineDtosEventArgs e)
+        {
+            FilterTerminal();
+        }
+
+        public ITerminalSupervisor TerminalLineSupervisor
         {
             get => terminalLineSupervisor;
             set
@@ -534,6 +544,7 @@ namespace TerminalMonitor.Windows.Controls
                 if (terminalLineSupervisor != value && terminalLineSupervisor != null)
                 {
                     terminalLineSupervisor.TerminalLinesAdded -= Supervisor_TerminalLinesAdded;
+                    terminalLineSupervisor.TerminalLinesRemoved -= Supervisor_TerminalLinesRemoved;
                 }
 
                 terminalLineSupervisor = value;
@@ -541,6 +552,7 @@ namespace TerminalMonitor.Windows.Controls
                 if (terminalLineSupervisor != null)
                 {
                     terminalLineSupervisor.TerminalLinesAdded += Supervisor_TerminalLinesAdded;
+                    terminalLineSupervisor.TerminalLinesRemoved += Supervisor_TerminalLinesRemoved;
                 }
             }
         }
