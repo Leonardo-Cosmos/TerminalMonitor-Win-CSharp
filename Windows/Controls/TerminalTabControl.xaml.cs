@@ -27,15 +27,13 @@ namespace TerminalMonitor.Windows.Controls
     /// <summary>
     /// Interaction logic for TerminalTabControl.xaml
     /// </summary>
-    public partial class TerminalTabControl : UserControl, ITerminalLineSupervisor
+    public partial class TerminalTabControl : UserControl
     {
-        private ITerminalLineProducer lineProducer;
+        private ITerminalLineProducer terminalLineProducer;
 
         private DispatcherTimer readTerminalTimer;
 
-        private readonly List<TerminalLineDto> terminalLineDtos = new();
-
-        private readonly List<TerminalView> terminalViews = new();
+        private readonly TerminalLineSupervisor terminalLineSupervisor = new();
 
         private readonly DispatcherTimer selectTabTimer;
 
@@ -47,16 +45,16 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly ItemClipboard<TextStyleCondition> styleConditionClipboard = new();
 
-        private readonly ItemClipboard<Condition> filterListClipboard = new();
+        private readonly ItemClipboard<Condition> conditionListClipboard = new();
 
-        private readonly ItemClipboard<Condition> filterTreeClipboard = new();
+        private readonly ItemClipboard<Condition> conditionTreeClipboard = new();
 
         public TerminalTabControl()
         {
             InitializeComponent();
 
             var defaultTab = tbCtrl.Items[0] as TabItem;
-            GetTabTerminalView(defaultTab).LineSupervisor = this;
+            GetTabTerminalView(defaultTab).TerminalLineSupervisor = terminalLineSupervisor;
 
             selectTabTimer = new();
             selectTabTimer.Tick += (sender, e) =>
@@ -182,9 +180,7 @@ namespace TerminalMonitor.Windows.Controls
             {
                 var readTerminalLineDtos = producer.ReadTerminalLines();
 
-                terminalLineDtos.AddRange(readTerminalLineDtos);
-
-                OnTerminalLineAdded(readTerminalLineDtos.ToArray());
+                terminalLineSupervisor.AddTerminalLines(readTerminalLineDtos);
 
                 if (producer.IsCompleted)
                 {
@@ -228,6 +224,7 @@ namespace TerminalMonitor.Windows.Controls
                 Name = tab.Header as string,
                 VisibleFields = terminalView.VisibleFields,
                 FilterCondition = terminalView.FilterCondition,
+                FindCondition = terminalView.FindCondition,
             };
         }
 
@@ -259,11 +256,14 @@ namespace TerminalMonitor.Windows.Controls
             TerminalView terminalView = new();
             terminalView.VisibleFields = config.VisibleFields?.ToList();
             terminalView.FilterCondition = config.FilterCondition;
+            terminalView.FindCondition = config.FindCondition;
             terminalView.FieldClipboard = fieldClipboard;
             terminalView.StyleConditionClipboard = styleConditionClipboard;
-            terminalView.FilterListClipboard = filterListClipboard;
-            terminalView.FilterTreeClipboard = filterTreeClipboard;
-            terminalView.LineSupervisor = this;
+            terminalView.FilterListClipboard = conditionListClipboard;
+            terminalView.FilterTreeClipboard = conditionTreeClipboard;
+            terminalView.FindListClipboard = conditionListClipboard;
+            terminalView.FindTreeClipboard = conditionTreeClipboard;
+            terminalView.TerminalLineSupervisor = terminalLineSupervisor;
             tab.Content = terminalView;
 
             return tab;
@@ -291,7 +291,7 @@ namespace TerminalMonitor.Windows.Controls
         private void RemoveTab(TabItem tab)
         {
             var terminalView = GetTabTerminalView(tab);
-            terminalView.LineSupervisor = null;
+            terminalView.TerminalLineSupervisor = null;
 
             tbCtrl.Items.Remove(tab);
         }
@@ -412,47 +412,27 @@ namespace TerminalMonitor.Windows.Controls
             changingTab = false;
         }
 
-        protected void OnTerminalLineAdded(TerminalLineDto[] terminalLineDtos)
-        {
-            TerminalLinesEventArgs e = new()
-            {
-                TerminalLines = terminalLineDtos,
-            };
-
-            TerminalLinesAdded?.Invoke(this, e);
-        }
-
-        public TerminalLineCollection TerminalLines
-        {
-            get
-            {
-                return new TerminalLineCollection(terminalLineDtos.AsEnumerable());
-            }
-        }
-
-        public event TerminalLinesEventHandler TerminalLinesAdded;
-
         private void LineProducer_Started(object sender, EventArgs e)
         {
-            StartTimer(lineProducer);
+            StartTimer(terminalLineProducer);
         }
 
-        public ITerminalLineProducer LineProducer
+        public ITerminalLineProducer TerminalLineProducer
         {
-            get => lineProducer;
+            get => terminalLineProducer;
             set
             {
-                if (lineProducer != value && lineProducer != null)
+                if (terminalLineProducer != value && terminalLineProducer != null)
                 {
                     StopTimer();
-                    lineProducer.Started -= LineProducer_Started;
+                    terminalLineProducer.Started -= LineProducer_Started;
                 }
 
-                lineProducer = value;
+                terminalLineProducer = value;
 
-                if (lineProducer != null)
+                if (terminalLineProducer != null)
                 {
-                    lineProducer.Started += LineProducer_Started;
+                    terminalLineProducer.Started += LineProducer_Started;
                 }
             }
         }

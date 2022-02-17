@@ -16,6 +16,8 @@ namespace TerminalMonitor.Models
 
         public GroupCondition FilterCondition { get; set; }
 
+        public GroupCondition FindCondition { get; set; }
+
         public object Clone()
         {
             TerminalConfig clone = new()
@@ -24,6 +26,7 @@ namespace TerminalMonitor.Models
                 Name = this.Name,
                 VisibleFields = this.VisibleFields?.Select(field => (FieldDisplayDetail)field.Clone()),
                 FilterCondition = this.FilterCondition?.Clone() as GroupCondition,
+                FindCondition = this.FindCondition?.Clone() as GroupCondition,
             };
 
             return clone;

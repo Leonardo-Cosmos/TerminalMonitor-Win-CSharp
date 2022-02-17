@@ -1,5 +1,7 @@
 ﻿/* 2021/8/27 */
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TerminalMonitor.Clipboard
 {
@@ -11,18 +13,38 @@ namespace TerminalMonitor.Clipboard
 
         public void Cut(params T[] items)
         {
+            if (items == null)
+            {
+                return;
+            }
+
             this.items = items;
             status = ItemClipboardStatus.Move;
 
             OnItemCut();
         }
 
+        public void Cut(IEnumerable<T> items)
+        {
+            Cut(items?.ToArray());
+        }
+
         public void Copy(params T[] items)
         {
+            if (items == null)
+            {
+                return;
+            }
+
             this.items = items;
             status = ItemClipboardStatus.Copy;
 
             OnItemCopied();
+        }
+
+        public void Copy(IEnumerable<T> items)
+        {
+            Copy(items?.ToArray());
         }
 
         public (T[], ItemClipboardStatus status) Paste()

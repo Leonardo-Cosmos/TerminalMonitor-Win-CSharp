@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -32,11 +33,17 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class TerminalView : UserControl
     {
-        private ITerminalLineSupervisor lineSupervisor;
+        private ITerminalLineSupervisor terminalLineSupervisor;
 
         private const string idColumnName = "Id";
 
         private const string plaintextColumnName = "PlainText";
+
+        private const string invalidNumber = "?";
+
+        private const string beforeLineNumber = "-";
+
+        private const string afterLineNumber = "+";
 
         private readonly DataTable terminalDataTable = new();
 
@@ -46,13 +53,25 @@ namespace TerminalMonitor.Windows.Controls
 
         private GroupCondition filterCondition = new();
 
-        private readonly TerminalViewDataContextVO dataContextVO = new();
+        private GroupCondition findCondition = new();
 
-        private readonly Dictionary<string, bool> matchedLineDict = new();
+        private readonly TerminalViewDataContextVO dataContextVO;
+
+        private readonly Dictionary<string, bool> lineFilterDict = new();
+
+        private readonly List<TerminalLineDto> shownLines = new();
+
+        private readonly List<(TerminalLineDto terminalLine, int shownIndex)> foundLines = new();
 
         public TerminalView()
         {
             InitializeComponent();
+
+            dataContextVO = new()
+            {
+                FoundSelectedNumber = invalidNumber,
+                FoundCount = 0,
+            };
 
             DataContext = dataContextVO;
             listTerminal.DataContext = dataContextVO;
@@ -70,19 +89,34 @@ namespace TerminalMonitor.Windows.Controls
             FilterTerminal();
         }
 
+        private void ButtonFind_Click(object sender, RoutedEventArgs e)
+        {
+            FindInTerminal();
+        }
+
+        private void ButtonFindPrevious_Click(object sender, RoutedEventArgs e)
+        {
+            FindPrevious();
+        }
+
+        private void ButtonFindNext_Click(object sender, RoutedEventArgs e)
+        {
+            FindNext();
+        }
+
+        private void ButtonFindFirst_Click(object sender, RoutedEventArgs e)
+        {
+            FindFirst();
+        }
+
+        private void ButtonFindLast_Click(object sender, RoutedEventArgs e)
+        {
+            FindLast();
+        }
+
         private void MenuItemShowDetail_Click(object sender, RoutedEventArgs e)
         {
-            if (listTerminal.SelectedValue is DataRowView item)
-            {
-                var id = (string)item[idColumnName];
-                var terminalLine = lineSupervisor.TerminalLines[id];
-
-                TerminalLineDetailWindow window = new()
-                {
-                    TerminalLine = terminalLine,
-                };
-                window.Show();
-            }
+            ShowDetailWindow();
         }
 
         private void MenuItemClear_Click(object sender, RoutedEventArgs e)
@@ -95,9 +129,36 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.AutoScroll = !dataContextVO.AutoScroll;
         }
 
+        private void ListTerminal_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateFoundSelectedNumber();
+        }
+
+        private void ListTerminal_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ShowDetailWindow();
+        }
+
         private void ClearTerminal()
         {
             terminalDataTable.Rows.Clear();
+        }
+
+        private void ShowDetailWindow()
+        {
+            if (listTerminal.SelectedValue is DataRowView item)
+            {
+                var id = (string)item[idColumnName];
+                var terminalLine = terminalLineSupervisor.TerminalLines[id];
+
+                TerminalLineDetailWindow window = new()
+                {
+                    TerminalLine = terminalLine,
+                    ConditionListClipboard = findConditionListView.ConditionListClipboard,
+                    ConditionTreeClipboard = findConditionListView.ConditionTreeClipboard,
+                };
+                window.Show();
+            }
         }
 
         public void AddNewTerminalLines(IEnumerable<TerminalLineDto> terminalLineDtos)
@@ -106,10 +167,11 @@ namespace TerminalMonitor.Windows.Controls
             foreach (var terminalLineDto in terminalLineDtos)
             {
                 var matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterCondition);
-                matchedLineDict.Add(terminalLineDto.Id, matched);
+                lineFilterDict.Add(terminalLineDto.Id, matched);
 
                 if (matched)
                 {
+                    shownLines.Add(terminalLineDto);
                     AddTerminalLine(terminalLineDto);
                     isAnyAdded = true;
                 }
@@ -125,24 +187,197 @@ namespace TerminalMonitor.Windows.Controls
 
         private void FilterTerminal()
         {
-            filterCondition = (GroupCondition)filterView.Condition.Clone();
+            filterCondition = (GroupCondition)filterConditionListView.Condition.Clone();
 
-            if (lineSupervisor == null)
+            if (terminalLineSupervisor == null)
             {
                 return;
             }
 
             terminalDataTable.Rows.Clear();
 
-            matchedLineDict.Clear();
+            lineFilterDict.Clear();
+            shownLines.Clear();
             TerminalLineMatcher matcher = new(filterCondition);
-            foreach (var terminalLineDto in lineSupervisor.TerminalLines)
+            foreach (var terminalLineDto in terminalLineSupervisor.TerminalLines)
             {
                 var matched = matcher.IsMatch(terminalLineDto);
-                matchedLineDict.Add(terminalLineDto.Id, matched);
+                lineFilterDict.Add(terminalLineDto.Id, matched);
+
+                if (matched)
+                {
+                    shownLines.Add(terminalLineDto);
+                }
             }
 
             AddMatchedTerminalLines();
+        }
+
+        private void FindInTerminal()
+        {
+            findCondition = (GroupCondition)findConditionListView.Condition.Clone();
+            foundLines.Clear();
+
+            TerminalLineMatcher matcher = new(findCondition);
+            for (var i = 0; i < shownLines.Count; i++)
+            {
+                var terminalLineDto = shownLines[i];
+                var found = matcher.IsMatch(terminalLineDto);
+                if (found)
+                {
+                    foundLines.Add((terminalLine: terminalLineDto, shownIndex: i));
+                }
+            }
+
+            dataContextVO.FoundCount = foundLines.Count;
+
+            UpdateFoundSelectedNumber();
+        }
+
+        private void UpdateFoundSelectedNumber()
+        {
+            if (!foundLines.Any())
+            {
+                dataContextVO.FoundSelectedNumber = invalidNumber;
+                return;
+            }
+
+            var selectedIndex = listTerminal.SelectedIndex;
+
+            if (selectedIndex == -1)
+            {
+                dataContextVO.FoundSelectedNumber = invalidNumber;
+            }
+            else if (selectedIndex < foundLines.First().shownIndex)
+            {
+                dataContextVO.FoundSelectedNumber = beforeLineNumber;
+            }
+            else if (selectedIndex > foundLines.Last().shownIndex)
+            {
+                dataContextVO.FoundSelectedNumber = afterLineNumber;
+            }
+            else
+            {
+
+                for (int i = 0; i < foundLines.Count; i++)
+                {
+                    var lineTuple = foundLines[i];
+
+                    if (lineTuple.shownIndex == selectedIndex)
+                    {
+                        dataContextVO.FoundSelectedNumber = (i + 1).ToString();
+
+                        break;
+                    }
+                    else if (lineTuple.shownIndex > selectedIndex)
+                    {
+                        dataContextVO.FoundSelectedNumber = $"{i}{afterLineNumber}";
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void FindPrevious()
+        {
+            if (foundLines.Count == 0)
+            {
+                return;
+            }
+
+            var selectedIndex = listTerminal.SelectedIndex;
+
+            if (selectedIndex == -1)
+            {
+                FindLast();
+                return;
+            }
+
+            for (int i = foundLines.Count - 1; i >= 0; i--)
+            {
+                var lineTuple = foundLines[i];
+                if (lineTuple.shownIndex < selectedIndex)
+                {
+                    listTerminal.SelectedIndex = lineTuple.shownIndex;
+                    listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+
+                    dataContextVO.FoundSelectedNumber = (i + 1).ToString();
+                    return;
+                }
+            }
+
+            FindLast();
+        }
+
+        private void FindNext()
+        {
+            if (foundLines.Count == 0)
+            {
+                return;
+            }
+
+            var selectedIndex = listTerminal.SelectedIndex;
+
+            if (selectedIndex == -1)
+            {
+                FindFirst();
+                return;
+            }
+
+            for (int i = 0; i < foundLines.Count; i++)
+            {
+                var lineTuple = foundLines[i];
+                if (lineTuple.shownIndex > selectedIndex)
+                {
+                    listTerminal.SelectedIndex = lineTuple.shownIndex;
+                    listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+
+                    dataContextVO.FoundSelectedNumber = (i + 1).ToString();
+                    return;
+                }
+            }
+
+            FindFirst();
+        }
+
+        private void FindFirst()
+        {
+            if (foundLines.Count == 0)
+            {
+                return;
+            }
+
+            var selectedIndex = listTerminal.SelectedIndex;
+
+            (TerminalLineDto terminalLine, int shownIndex) lineTuple = foundLines.First();
+
+            if (selectedIndex != lineTuple.shownIndex)
+            {
+                listTerminal.SelectedIndex = lineTuple.shownIndex;
+                listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+            }
+
+            dataContextVO.FoundSelectedNumber = 1.ToString();
+        }
+
+        private void FindLast()
+        {
+            if (foundLines.Count == 0)
+            {
+                return;
+            }
+
+            var selectedIndex = listTerminal.SelectedIndex;
+
+            (TerminalLineDto terminalLine, int shownIndex) lineTuple = foundLines.Last();
+
+            if (selectedIndex != lineTuple.shownIndex)
+            {
+                listTerminal.SelectedIndex = lineTuple.shownIndex;
+                listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+            }
+
+            dataContextVO.FoundSelectedNumber = foundLines.Count.ToString();
         }
 
         private void ApplyVisibleField()
@@ -257,22 +492,26 @@ namespace TerminalMonitor.Windows.Controls
 
         private void AddMatchedTerminalLines()
         {
-            if (lineSupervisor == null)
+            if (terminalLineSupervisor == null)
             {
                 return;
             }
 
-            foreach (var terminalLineDto in lineSupervisor.TerminalLines)
+            foreach (var terminalLineDto in terminalLineSupervisor.TerminalLines)
             {
                 bool matched;
-                if (matchedLineDict.ContainsKey(terminalLineDto.Id))
+                if (lineFilterDict.ContainsKey(terminalLineDto.Id))
                 {
-                    matched = matchedLineDict[terminalLineDto.Id];
+                    matched = lineFilterDict[terminalLineDto.Id];
                 }
                 else
                 {
                     matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterCondition);
-                    matchedLineDict.Add(terminalLineDto.Id, matched);
+                    lineFilterDict.Add(terminalLineDto.Id, matched);
+                    if (matched)
+                    {
+                        shownLines.Add(terminalLineDto);
+                    }
                 }
 
                 if (matched)
@@ -287,21 +526,21 @@ namespace TerminalMonitor.Windows.Controls
             AddNewTerminalLines(e.TerminalLines);
         }
 
-        public ITerminalLineSupervisor LineSupervisor
+        public ITerminalLineSupervisor TerminalLineSupervisor
         {
-            get => lineSupervisor;
+            get => terminalLineSupervisor;
             set
             {
-                if (lineSupervisor != value && lineSupervisor != null)
+                if (terminalLineSupervisor != value && terminalLineSupervisor != null)
                 {
-                    lineSupervisor.TerminalLinesAdded -= Supervisor_TerminalLinesAdded;
+                    terminalLineSupervisor.TerminalLinesAdded -= Supervisor_TerminalLinesAdded;
                 }
 
-                lineSupervisor = value;
+                terminalLineSupervisor = value;
 
-                if (lineSupervisor != null)
+                if (terminalLineSupervisor != null)
                 {
-                    lineSupervisor.TerminalLinesAdded += Supervisor_TerminalLinesAdded;
+                    terminalLineSupervisor.TerminalLinesAdded += Supervisor_TerminalLinesAdded;
                 }
             }
         }
@@ -324,12 +563,18 @@ namespace TerminalMonitor.Windows.Controls
 
         public GroupCondition FilterCondition
         {
-            get => filterView.Condition;
+            get => filterConditionListView.Condition;
             set
             {
-                filterView.Condition = value;
+                filterConditionListView.Condition = value;
                 FilterTerminal();
             }
+        }
+
+        public GroupCondition FindCondition
+        {
+            get => findConditionListView.Condition;
+            set => findConditionListView.Condition = value;
         }
 
         public ItemClipboard<FieldDisplayDetail> FieldClipboard
@@ -346,14 +591,26 @@ namespace TerminalMonitor.Windows.Controls
 
         public ItemClipboard<Condition> FilterListClipboard
         {
-            get => filterView.ConditionListClipboard;
-            set => filterView.ConditionListClipboard = value;
+            get => filterConditionListView.ConditionListClipboard;
+            set => filterConditionListView.ConditionListClipboard = value;
         }
 
         public ItemClipboard<Condition> FilterTreeClipboard
         {
-            get => filterView.ConditionTreeClipboard;
-            set => filterView.ConditionTreeClipboard = value;
+            get => filterConditionListView.ConditionTreeClipboard;
+            set => filterConditionListView.ConditionTreeClipboard = value;
+        }
+
+        public ItemClipboard<Condition> FindListClipboard
+        {
+            get => findConditionListView.ConditionListClipboard;
+            set => findConditionListView.ConditionListClipboard = value;
+        }
+
+        public ItemClipboard<Condition> FindTreeClipboard
+        {
+            get => findConditionListView.ConditionTreeClipboard;
+            set => findConditionListView.ConditionTreeClipboard = value;
         }
     }
 }

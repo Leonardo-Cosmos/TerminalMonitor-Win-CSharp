@@ -38,7 +38,7 @@ namespace TerminalMonitor.Windows
             };
 
             executionListView.Executor = commandExecutor;
-            terminalTabControl.LineProducer = commandExecutor;
+            terminalTabControl.TerminalLineProducer = commandExecutor;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
