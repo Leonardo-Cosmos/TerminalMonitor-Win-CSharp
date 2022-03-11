@@ -6,12 +6,12 @@ using System.Text;
 using System.Threading.Tasks;
 using TerminalMonitor.Models;
 
-namespace TerminalMonitor.Windows.Controls
+namespace TerminalMonitor.Terminal
 {
-    public class TerminalLinesEventArgs : EventArgs
+    public class TerminalLineDtosEventArgs : EventArgs
     {
         public IEnumerable<TerminalLineDto> TerminalLines { get; set; }
     }
 
-    public delegate void TerminalLinesEventHandler(object sender, TerminalLinesEventArgs e);
+    public delegate void TerminalLineDtosEventHandler(object sender, TerminalLineDtosEventArgs e);
 }

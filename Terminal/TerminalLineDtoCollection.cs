@@ -1,23 +1,19 @@
-﻿/* 2021/6/20 */
+﻿/* 2022/2/16 */
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using TerminalMonitor.Models;
 
-namespace TerminalMonitor.Windows.Controls
+namespace TerminalMonitor.Terminal
 {
-    public interface ITerminalLineSupervisor
-    {
-        TerminalLineCollection TerminalLines { get; }
-
-        event TerminalLinesEventHandler TerminalLinesAdded;
-    }
-
-    public class TerminalLineCollection : IReadOnlyList<TerminalLineDto>
+    public class TerminalLineDtoCollection : IReadOnlyList<TerminalLineDto>
     {
         private readonly IReadOnlyList<TerminalLineDto> terminalLines;
 
-        public TerminalLineCollection(IEnumerable<TerminalLineDto> terminalLines)
+        public TerminalLineDtoCollection(IEnumerable<TerminalLineDto> terminalLines)
         {
             if (terminalLines is IReadOnlyList<TerminalLineDto> terminalLineList)
             {

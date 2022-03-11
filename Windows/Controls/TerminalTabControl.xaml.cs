@@ -20,6 +20,7 @@ using TerminalMonitor.Execution;
 using TerminalMonitor.Models;
 using TerminalMonitor.Models.Settings;
 using TerminalMonitor.Parsers;
+using TerminalMonitor.Terminal;
 using Condition = TerminalMonitor.Matchers.Models.Condition;
 
 namespace TerminalMonitor.Windows.Controls
@@ -33,7 +34,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private DispatcherTimer readTerminalTimer;
 
-        private readonly TerminalLineSupervisor terminalLineSupervisor = new();
+        private readonly TerminalSupervisor terminalLineSupervisor = new();
 
         private readonly DispatcherTimer selectTabTimer;
 
@@ -90,7 +91,16 @@ namespace TerminalMonitor.Windows.Controls
         {
             var self = sender as Button;
 
-            RemoveTab(self.Tag as string);
+            var tab = GetTab(self.Tag as string);
+            var tabConfig = GetTabConfig(tab);
+
+            var result = MessageBox.Show($"Do you want to close tab \"{tabConfig.Name}\"?\nAll settings in this tab will be deleted.", "Close Terminal Tab",
+                MessageBoxButton.YesNo, MessageBoxImage.None);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                RemoveTab(self.Tag as string);
+            }
         }
 
         private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
