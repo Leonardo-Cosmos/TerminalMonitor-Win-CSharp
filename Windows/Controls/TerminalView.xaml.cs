@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -117,7 +118,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void MenuItemShowDetail_Click(object sender, RoutedEventArgs e)
         {
-            ShowDetailWindow();
+            //ShowDetailWindow();
         }
 
         private void MenuItemClear_Click(object sender, RoutedEventArgs e)
@@ -137,7 +138,52 @@ namespace TerminalMonitor.Windows.Controls
 
         private void ListTerminal_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ShowDetailWindow();
+            HitTestResult hitResult = VisualTreeHelper.HitTest(this, e.GetPosition(this));
+
+            Debug.Print(hitResult.VisualHit.GetType().ToString());
+            //if (hitResult.VisualHit.GetType() == typeof(ListBoxItem))
+            //{
+
+            //    ShowDetailWindow();
+            //}
+
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+            // iteratively traverse the visual tree
+            while (dep != null)
+            {
+                Debug.Print(dep.GetType().ToString());
+                if (dep is ListViewItem item)
+                {
+                    Debug.WriteLine(item.Content);
+                    if (item.Content is DataRowView rowView)
+                    {
+                        ShowDetailWindow(rowView);
+                        return;
+                    }
+                }
+                else if (dep.GetType() == typeof(ListView))
+                {
+                    break;
+                }
+
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            //if (dep == null)
+            //    return;
+
+            //if (dep is DataGridColumnHeader)
+            //{
+            //    DataGridColumnHeader columnHeader = dep as DataGridColumnHeader;
+            //    // do something
+            //}
+
+            //if (dep is DataGridCell)
+            //{
+            //    DataGridCell cell = dep as DataGridCell;
+            //    // do something
+            //}
         }
 
         private void ClearTerminal()
@@ -149,9 +195,9 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void ShowDetailWindow()
+        private void ShowDetailWindow(DataRowView item)
         {
-            if (listTerminal.SelectedValue is DataRowView item)
+            if (item != null)
             {
                 var id = (string)item[idColumnName];
                 var terminalLine = terminalLineSupervisor.TerminalLines[id];
