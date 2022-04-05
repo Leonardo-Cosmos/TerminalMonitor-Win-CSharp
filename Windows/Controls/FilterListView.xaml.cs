@@ -416,6 +416,18 @@ namespace TerminalMonitor.Windows.Controls
             return item;
         }
 
+        public void AddCondition(Condition condition)
+        {
+            if (condition == null)
+            {
+                return;
+            }
+
+            FilterItemVO itemVO = CreateFilterVO(condition);
+
+            InsertAtSelectedItem((condition, itemVO));
+        }
+
         public GroupCondition Condition
         {
             get => groupCondition;

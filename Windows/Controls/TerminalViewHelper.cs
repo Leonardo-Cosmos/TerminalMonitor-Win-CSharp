@@ -1,5 +1,6 @@
 ﻿/* 2021/10/10 */
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows;
@@ -13,6 +14,8 @@ namespace TerminalMonitor.Windows.Controls
 {
     static class TerminalViewHelper
     {
+        public record RoutedEventHandlerRecord(RoutedEvent RoutedEvent, Delegate Handler);
+
         private static readonly IntToHorizontalAlignmentConverter horizontalAlignmentConverter = new();
 
         private static readonly IntToVerticalAlignmentConverter verticalAlignmentConverter = new();
@@ -21,7 +24,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private static readonly Func<object, object> convertColorToBrush = color => new SolidColorBrush((Color)color);
 
-        public static DataTemplate BuildFieldDataTemplate(FieldDisplayDetail visibleField, DataTable terminalDataTable)
+        public static DataTemplate BuildFieldDataTemplate(FieldDisplayDetail visibleField, DataTable terminalDataTable,
+            IEnumerable<RoutedEventHandlerRecord> eventHandlerRecords)
         {
             string fieldId = visibleField.Id;
             SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(Brush), GetForegroundColumnName);
@@ -62,6 +66,14 @@ namespace TerminalMonitor.Windows.Controls
             SetElementStyleProperty(visibleField, panelElement, Panel.BackgroundProperty,
                 null, convertColorToBrush,
                 textStyle => textStyle.CellBackground, GetCellBackgroundColumnName);
+
+            if (eventHandlerRecords != null)
+            {
+                foreach (var eventHandlerRecord in eventHandlerRecords)
+                {
+                    panelElement.AddHandler(eventHandlerRecord.RoutedEvent, eventHandlerRecord.Handler);
+                }
+            }
 
             panelElement.AppendChild(textBlockElement);
 

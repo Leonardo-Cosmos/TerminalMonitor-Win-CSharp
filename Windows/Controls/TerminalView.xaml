@@ -106,14 +106,18 @@
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                    <EventSetter Event="PreviewMouseDown" Handler="ListTerminalItemContainer_MouseDown" />
                 </Style>
             </ListView.ItemContainerStyle>
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Name="menuItemShowDetail" Header="Detail" Click="MenuItemShowDetail_Click" />
-                    <Separator />
                     <MenuItem Name="menuItemClear" Header="Clear All until This" Click="MenuItemClear_Click" />
                     <MenuItem Name="menuItemAutoScroll" Header="Auto Scroll" IsChecked="{Binding AutoScroll}" Click="MenuItemAutoScroll_Click" />
+                    <Separator />
+                    <MenuItem Name="menuItemAddFilterCondition" Header="Add to Filter" Click="MenuItemAddFilterCondition_Click" />
+                    <MenuItem Name="menuItemAddFindCondtion" Header="Add to Find" Click="MenuItemAddFindCondtion_Click" />
+                    <Separator />
+                    <MenuItem Name="menuItemShowDetail" Header="Detail" Click="MenuItemShowDetail_Click" />
                 </ContextMenu>
             </ListView.ContextMenu>
         </ListView>
