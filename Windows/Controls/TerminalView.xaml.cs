@@ -274,6 +274,8 @@ namespace TerminalMonitor.Windows.Controls
             }
 
             AddMatchedTerminalLines();
+
+            FindInTerminal();
         }
 
         private void FindInTerminal()
