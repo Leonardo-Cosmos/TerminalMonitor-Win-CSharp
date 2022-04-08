@@ -188,7 +188,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void AddClickedCellToConditionListView(FilterListView conditionListView)
+        private void AddClickedCellToConditionListView(ConditionListView conditionListView)
         {
             var condition = ConvertClickedDataCellToCondition();
             if (condition != null)

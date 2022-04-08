@@ -26,13 +26,13 @@ using Condition = TerminalMonitor.Matchers.Models.Condition;
 namespace TerminalMonitor.Windows.Controls
 {
     /// <summary>
-    /// Interaction logic for FilterListView.xaml
+    /// Interaction logic for ConditionListView.xaml
     /// </summary>
-    public partial class FilterListView : UserControl
+    public partial class ConditionListView : UserControl
     {
-        private readonly FilterListViewDataContextVO dataContextVO;
+        private readonly ConditionListViewDataContextVO dataContextVO;
 
-        private readonly ObservableCollection<FilterItemVO> filterVOs = new();
+        private readonly ObservableCollection<ConditionItemVO> conditionVOs = new();
 
         private List<Condition> conditions;
 
@@ -42,7 +42,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private ItemClipboard<Condition> conditionTreeClipboard;
 
-        public FilterListView()
+        public ConditionListView()
         {
             InitializeComponent();
 
@@ -70,26 +70,26 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
             DataContext = dataContextVO;
 
-            lstFilters.ItemsSource = filterVOs;
+            lstConditions.ItemsSource = conditionVOs;
         }
 
         private void DataContextVO_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
-                case nameof(FilterListViewDataContextVO.MatchMode):
+                case nameof(ConditionListViewDataContextVO.MatchMode):
                     groupCondition.MatchMode = dataContextVO.MatchMode;
                     break;
-                case nameof(FilterListViewDataContextVO.IsInverted):
+                case nameof(ConditionListViewDataContextVO.IsInverted):
                     groupCondition.IsInverted = dataContextVO.IsInverted;
                     break;
-                case nameof(FilterListViewDataContextVO.DefaultResult):
+                case nameof(ConditionListViewDataContextVO.DefaultResult):
                     groupCondition.DefaultResult = dataContextVO.DefaultResult;
                     break;
-                case nameof(FilterListViewDataContextVO.IsDisabled):
+                case nameof(ConditionListViewDataContextVO.IsDisabled):
                     groupCondition.IsDisabled = dataContextVO.IsDisabled;
                     break;
-                case nameof(FilterListViewDataContextVO.IsAnyConditionSelected):
+                case nameof(ConditionListViewDataContextVO.IsAnyConditionSelected):
                     (dataContextVO.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.EditCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.MoveLeftCommand as RelayCommand)?.NotifyCanExecuteChanged();
@@ -97,10 +97,10 @@ namespace TerminalMonitor.Windows.Controls
                     (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     break;
-                case nameof(FilterListViewDataContextVO.IsAnyConditionInClipboard):
+                case nameof(ConditionListViewDataContextVO.IsAnyConditionInClipboard):
                     (dataContextVO.PasteCommnad as RelayCommand)?.NotifyCanExecuteChanged();
                     break;
-                case nameof(FilterListViewDataContextVO.IsAnyConditionCutInClipboard):
+                case nameof(ConditionListViewDataContextVO.IsAnyConditionCutInClipboard):
                     (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     break;
@@ -109,22 +109,22 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void LstFilters_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void LstConditions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var count = lstFilters.SelectedItems.Count;
+            var count = lstConditions.SelectedItems.Count;
             dataContextVO.IsAnyConditionSelected = count > 0;
         }
 
-        private void LstFilters_MouseDown(object sender, MouseButtonEventArgs e)
+        private void LstConditions_MouseDown(object sender, MouseButtonEventArgs e)
         {
             HitTestResult hitResult = VisualTreeHelper.HitTest(this, e.GetPosition(this));
             if (hitResult.VisualHit.GetType() != typeof(ListBoxItem))
             {
-                lstFilters.UnselectAll();
+                lstConditions.UnselectAll();
             }
         }
 
-        private void LstFilters_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void LstConditions_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             EditSelectedCondition();
         }
@@ -140,21 +140,21 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.IsAnyConditionCutInClipboard = conditionListClipboard.Status == ItemClipboardStatus.Move;
         }
 
-        private void ForSelectedItem(Action<FilterItemVO> action)
+        private void ForSelectedItem(Action<ConditionItemVO> action)
         {
-            if (lstFilters.SelectedItem is FilterItemVO itemVO)
+            if (lstConditions.SelectedItem is ConditionItemVO itemVO)
             {
                 action(itemVO);
             }
         }
 
-        private void ForEachSelectedItem(Action<FilterItemVO> action,
+        private void ForEachSelectedItem(Action<ConditionItemVO> action,
             bool byOrder = false, bool reverseOrder = false, bool recoverSelection = false)
         {
-            List<FilterItemVO> itemVOs = new();
-            foreach (var selectedItem in lstFilters.SelectedItems)
+            List<ConditionItemVO> itemVOs = new();
+            foreach (var selectedItem in lstConditions.SelectedItems)
             {
-                if (selectedItem is FilterItemVO itemVO)
+                if (selectedItem is ConditionItemVO itemVO)
                 {
                     itemVOs.Add(itemVO);
                 }
@@ -163,7 +163,7 @@ namespace TerminalMonitor.Windows.Controls
             if (byOrder)
             {
                 itemVOs.Sort((itemX, itemY) =>
-                    filterVOs.IndexOf(itemX) - filterVOs.IndexOf(itemY));
+                    conditionVOs.IndexOf(itemX) - conditionVOs.IndexOf(itemY));
             }
 
             if (reverseOrder)
@@ -175,32 +175,32 @@ namespace TerminalMonitor.Windows.Controls
 
             if (recoverSelection)
             {
-                itemVOs.ForEach(itemVO => lstFilters.SelectedItems.Add(itemVO));
+                itemVOs.ForEach(itemVO => lstConditions.SelectedItems.Add(itemVO));
             }
         }
 
-        private void InsertAtSelectedItem(params (Condition condition, FilterItemVO itemVO)[] conditionTuples)
+        private void InsertAtSelectedItem(params (Condition condition, ConditionItemVO itemVO)[] conditionTuples)
         {
-            var selectedIndex = lstFilters.SelectedIndex;
+            var selectedIndex = lstConditions.SelectedIndex;
             if (selectedIndex == -1)
             {
                 foreach (var (condition, itemVO) in conditionTuples)
                 {
-                    filterVOs.Add(itemVO);
-                    lstFilters.SelectedItems.Add(itemVO);
+                    conditionVOs.Add(itemVO);
+                    lstConditions.SelectedItems.Add(itemVO);
 
                     conditions.Add(condition);
                 }
             }
             else
             {
-                lstFilters.SelectedItems.Clear();
+                lstConditions.SelectedItems.Clear();
 
                 var reversedConditionTuples = conditionTuples.Reverse().ToArray();
                 foreach (var (condition, itemVO) in reversedConditionTuples)
                 {
-                    filterVOs.Insert(selectedIndex, itemVO);
-                    lstFilters.SelectedItems.Add(itemVO);
+                    conditionVOs.Insert(selectedIndex, itemVO);
+                    lstConditions.SelectedItems.Add(itemVO);
 
                     conditions.Insert(selectedIndex, condition);
                 }
@@ -220,7 +220,7 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     var condition = window.Condition;
 
-                    FilterItemVO itemVO = CreateFilterVO(condition);
+                    ConditionItemVO itemVO = CreateConditionVO(condition);
 
                     InsertAtSelectedItem((condition, itemVO));
                 }
@@ -234,10 +234,10 @@ namespace TerminalMonitor.Windows.Controls
             ForEachSelectedItem(RemoveCondition);
         }
 
-        private void RemoveCondition(FilterItemVO itemVO)
+        private void RemoveCondition(ConditionItemVO itemVO)
         {
-            var index = filterVOs.IndexOf(itemVO);
-            filterVOs.RemoveAt(index);
+            var index = conditionVOs.IndexOf(itemVO);
+            conditionVOs.RemoveAt(index);
 
             conditions.RemoveAt(index);
         }
@@ -252,9 +252,9 @@ namespace TerminalMonitor.Windows.Controls
             ForEachSelectedItem(EditCondition);
         }
 
-        private void EditCondition(FilterItemVO itemVO)
+        private void EditCondition(ConditionItemVO itemVO)
         {
-            var index = filterVOs.IndexOf(itemVO);
+            var index = conditionVOs.IndexOf(itemVO);
 
             var condition = conditions[index];
             ConditionDetailWindow window = new()
@@ -269,12 +269,12 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     var condition = window.Condition;
 
-                    FilterItemVO item = CreateFilterVO(condition);
+                    ConditionItemVO item = CreateConditionVO(condition);
 
-                    var newIndex = filterVOs.IndexOf(itemVO);
+                    var newIndex = conditionVOs.IndexOf(itemVO);
                     if (newIndex > -1)
                     {
-                        filterVOs[newIndex] = item;
+                        conditionVOs[newIndex] = item;
                         conditions[newIndex] = condition;
                     }
                 }
@@ -288,13 +288,13 @@ namespace TerminalMonitor.Windows.Controls
             ForEachSelectedItem(MoveConditionLeft, byOrder: true, recoverSelection: true);
         }
 
-        private void MoveConditionLeft(FilterItemVO itemVO)
+        private void MoveConditionLeft(ConditionItemVO itemVO)
         {
-            var srcIndex = filterVOs.IndexOf(itemVO);
-            var dstIndex = (srcIndex - 1 + filterVOs.Count) % filterVOs.Count;
+            var srcIndex = conditionVOs.IndexOf(itemVO);
+            var dstIndex = (srcIndex - 1 + conditionVOs.Count) % conditionVOs.Count;
 
-            filterVOs.RemoveAt(srcIndex);
-            filterVOs.Insert(dstIndex, itemVO);
+            conditionVOs.RemoveAt(srcIndex);
+            conditionVOs.Insert(dstIndex, itemVO);
 
             var condition = conditions[srcIndex];
             conditions.RemoveAt(srcIndex);
@@ -306,13 +306,13 @@ namespace TerminalMonitor.Windows.Controls
             ForEachSelectedItem(MoveConditionRight, byOrder: true, reverseOrder: true, recoverSelection: true);
         }
 
-        private void MoveConditionRight(FilterItemVO itemVO)
+        private void MoveConditionRight(ConditionItemVO itemVO)
         {
-            var srcIndex = filterVOs.IndexOf(itemVO);
-            var dstIndex = (srcIndex + 1) % filterVOs.Count;
+            var srcIndex = conditionVOs.IndexOf(itemVO);
+            var dstIndex = (srcIndex + 1) % conditionVOs.Count;
 
-            filterVOs.RemoveAt(srcIndex);
-            filterVOs.Insert(dstIndex, itemVO);
+            conditionVOs.RemoveAt(srcIndex);
+            conditionVOs.Insert(dstIndex, itemVO);
 
             var condition = conditions[srcIndex];
             conditions.RemoveAt(srcIndex);
@@ -324,11 +324,11 @@ namespace TerminalMonitor.Windows.Controls
             if (conditionListClipboard != null)
             {
                 List<Condition> selectedConditions = new();
-                foreach (var selectedItem in lstFilters.SelectedItems)
+                foreach (var selectedItem in lstConditions.SelectedItems)
                 {
-                    if (selectedItem is FilterItemVO itemVO)
+                    if (selectedItem is ConditionItemVO itemVO)
                     {
-                        var index = filterVOs.IndexOf(itemVO);
+                        var index = conditionVOs.IndexOf(itemVO);
 
                         var condition = conditions[index];
                         selectedConditions.Add(condition);
@@ -345,11 +345,11 @@ namespace TerminalMonitor.Windows.Controls
             if (conditionListClipboard != null)
             {
                 List<Condition> copiedConditions = new();
-                foreach (var selectedItem in lstFilters.SelectedItems)
+                foreach (var selectedItem in lstConditions.SelectedItems)
                 {
-                    if (selectedItem is FilterItemVO itemVO)
+                    if (selectedItem is ConditionItemVO itemVO)
                     {
-                        var index = filterVOs.IndexOf(itemVO);
+                        var index = conditionVOs.IndexOf(itemVO);
 
                         var condition = conditions[index];
                         copiedConditions.Add(condition);
@@ -373,7 +373,7 @@ namespace TerminalMonitor.Windows.Controls
                         var condition = clipboardStatus == ItemClipboardStatus.Move ?
                             pastedCondition : (Condition)pastedCondition.Clone();
 
-                        FilterItemVO itemVO = CreateFilterVO(condition);
+                        ConditionItemVO itemVO = CreateConditionVO(condition);
 
                         return (condition, itemVO);
                     }).ToArray();
@@ -383,9 +383,9 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private static FilterItemVO CreateFilterVO(Condition condition)
+        private static ConditionItemVO CreateConditionVO(Condition condition)
         {
-            FilterItemVO item;
+            ConditionItemVO item;
             if (!String.IsNullOrEmpty(condition.Name))
             {
                 item = new()
@@ -423,7 +423,7 @@ namespace TerminalMonitor.Windows.Controls
                 return;
             }
 
-            FilterItemVO itemVO = CreateFilterVO(condition);
+            ConditionItemVO itemVO = CreateConditionVO(condition);
 
             InsertAtSelectedItem((condition, itemVO));
         }
@@ -434,7 +434,7 @@ namespace TerminalMonitor.Windows.Controls
 
             set
             {
-                filterVOs.Clear();
+                conditionVOs.Clear();
 
                 dataContextVO.PropertyChanged -= DataContextVO_PropertyChanged;
                 groupCondition = value ?? new();
@@ -447,7 +447,7 @@ namespace TerminalMonitor.Windows.Controls
                 conditions = groupCondition.Conditions;
                 foreach (Condition condition in conditions)
                 {
-                    filterVOs.Add(CreateFilterVO(condition));
+                    conditionVOs.Add(CreateConditionVO(condition));
                 }
 
                 dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
