@@ -5,7 +5,7 @@ using TerminalMonitor.Matchers;
 
 namespace TerminalMonitor.Windows.Controls
 {
-    class FilterItemVO : INotifyPropertyChanged
+    class ConditionItemVO : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)

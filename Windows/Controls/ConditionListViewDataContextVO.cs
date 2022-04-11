@@ -6,7 +6,7 @@ using TerminalMonitor.Matchers.Models;
 
 namespace TerminalMonitor.Windows.Controls
 {
-    class FilterListViewDataContextVO : INotifyPropertyChanged
+    class ConditionListViewDataContextVO : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

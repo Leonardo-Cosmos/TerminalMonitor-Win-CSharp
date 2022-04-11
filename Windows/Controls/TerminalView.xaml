@@ -50,7 +50,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <controls:FilterListView x:Name="filterConditionListView" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" />
+                <controls:ConditionListView x:Name="filterConditionListView" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" />
 
                 <Button Name="buttonFilter" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" Content="Filter" Click="ButtonFilter_Click" />
             </Grid>
@@ -70,7 +70,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <controls:FilterListView x:Name="findConditionListView" Grid.RowSpan="3" Grid.ColumnSpan="2" Panel.ZIndex="0" />
+                <controls:ConditionListView x:Name="findConditionListView" Grid.RowSpan="3" Grid.ColumnSpan="2" Panel.ZIndex="0" />
 
 
                 <StackPanel Name="gridFindResult" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" 
@@ -106,14 +106,18 @@
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                    <EventSetter Event="PreviewMouseDown" Handler="ListTerminalItemContainer_MouseDown" />
                 </Style>
             </ListView.ItemContainerStyle>
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Name="menuItemShowDetail" Header="Detail" Click="MenuItemShowDetail_Click" />
-                    <Separator />
                     <MenuItem Name="menuItemClear" Header="Clear All until This" Click="MenuItemClear_Click" />
                     <MenuItem Name="menuItemAutoScroll" Header="Auto Scroll" IsChecked="{Binding AutoScroll}" Click="MenuItemAutoScroll_Click" />
+                    <Separator />
+                    <MenuItem Name="menuItemAddFilterCondition" Header="Add to Filter" Click="MenuItemAddFilterCondition_Click" />
+                    <MenuItem Name="menuItemAddFindCondtion" Header="Add to Find" Click="MenuItemAddFindCondtion_Click" />
+                    <Separator />
+                    <MenuItem Name="menuItemShowDetail" Header="Detail" Click="MenuItemShowDetail_Click" />
                 </ContextMenu>
             </ListView.ContextMenu>
         </ListView>

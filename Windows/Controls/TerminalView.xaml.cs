@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -64,6 +65,10 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly List<(TerminalLineDto terminalLine, int shownIndex)> foundLines = new();
 
+        private string clickedColumnFieldKey;
+
+        private string clickedRowTerminalLineId;
+
         public TerminalView()
         {
             InitializeComponent();
@@ -117,7 +122,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void MenuItemShowDetail_Click(object sender, RoutedEventArgs e)
         {
-            ShowDetailWindow();
+            ShowDetailWindow(clickedRowTerminalLineId);
         }
 
         private void MenuItemClear_Click(object sender, RoutedEventArgs e)
@@ -130,14 +135,32 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.AutoScroll = !dataContextVO.AutoScroll;
         }
 
+        private void MenuItemAddFilterCondition_Click(object sender, RoutedEventArgs e)
+        {
+            AddClickedCellToConditionListView(filterConditionListView);
+        }
+
+        private void MenuItemAddFindCondtion_Click(object sender, RoutedEventArgs e)
+        {
+            AddClickedCellToConditionListView(findConditionListView);
+        }
+
         private void ListTerminal_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateFoundSelectedNumber();
         }
 
+        private void ListTerminalItemContainer_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if ((sender is ListViewItem item) && (item.Content is DataRowView rowView))
+            {
+                clickedRowTerminalLineId = (string)rowView[idColumnName];
+            }
+        }
+
         private void ListTerminal_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ShowDetailWindow();
+            ShowDetailWindow(clickedRowTerminalLineId);
         }
 
         private void ClearTerminal()
@@ -149,12 +172,11 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void ShowDetailWindow()
+        private void ShowDetailWindow(string terminalLineId)
         {
-            if (listTerminal.SelectedValue is DataRowView item)
+            if (terminalLineId != null)
             {
-                var id = (string)item[idColumnName];
-                var terminalLine = terminalLineSupervisor.TerminalLines[id];
+                var terminalLine = terminalLineSupervisor.TerminalLines[terminalLineId];
 
                 TerminalLineDetailWindow window = new()
                 {
@@ -164,6 +186,42 @@ namespace TerminalMonitor.Windows.Controls
                 };
                 window.Show();
             }
+        }
+
+        private void AddClickedCellToConditionListView(ConditionListView conditionListView)
+        {
+            var condition = ConvertClickedDataCellToCondition();
+            if (condition != null)
+            {
+                conditionListView.AddCondition(condition);
+            }
+        }
+
+        private Condition ConvertClickedDataCellToCondition()
+        {
+            if (clickedRowTerminalLineId == null || clickedColumnFieldKey == null)
+            {
+                return null;
+            }
+
+            var terminalLine = terminalLineSupervisor.TerminalLines[clickedRowTerminalLineId];
+            if (terminalLine == null)
+            {
+                return null;
+            }
+
+            var terminalLineFieldDict = terminalLine.LineFieldDict;
+            if (!terminalLineFieldDict.ContainsKey(clickedColumnFieldKey))
+            {
+                return null;
+            }
+
+            return new FieldCondition()
+            {
+                FieldKey = clickedColumnFieldKey,
+                MatchOperator = Matchers.TextMatchOperator.Equals,
+                TargetValue = terminalLineFieldDict[clickedColumnFieldKey].Text,
+            };
         }
 
         public void AddNewTerminalLines(IEnumerable<TerminalLineDto> terminalLineDtos)
@@ -216,6 +274,8 @@ namespace TerminalMonitor.Windows.Controls
             }
 
             AddMatchedTerminalLines();
+
+            FindInTerminal();
         }
 
         private void FindInTerminal()
@@ -415,7 +475,17 @@ namespace TerminalMonitor.Windows.Controls
                     GridViewColumn viewColumn;
                     if (visibleField.CustomizeStyle)
                     {
-                        DataTemplate dataTemplate = TerminalViewHelper.BuildFieldDataTemplate(visibleField, terminalDataTable);
+                        MouseButtonEventHandler mouseDownHandler = (sender, e) =>
+                        {
+                            clickedColumnFieldKey = visibleField.FieldKey;
+                        };
+
+                        DataTemplate dataTemplate = TerminalViewHelper.BuildFieldDataTemplate(
+                            visibleField, terminalDataTable,
+                            new TerminalViewHelper.RoutedEventHandlerRecord[] {
+                                new TerminalViewHelper.RoutedEventHandlerRecord(
+                                    MouseDownEvent, mouseDownHandler)
+                            });
 
                         viewColumn = new()
                         {
