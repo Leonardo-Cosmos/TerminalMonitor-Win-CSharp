@@ -6,114 +6,225 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TerminalMonitor.Models;
+using TerminalMonitor.Parsers;
+using static TerminalMonitor.Execution.ITerminalLineProducer;
 
 namespace TerminalMonitor.Execution
 {
-    class CommandExecutor
+    class CommandExecutor : IExecutor, ITerminalLineProducer
     {
-        private readonly string command;
+        private readonly List<string> executionNames = new();
 
-        private readonly string arguments = null;
+        private readonly Dictionary<string, Execution> executionDict = new();
 
-        private readonly string workingDirectory = null;
+        private readonly ConcurrentQueue<TerminalLineDto> terminalLineQueue = new();
 
-        private readonly ConcurrentQueue<string> terminalTextQueue = new();
+        private readonly BlockingCollection<TerminalLine> terminalLineCollection = new();
 
-        private bool started = false;
-
-        private class Execution : IExecution
+        public CommandExecutor()
         {
-            private readonly CommandExecutor executor;
+            _ = Task.Run(ParseTerminalLine);
+        }
 
-            private readonly Task processTask;
+        public void Execute(CommandConfig commandConfig)
+        {
+            Execution execution = new(commandConfig);
+            var name = GetValidExecutionName(commandConfig.Name);
 
-            internal Execution(CommandExecutor executor, Task processTask)
+            execution.LineReceived += (sender, e) =>
             {
-                this.executor = executor;
-                this.processTask = processTask;
+                TerminalLine terminalLine = new(Text: e.Line, ExecutionName: name);
+                terminalLineCollection.Add(terminalLine);
+            };
+
+            execution.Exited += (sender, e) =>
+            {
+                RemoveExecution(name, execution.Id, e.Exception);
+
+                Debug.Print($"Executor {name} completed.");
+            };
+
+            AddExecution(name, execution);
+
+            execution.Start();
+
+            Debug.Print($"Executor {name} is started");
+        }
+
+        public void Terminate(string executionName)
+        {
+            if (!executionDict.ContainsKey(executionName))
+            {
+                Debug.Print($"Executor {executionName} doesn't exist when terminate.");
+                return;
             }
 
-            public IEnumerable<string> ReadTerminalLines()
+            var execution = executionDict[executionName];
+            try
             {
-                return executor.ReadTerminalLines();
+                execution.Kill();
+                RemoveExecution(executionName, execution.Id);
+            }
+            catch (Exception ex)
+            {
+                RemoveExecution(executionName, execution.Id, ex);
+            }
+        }
+
+        public void TerminateAll()
+        {
+            foreach (var executionName in executionNames)
+            {
+                var execution = executionDict[executionName];
+                execution.Kill();
             }
 
-            public bool IsCompleted
+            executionNames.Clear();
+            executionDict.Clear();
+        }
+
+        public void Shutdown()
+        {
+            TerminateAll();
+            terminalLineCollection.CompleteAdding();
+        }
+
+        private string GetValidExecutionName(string configName)
+        {
+            if (!executionDict.ContainsKey(configName))
             {
-                get
+                return configName;
+            }
+
+            var number = 0;
+            string name;
+            do
+            {
+                number++;
+                name = $"{configName} {number}";
+            } while (executionDict.ContainsKey(name));
+
+            return name;
+        }
+
+        private void AddExecution(string name, Execution execution)
+        {
+            // Emit event when the first execution started.
+            if (executionNames.Count == 0)
+            {
+                OnStarted();
+            }
+
+            executionNames.Add(name);
+            executionDict.Add(name, execution);
+
+            OnExecutionStarted(name, execution.Id);
+        }
+
+        private void RemoveExecution(string name, string id, Exception exception = null)
+        {
+            executionNames.Remove(name);
+            executionDict.Remove(name);
+
+            OnExecutionExited(name, id, exception);
+
+            // Emit event when the last execution ended.
+            if (executionNames.Count == 0)
+            {
+                OnCompleted();
+            }
+        }
+
+        protected void OnExecutionStarted(string name, string id)
+        {
+            ExecutionInfoEventArgs e = new()
+            {
+                Execution = new()
                 {
-                    return processTask.IsCompleted;
+                    Id = id,
+                    Name = name,
+                    Status = ExecutionStatus.Started,
+                },
+            };
+            ExecutionStarted?.Invoke(this, e);
+        }
+
+        protected void OnExecutionExited(string name, string id, Exception exception)
+        {
+            var status = exception == null ? ExecutionStatus.Completed : ExecutionStatus.Error;
+            ExecutionInfoEventArgs e = new()
+            {
+                Execution = new()
+                {
+                    Id = id,
+                    Name = name,
+                    Status = status,
+                },
+
+                Exception = exception,
+            };
+            ExecutionExited?.Invoke(this, e);
+        }
+
+        protected void OnStarted()
+        {
+            IsCompleted = false;
+            Started?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void ParseTerminalLine()
+        {
+            while (true)
+            {
+                TerminalLine terminalLine;
+                try
+                {
+                    terminalLine = terminalLineCollection.Take();
+                }
+                catch (InvalidOperationException)
+                {
+                    Debug.WriteLine("Parse task done");
+                    break;
+                }
+
+                TerminalLineDto terminalLineDto =
+                    TerminalLineParser.ParseTerminalLine(terminalLine.Text, terminalLine.ExecutionName);
+                terminalLineQueue.Enqueue(terminalLineDto);
+            }
+        }
+
+        protected void OnCompleted()
+        {
+            IsCompleted = true;
+            Completed?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event ExecutionInfoEventHandler ExecutionStarted;
+
+        public event ExecutionInfoEventHandler ExecutionExited;
+
+        public event EventHandler Started;
+
+        public event EventHandler Completed;
+
+        public IEnumerable<TerminalLineDto> ReadTerminalLines()
+        {
+            List<TerminalLineDto> terminalLines = new();
+            while (!terminalLineQueue.IsEmpty)
+            {
+                if (terminalLineQueue.TryDequeue(out var terminalLine))
+                {
+                    terminalLines.Add(terminalLine);
                 }
             }
+            return terminalLines.AsEnumerable();
         }
 
-        public CommandExecutor(string command, string arguments = null, string workingDirectory = null)
+        public bool IsCompleted
         {
-            this.command = command;
-            this.arguments = arguments;
-            this.workingDirectory = workingDirectory;
+            get;
+            private set;
         }
-
-        public IExecution Execute()
-        {
-            if (started)
-            {
-                throw new InvalidOperationException("It has been started already.");
-            }
-
-            var task = Start();
-            started = true;
-            return new Execution(this, task);
-        }
-
-        private async Task Start()
-        {
-            if (!String.IsNullOrEmpty(command))
-            {
-                var process = new Process();
-                process.StartInfo.FileName = command;
-                if (!String.IsNullOrWhiteSpace(arguments))
-                {
-                    process.StartInfo.Arguments = arguments;
-                }
-                if (!String.IsNullOrWhiteSpace(workingDirectory))
-                {
-                    process.StartInfo.WorkingDirectory = workingDirectory;
-                }
-
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.RedirectStandardOutput = true;
-                process.OutputDataReceived += (sender, e) =>
-                {
-
-                    if (!String.IsNullOrEmpty(e.Data))
-                    {
-                        terminalTextQueue.Enqueue(e.Data);
-                    }
-
-                };
-
-                process.Start();
-
-                process.BeginOutputReadLine();
-
-                await process.WaitForExitAsync();
-                process.Close();
-            }
-        }
-
-        IEnumerable<string> ReadTerminalLines()
-        {
-            List<string> lines = new();
-            while (!terminalTextQueue.IsEmpty)
-            {
-                if (terminalTextQueue.TryDequeue(out var line))
-                {
-                    lines.Add(line);
-                }
-            }
-            return lines.AsEnumerable();
-        }
-
     }
 }

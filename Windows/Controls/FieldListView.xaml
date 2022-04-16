@@ -5,41 +5,49 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=local:FieldItemVO}"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DataContext="{d:DesignInstance Type=local:FieldListViewDataContextVO}"
+             d:DesignHeight="150" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <Label Name="lblKey" Grid.Row="0" Grid.Column="0" Content="Key" />
-        <TextBox Name="txtBxKey" Grid.Row="0" Grid.Column="1" Text="{Binding FieldKey}" />
-
-        <Grid Name="grdButton" Grid.Row="0" Grid.Column="2">
+        <Grid Name="grdButton" Grid.Row="1" Grid.Column="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="+" ToolTip="Add" Click="BtnAdd_Click" />
-            <Button Name="btnModify" Grid.Column="1" Width="20" Content="*" ToolTip="Modify" Click="BtnModify_Click" />
-            <Button Name="btnDelete" Grid.Column="2" Width="20" Content="-" ToolTip="Delete" Click="BtnDelete_Click" />
-            <Button Name="btnMoveLeft" Grid.Column="3" Width="20" Content="←" ToolTip="Move Left" Click="BtnMoveLeft_Click" />
-            <Button Name="btnMoveRight" Grid.Column="4" Width="20" Content="→" ToolTip="Move Right" Click="BtnMoveRight_Click" />
+            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Command="{Binding Path=AddCommand}" />
+            <Button Name="btnRemove" Grid.Column="1" Width="20" Content="➖" ToolTip="Remove" Command="{Binding Path=RemoveCommand}" />
+            <Button Name="btnEdit" Grid.Column="2" Width="20" Content="✏" ToolTip="Edit" Command="{Binding Path=EditCommand}" />
+            <Button Name="btnMoveLeft" Grid.Column="3" Width="20" Content="←" ToolTip="Move Left" Command="{Binding Path=MoveLeftCommand}" />
+            <Button Name="btnMoveRight" Grid.Column="4" Width="20" Content="→" ToolTip="Move Right" Command="{Binding Path=MoveRightCommand}" />
         </Grid>
 
-        <Label Name="lblFields" Grid.Row="1" Grid.Column="0" Content="Fields" />
-        <ListView Name="lstFields" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Grid.ColumnSpan="2" MinHeight="25"
-                  SelectionMode="Single" SelectionChanged="LstFields_SelectionChanged">
+        <ListView Name="lstFields" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" MinHeight="25"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  SelectionChanged="LstFields_SelectionChanged"
+                  MouseDown="LstFields_MouseDown" MouseDoubleClick="LstFields_MouseDoubleClick">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Edit" Icon="✏" Command="{Binding Path=EditCommand}" />
+                    <Separator />
+                    <MenuItem Header="Cut" Icon="✂" Command="{Binding Path=CutCommand}" />
+                    <MenuItem Header="Copy" Icon="📄" Command="{Binding Path=CopyCommand}" />
+                    <MenuItem Header="Paste" Icon="📋" Command="{Binding Path=PasteCommnad}" />
+                    <Separator />
+                    <MenuItem Header="Add" Icon="➕" Command="{Binding Path=AddCommand}" />
+                    <MenuItem Header="Remove" Icon="➖" Command="{Binding Path=RemoveCommand}" />
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel></WrapPanel>
@@ -47,7 +55,7 @@
             </ListView.ItemsPanel>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border BorderBrush="SkyBlue" BorderThickness="1">
+                    <Border BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" BorderThickness="1">
                         <TextBlock Text="{Binding FieldKey}" Margin="3" />
                     </Border>
                 </DataTemplate>

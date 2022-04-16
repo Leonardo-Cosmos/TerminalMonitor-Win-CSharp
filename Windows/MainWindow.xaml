@@ -4,43 +4,44 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TerminalMonitor" 
+        xmlns:props="clr-namespace:TerminalMonitor.Properties"
         xmlns:controls="clr-namespace:TerminalMonitor.Windows.Controls"
         mc:Ignorable="d"
-        Title="TerminalMonitor" Height="450" Width="800" Loaded="Window_Loaded" Closing="Window_Closing">
+        Title="TerminalMonitor" 
+        Height="{Binding Source={x:Static props:WindowSettings.Default},
+            Path=WindowHeight, Mode=TwoWay}"
+        Width="{Binding Source={x:Static props:WindowSettings.Default},
+            Path=WindowWidth, Mode=TwoWay}" 
+        Top="{Binding Source={x:Static props:WindowSettings.Default},
+            Path=WindowTop, Mode=TwoWay}"
+        Left="{Binding Source={x:Static props:WindowSettings.Default},
+            Path=WindowLeft, Mode=TwoWay}"
+        Loaded="Window_Loaded" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="*" MinHeight="100" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" MinHeight="100" />
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="150" MaxWidth="800" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-        <Expander Name="expanderCommand" Grid.Row="0" Header="Command" IsExpanded="True">
-            <Grid Name="gridCommand" Margin="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <Label Name="labelCommand" Grid.Row="0" Grid.Column="0" Content="Command" />
-                <TextBox Name="textBoxCommand" Grid.Row="0" Grid.Column="1" />
-                <Button Name="buttonExecute" Grid.Row="0" Grid.Column="2" Margin="2" Content="Run" Click="ButtonExecute_Click" />
-
-                <Label Name="labelArguments" Grid.Row="1" Grid.Column="0" Content="Arguments" />
-                <TextBox Name="textBoxArguments" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" />
-
-                <Label Name="labelWorkDir" Grid.Row="2" Grid.Column="0" Content="Working Directory" />
-                <TextBox Name="textBoxWorkDir" Grid.Row="2" Grid.Column="1" />
-                <Button Name="buttonBrowseWorkDir" Grid.Row="2" Grid.Column="2" Margin="2" Content="Browse" Click="ButtonBrowseWorkDir_Click" />
-            </Grid>
+        <Expander Name="expanderCommand" Grid.Row="0" Grid.Column="0" Header="Command" IsExpanded="True">
+            <controls:CommandListView x:Name="commandListView" />
         </Expander>
 
-        <controls:TerminalView x:Name="terminalView" Grid.Row="1" />
+        <GridSplitter Grid.Row="1" Grid.Column="0" Height="5" HorizontalAlignment="Stretch" />
+
+        <Expander Name="expanderExecution" Grid.Row="2" Grid.Column="0" Header="Execution" IsExpanded="True">
+            <controls:ExecutionListView x:Name="executionListView" />
+        </Expander>
+
+        <GridSplitter Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+
+        <controls:TerminalTabControl x:Name="terminalTabControl" Grid.Row="0" Grid.RowSpan="3" Grid.Column="2" />
 
     </Grid>
 </Window>

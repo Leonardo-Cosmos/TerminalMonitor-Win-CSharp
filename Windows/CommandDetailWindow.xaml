@@ -1,0 +1,61 @@
+﻿<Window x:Class="TerminalMonitor.Windows.CommandDetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TerminalMonitor.Windows"
+        xmlns:rules="clr-namespace:TerminalMonitor.Windows.ValidationRules"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=local:CommandDetailWindowDataContextVO}"
+        Title="Command Detail" Height="450" Width="800">
+    <StackPanel>
+        <Grid Name="grdCommand">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Label Name="lblName" Grid.Row="0" Grid.Column="0" Content="Name (*)" />
+            <TextBox Name="txtBxName" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+                     Style="{StaticResource textBoxInValidation}"
+                     Validation.ErrorTemplate="{StaticResource validationTemplate}"/>
+
+            <Label Name="lblCommand" Grid.Row="1" Grid.Column="0" Content="Command (*)" />
+            <TextBox Name="txtBxCommand" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                     Style="{StaticResource textBoxInValidation}"
+                     Validation.ErrorTemplate="{StaticResource validationTemplate}">
+                <TextBox.Text>
+                    <Binding Path="StartFile" UpdateSourceTrigger="PropertyChanged">
+                        <Binding.ValidationRules>
+                            <rules:NotEmptyRule ErrorMessage="Command is required" />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+
+            <Label Name="lblArguments" Grid.Row="2" Grid.Column="0" Content="Arguments" />
+            <TextBox Name="txtBxArguments" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding Arguments}" />
+
+            <Label Name="lblWorkDir" Grid.Row="3" Grid.Column="0" Content="Working Directory" />
+            <TextBox Name="txtBoxWorkDir" Grid.Row="3" Grid.Column="1" Text="{Binding WorkDirectory}" />
+            <Button Name="btnBrowseWorkDir" Grid.Row="3" Grid.Column="2" Margin="2" Content="Browse" Click="BtnBrowseWorkDir_Click" />
+        </Grid>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Button Name="btnSave" Grid.Column="1" Content="Save" Click="BtnSave_Click" />
+        </Grid>
+    </StackPanel>
+</Window>

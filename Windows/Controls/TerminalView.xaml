@@ -13,50 +13,111 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid Name="gridVisibleFields" Grid.Row="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+        <Expander Name="expanderFields" Grid.Row="0" Header="Visible Fields" IsExpanded="True">
+            <Grid Name="gridVisibleFields">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-            <Expander Name="expanderFields" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" Header="Visible Fields" IsExpanded="True">
-                <controls:FieldListView x:Name="fieldListView" />
-            </Expander>
+                <controls:FieldListView x:Name="fieldListView" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" />
 
-            <Button Name="buttonApplyFields" Grid.Row="0" Grid.Column="1" Panel.ZIndex="1" Content="Apply" Click="ButtonApplyFields_Click" />
-        </Grid>
-        
-        <Grid Name="gridFilters" Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+                <Button Name="buttonApplyFields" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" Content="Apply" Click="ButtonApplyFields_Click" />
+            </Grid>
+        </Expander>
 
-            <Expander Name="expanderFilters" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" Header="Filters" IsExpanded="True">
-                <controls:FilterListView x:Name="filterView" />
-            </Expander>
+        <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" />
 
-            <Button Name="buttonFilter" Grid.Row="0" Grid.Column="1" Panel.ZIndex="1" Content="Filter" Click="ButtonFilter_Click" />
-        </Grid>
 
-        <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" />
+        <Expander Name="expanderFilter" Grid.Row="2" Header="Filter" IsExpanded="True">
+            <Grid Name="gridFilter">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-        <ListView Name="listTerminal" Grid.Row="3">
+                <controls:ConditionListView x:Name="filterConditionListView" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" />
+
+                <Button Name="buttonFilter" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" Content="Filter" Click="ButtonFilter_Click" />
+            </Grid>
+        </Expander>
+
+        <GridSplitter Grid.Row="3" Height="5" HorizontalAlignment="Stretch" />
+
+        <Expander Name="expanderFind" Grid.Row="4" Header="Find" IsExpanded="True">
+            <Grid Name="gridFind">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <controls:ConditionListView x:Name="findConditionListView" Grid.RowSpan="3" Grid.ColumnSpan="2" Panel.ZIndex="0" />
+
+
+                <StackPanel Name="gridFindResult" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" 
+                        HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Label Content="{Binding FoundSelectedNumber}" />
+                    <Label Content="/" />
+                    <Label Content="{Binding FoundCount}" />
+                </StackPanel>
+
+                <Grid Name="gridFindButton" Grid.Row="2" Grid.Column="1" Panel.ZIndex="1">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Name="buttonFind" Grid.Column="0" Content="Find" ToolTip="Find" Click="ButtonFind_Click" />
+                    <Button Name="buttonFindFirst" Grid.Column="1" Width="20" Content="⬆" ToolTip="Find First" Click="ButtonFindFirst_Click" />
+                    <Button Name="buttonFindPrevious" Grid.Column="2" Width="20" Content="↑" ToolTip="Find Previous" Click="ButtonFindPrevious_Click" />
+                    <Button Name="buttonFindNext" Grid.Column="3" Width="20" Content="↓" ToolTip="Find Next" Click="ButtonFindNext_Click" />
+                    <Button Name="buttonFindLast" Grid.Column="4" Width="20" Content="⬇" ToolTip="Find Last" Click="ButtonFindLast_Click" />
+                </Grid>
+            </Grid>
+        </Expander>
+
+        <GridSplitter Grid.Row="5" Height="5" HorizontalAlignment="Stretch" />
+
+        <ListView Name="listTerminal" Grid.Row="6" SelectionMode="Single" SelectionChanged="ListTerminal_SelectionChanged" MouseDoubleClick="ListTerminal_MouseDoubleClick">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                    <EventSetter Event="PreviewMouseDown" Handler="ListTerminalItemContainer_MouseDown" />
+                </Style>
+            </ListView.ItemContainerStyle>
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Name="menuItemClear" Header="Clear" Click="MenuItemClear_Click" />
+                    <MenuItem Name="menuItemClear" Header="Clear All until This" Click="MenuItemClear_Click" />
                     <MenuItem Name="menuItemAutoScroll" Header="Auto Scroll" IsChecked="{Binding AutoScroll}" Click="MenuItemAutoScroll_Click" />
+                    <Separator />
+                    <MenuItem Name="menuItemAddFilterCondition" Header="Add to Filter" Click="MenuItemAddFilterCondition_Click" />
+                    <MenuItem Name="menuItemAddFindCondtion" Header="Add to Find" Click="MenuItemAddFindCondtion_Click" />
+                    <Separator />
+                    <MenuItem Name="menuItemShowDetail" Header="Detail" Click="MenuItemShowDetail_Click" />
                 </ContextMenu>
             </ListView.ContextMenu>
         </ListView>

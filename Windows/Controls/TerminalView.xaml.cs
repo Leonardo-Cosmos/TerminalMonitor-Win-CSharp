@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,10 +18,15 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using TerminalMonitor.Clipboard;
 using TerminalMonitor.Execution;
 using TerminalMonitor.Matchers;
+using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
-using TerminalMonitor.Parsers;
+using TerminalMonitor.Models.Settings;
+using TerminalMonitor.Terminal;
+using TerminalMonitor.Windows.Converters;
+using Condition = TerminalMonitor.Matchers.Models.Condition;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -28,54 +35,99 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class TerminalView : UserControl
     {
-        private const string defaultColumn = "PlainText";
+        private ITerminalSupervisor terminalLineSupervisor;
 
-        private readonly List<TerminalLineVO> terminalLineVOs = new();
+        private const string idColumnName = "Id";
+
+        private const string plaintextColumnName = "PlainText";
+
+        private const string invalidNumber = "?";
+
+        private const string beforeLineNumber = "-";
+
+        private const string afterLineNumber = "+";
 
         private readonly DataTable terminalDataTable = new();
 
-        private DispatcherTimer timer;
+        private List<FieldDisplayDetail> visibleFields = new();
 
-        private IEnumerable<FieldDisplayDetail> visibleFields = Array.Empty<FieldDisplayDetail>();
-        private IEnumerable<FilterCondition> filterConditions = Array.Empty<FilterCondition>();
+        private readonly TerminalViewColumnSettingHelper columnSettingHelper = new();
 
-        private readonly TerminalViewDataContextVO dataContextVO = new();
+        private GroupCondition filterCondition = new();
+
+        private GroupCondition findCondition = new();
+
+        private readonly TerminalViewDataContextVO dataContextVO;
+
+        private readonly Dictionary<string, bool> lineFilterDict = new();
+
+        private readonly List<TerminalLineDto> shownLines = new();
+
+        private readonly List<(TerminalLineDto terminalLine, int shownIndex)> foundLines = new();
+
+        private string clickedColumnFieldKey;
+
+        private string clickedRowTerminalLineId;
 
         public TerminalView()
         {
             InitializeComponent();
 
+            dataContextVO = new()
+            {
+                FoundSelectedNumber = invalidNumber,
+                FoundCount = 0,
+            };
+
             DataContext = dataContextVO;
+            listTerminal.DataContext = dataContextVO;
+            listTerminal.ContextMenu.DataContext = dataContextVO;
             ApplyVisibleField();
         }
 
         private void ButtonApplyFields_Click(object sender, RoutedEventArgs e)
         {
-            PauseTimer();
-
-            visibleFields = fieldListView.FieldKeys.ToArray();
             ApplyVisibleField();
-
-            ResumeTimer();
         }
 
         private void ButtonFilter_Click(object sender, RoutedEventArgs e)
         {
-            PauseTimer();
-
-            filterConditions = filterView.FilterConditions.ToArray();
             FilterTerminal();
+        }
 
-            ResumeTimer();
+        private void ButtonFind_Click(object sender, RoutedEventArgs e)
+        {
+            FindInTerminal();
+        }
+
+        private void ButtonFindPrevious_Click(object sender, RoutedEventArgs e)
+        {
+            FindPrevious();
+        }
+
+        private void ButtonFindNext_Click(object sender, RoutedEventArgs e)
+        {
+            FindNext();
+        }
+
+        private void ButtonFindFirst_Click(object sender, RoutedEventArgs e)
+        {
+            FindFirst();
+        }
+
+        private void ButtonFindLast_Click(object sender, RoutedEventArgs e)
+        {
+            FindLast();
+        }
+
+        private void MenuItemShowDetail_Click(object sender, RoutedEventArgs e)
+        {
+            ShowDetailWindow(clickedRowTerminalLineId);
         }
 
         private void MenuItemClear_Click(object sender, RoutedEventArgs e)
         {
-            PauseTimer();
-
             ClearTerminal();
-
-            ResumeTimer();
         }
 
         private void MenuItemAutoScroll_Click(object sender, RoutedEventArgs e)
@@ -83,155 +135,395 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.AutoScroll = !dataContextVO.AutoScroll;
         }
 
-        public void AddExecution(IExecution execution)
+        private void MenuItemAddFilterCondition_Click(object sender, RoutedEventArgs e)
         {
-            StartTimer(execution);
+            AddClickedCellToConditionListView(filterConditionListView);
         }
 
-        private void StartTimer(IExecution execution)
+        private void MenuItemAddFindCondtion_Click(object sender, RoutedEventArgs e)
         {
-            timer = new();
-            timer.Tick += (sender, e) =>
+            AddClickedCellToConditionListView(findConditionListView);
+        }
+
+        private void ListTerminal_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateFoundSelectedNumber();
+        }
+
+        private void ListTerminalItemContainer_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if ((sender is ListViewItem item) && (item.Content is DataRowView rowView))
             {
-                var lines = execution.ReadTerminalLines();
-                foreach (var line in lines)
-                {
-                    ParseTerminalLine(line);
-                }
-
-                if (execution.IsCompleted)
-                {
-                    timer.Stop();
-                    ParseTerminalLine("Task is completed");
-                }
-
-            };
-            timer.Interval = new TimeSpan(0, 0, 1);
-            timer.Start();
+                clickedRowTerminalLineId = (string)rowView[idColumnName];
+            }
         }
 
-        private void PauseTimer()
+        private void ListTerminal_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            timer.Stop();
-        }
-
-        private void ResumeTimer()
-        {
-            timer.Start();
+            ShowDetailWindow(clickedRowTerminalLineId);
         }
 
         private void ClearTerminal()
         {
-            terminalLineVOs.Clear();
-            terminalDataTable.Rows.Clear();
+            if (listTerminal.SelectedValue is DataRowView item)
+            {
+                var id = (string)item[idColumnName];
+                terminalLineSupervisor.RemoveTerminalLinesUntil(id);
+            }
         }
 
-        private void ParseTerminalLine(string text)
+        private void ShowDetailWindow(string terminalLineId)
         {
-            var terminalLineVO = JsonParser.ParseTerminalLineToVO(text);
-            terminalLineVOs.Add(terminalLineVO);
-
-
-            terminalLineVO.Matched = TerminalLineMatcher.IsMatch(terminalLineVO, filterConditions);
-            if (terminalLineVO.Matched)
+            if (terminalLineId != null)
             {
-                AddTerminalLine(terminalLineVO);
+                var terminalLine = terminalLineSupervisor.TerminalLines[terminalLineId];
 
-                if (dataContextVO.AutoScroll)
+                TerminalLineDetailWindow window = new()
                 {
-                    var itemCount = listTerminal.Items.Count;
-                    var lastItem = listTerminal.Items[itemCount - 1];
-                    listTerminal.ScrollIntoView(lastItem);
+                    TerminalLine = terminalLine,
+                    ConditionListClipboard = findConditionListView.ConditionListClipboard,
+                    ConditionTreeClipboard = findConditionListView.ConditionTreeClipboard,
+                };
+                window.Show();
+            }
+        }
+
+        private void AddClickedCellToConditionListView(ConditionListView conditionListView)
+        {
+            var condition = ConvertClickedDataCellToCondition();
+            if (condition != null)
+            {
+                conditionListView.AddCondition(condition);
+            }
+        }
+
+        private Condition ConvertClickedDataCellToCondition()
+        {
+            if (clickedRowTerminalLineId == null || clickedColumnFieldKey == null)
+            {
+                return null;
+            }
+
+            var terminalLine = terminalLineSupervisor.TerminalLines[clickedRowTerminalLineId];
+            if (terminalLine == null)
+            {
+                return null;
+            }
+
+            var terminalLineFieldDict = terminalLine.LineFieldDict;
+            if (!terminalLineFieldDict.ContainsKey(clickedColumnFieldKey))
+            {
+                return null;
+            }
+
+            return new FieldCondition()
+            {
+                FieldKey = clickedColumnFieldKey,
+                MatchOperator = Matchers.TextMatchOperator.Equals,
+                TargetValue = terminalLineFieldDict[clickedColumnFieldKey].Text,
+            };
+        }
+
+        public void AddNewTerminalLines(IEnumerable<TerminalLineDto> terminalLineDtos)
+        {
+            var isAnyAdded = false;
+            foreach (var terminalLineDto in terminalLineDtos)
+            {
+                var matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterCondition);
+                lineFilterDict.Add(terminalLineDto.Id, matched);
+
+                if (matched)
+                {
+                    shownLines.Add(terminalLineDto);
+                    AddTerminalLine(terminalLineDto);
+                    isAnyAdded = true;
                 }
+            }
+
+            if (isAnyAdded && dataContextVO.AutoScroll)
+            {
+                var itemCount = listTerminal.Items.Count;
+                var lastItem = listTerminal.Items[itemCount - 1];
+                listTerminal.ScrollIntoView(lastItem);
             }
         }
 
         private void FilterTerminal()
         {
-            TerminalLineMatcher matcher = new (filterConditions);
-            foreach (var terminalLineVO in terminalLineVOs)
+            filterCondition = (GroupCondition)filterConditionListView.Condition.Clone();
+
+            if (terminalLineSupervisor == null)
             {
-                terminalLineVO.Matched = matcher.IsMatch(terminalLineVO);
+                return;
+            }
+
+            terminalDataTable.Rows.Clear();
+
+            lineFilterDict.Clear();
+            shownLines.Clear();
+            TerminalLineMatcher matcher = new(filterCondition);
+            foreach (var terminalLineDto in terminalLineSupervisor.TerminalLines)
+            {
+                var matched = matcher.IsMatch(terminalLineDto);
+                lineFilterDict.Add(terminalLineDto.Id, matched);
+
+                if (matched)
+                {
+                    shownLines.Add(terminalLineDto);
+                }
             }
 
             AddMatchedTerminalLines();
+
+            FindInTerminal();
         }
 
-        private static string GetForegroundColumnName(string columnName)
+        private void FindInTerminal()
         {
-            return $"{columnName}__foreground";
+            findCondition = (GroupCondition)findConditionListView.Condition.Clone();
+            foundLines.Clear();
+
+            TerminalLineMatcher matcher = new(findCondition);
+            for (var i = 0; i < shownLines.Count; i++)
+            {
+                var terminalLineDto = shownLines[i];
+                var found = matcher.IsMatch(terminalLineDto);
+                if (found)
+                {
+                    foundLines.Add((terminalLine: terminalLineDto, shownIndex: i));
+                }
+            }
+
+            dataContextVO.FoundCount = foundLines.Count;
+
+            UpdateFoundSelectedNumber();
         }
 
-        private static string GetBackgroundColumnName(string columnName)
+        private void UpdateFoundSelectedNumber()
         {
-            return $"{columnName}__background";
+            if (!foundLines.Any())
+            {
+                dataContextVO.FoundSelectedNumber = invalidNumber;
+                return;
+            }
+
+            var selectedIndex = listTerminal.SelectedIndex;
+
+            if (selectedIndex == -1)
+            {
+                dataContextVO.FoundSelectedNumber = invalidNumber;
+            }
+            else if (selectedIndex < foundLines.First().shownIndex)
+            {
+                dataContextVO.FoundSelectedNumber = beforeLineNumber;
+            }
+            else if (selectedIndex > foundLines.Last().shownIndex)
+            {
+                dataContextVO.FoundSelectedNumber = afterLineNumber;
+            }
+            else
+            {
+
+                for (int i = 0; i < foundLines.Count; i++)
+                {
+                    var lineTuple = foundLines[i];
+
+                    if (lineTuple.shownIndex == selectedIndex)
+                    {
+                        dataContextVO.FoundSelectedNumber = (i + 1).ToString();
+
+                        break;
+                    }
+                    else if (lineTuple.shownIndex > selectedIndex)
+                    {
+                        dataContextVO.FoundSelectedNumber = $"{i}{afterLineNumber}";
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void FindPrevious()
+        {
+            if (foundLines.Count == 0)
+            {
+                return;
+            }
+
+            var selectedIndex = listTerminal.SelectedIndex;
+
+            if (selectedIndex == -1)
+            {
+                FindLast();
+                return;
+            }
+
+            for (int i = foundLines.Count - 1; i >= 0; i--)
+            {
+                var lineTuple = foundLines[i];
+                if (lineTuple.shownIndex < selectedIndex)
+                {
+                    listTerminal.SelectedIndex = lineTuple.shownIndex;
+                    listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+
+                    dataContextVO.FoundSelectedNumber = (i + 1).ToString();
+                    return;
+                }
+            }
+
+            FindLast();
+        }
+
+        private void FindNext()
+        {
+            if (foundLines.Count == 0)
+            {
+                return;
+            }
+
+            var selectedIndex = listTerminal.SelectedIndex;
+
+            if (selectedIndex == -1)
+            {
+                FindFirst();
+                return;
+            }
+
+            for (int i = 0; i < foundLines.Count; i++)
+            {
+                var lineTuple = foundLines[i];
+                if (lineTuple.shownIndex > selectedIndex)
+                {
+                    listTerminal.SelectedIndex = lineTuple.shownIndex;
+                    listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+
+                    dataContextVO.FoundSelectedNumber = (i + 1).ToString();
+                    return;
+                }
+            }
+
+            FindFirst();
+        }
+
+        private void FindFirst()
+        {
+            if (foundLines.Count == 0)
+            {
+                return;
+            }
+
+            var selectedIndex = listTerminal.SelectedIndex;
+
+            (TerminalLineDto terminalLine, int shownIndex) lineTuple = foundLines.First();
+
+            if (selectedIndex != lineTuple.shownIndex)
+            {
+                listTerminal.SelectedIndex = lineTuple.shownIndex;
+                listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+            }
+
+            dataContextVO.FoundSelectedNumber = 1.ToString();
+        }
+
+        private void FindLast()
+        {
+            if (foundLines.Count == 0)
+            {
+                return;
+            }
+
+            var selectedIndex = listTerminal.SelectedIndex;
+
+            (TerminalLineDto terminalLine, int shownIndex) lineTuple = foundLines.Last();
+
+            if (selectedIndex != lineTuple.shownIndex)
+            {
+                listTerminal.SelectedIndex = lineTuple.shownIndex;
+                listTerminal.ScrollIntoView(listTerminal.SelectedItem);
+            }
+
+            dataContextVO.FoundSelectedNumber = foundLines.Count.ToString();
         }
 
         private void ApplyVisibleField()
         {
+            // Save current column settings before reload grid.
+            var gridViewColumnSettings = columnSettingHelper.GetGridViewColumnSettings();
+
+            visibleFields = columnSettingHelper.Init(fieldListView.Fields);
+
             GridView gridView = new();
 
             terminalDataTable.Columns.Clear();
             terminalDataTable.Rows.Clear();
+
+            DataColumn idColumn = new(idColumnName);
+            idColumn.DataType = typeof(string);
+            terminalDataTable.Columns.Add(idColumn);
+
             if (visibleFields.Any())
             {
+                /*
+                 * Add selected visible fields.
+                 */
                 foreach (var visibleField in visibleFields)
                 {
-                    DataColumn column = new(visibleField.FieldKey);
+                    DataColumn column = new(visibleField.Id);
                     column.DataType = typeof(string);
                     terminalDataTable.Columns.Add(column);
 
+                    GridViewColumn viewColumn;
                     if (visibleField.CustomizeStyle)
                     {
-                        DataColumn foregroundColumn = new(GetForegroundColumnName(visibleField.FieldKey));
-                        foregroundColumn.DataType = typeof(Brush);
-                        terminalDataTable.Columns.Add(foregroundColumn);
+                        MouseButtonEventHandler mouseDownHandler = (sender, e) =>
+                        {
+                            clickedColumnFieldKey = visibleField.FieldKey;
+                        };
 
-                        DataColumn backgroundColumn = new(GetBackgroundColumnName(visibleField.FieldKey));
-                        backgroundColumn.DataType = typeof(Brush);
-                        terminalDataTable.Columns.Add(backgroundColumn);
+                        DataTemplate dataTemplate = TerminalViewHelper.BuildFieldDataTemplate(
+                            visibleField, terminalDataTable,
+                            new TerminalViewHelper.RoutedEventHandlerRecord[] {
+                                new TerminalViewHelper.RoutedEventHandlerRecord(
+                                    MouseDownEvent, mouseDownHandler)
+                            });
 
-                        FrameworkElementFactory fef = new(typeof(TextBlock));
-                        Binding textBinding = new();
-                        textBinding.Path = new PropertyPath(visibleField.FieldKey, Array.Empty<object>());
-                        fef.SetBinding(TextBlock.TextProperty, textBinding);
-                        Binding foregroundBinding = new();
-                        foregroundBinding.Path = new PropertyPath(GetForegroundColumnName(visibleField.FieldKey), Array.Empty<object>());
-                        fef.SetBinding(TextBlock.ForegroundProperty, foregroundBinding);
-                        Binding backgroundBinding = new();
-                        backgroundBinding.Path = new PropertyPath(GetBackgroundColumnName(visibleField.FieldKey), Array.Empty<object>());
-                        fef.SetBinding(TextBlock.BackgroundProperty, backgroundBinding);
-                        DataTemplate dataTemplate = new();
-                        dataTemplate.VisualTree = fef;
-
-                        gridView.Columns.Add(new GridViewColumn()
+                        viewColumn = new()
                         {
                             Header = visibleField.FieldKey,
                             CellTemplate = dataTemplate,
-                        });
+                        };
                     }
                     else
                     {
-                        gridView.Columns.Add(new GridViewColumn()
+                        viewColumn = new()
                         {
                             Header = visibleField.FieldKey,
-                            DisplayMemberBinding = new Binding(visibleField.FieldKey),
-                        });
+                            DisplayMemberBinding = new Binding(visibleField.Id),
+                        };
                     }
+
+                    gridView.Columns.Add(viewColumn);
+                    columnSettingHelper.AddColumn(visibleField.Id, viewColumn);
                 }
             }
             else
             {
-                DataColumn column = new(defaultColumn);
-                column.DataType = typeof(string);
-                terminalDataTable.Columns.Add(column);
+                /*
+                 * Add default column when no visible field selected.
+                 */
+                DataColumn defaultColumn = new(plaintextColumnName);
+                defaultColumn.DataType = typeof(string);
+                terminalDataTable.Columns.Add(defaultColumn);
 
                 gridView.Columns.Add(new GridViewColumn()
                 {
-                    Header = defaultColumn,
-                    DisplayMemberBinding = new Binding(defaultColumn),
+                    Header = plaintextColumnName,
+                    DisplayMemberBinding = new Binding(plaintextColumnName),
                 });
             }
+
+            // Recover column settings. 
+            columnSettingHelper.SetGridViewColumnSettings(gridViewColumnSettings);
 
             AddMatchedTerminalLines();
 
@@ -241,33 +533,33 @@ namespace TerminalMonitor.Windows.Controls
             listTerminal.SetBinding(ItemsControl.ItemsSourceProperty, binding);
         }
 
-        private void AddTerminalLine(TerminalLineVO terminalLineVO)
+        private void AddTerminalLine(TerminalLineDto terminalLineDto)
         {
             DataRow row = terminalDataTable.NewRow();
+
+            row[idColumnName] = terminalLineDto.Id;
 
             if (visibleFields.Any())
             {
                 foreach (var visibleField in visibleFields)
                 {
-                    var fieldValue = terminalLineVO.ParsedFieldDict.ContainsKey(visibleField.FieldKey) ?
-                    terminalLineVO.ParsedFieldDict[visibleField.FieldKey] : "";
+                    var fieldValue = terminalLineDto.LineFieldDict.ContainsKey(visibleField.FieldKey) ?
+                        terminalLineDto.LineFieldDict[visibleField.FieldKey].Text : "";
 
-                    row[visibleField.FieldKey] = fieldValue;
+                    row[visibleField.Id] = fieldValue;
 
                     if (visibleField.CustomizeStyle)
                     {
                         var matchedTextStyleCondition = visibleField.Conditions.FirstOrDefault(
-                            textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineVO, textStyleCondition.Condition));
-                        var textStyle = matchedTextStyleCondition?.Style ?? visibleField.Style;
+                            textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineDto, textStyleCondition.Condition));
 
-                        row[GetForegroundColumnName(visibleField.FieldKey)] = new SolidColorBrush(textStyle.Foreground);
-                        row[GetBackgroundColumnName(visibleField.FieldKey)] = new SolidColorBrush(textStyle.Background);
+                        TerminalViewHelper.BuildDataRowStyleCells(row, visibleField, matchedTextStyleCondition?.Style);
                     }
-                }              
+                }
             }
             else
             {
-                row[defaultColumn] = terminalLineVO.PlainText;
+                row[plaintextColumnName] = terminalLineDto.PlainText;
             }
 
             terminalDataTable.Rows.Add(row);
@@ -275,13 +567,132 @@ namespace TerminalMonitor.Windows.Controls
 
         private void AddMatchedTerminalLines()
         {
-            foreach (var terminalLineVO in terminalLineVOs)
+            if (terminalLineSupervisor == null)
             {
-                if (terminalLineVO.Matched)
-                {
-                    AddTerminalLine(terminalLineVO);
-                }                
+                return;
             }
+
+            foreach (var terminalLineDto in terminalLineSupervisor.TerminalLines)
+            {
+                bool matched;
+                if (lineFilterDict.ContainsKey(terminalLineDto.Id))
+                {
+                    matched = lineFilterDict[terminalLineDto.Id];
+                }
+                else
+                {
+                    matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterCondition);
+                    lineFilterDict.Add(terminalLineDto.Id, matched);
+                    if (matched)
+                    {
+                        shownLines.Add(terminalLineDto);
+                    }
+                }
+
+                if (matched)
+                {
+                    AddTerminalLine(terminalLineDto);
+                }
+            }
+        }
+
+        private void Supervisor_TerminalLinesAdded(object sender, TerminalLineDtosEventArgs e)
+        {
+            AddNewTerminalLines(e.TerminalLines);
+        }
+
+        private void Supervisor_TerminalLinesRemoved(object sender, TerminalLineDtosEventArgs e)
+        {
+            FilterTerminal();
+        }
+
+        public ITerminalSupervisor TerminalLineSupervisor
+        {
+            get => terminalLineSupervisor;
+            set
+            {
+                if (terminalLineSupervisor != value && terminalLineSupervisor != null)
+                {
+                    terminalLineSupervisor.TerminalLinesAdded -= Supervisor_TerminalLinesAdded;
+                    terminalLineSupervisor.TerminalLinesRemoved -= Supervisor_TerminalLinesRemoved;
+                }
+
+                terminalLineSupervisor = value;
+
+                if (terminalLineSupervisor != null)
+                {
+                    terminalLineSupervisor.TerminalLinesAdded += Supervisor_TerminalLinesAdded;
+                    terminalLineSupervisor.TerminalLinesRemoved += Supervisor_TerminalLinesRemoved;
+                }
+            }
+        }
+
+        public List<FieldDisplayDetail> VisibleFields
+        {
+            get => fieldListView.Fields;
+            set
+            {
+                fieldListView.Fields = value;
+                ApplyVisibleField();
+            }
+        }
+
+        public IEnumerable<GridViewColumnSetting> ColumnSettings
+        {
+            get => columnSettingHelper.GetGridViewColumnSettings();
+            set => columnSettingHelper.SetGridViewColumnSettings(value);
+        }
+
+        public GroupCondition FilterCondition
+        {
+            get => filterConditionListView.Condition;
+            set
+            {
+                filterConditionListView.Condition = value;
+                FilterTerminal();
+            }
+        }
+
+        public GroupCondition FindCondition
+        {
+            get => findConditionListView.Condition;
+            set => findConditionListView.Condition = value;
+        }
+
+        public ItemClipboard<FieldDisplayDetail> FieldClipboard
+        {
+            get => fieldListView.FieldClipboard;
+            set => fieldListView.FieldClipboard = value;
+        }
+
+        public ItemClipboard<TextStyleCondition> StyleConditionClipboard
+        {
+            get => fieldListView.StyleConditionClipboard;
+            set => fieldListView.StyleConditionClipboard = value;
+        }
+
+        public ItemClipboard<Condition> FilterListClipboard
+        {
+            get => filterConditionListView.ConditionListClipboard;
+            set => filterConditionListView.ConditionListClipboard = value;
+        }
+
+        public ItemClipboard<Condition> FilterTreeClipboard
+        {
+            get => filterConditionListView.ConditionTreeClipboard;
+            set => filterConditionListView.ConditionTreeClipboard = value;
+        }
+
+        public ItemClipboard<Condition> FindListClipboard
+        {
+            get => findConditionListView.ConditionListClipboard;
+            set => findConditionListView.ConditionListClipboard = value;
+        }
+
+        public ItemClipboard<Condition> FindTreeClipboard
+        {
+            get => findConditionListView.ConditionTreeClipboard;
+            set => findConditionListView.ConditionTreeClipboard = value;
         }
     }
 }

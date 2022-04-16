@@ -7,9 +7,15 @@
         xmlns:controls="clr-namespace:TerminalMonitor.Windows.Controls"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=local:FieldDisplayDetailWindowDataContextVO}"
-        Title="Field Detail" Height="450" Width="800">
-    <StackPanel Orientation="Vertical">
-        <GroupBox Name="grpBxGeneral" Header="General">
+        Title="Field Detail" Height="600" Width="1100">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
+        <GroupBox Name="grpBxGeneral" Grid.Row="0" Header="General">
             <Grid Name="grdGeneral">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -20,67 +26,93 @@
                 </Grid.ColumnDefinitions>
 
                 <Label Name="lblKey" Grid.Row="0" Grid.Column="0" Content="Key" />
-                <TextBox Name="txtBxKey" Grid.Row="0" Grid.Column="1" Text="{Binding FieldKey}" />
+                <TextBox Name="txtBxKey" Grid.Row="0" Grid.Column="1"
+                         Style="{StaticResource textBoxInValidation}"
+                         Validation.ErrorTemplate="{StaticResource validationTemplate}" />
             </Grid>
         </GroupBox>
 
-        <GroupBox Name="grpBxStyle" Header="Style">
+        <GroupBox Name="grpBxStyle" Grid.Row="1" Header="Style">
             <Grid Name="grdStyle">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Label Name="lblEnable" Grid.Row="0" Grid.Column="0" Content="Enable" />
+                <Label Name="lblEnable" Grid.Row="0" Grid.Column="0" Content="Customize style" />
                 <CheckBox Name="chkBxStyle" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" IsChecked="{Binding CustomizeStyle}" />
 
-                <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-                    <GroupBox Header="Default">
+                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" IsEnabled="{Binding CustomizeStyle}" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <GroupBox Grid.Row="0" Header="Default">
                         <controls:TextStyleView TextStyle="{Binding Style}"  />
                     </GroupBox>
-                    <GroupBox Header="Conditions" MinHeight="50">
-                        <StackPanel Orientation="Vertical">
-                            <Grid>
+                    <GroupBox Grid.Row="1" Header="Conditions" MinHeight="50">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Name="grdListButton" Grid.Row="0" Grid.Column="1">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-
-                                <Grid Name="grdButton" Grid.Column="1">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Button Name="btnAdd" Grid.Column="0" Width="20" Content="+" ToolTip="Add" Click="BtnAdd_Click" />
-                                    <Button Name="btnDelete" Grid.Column="1" Width="20" Content="-" ToolTip="Delete" Click="BtnDelete_Click" />
-                                    <Button Name="btnMoveUp" Grid.Column="2" Width="20" Content="↑" ToolTip="Move Up" Click="BtnMoveUp_Click" />
-                                    <Button Name="btnMoveDown" Grid.Column="3" Width="20" Content="↓" ToolTip="Move Down" Click="BtnMoveDown_Click" />
-                                </Grid>
+                                <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Command="{Binding AddCommand}" />
+                                <Button Name="btnRemove" Grid.Column="1" Width="20" Content="➖" ToolTip="Remove" Command="{Binding RemoveCommand}" />
+                                <Button Name="btnMoveUp" Grid.Column="2" Width="20" Content="↑" ToolTip="Move Up" Command="{Binding MoveUpCommand}" />
+                                <Button Name="btnMoveDown" Grid.Column="3" Width="20" Content="↓" ToolTip="Move Down" Command="{Binding MoveDownCommand}" />
                             </Grid>
-                            <ListView Name="lstStyleCondtions" MinHeight="30" ItemsSource="{Binding Conditions}">
+
+                            <ListView Name="lstStyleCondtions" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" MinHeight="30"
+                                      SelectionChanged="LstStyleCondtions_SelectionChanged">
+                                <ListView.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Cut" Icon="✂" Command="{Binding Path=CutCommand}" />
+                                        <MenuItem Header="Copy" Icon="📄" Command="{Binding Path=CopyCommand}" />
+                                        <MenuItem Header="Paste" Icon="📋" Command="{Binding Path=PasteCommnad}" />
+                                        <Separator />
+                                        <MenuItem Header="Add" Icon="➕" Command="{Binding Path=AddCommand}" />
+                                        <MenuItem Header="Remove" Icon="➖" Command="{Binding Path=RemoveCommand}" />
+                                    </ContextMenu>
+                                </ListView.ContextMenu>
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
-                                        <WrapPanel Orientation="Horizontal">
-                                            <controls:TextStyleView TextStyle="{Binding Style}" />
-                                            <controls:FieldConditionView FieldCondition="{Binding Condition}" />
-                                        </WrapPanel>
+                                        <Border BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" BorderThickness="1" Margin="0, 4">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <controls:FieldConditionView Grid.Row="0" FieldCondition="{Binding Condition}" />
+                                                <controls:TextStyleView Grid.Row="1" TextStyle="{Binding Style}" />
+                                            </Grid>
+                                        </Border>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
-                        </StackPanel>
+                        </Grid>
                     </GroupBox>
-                </StackPanel>
-                
+                </Grid>
             </Grid>
         </GroupBox>
 
-        <Grid>
+        <Grid Name="grdWindowButton" Grid.Row="2" Margin="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -88,5 +120,5 @@
 
             <Button Name="btnSave" Grid.Column="1" Content="Save" Click="BtnSave_Click" />
         </Grid>
-    </StackPanel>
+    </Grid>
 </Window>

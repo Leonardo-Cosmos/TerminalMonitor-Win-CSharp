@@ -21,11 +21,37 @@ namespace TerminalMonitor.Windows.Controls
 
         public bool AutoScroll
         {
-            get { return autoScroll; }
+            get => autoScroll;
 
             set
             {
                 autoScroll = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int foundCount;
+
+        public int FoundCount
+        {
+            get => foundCount;
+
+            set
+            {
+                foundCount = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string foundSelectedNumber;
+
+        public string FoundSelectedNumber
+        {
+            get => foundSelectedNumber;
+
+            set
+            {
+                foundSelectedNumber = value;
                 OnPropertyChanged();
             }
         }

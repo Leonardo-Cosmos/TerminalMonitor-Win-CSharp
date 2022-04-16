@@ -1,7 +1,52 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:converters="clr-namespace:TerminalMonitor.Windows.Converters">
 
+    <converters:ObjectNullOrEmptyConverter x:Key="ObjectNullOrEmptyConverter" />
+
+    <x:Array x:Key="TextMatchOperators" Type="matchers:TextMatchOperator" xmlns:matchers="clr-namespace:TerminalMonitor.Matchers">
+        <matchers:TextMatchOperator>None</matchers:TextMatchOperator>
+        <matchers:TextMatchOperator>Equals</matchers:TextMatchOperator>
+        <matchers:TextMatchOperator>Contains</matchers:TextMatchOperator>
+        <matchers:TextMatchOperator>StartsWith</matchers:TextMatchOperator>
+        <matchers:TextMatchOperator>EndsWith</matchers:TextMatchOperator>
+        <matchers:TextMatchOperator>Matches</matchers:TextMatchOperator>
+    </x:Array>
+
     <converters:MatchOperatorToStringConverter x:Key="MatchOperatorToStringConverter" />
+
+    <x:Array x:Key="GroupMatchModes" Type="matchers:GroupMatchMode" xmlns:matchers="clr-namespace:TerminalMonitor.Matchers.Models">
+        <matchers:GroupMatchMode>All</matchers:GroupMatchMode>
+        <matchers:GroupMatchMode>Any</matchers:GroupMatchMode>
+    </x:Array>
     
+    <converters:MatchModeToStringConverter x:Key="MatchModeToStringConverter" />
+
+    <x:Array x:Key="HorizontalAlignmentValues" Type="windows:HorizontalAlignment" xmlns:windows="clr-namespace:System.Windows;assembly=PresentationFramework">
+        <windows:HorizontalAlignment>Left</windows:HorizontalAlignment>
+        <windows:HorizontalAlignment>Center</windows:HorizontalAlignment>
+        <windows:HorizontalAlignment>Right</windows:HorizontalAlignment>
+        <windows:HorizontalAlignment>Stretch</windows:HorizontalAlignment>
+    </x:Array>
+
+    <converters:HorizontalAlignmentToStringConverter x:Key="HorizontalAlignmentToStringConverter" />
+
+    <x:Array x:Key="VerticalAlignmentValues" Type="windows:VerticalAlignment" xmlns:windows="clr-namespace:System.Windows;assembly=PresentationFramework">
+        <windows:VerticalAlignment>Top</windows:VerticalAlignment>
+        <windows:VerticalAlignment>Center</windows:VerticalAlignment>
+        <windows:VerticalAlignment>Bottom</windows:VerticalAlignment>
+        <windows:VerticalAlignment>Stretch</windows:VerticalAlignment>
+    </x:Array>
+
+    <converters:VerticalAlignmentToStringConverter x:Key="VerticalAlignmentToStringConverter" />
+
+    <x:Array x:Key="TextAlignmentValues" Type="windows:TextAlignment" xmlns:windows="clr-namespace:System.Windows;assembly=PresentationCore">
+        <windows:TextAlignment>Left</windows:TextAlignment>
+        <windows:TextAlignment>Right</windows:TextAlignment>
+        <windows:TextAlignment>Center</windows:TextAlignment>
+        <windows:TextAlignment>Justify</windows:TextAlignment>
+    </x:Array>
+
+    <converters:TextAlignmentToStringConverter x:Key="TextAlignmentToStringConverter" />
+
 </ResourceDictionary>
