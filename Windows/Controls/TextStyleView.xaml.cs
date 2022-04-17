@@ -121,7 +121,7 @@ namespace TerminalMonitor.Windows.Controls
             Properties.WindowSettings.Default.CustomColors.AddRange(colors);
         }
 
-        private void RctForeground_MouseDown(object sender, MouseButtonEventArgs e)
+        private void RctForegroundColor_MouseDown(object sender, MouseButtonEventArgs e)
         {
             var brush = ShowColorDialog(dataContextVO.Foreground as SolidColorBrush);
             if (brush != null)
@@ -130,7 +130,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void RctBackground_MouseDown(object sender, MouseButtonEventArgs e)
+        private void RctBackgroundColor_MouseDown(object sender, MouseButtonEventArgs e)
         {
             var brush = ShowColorDialog(dataContextVO.Background as SolidColorBrush);
             if (brush != null)
@@ -139,7 +139,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void RctCellBackground_MouseDown(object sender, MouseButtonEventArgs e)
+        private void RctCellBackgroundColor_MouseDown(object sender, MouseButtonEventArgs e)
         {
             var brush = ShowColorDialog(dataContextVO.CellBackground as SolidColorBrush);
             if (brush != null)

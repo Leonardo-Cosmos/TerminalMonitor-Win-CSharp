@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
+using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -39,6 +40,18 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private TextColorMode foregroundColorMode;
+
+        public TextColorMode ForegroundColorMode
+        {
+            get => foregroundColorMode;
+            set
+            {
+                foregroundColorMode = value;
+                OnPropertyChanged();
+            }
+        }
+
         private bool enableBackground;
 
         public bool EnableBackground
@@ -63,6 +76,18 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private TextColorMode backgroundColorMode;
+
+        public TextColorMode BackgroundColorMode
+        {
+            get => backgroundColorMode;
+            set
+            {
+                backgroundColorMode = value;
+                OnPropertyChanged();
+            }
+        }
+
         private bool enableCellbackground;
 
         public bool EnableCellBackground
@@ -83,6 +108,18 @@ namespace TerminalMonitor.Windows.Controls
             set
             {
                 cellBackground = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private TextColorMode cellBackgroundColorMode;
+
+        public TextColorMode CellBackgroundColorMode
+        {
+            get => cellBackgroundColorMode;
+            set
+            {
+                cellBackgroundColorMode = value;
                 OnPropertyChanged();
             }
         }

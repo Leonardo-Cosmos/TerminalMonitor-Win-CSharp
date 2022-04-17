@@ -49,4 +49,12 @@
 
     <converters:TextAlignmentToStringConverter x:Key="TextAlignmentToStringConverter" />
 
+    <x:Array x:Key="TextColorModes" Type="models:TextColorMode" xmlns:models="clr-namespace:TerminalMonitor.Models">
+        <models:TextColorMode>Constant</models:TextColorMode>
+        <models:TextColorMode>Hash</models:TextColorMode>
+        <models:TextColorMode>InvertHash</models:TextColorMode>
+    </x:Array>
+
+    <converters:TextColorModeToStringConverter x:Key="TextColorModeToStringConverter" />
+
 </ResourceDictionary>
