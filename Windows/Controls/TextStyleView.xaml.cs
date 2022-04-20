@@ -224,19 +224,31 @@ namespace TerminalMonitor.Windows.Controls
             textStyle = e.NewValue as TextStyle;
             if (textStyle != null)
             {
-                dataContextVO.EnableForeground = textStyle.Foreground.HasValue;
+                dataContextVO.EnableForeground = textStyle.ForegroundColorMode.HasValue || textStyle.Foreground.HasValue;
+                if (textStyle.ForegroundColorMode.HasValue)
+                {
+                    dataContextVO.ForegroundColorMode = textStyle.ForegroundColorMode.Value;
+                }
                 if (textStyle.Foreground.HasValue)
                 {
                     dataContextVO.Foreground = new SolidColorBrush(textStyle.Foreground.Value);
                 }
 
-                dataContextVO.EnableBackground = textStyle.Background.HasValue;
+                dataContextVO.EnableBackground = textStyle.BackgroundColorMode.HasValue || textStyle.Background.HasValue;
+                if (textStyle.BackgroundColorMode.HasValue)
+                {
+                    dataContextVO.BackgroundColorMode = textStyle.BackgroundColorMode.Value;
+                }
                 if (textStyle.Background.HasValue)
                 {
                     dataContextVO.Background = new SolidColorBrush(textStyle.Background.Value);
                 }
 
-                dataContextVO.EnableCellBackground = textStyle.CellBackground.HasValue;
+                dataContextVO.EnableCellBackground = textStyle.CellBackgroundColorMode.HasValue || textStyle.CellBackground.HasValue;
+                if (textStyle.CellBackgroundColorMode.HasValue)
+                {
+                    dataContextVO.CellBackgroundColorMode = textStyle.CellBackgroundColorMode.Value;
+                }
                 if (textStyle.CellBackground.HasValue)
                 {
                     dataContextVO.CellBackground = new SolidColorBrush(textStyle.CellBackground.Value);
