@@ -32,9 +32,9 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly TextStyleViewDataContextVO dataContextVO = new()
         {
-            Foreground = Brushes.Black,
-            Background = Brushes.White,
-            CellBackground = Brushes.White,
+            ForegroundColor = Brushes.Black,
+            BackgroundColor = Brushes.White,
+            CellBackgroundColor = Brushes.White,
         };
 
         public TextStyleView()
@@ -78,13 +78,21 @@ namespace TerminalMonitor.Windows.Controls
             {
                 var customColors = colorDialog.CustomColors;
 
+                bool added = false;
                 for (int i = 0; i < customColors.Length; i++)
                 {
                     if (customColors[i] == 0xffffff)
                     {
                         customColors[i] = selectedColor;
+                        added = true;
                         break;
                     }
+                }
+
+                if (!added)
+                {
+                    customColors = customColors.Skip(1)
+                        .Concat(new int[] { selectedColor }).ToArray();
                 }
 
                 colorDialog.CustomColors = customColors;
@@ -123,28 +131,28 @@ namespace TerminalMonitor.Windows.Controls
 
         private void RctForegroundColor_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var brush = ShowColorDialog(dataContextVO.Foreground as SolidColorBrush);
+            var brush = ShowColorDialog(dataContextVO.ForegroundColor as SolidColorBrush);
             if (brush != null)
             {
-                dataContextVO.Foreground = brush;
+                dataContextVO.ForegroundColor = brush;
             }
         }
 
         private void RctBackgroundColor_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var brush = ShowColorDialog(dataContextVO.Background as SolidColorBrush);
+            var brush = ShowColorDialog(dataContextVO.BackgroundColor as SolidColorBrush);
             if (brush != null)
             {
-                dataContextVO.Background = brush;
+                dataContextVO.BackgroundColor = brush;
             }
         }
 
         private void RctCellBackgroundColor_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var brush = ShowColorDialog(dataContextVO.CellBackground as SolidColorBrush);
+            var brush = ShowColorDialog(dataContextVO.CellBackgroundColor as SolidColorBrush);
             if (brush != null)
             {
-                dataContextVO.CellBackground = brush;
+                dataContextVO.CellBackgroundColor = brush;
             }
         }
 
@@ -152,14 +160,35 @@ namespace TerminalMonitor.Windows.Controls
         {
             switch (e.PropertyName)
             {
-                case nameof(TextStyleViewDataContextVO.Foreground):
-                    textStyle.Foreground = (dataContextVO.Foreground as SolidColorBrush).Color;
+                case nameof(TextStyleViewDataContextVO.ForegroundColor):
+                    textStyle.Foreground ??= new TextColorConfig();
+                    textStyle.Foreground.Color = (dataContextVO.ForegroundColor as SolidColorBrush).Color;
                     break;
-                case nameof(TextStyleViewDataContextVO.Background):
-                    textStyle.Background = (dataContextVO.Background as SolidColorBrush).Color;
+                case nameof(TextStyleViewDataContextVO.ForegroundColorMode):
+                    textStyle.Foreground ??= new TextColorConfig();
+                    textStyle.Foreground.Mode = dataContextVO.ForegroundColorMode;
+                    textStyle.Foreground.Color = dataContextVO.IsForegroundColorStatic ?
+                        (dataContextVO.ForegroundColor as SolidColorBrush).Color : null;
                     break;
-                case nameof(TextStyleViewDataContextVO.CellBackground):
-                    textStyle.CellBackground = (dataContextVO.CellBackground as SolidColorBrush).Color;
+                case nameof(TextStyleViewDataContextVO.BackgroundColor):
+                    textStyle.Background ??= new TextColorConfig();
+                    textStyle.Background.Color = (dataContextVO.BackgroundColor as SolidColorBrush).Color;
+                    break;
+                case nameof(TextStyleViewDataContextVO.BackgroundColorMode):
+                    textStyle.Background ??= new TextColorConfig();
+                    textStyle.Background.Mode = dataContextVO.BackgroundColorMode;
+                    textStyle.Background.Color = dataContextVO.IsBackgroundColorStatic ?
+                        (dataContextVO.BackgroundColor as SolidColorBrush).Color : null;
+                    break;
+                case nameof(TextStyleViewDataContextVO.CellBackgroundColor):
+                    textStyle.CellBackground ??= new TextColorConfig();
+                    textStyle.CellBackground.Color = (dataContextVO.CellBackgroundColor as SolidColorBrush).Color;
+                    break;
+                case nameof(TextStyleViewDataContextVO.CellBackgroundColorMode):
+                    textStyle.CellBackground ??= new TextColorConfig();
+                    textStyle.CellBackground.Mode = dataContextVO.CellBackgroundColorMode;
+                    textStyle.CellBackground.Color = dataContextVO.IsCellBackgroundColorStatic ?
+                        (dataContextVO.CellBackgroundColor as SolidColorBrush).Color : null;
                     break;
                 case nameof(TextStyleViewDataContextVO.HorizontalAlignment):
                     textStyle.HorizontalAlignment = dataContextVO.HorizontalAlignment;
@@ -224,34 +253,39 @@ namespace TerminalMonitor.Windows.Controls
             textStyle = e.NewValue as TextStyle;
             if (textStyle != null)
             {
-                dataContextVO.EnableForeground = textStyle.ForegroundColorMode.HasValue || textStyle.Foreground.HasValue;
-                if (textStyle.ForegroundColorMode.HasValue)
+                dataContextVO.PropertyChanged -= OnDataContextPropertyChanged;
+
+                dataContextVO.EnableForeground = textStyle.Foreground != null;
+                if (textStyle.Foreground != null)
                 {
-                    dataContextVO.ForegroundColorMode = textStyle.ForegroundColorMode.Value;
-                }
-                if (textStyle.Foreground.HasValue)
-                {
-                    dataContextVO.Foreground = new SolidColorBrush(textStyle.Foreground.Value);
+                    dataContextVO.ForegroundColorMode = textStyle.Foreground.Mode;
+
+                    if (textStyle.Foreground.Color.HasValue)
+                    {
+                        dataContextVO.ForegroundColor = new SolidColorBrush(textStyle.Foreground.Color.Value);
+                    }
                 }
 
-                dataContextVO.EnableBackground = textStyle.BackgroundColorMode.HasValue || textStyle.Background.HasValue;
-                if (textStyle.BackgroundColorMode.HasValue)
+                dataContextVO.EnableBackground = textStyle.Background != null;
+                if (textStyle.Background != null)
                 {
-                    dataContextVO.BackgroundColorMode = textStyle.BackgroundColorMode.Value;
-                }
-                if (textStyle.Background.HasValue)
-                {
-                    dataContextVO.Background = new SolidColorBrush(textStyle.Background.Value);
+                    dataContextVO.BackgroundColorMode = textStyle.Background.Mode;
+
+                    if (textStyle.Background.Color.HasValue)
+                    {
+                        dataContextVO.BackgroundColor = new SolidColorBrush(textStyle.Background.Color.Value);
+                    }
                 }
 
-                dataContextVO.EnableCellBackground = textStyle.CellBackgroundColorMode.HasValue || textStyle.CellBackground.HasValue;
-                if (textStyle.CellBackgroundColorMode.HasValue)
+                dataContextVO.EnableCellBackground = textStyle.CellBackground != null;
+                if (textStyle.CellBackground != null)
                 {
-                    dataContextVO.CellBackgroundColorMode = textStyle.CellBackgroundColorMode.Value;
-                }
-                if (textStyle.CellBackground.HasValue)
-                {
-                    dataContextVO.CellBackground = new SolidColorBrush(textStyle.CellBackground.Value);
+                    dataContextVO.CellBackgroundColorMode = textStyle.CellBackground.Mode;
+
+                    if (textStyle.CellBackground.Color.HasValue)
+                    {
+                        dataContextVO.CellBackgroundColor = new SolidColorBrush(textStyle.CellBackground.Color.Value);
+                    }
                 }
 
                 dataContextVO.EnableHorizontalAlignment = textStyle.HorizontalAlignment.HasValue;
@@ -271,6 +305,8 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     dataContextVO.TextAlignment = textStyle.TextAlignment.Value;
                 }
+
+                dataContextVO.PropertyChanged += OnDataContextPropertyChanged;
             }
         }
 

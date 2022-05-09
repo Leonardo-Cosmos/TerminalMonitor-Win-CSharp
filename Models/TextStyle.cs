@@ -11,17 +11,11 @@ namespace TerminalMonitor.Models
         {
         };
 
-        public TextColorMode? ForegroundColorMode { get; set; }
+        public TextColorConfig Foreground { get; set; }
 
-        public Color? Foreground { get; set; }
+        public TextColorConfig Background { get; set; }
 
-        public TextColorMode? BackgroundColorMode { get; set; }
-
-        public Color? Background { get; set; }
-
-        public TextColorMode? CellBackgroundColorMode { get; set; }
-
-        public Color? CellBackground { get; set; }
+        public TextColorConfig CellBackground { get; set; }
 
         public HorizontalAlignment? HorizontalAlignment { get; set; }
 

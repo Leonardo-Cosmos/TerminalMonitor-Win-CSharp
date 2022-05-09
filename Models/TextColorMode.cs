@@ -4,8 +4,8 @@ namespace TerminalMonitor.Models
 {
     public enum TextColorMode
     {
-        Constant,
+        Static,
         Hash,
-        InvertHash,
+        HashInverted,
     }
 }

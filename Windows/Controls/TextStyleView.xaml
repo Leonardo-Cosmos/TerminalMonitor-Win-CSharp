@@ -44,8 +44,17 @@
                     </ComboBox>
                     <Rectangle Name="rctForegroundColor" Width="10" Height="10"
                                Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                               Fill="{Binding Foreground}" IsEnabled="{Binding EnableForeground}"
-                               MouseDown="RctForegroundColor_MouseDown" />
+                               Fill="{Binding ForegroundColor}" MouseDown="RctForegroundColor_MouseDown">
+                        <Rectangle.Style>
+                            <Style TargetType="Rectangle">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsForegroundColorStatic}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Rectangle.Style>
+                    </Rectangle>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
@@ -61,8 +70,17 @@
                     </ComboBox>
                     <Rectangle Name="rctBackgroundColor" Width="10" Height="10"
                                Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                               Fill="{Binding Background}" IsEnabled="{Binding EnableBackground}"
-                               MouseDown="RctBackgroundColor_MouseDown" />
+                               Fill="{Binding BackgroundColor}" MouseDown="RctBackgroundColor_MouseDown">
+                        <Rectangle.Style>
+                            <Style TargetType="Rectangle">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsBackgroundColorStatic}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Rectangle.Style>
+                    </Rectangle>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
@@ -78,8 +96,17 @@
                     </ComboBox>
                     <Rectangle Name="rctCellBackgroundColor" Width="10" Height="10"
                                Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                               Fill="{Binding CellBackground}" IsEnabled="{Binding EnableCellBackground}"
-                               MouseDown="RctCellBackgroundColor_MouseDown" />
+                               Fill="{Binding CellBackgroundColor}" MouseDown="RctCellBackgroundColor_MouseDown">
+                        <Rectangle.Style>
+                            <Style TargetType="Rectangle">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsCellBackgroundColorStatic}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Rectangle.Style>
+                    </Rectangle>
                 </StackPanel>
             </WrapPanel>
         </GroupBox>

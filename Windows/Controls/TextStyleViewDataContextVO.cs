@@ -30,7 +30,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private Brush foreground;
 
-        public Brush Foreground
+        public Brush ForegroundColor
         {
             get => foreground;
             set
@@ -49,7 +49,13 @@ namespace TerminalMonitor.Windows.Controls
             {
                 foregroundColorMode = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsForegroundColorStatic));
             }
+        }
+
+        public bool IsForegroundColorStatic
+        {
+            get => foregroundColorMode == TextColorMode.Static;
         }
 
         private bool enableBackground;
@@ -66,7 +72,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private Brush background;
 
-        public Brush Background
+        public Brush BackgroundColor
         {
             get => background;
             set
@@ -85,7 +91,13 @@ namespace TerminalMonitor.Windows.Controls
             {
                 backgroundColorMode = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsBackgroundColorStatic));
             }
+        }
+
+        public bool IsBackgroundColorStatic
+        {
+            get => backgroundColorMode == TextColorMode.Static;
         }
 
         private bool enableCellbackground;
@@ -102,7 +114,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private Brush cellBackground;
 
-        public Brush CellBackground
+        public Brush CellBackgroundColor
         {
             get => cellBackground;
             set
@@ -121,7 +133,13 @@ namespace TerminalMonitor.Windows.Controls
             {
                 cellBackgroundColorMode = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsCellBackgroundColorStatic));
             }
+        }
+
+        public bool IsCellBackgroundColorStatic
+        {
+            get => cellBackgroundColorMode == TextColorMode.Static;
         }
 
         private bool enableHorizontalAlignment;
