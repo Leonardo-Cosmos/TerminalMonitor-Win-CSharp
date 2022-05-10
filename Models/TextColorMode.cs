@@ -7,5 +7,6 @@ namespace TerminalMonitor.Models
         Static,
         Hash,
         HashInverted,
+        HashSymmetric,
     }
 }

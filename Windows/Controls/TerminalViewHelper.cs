@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,19 +25,40 @@ namespace TerminalMonitor.Windows.Controls
 
         private static object ConvertColorToBrush(object color) => new SolidColorBrush((Color)color);
 
-        private static Color GenerateColorByHash(object value, bool invert = false)
+        private static Color GenerateColorByHash(object value)
         {
             int hashCode = value?.GetHashCode() ?? 0;
+
             byte red = (byte)hashCode;
             byte green = (byte)(hashCode >> 8);
             byte blue = (byte)(hashCode >> 16);
 
-            if (invert)
-            {
-                red = (byte)(red ^ 0xFF);
-                green = (byte)(green ^ 0xFF);
-                blue = (byte)(blue ^ 0xFF);
-            }
+            return Color.FromRgb(red, green, blue);
+        }
+
+        private static Color ToInvertedColor(Color color)
+        {
+            byte red = color.R;
+            byte green = color.G;
+            byte blue = color.B;
+
+            red ^= 0xFF;
+            green ^= 0xFF;
+            blue ^= 0xFF;
+
+            return Color.FromRgb(red, green, blue);
+        }
+
+        private static Color ToSymmetricColor(Color color)
+        {
+            byte red = color.R;
+            byte green = color.G;
+            byte blue = color.B;
+
+            red -= 0x80;
+            green -= 0x80;
+            blue -= 0x80;
+
             return Color.FromRgb(red, green, blue);
         }
 
@@ -46,7 +68,8 @@ namespace TerminalMonitor.Windows.Controls
             {
                 TextColorMode.Static => ((TextColorConfig)textColor).Color,
                 TextColorMode.Hash => GenerateColorByHash(value),
-                TextColorMode.HashInverted => GenerateColorByHash(value, true),
+                TextColorMode.HashInverted => ToInvertedColor(GenerateColorByHash(value)),
+                TextColorMode.HashSymmetric => ToSymmetricColor(GenerateColorByHash(value)),
                 _ => null,
             };
             return ConvertColorToBrush(color);

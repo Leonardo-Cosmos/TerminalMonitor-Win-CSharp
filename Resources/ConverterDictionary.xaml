@@ -53,6 +53,7 @@
         <models:TextColorMode>Static</models:TextColorMode>
         <models:TextColorMode>Hash</models:TextColorMode>
         <models:TextColorMode>HashInverted</models:TextColorMode>
+        <models:TextColorMode>HashSymmetric</models:TextColorMode>
     </x:Array>
 
     <converters:TextColorModeToStringConverter x:Key="TextColorModeToStringConverter" />

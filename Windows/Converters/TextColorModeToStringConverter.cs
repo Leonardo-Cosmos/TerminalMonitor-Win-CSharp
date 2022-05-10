@@ -16,8 +16,9 @@ namespace TerminalMonitor.Windows.Converters
         private static readonly ReadOnlyDictionary<TextColorMode, string> textDict =
             new(new Dictionary<TextColorMode, string>() {
                 { TextColorMode.Static, "Static" },
-                { TextColorMode.Hash, "Hash"},
-                { TextColorMode.HashInverted, "Hash Inverted"},
+                { TextColorMode.Hash, "Hash" },
+                { TextColorMode.HashInverted, "Hash Inverted" },
+                { TextColorMode.HashSymmetric, "Hash Symmetric" },
             });
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
