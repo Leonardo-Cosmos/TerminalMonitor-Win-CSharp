@@ -46,7 +46,7 @@
                                Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
                                Fill="{Binding ForegroundColor}" MouseDown="RctForegroundColor_MouseDown">
                         <Rectangle.Style>
-                            <Style TargetType="Rectangle">
+                            <Style TargetType="Rectangle" BasedOn="{StaticResource {x:Type Rectangle}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsForegroundColorStatic}" Value="False">
                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -72,7 +72,7 @@
                                Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
                                Fill="{Binding BackgroundColor}" MouseDown="RctBackgroundColor_MouseDown">
                         <Rectangle.Style>
-                            <Style TargetType="Rectangle">
+                            <Style TargetType="Rectangle" BasedOn="{StaticResource {x:Type Rectangle}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsBackgroundColorStatic}" Value="False">
                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -98,7 +98,7 @@
                                Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
                                Fill="{Binding CellBackgroundColor}" MouseDown="RctCellBackgroundColor_MouseDown">
                         <Rectangle.Style>
-                            <Style TargetType="Rectangle">
+                            <Style TargetType="Rectangle" BasedOn="{StaticResource {x:Type Rectangle}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsCellBackgroundColorStatic}" Value="False">
                                         <Setter Property="Visibility" Value="Collapsed" />
