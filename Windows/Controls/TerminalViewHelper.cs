@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,7 +23,57 @@ namespace TerminalMonitor.Windows.Controls
 
         private static readonly IntToTextAlignmentConverter textAlignmentConverter = new();
 
-        private static readonly Func<object, object> convertColorToBrush = color => new SolidColorBrush((Color)color);
+        private static object ConvertColorToBrush(object color) => new SolidColorBrush((Color)color);
+
+        private static Color GenerateColorByHash(object value)
+        {
+            int hashCode = value?.GetHashCode() ?? 0;
+
+            byte red = (byte)hashCode;
+            byte green = (byte)(hashCode >> 8);
+            byte blue = (byte)(hashCode >> 16);
+
+            return Color.FromRgb(red, green, blue);
+        }
+
+        private static Color ToInvertedColor(Color color)
+        {
+            byte red = color.R;
+            byte green = color.G;
+            byte blue = color.B;
+
+            red ^= 0xFF;
+            green ^= 0xFF;
+            blue ^= 0xFF;
+
+            return Color.FromRgb(red, green, blue);
+        }
+
+        private static Color ToSymmetricColor(Color color)
+        {
+            byte red = color.R;
+            byte green = color.G;
+            byte blue = color.B;
+
+            red -= 0x80;
+            green -= 0x80;
+            blue -= 0x80;
+
+            return Color.FromRgb(red, green, blue);
+        }
+
+        private static object ConvertTextColorToBrush(object textColor, object value)
+        {
+            object color = ((TextColorConfig)textColor).Mode switch
+            {
+                TextColorMode.Static => ((TextColorConfig)textColor).Color,
+                TextColorMode.Hash => GenerateColorByHash(value),
+                TextColorMode.HashInverted => ToInvertedColor(GenerateColorByHash(value)),
+                TextColorMode.HashSymmetric => ToSymmetricColor(GenerateColorByHash(value)),
+                _ => null,
+            };
+            return ConvertColorToBrush(color);
+        }
 
         public static DataTemplate BuildFieldDataTemplate(FieldDisplayDetail visibleField, DataTable terminalDataTable,
             IEnumerable<RoutedEventHandlerRecord> eventHandlerRecords)
@@ -42,12 +93,12 @@ namespace TerminalMonitor.Windows.Controls
             textBlockElement.SetBinding(TextBlock.TextProperty, textBinding);
 
             SetElementStyleProperty(visibleField, textBlockElement, TextBlock.ForegroundProperty,
-                null, convertColorToBrush,
-                textStyle => textStyle.Foreground, GetForegroundColumnName);
+                null, ConvertColorToBrush,
+                textStyle => textStyle.Foreground?.Color, GetForegroundColumnName);
 
             SetElementStyleProperty(visibleField, textBlockElement, TextBlock.BackgroundProperty,
-                null, convertColorToBrush,
-                textStyle => textStyle.Background, GetBackgroundColumnName);
+                null, ConvertColorToBrush,
+                textStyle => textStyle.Background?.Color, GetBackgroundColumnName);
 
             SetElementStyleProperty(visibleField, textBlockElement, TextBlock.HorizontalAlignmentProperty,
                 horizontalAlignmentConverter, null,
@@ -64,8 +115,8 @@ namespace TerminalMonitor.Windows.Controls
             FrameworkElementFactory panelElement = new(typeof(DockPanel));
 
             SetElementStyleProperty(visibleField, panelElement, Panel.BackgroundProperty,
-                null, convertColorToBrush,
-                textStyle => textStyle.CellBackground, GetCellBackgroundColumnName);
+                null, ConvertColorToBrush,
+                textStyle => textStyle.CellBackground?.Color, GetCellBackgroundColumnName);
 
             if (eventHandlerRecords != null)
             {
@@ -177,13 +228,13 @@ namespace TerminalMonitor.Windows.Controls
             var fieldId = visibleField.Id;
             BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.Foreground, GetForegroundColumnName, row,
-                convertColorToBrush);
+                textColor => ConvertTextColorToBrush(textColor, row[fieldId]));
             BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.Background, GetBackgroundColumnName, row,
-                convertColorToBrush);
+                textColor => ConvertTextColorToBrush(textColor, row[fieldId]));
             BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.CellBackground, GetCellBackgroundColumnName, row,
-                convertColorToBrush);
+                textColor => ConvertTextColorToBrush(textColor, row[fieldId]));
 
             BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.HorizontalAlignment, GetHorizontalAlignmentColumnName, row, null);

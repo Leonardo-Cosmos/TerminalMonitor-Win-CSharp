@@ -1,7 +1,6 @@
 ﻿/* 2021/5/22 */
 using System;
 using System.Windows;
-using System.Windows.Media;
 
 namespace TerminalMonitor.Models
 {
@@ -11,11 +10,11 @@ namespace TerminalMonitor.Models
         {
         };
 
-        public Color? Foreground { get; set; }
+        public TextColorConfig Foreground { get; set; }
 
-        public Color? Background { get; set; }
+        public TextColorConfig Background { get; set; }
 
-        public Color? CellBackground { get; set; }
+        public TextColorConfig CellBackground { get; set; }
 
         public HorizontalAlignment? HorizontalAlignment { get; set; }
 

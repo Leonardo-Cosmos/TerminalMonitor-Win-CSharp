@@ -18,6 +18,7 @@
                 </Style>
                 <Style TargetType="Rectangle">
                     <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="Margin" Value="4, 0, 0, 0" />
                 </Style>
                 <Style TargetType="WrapPanel">
                     <Setter Property="Margin" Value="0, 4, 0, 4" />
@@ -27,34 +28,85 @@
                 </Style>
             </ResourceDictionary>
         </WrapPanel.Resources>
-        
+
         <GroupBox Header="Color">
             <WrapPanel Name="wrpPnlColor" Orientation="Horizontal">
                 <StackPanel Orientation="Horizontal">
                     <CheckBox Name="chkBxForeground" IsChecked="{Binding EnableForeground}"/>
                     <Label Name="lblForeground" Content="Foreground" IsEnabled="{Binding EnableForeground}" />
-                    <Rectangle Name="rctForeground" Width="10" Height="10"
+                    <ComboBox Name="cmbBxForegroundColor" IsEnabled="{Binding EnableForeground}"
+                              ItemsSource="{StaticResource TextColorModes}" SelectedValue="{Binding ForegroundColorMode}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource TextColorModeToStringConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Rectangle Name="rctForegroundColor" Width="10" Height="10"
                                Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                               Fill="{Binding Foreground}" IsEnabled="{Binding EnableForeground}"
-                               MouseDown="RctForeground_MouseDown" />
+                               Fill="{Binding ForegroundColor}" MouseDown="RctForegroundColor_MouseDown">
+                        <Rectangle.Style>
+                            <Style TargetType="Rectangle" BasedOn="{StaticResource {x:Type Rectangle}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsForegroundColorStatic}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Rectangle.Style>
+                    </Rectangle>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
                     <CheckBox Name="chkBxBackground" IsChecked="{Binding EnableBackground}" />
                     <Label Name="lblBackground" Content="Background" IsEnabled="{Binding EnableBackground}" />
-                    <Rectangle Name="rctBackground" Width="10" Height="10"
+                    <ComboBox Name="cmbBxBackgroundColor" IsEnabled="{Binding EnableBackground}"
+                              ItemsSource="{StaticResource TextColorModes}" SelectedValue="{Binding BackgroundColorMode}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource TextColorModeToStringConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Rectangle Name="rctBackgroundColor" Width="10" Height="10"
                                Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                               Fill="{Binding Background}" IsEnabled="{Binding EnableBackground}"
-                               MouseDown="RctBackground_MouseDown" />
+                               Fill="{Binding BackgroundColor}" MouseDown="RctBackgroundColor_MouseDown">
+                        <Rectangle.Style>
+                            <Style TargetType="Rectangle" BasedOn="{StaticResource {x:Type Rectangle}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsBackgroundColorStatic}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Rectangle.Style>
+                    </Rectangle>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
                     <CheckBox Name="chkBoCellBackground" IsChecked="{Binding EnableCellBackground}" />
                     <Label Name="lblCellBackground" Content="Cell background" IsEnabled="{Binding EnableCellBackground}" />
-                    <Rectangle Name="rctCellBackground" Width="10" Height="10"
+                    <ComboBox Name="cmbBxCellBoregroundColor" IsEnabled="{Binding EnableCellBackground}"
+                              ItemsSource="{StaticResource TextColorModes}" SelectedValue="{Binding CellBackgroundColorMode}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource TextColorModeToStringConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Rectangle Name="rctCellBackgroundColor" Width="10" Height="10"
                                Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
-                               Fill="{Binding CellBackground}" IsEnabled="{Binding EnableCellBackground}"
-                               MouseDown="RctCellBackground_MouseDown" />
+                               Fill="{Binding CellBackgroundColor}" MouseDown="RctCellBackgroundColor_MouseDown">
+                        <Rectangle.Style>
+                            <Style TargetType="Rectangle" BasedOn="{StaticResource {x:Type Rectangle}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsCellBackgroundColorStatic}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Rectangle.Style>
+                    </Rectangle>
                 </StackPanel>
             </WrapPanel>
         </GroupBox>
