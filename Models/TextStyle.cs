@@ -1,7 +1,6 @@
 ﻿/* 2021/5/22 */
 using System;
 using System.Windows;
-using System.Windows.Media;
 
 namespace TerminalMonitor.Models
 {
