@@ -178,13 +178,16 @@ namespace TerminalMonitor.Windows.Controls
             {
                 var terminalLine = terminalLineSupervisor.TerminalLines[terminalLineId];
 
-                TerminalLineDetailWindow window = new()
+                if (terminalLine != null)
                 {
-                    TerminalLine = terminalLine,
-                    ConditionListClipboard = findConditionListView.ConditionListClipboard,
-                    ConditionTreeClipboard = findConditionListView.ConditionTreeClipboard,
-                };
-                window.Show();
+                    TerminalLineDetailWindow window = new()
+                    {
+                        TerminalLine = terminalLine,
+                        ConditionListClipboard = findConditionListView.ConditionListClipboard,
+                        ConditionTreeClipboard = findConditionListView.ConditionTreeClipboard,
+                    };
+                    window.Show();
+                }
             }
         }
 
