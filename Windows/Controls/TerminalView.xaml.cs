@@ -158,9 +158,14 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void ListTerminal_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void ListTerminalItemContainer_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ShowDetailWindow(clickedRowTerminalLineId);
+            if ((sender is ListViewItem item) && (item.Content is DataRowView rowView))
+            {
+                clickedRowTerminalLineId = (string)rowView[idColumnName];
+
+                ShowDetailWindow(clickedRowTerminalLineId);
+            }
         }
 
         private void ClearTerminal()
