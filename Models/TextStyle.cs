@@ -26,9 +26,9 @@ namespace TerminalMonitor.Models
         {
             return new TextStyle()
             {
-                Foreground = this.Foreground,
-                Background = this.Background,
-                CellBackground = this.CellBackground,
+                Foreground = (TextColorConfig)this.Foreground?.Clone(),
+                Background = (TextColorConfig)this.Background?.Clone(),
+                CellBackground = (TextColorConfig)this.CellBackground?.Clone(),
                 HorizontalAlignment = this.HorizontalAlignment,
                 VerticalAlignment = this.VerticalAlignment,
                 TextAlignment = this.TextAlignment,
