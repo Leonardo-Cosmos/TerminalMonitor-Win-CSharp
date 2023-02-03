@@ -281,5 +281,27 @@ namespace TerminalMonitor.Windows.Controls
                 dataRow[getStyleColumnName(fieldId)] = convert(finalStyleProperty);
             }
         }
+
+        public static DataTemplate BuildColumnHeaderTemplate(string fieldKey)
+        {
+            FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
+            textBlockElement.SetValue(TextBlock.TextProperty, fieldKey);
+
+            textBlockElement.SetValue(TextBlock.ForegroundProperty, Brushes.Blue);
+            textBlockElement.SetValue(TextBlock.BackgroundProperty, Brushes.Green);
+
+            textBlockElement.SetValue(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
+            textBlockElement.SetValue(TextBlock.TextAlignmentProperty, TextAlignment.Center);
+
+            FrameworkElementFactory panelElement = new(typeof(DockPanel));
+
+            panelElement.SetValue(Panel.BackgroundProperty, Brushes.Cyan);
+
+            panelElement.AppendChild(textBlockElement);
+
+            DataTemplate dataTemplate = new();
+            dataTemplate.VisualTree = panelElement;
+            return dataTemplate;
+        }
     }
 }

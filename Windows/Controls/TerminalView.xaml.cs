@@ -461,6 +461,9 @@ namespace TerminalMonitor.Windows.Controls
             visibleFields = columnSettingHelper.Init(fieldListView.Fields);
 
             GridView gridView = new();
+            //var gridViewHeaderStyle = new Style(typeof(GridViewColumnHeader));
+            //gridViewHeaderStyle.Setters.Add(new Setter(GridViewColumnHeader.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
+            //gridView.ColumnHeaderContainerStyle = gridViewHeaderStyle;
 
             terminalDataTable.Columns.Clear();
             terminalDataTable.Rows.Clear();
@@ -495,11 +498,15 @@ namespace TerminalMonitor.Windows.Controls
                                     MouseDownEvent, mouseDownHandler)
                             });
 
+                        DataTemplate columnTemplate = TerminalViewHelper.BuildColumnHeaderTemplate(visibleField.FieldKey);
+
                         viewColumn = new()
                         {
                             Header = visibleField.FieldKey,
                             CellTemplate = dataTemplate,
                         };
+
+                        viewColumn.HeaderTemplate = columnTemplate;
                     }
                     else
                     {

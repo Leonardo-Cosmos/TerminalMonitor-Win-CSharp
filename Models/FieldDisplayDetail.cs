@@ -11,6 +11,12 @@ namespace TerminalMonitor.Models
 
         public string FieldKey { get; set; }
 
+        public bool Hidden { get; set; }
+
+        public bool CustomizeHeaderStyle { get; set; }
+
+        public ColumnHeaderStyle HeaderStyle { get; set; }
+
         public bool CustomizeStyle { get; set; }
 
         public TextStyle Style { get; set; }
@@ -23,6 +29,9 @@ namespace TerminalMonitor.Models
             {
                 Id = Guid.NewGuid().ToString(),
                 FieldKey = this.FieldKey,
+                Hidden = this.Hidden,
+                CustomizeHeaderStyle = this.CustomizeHeaderStyle,
+                HeaderStyle = this.HeaderStyle,
                 CustomizeStyle = this.CustomizeStyle,
                 Style = (TextStyle)this.Style.Clone(),
                 Conditions = this.Conditions.Select(condition => (TextStyleCondition)condition.Clone()),
