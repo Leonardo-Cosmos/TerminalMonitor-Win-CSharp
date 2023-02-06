@@ -13,6 +13,8 @@ namespace TerminalMonitor.Models
 
         public bool Hidden { get; set; }
 
+        public string HeaderName { get; set; }
+
         public bool CustomizeHeaderStyle { get; set; }
 
         public ColumnHeaderStyle HeaderStyle { get; set; }
@@ -30,6 +32,7 @@ namespace TerminalMonitor.Models
                 Id = Guid.NewGuid().ToString(),
                 FieldKey = this.FieldKey,
                 Hidden = this.Hidden,
+                HeaderName = this.HeaderName,
                 CustomizeHeaderStyle = this.CustomizeHeaderStyle,
                 HeaderStyle = this.HeaderStyle,
                 CustomizeStyle = this.CustomizeStyle,

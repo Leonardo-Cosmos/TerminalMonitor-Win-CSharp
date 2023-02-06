@@ -28,6 +28,38 @@ namespace TerminalMonitor.Windows
             set { fieldKey = value; OnPropertyChanged(); }
         }
 
+        private bool hidden;
+
+        public bool Hidden
+        {
+            get => hidden;
+            set { hidden = value; OnPropertyChanged(); }
+        }
+
+        private string headerName;
+
+        public string HeaderName
+        {
+            get => headerName;
+            set { headerName = value; OnPropertyChanged(); }
+        }
+
+        private bool customizeHeaderStyle;
+
+        public bool CustomizeHeaderStyle
+        {
+            get => customizeHeaderStyle;
+            set { customizeHeaderStyle = value; OnPropertyChanged(); }
+        }
+
+        private ColumnHeaderStyle headerStyle;
+
+        public ColumnHeaderStyle HeaderStyle
+        {
+            get => headerStyle;
+            set { headerStyle = value; OnPropertyChanged(); }
+        }
+
         private bool customizeStyle;
 
         public bool CustomizeStyle
