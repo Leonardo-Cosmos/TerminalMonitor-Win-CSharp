@@ -23,17 +23,16 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class ColumnHeaderStyleView : UserControl
     {
-        public static readonly DependencyProperty TextStyleProperty =
-    DependencyProperty.Register(nameof(TextStyle), typeof(TextStyle), typeof(TextStyleView),
-        new PropertyMetadata(TextStyle.Empty, OnTextStyleChanged));
+        public static readonly DependencyProperty ColumnHeaderStyleProperty =
+            DependencyProperty.Register(nameof(ColumnHeaderStyle), typeof(ColumnHeaderStyle), typeof(ColumnHeaderStyleView),
+                new PropertyMetadata(ColumnHeaderStyle.Empty, OnTextStyleChanged));
 
-        private TextStyle textStyle;
+        private ColumnHeaderStyle columnHeaderStyle;
 
-        private readonly TextStyleViewDataContextVO dataContextVO = new()
+        private readonly ColumnHeaderStyleViewDataContextVO dataContextVO = new()
         {
             ForegroundColor = Brushes.Black,
             BackgroundColor = Brushes.White,
-            CellBackgroundColor = Brushes.White,
         };
 
         public ColumnHeaderStyleView()
@@ -46,7 +45,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void RctForegroundColor_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var brush = ShowColorDialog(dataContextVO.ForegroundColor as SolidColorBrush);
+            var brush = ColorDialogHelper.ShowColorDialog(dataContextVO.ForegroundColor as SolidColorBrush);
             if (brush != null)
             {
                 dataContextVO.ForegroundColor = brush;
@@ -55,7 +54,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void RctBackgroundColor_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var brush = ShowColorDialog(dataContextVO.BackgroundColor as SolidColorBrush);
+            var brush = ColorDialogHelper.ShowColorDialog(dataContextVO.BackgroundColor as SolidColorBrush);
             if (brush != null)
             {
                 dataContextVO.BackgroundColor = brush;
@@ -66,80 +65,43 @@ namespace TerminalMonitor.Windows.Controls
         {
             switch (e.PropertyName)
             {
-                case nameof(TextStyleViewDataContextVO.ForegroundColor):
-                    textStyle.Foreground ??= new TextColorConfig();
-                    textStyle.Foreground.Color = (dataContextVO.ForegroundColor as SolidColorBrush).Color;
+                case nameof(ColumnHeaderStyleViewDataContextVO.ForegroundColor):
+                    columnHeaderStyle.Foreground ??= new TextColorConfig();
+                    columnHeaderStyle.Foreground.Color = (dataContextVO.ForegroundColor as SolidColorBrush).Color;
                     break;
-                case nameof(TextStyleViewDataContextVO.ForegroundColorMode):
-                    textStyle.Foreground ??= new TextColorConfig();
-                    textStyle.Foreground.Mode = dataContextVO.ForegroundColorMode;
-                    textStyle.Foreground.Color = dataContextVO.IsForegroundColorStatic ?
-                        (dataContextVO.ForegroundColor as SolidColorBrush).Color : null;
+                case nameof(ColumnHeaderStyleViewDataContextVO.BackgroundColor):
+                    columnHeaderStyle.Background ??= new TextColorConfig();
+                    columnHeaderStyle.Background.Color = (dataContextVO.BackgroundColor as SolidColorBrush).Color;
                     break;
-                case nameof(TextStyleViewDataContextVO.BackgroundColor):
-                    textStyle.Background ??= new TextColorConfig();
-                    textStyle.Background.Color = (dataContextVO.BackgroundColor as SolidColorBrush).Color;
+                case nameof(ColumnHeaderStyleViewDataContextVO.HorizontalAlignment):
+                    columnHeaderStyle.HorizontalAlignment = dataContextVO.HorizontalAlignment;
                     break;
-                case nameof(TextStyleViewDataContextVO.BackgroundColorMode):
-                    textStyle.Background ??= new TextColorConfig();
-                    textStyle.Background.Mode = dataContextVO.BackgroundColorMode;
-                    textStyle.Background.Color = dataContextVO.IsBackgroundColorStatic ?
-                        (dataContextVO.BackgroundColor as SolidColorBrush).Color : null;
-                    break;
-                case nameof(TextStyleViewDataContextVO.CellBackgroundColor):
-                    textStyle.CellBackground ??= new TextColorConfig();
-                    textStyle.CellBackground.Color = (dataContextVO.CellBackgroundColor as SolidColorBrush).Color;
-                    break;
-                case nameof(TextStyleViewDataContextVO.CellBackgroundColorMode):
-                    textStyle.CellBackground ??= new TextColorConfig();
-                    textStyle.CellBackground.Mode = dataContextVO.CellBackgroundColorMode;
-                    textStyle.CellBackground.Color = dataContextVO.IsCellBackgroundColorStatic ?
-                        (dataContextVO.CellBackgroundColor as SolidColorBrush).Color : null;
-                    break;
-                case nameof(TextStyleViewDataContextVO.HorizontalAlignment):
-                    textStyle.HorizontalAlignment = dataContextVO.HorizontalAlignment;
-                    break;
-                case nameof(TextStyleViewDataContextVO.VerticalAlignment):
-                    textStyle.VerticalAlignment = dataContextVO.VerticalAlignment;
-                    break;
-                case nameof(TextStyleViewDataContextVO.TextAlignment):
-                    textStyle.TextAlignment = dataContextVO.TextAlignment;
+                case nameof(ColumnHeaderStyleViewDataContextVO.TextAlignment):
+                    columnHeaderStyle.TextAlignment = dataContextVO.TextAlignment;
                     break;
 
-                case nameof(TextStyleViewDataContextVO.EnableForeground):
+                case nameof(ColumnHeaderStyleViewDataContextVO.EnableForeground):
                     if (!dataContextVO.EnableForeground)
                     {
-                        textStyle.Foreground = null;
+                        columnHeaderStyle.Foreground = null;
                     }
                     break;
-                case nameof(TextStyleViewDataContextVO.EnableBackground):
+                case nameof(ColumnHeaderStyleViewDataContextVO.EnableBackground):
                     if (!dataContextVO.EnableBackground)
                     {
-                        textStyle.Background = null;
+                        columnHeaderStyle.Background = null;
                     }
                     break;
-                case nameof(TextStyleViewDataContextVO.EnableCellBackground):
-                    if (!dataContextVO.EnableCellBackground)
-                    {
-                        textStyle.CellBackground = null;
-                    }
-                    break;
-                case nameof(TextStyleViewDataContextVO.EnableHorizontalAlignment):
+                case nameof(ColumnHeaderStyleViewDataContextVO.EnableHorizontalAlignment):
                     if (!dataContextVO.EnableHorizontalAlignment)
                     {
-                        textStyle.HorizontalAlignment = null;
+                        columnHeaderStyle.HorizontalAlignment = null;
                     }
                     break;
-                case nameof(TextStyleViewDataContextVO.EnableVerticalAlignment):
-                    if (!dataContextVO.EnableVerticalAlignment)
-                    {
-                        textStyle.VerticalAlignment = null;
-                    }
-                    break;
-                case nameof(TextStyleViewDataContextVO.EnableTextAlignment):
+                case nameof(ColumnHeaderStyleViewDataContextVO.EnableTextAlignment):
                     if (!dataContextVO.EnableTextAlignment)
                     {
-                        textStyle.TextAlignment = null;
+                        columnHeaderStyle.TextAlignment = null;
                     }
                     break;
 
@@ -150,76 +112,55 @@ namespace TerminalMonitor.Windows.Controls
 
         private static void OnTextStyleChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
         {
-            var textStyleView = dependencyObject as TextStyleView;
-            textStyleView.OnTextStyleChanged(e);
+            var columnHeaderStyleView = dependencyObject as ColumnHeaderStyleView;
+            columnHeaderStyleView.OnTextStyleChanged(e);
         }
 
         private void OnTextStyleChanged(DependencyPropertyChangedEventArgs e)
         {
-            textStyle = e.NewValue as TextStyle;
-            if (textStyle != null)
+            columnHeaderStyle = e.NewValue as ColumnHeaderStyle;
+            if (columnHeaderStyle != null)
             {
                 dataContextVO.PropertyChanged -= OnDataContextPropertyChanged;
 
-                dataContextVO.EnableForeground = textStyle.Foreground != null;
-                if (textStyle.Foreground != null)
+                dataContextVO.EnableForeground = columnHeaderStyle.Foreground != null;
+                if (columnHeaderStyle.Foreground != null)
                 {
-                    dataContextVO.ForegroundColorMode = textStyle.Foreground.Mode;
-
-                    if (textStyle.Foreground.Color.HasValue)
+                    if (columnHeaderStyle.Foreground.Color.HasValue)
                     {
-                        dataContextVO.ForegroundColor = new SolidColorBrush(textStyle.Foreground.Color.Value);
+                        dataContextVO.ForegroundColor = new SolidColorBrush(columnHeaderStyle.Foreground.Color.Value);
                     }
                 }
 
-                dataContextVO.EnableBackground = textStyle.Background != null;
-                if (textStyle.Background != null)
+                dataContextVO.EnableBackground = columnHeaderStyle.Background != null;
+                if (columnHeaderStyle.Background != null)
                 {
-                    dataContextVO.BackgroundColorMode = textStyle.Background.Mode;
-
-                    if (textStyle.Background.Color.HasValue)
+                    if (columnHeaderStyle.Background.Color.HasValue)
                     {
-                        dataContextVO.BackgroundColor = new SolidColorBrush(textStyle.Background.Color.Value);
+                        dataContextVO.BackgroundColor = new SolidColorBrush(columnHeaderStyle.Background.Color.Value);
                     }
                 }
 
-                dataContextVO.EnableCellBackground = textStyle.CellBackground != null;
-                if (textStyle.CellBackground != null)
+                dataContextVO.EnableHorizontalAlignment = columnHeaderStyle.HorizontalAlignment.HasValue;
+                if (columnHeaderStyle.HorizontalAlignment.HasValue)
                 {
-                    dataContextVO.CellBackgroundColorMode = textStyle.CellBackground.Mode;
-
-                    if (textStyle.CellBackground.Color.HasValue)
-                    {
-                        dataContextVO.CellBackgroundColor = new SolidColorBrush(textStyle.CellBackground.Color.Value);
-                    }
+                    dataContextVO.HorizontalAlignment = columnHeaderStyle.HorizontalAlignment.Value;
                 }
 
-                dataContextVO.EnableHorizontalAlignment = textStyle.HorizontalAlignment.HasValue;
-                if (textStyle.HorizontalAlignment.HasValue)
+                dataContextVO.EnableTextAlignment = columnHeaderStyle.TextAlignment.HasValue;
+                if (columnHeaderStyle.TextAlignment.HasValue)
                 {
-                    dataContextVO.HorizontalAlignment = textStyle.HorizontalAlignment.Value;
-                }
-
-                dataContextVO.EnableVerticalAlignment = textStyle.VerticalAlignment.HasValue;
-                if (textStyle.VerticalAlignment.HasValue)
-                {
-                    dataContextVO.VerticalAlignment = textStyle.VerticalAlignment.Value;
-                }
-
-                dataContextVO.EnableTextAlignment = textStyle.TextAlignment.HasValue;
-                if (textStyle.TextAlignment.HasValue)
-                {
-                    dataContextVO.TextAlignment = textStyle.TextAlignment.Value;
+                    dataContextVO.TextAlignment = columnHeaderStyle.TextAlignment.Value;
                 }
 
                 dataContextVO.PropertyChanged += OnDataContextPropertyChanged;
             }
         }
 
-        public TextStyle TextStyle
+        public ColumnHeaderStyle ColumnHeaderStyle
         {
-            get => (TextStyle)GetValue(TextStyleProperty);
-            set => SetValue(TextStyleProperty, value);
+            get => (ColumnHeaderStyle)GetValue(ColumnHeaderStyleProperty);
+            set => SetValue(ColumnHeaderStyleProperty, value);
         }
     }
 }

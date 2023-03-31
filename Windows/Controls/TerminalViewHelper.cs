@@ -282,10 +282,12 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public static DataTemplate BuildColumnHeaderTemplate(string fieldKey)
+        public static DataTemplate BuildColumnHeaderTemplate(FieldDisplayDetail visibleField)
         {
+            string columnHeader = visibleField.HeaderName ?? visibleField.FieldKey;
+
             FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
-            textBlockElement.SetValue(TextBlock.TextProperty, fieldKey);
+            textBlockElement.SetValue(TextBlock.TextProperty, columnHeader);
 
             //textBlockElement.SetValue(TextBlock.ForegroundProperty, Brushes.Blue);
             //textBlockElement.SetValue(TextBlock.BackgroundProperty, Brushes.Green);

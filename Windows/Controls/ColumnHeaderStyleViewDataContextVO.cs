@@ -1,12 +1,12 @@
 ﻿/* 2023/3/1 */
 using System.ComponentModel;
-using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Media;
 
 namespace TerminalMonitor.Windows.Controls
 {
-    class ColumnHeaderStyleViewDataContext
+    class ColumnHeaderStyleViewDataContextVO
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

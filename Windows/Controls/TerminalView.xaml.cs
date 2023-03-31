@@ -483,7 +483,10 @@ namespace TerminalMonitor.Windows.Controls
                     column.DataType = typeof(string);
                     terminalDataTable.Columns.Add(column);
 
-                    GridViewColumn viewColumn;
+                    GridViewColumn viewColumn = new();
+
+                    viewColumn.Header = visibleField.HeaderName ?? visibleField.FieldKey;
+
                     if (visibleField.CustomizeStyle)
                     {
                         MouseButtonEventHandler mouseDownHandler = (sender, e) =>
@@ -498,23 +501,17 @@ namespace TerminalMonitor.Windows.Controls
                                     MouseDownEvent, mouseDownHandler)
                             });
 
-                        DataTemplate columnTemplate = TerminalViewHelper.BuildColumnHeaderTemplate(visibleField.FieldKey);
-
-                        viewColumn = new()
-                        {
-                            Header = visibleField.FieldKey,
-                            CellTemplate = dataTemplate,
-                        };
-
-                        viewColumn.HeaderTemplate = columnTemplate;
+                        viewColumn.CellTemplate = dataTemplate;
                     }
                     else
                     {
-                        viewColumn = new()
-                        {
-                            Header = visibleField.FieldKey,
-                            DisplayMemberBinding = new Binding(visibleField.Id),
-                        };
+                        viewColumn.DisplayMemberBinding = new Binding(visibleField.Id);
+                    }
+
+                    if (visibleField.CustomizeHeader)
+                    {
+                        DataTemplate columnTemplate = TerminalViewHelper.BuildColumnHeaderTemplate(visibleField);
+                        viewColumn.HeaderTemplate = columnTemplate;
                     }
 
                     gridView.Columns.Add(viewColumn);

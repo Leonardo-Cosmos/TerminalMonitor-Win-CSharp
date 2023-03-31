@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=local:ColumnHeaderStyleViewDataContext}"
+             d:DataContext="{d:DesignInstance Type=local:ColumnHeaderStyleViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="600">
     <WrapPanel Name="pnl" Orientation="Horizontal">
         <WrapPanel.Resources>
@@ -34,14 +34,6 @@
                 <StackPanel Orientation="Horizontal">
                     <CheckBox Name="chkBxForeground" IsChecked="{Binding EnableForeground}"/>
                     <Label Name="lblForeground" Content="Foreground" IsEnabled="{Binding EnableForeground}" />
-                    <ComboBox Name="cmbBxForegroundColor" IsEnabled="{Binding EnableForeground}"
-                              ItemsSource="{StaticResource TextColorModes}" SelectedValue="{Binding ForegroundColorMode}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Converter={StaticResource TextColorModeToStringConverter}}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
                     <Rectangle Name="rctForegroundColor" Width="10" Height="10"
                                Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
                                Fill="{Binding ForegroundColor}" MouseDown="RctForegroundColor_MouseDown">
@@ -60,14 +52,6 @@
                 <StackPanel Orientation="Horizontal">
                     <CheckBox Name="chkBxBackground" IsChecked="{Binding EnableBackground}" />
                     <Label Name="lblBackground" Content="Background" IsEnabled="{Binding EnableBackground}" />
-                    <ComboBox Name="cmbBxBackgroundColor" IsEnabled="{Binding EnableBackground}"
-                              ItemsSource="{StaticResource TextColorModes}" SelectedValue="{Binding BackgroundColorMode}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Converter={StaticResource TextColorModeToStringConverter}}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
                     <Rectangle Name="rctBackgroundColor" Width="10" Height="10"
                                Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
                                Fill="{Binding BackgroundColor}" MouseDown="RctBackgroundColor_MouseDown">
