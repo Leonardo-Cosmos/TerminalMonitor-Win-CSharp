@@ -25,7 +25,7 @@ namespace TerminalMonitor.Windows.Controls
     {
         public static readonly DependencyProperty ColumnHeaderStyleProperty =
             DependencyProperty.Register(nameof(ColumnHeaderStyle), typeof(ColumnHeaderStyle), typeof(ColumnHeaderStyleView),
-                new PropertyMetadata(ColumnHeaderStyle.Empty, OnTextStyleChanged));
+                new PropertyMetadata(ColumnHeaderStyle.Empty, OnColumnHeaderStyleChanged));
 
         private ColumnHeaderStyle columnHeaderStyle;
 
@@ -110,13 +110,13 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private static void OnTextStyleChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
+        private static void OnColumnHeaderStyleChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
         {
             var columnHeaderStyleView = dependencyObject as ColumnHeaderStyleView;
-            columnHeaderStyleView.OnTextStyleChanged(e);
+            columnHeaderStyleView.OnColumnHeaderStyleChanged(e);
         }
 
-        private void OnTextStyleChanged(DependencyPropertyChangedEventArgs e)
+        private void OnColumnHeaderStyleChanged(DependencyPropertyChangedEventArgs e)
         {
             columnHeaderStyle = e.NewValue as ColumnHeaderStyle;
             if (columnHeaderStyle != null)

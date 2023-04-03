@@ -289,15 +289,29 @@ namespace TerminalMonitor.Windows.Controls
             FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
             textBlockElement.SetValue(TextBlock.TextProperty, columnHeader);
 
-            //textBlockElement.SetValue(TextBlock.ForegroundProperty, Brushes.Blue);
-            //textBlockElement.SetValue(TextBlock.BackgroundProperty, Brushes.Green);
+            var headerStyle = visibleField.HeaderStyle;
 
-            textBlockElement.SetValue(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
-            textBlockElement.SetValue(TextBlock.TextAlignmentProperty, TextAlignment.Center);
+            if (headerStyle.Foreground != null)
+            {
+                textBlockElement.SetValue(TextBlock.ForegroundProperty, headerStyle.Foreground);
+            }
+
+            if (headerStyle.Background != null)
+            {
+                textBlockElement.SetValue(TextBlock.BackgroundProperty, headerStyle.Background);
+            }
+
+            if (headerStyle.HorizontalAlignment != null)
+            {
+                textBlockElement.SetValue(TextBlock.HorizontalAlignmentProperty, headerStyle.HorizontalAlignment);
+            }
+
+            if (headerStyle.TextAlignment != null)
+            {
+                textBlockElement.SetValue(TextBlock.TextAlignmentProperty, headerStyle.TextAlignment);
+            }
 
             FrameworkElementFactory panelElement = new(typeof(DockPanel));
-
-            //panelElement.SetValue(Panel.BackgroundProperty, Brushes.Cyan);
 
             panelElement.AppendChild(textBlockElement);
 

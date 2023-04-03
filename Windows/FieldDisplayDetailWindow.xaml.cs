@@ -42,6 +42,7 @@ namespace TerminalMonitor.Windows
 
             dataContextVO = new()
             {
+                HeaderStyle = ColumnHeaderStyle.Empty,
                 Style = TextStyle.Empty,
 
                 AddCommand = new RelayCommand(AddCondition, () => true),
@@ -293,8 +294,12 @@ namespace TerminalMonitor.Windows
             if (fieldDetail != null)
             {
                 dataContextVO.FieldKey = fieldDetail.FieldKey;
-                dataContextVO.CustomizeStyle = fieldDetail.CustomizeStyle;
+                dataContextVO.HeaderName = fieldDetail.HeaderName;
 
+                dataContextVO.CustomizeHeaderStyle = fieldDetail.CustomizeHeader;
+                dataContextVO.HeaderStyle = fieldDetail.HeaderStyle ?? ColumnHeaderStyle.Empty;
+
+                dataContextVO.CustomizeStyle = fieldDetail.CustomizeStyle;
                 dataContextVO.Style = fieldDetail.Style ?? TextStyle.Empty;
 
                 styleConditions.Clear();
@@ -310,6 +315,9 @@ namespace TerminalMonitor.Windows
             if (fieldDetail != null)
             {
                 fieldDetail.FieldKey = dataContextVO.FieldKey;
+                fieldDetail.HeaderName = dataContextVO.HeaderName;
+                fieldDetail.CustomizeHeader = dataContextVO.CustomizeHeaderStyle;
+                fieldDetail.HeaderStyle = dataContextVO.HeaderStyle;
                 fieldDetail.CustomizeStyle = dataContextVO.CustomizeStyle;
                 fieldDetail.Style = dataContextVO.Style;
                 fieldDetail.Conditions = styleConditions.ToArray();
@@ -320,6 +328,9 @@ namespace TerminalMonitor.Windows
                 {
                     Id = Guid.NewGuid().ToString(),
                     FieldKey = dataContextVO.FieldKey,
+                    HeaderName = dataContextVO.HeaderName,
+                    CustomizeHeader = dataContextVO.CustomizeHeaderStyle,
+                    HeaderStyle = dataContextVO.HeaderStyle,
                     CustomizeStyle = dataContextVO.CustomizeStyle,
                     Style = dataContextVO.Style,
                     Conditions = styleConditions.ToArray(),
