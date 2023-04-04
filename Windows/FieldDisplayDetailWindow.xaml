@@ -54,7 +54,8 @@
                 <Label Name="lblHeaderStyle" Grid.Row="0" Grid.Column="0" Content="Customize style" />
                 <CheckBox Name="chkBxHeaderStyle" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center"
                           IsChecked="{Binding CustomizeHeaderStyle}" />
-                <controls:ColumnHeaderStyleView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" ColumnHeaderStyle="{Binding HeaderStyle}" />
+                <controls:ColumnHeaderStyleView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                IsEnabled="{Binding CustomizeHeaderStyle}" ColumnHeaderStyle="{Binding HeaderStyle}" />
             </Grid>
         </GroupBox>
 

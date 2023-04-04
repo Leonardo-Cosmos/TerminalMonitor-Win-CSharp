@@ -13,9 +13,9 @@ namespace TerminalMonitor.Models
 
         public bool Hidden { get; set; }
 
-        public bool CustomizeHeader { get; set; }
-
         public string HeaderName { get; set; }
+
+        public bool CustomizeHeader { get; set; }
 
         public ColumnHeaderStyle HeaderStyle { get; set; }
 
@@ -32,12 +32,12 @@ namespace TerminalMonitor.Models
                 Id = Guid.NewGuid().ToString(),
                 FieldKey = this.FieldKey,
                 Hidden = this.Hidden,
-                CustomizeHeader = this.CustomizeHeader,
                 HeaderName = this.HeaderName,
-                HeaderStyle = this.HeaderStyle,
+                CustomizeHeader = this.CustomizeHeader,
+                HeaderStyle = (ColumnHeaderStyle)this.HeaderStyle?.Clone(),
                 CustomizeStyle = this.CustomizeStyle,
-                Style = (TextStyle)this.Style.Clone(),
-                Conditions = this.Conditions.Select(condition => (TextStyleCondition)condition.Clone()),
+                Style = (TextStyle)this.Style?.Clone(),
+                Conditions = this.Conditions?.Select(condition => (TextStyleCondition)condition.Clone()),
             };
         }
     }
