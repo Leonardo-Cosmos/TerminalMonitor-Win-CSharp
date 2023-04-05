@@ -1,18 +1,19 @@
 ﻿/* 2023/2/3 */
 using System;
 using System.Windows;
+using System.Windows.Media;
 
 namespace TerminalMonitor.Models
 {
     public class ColumnHeaderStyle : ICloneable
     {
-        public static ColumnHeaderStyle Empty = new()
+        public static ColumnHeaderStyle Empty => new()
         {
         };
 
-        public TextColorConfig Foreground { get; set; }
+        public Color? Foreground { get; set; }
 
-        public TextColorConfig Background { get; set; }
+        public Color? Background { get; set; }
 
         public HorizontalAlignment? HorizontalAlignment { get; set; }
 
@@ -22,8 +23,8 @@ namespace TerminalMonitor.Models
         {
             return new ColumnHeaderStyle()
             {
-                Foreground = (TextColorConfig)this.Foreground?.Clone(),
-                Background = (TextColorConfig)this.Background?.Clone(),
+                Foreground = this.Foreground,
+                Background = this.Background,
                 HorizontalAlignment = this.HorizontalAlignment,
                 TextAlignment = this.TextAlignment,
             };

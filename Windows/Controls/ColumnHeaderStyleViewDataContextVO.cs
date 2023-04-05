@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 namespace TerminalMonitor.Windows.Controls
 {
-    class ColumnHeaderStyleViewDataContextVO
+    class ColumnHeaderStyleViewDataContextVO : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

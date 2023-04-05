@@ -110,6 +110,7 @@
                 </StackPanel>
             </WrapPanel>
         </GroupBox>
+        
         <GroupBox Header="Alignment">
             <WrapPanel Orientation="Horizontal">
                 <StackPanel Orientation="Horizontal">

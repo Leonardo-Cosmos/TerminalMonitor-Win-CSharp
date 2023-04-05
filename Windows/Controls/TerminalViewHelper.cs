@@ -293,12 +293,12 @@ namespace TerminalMonitor.Windows.Controls
 
             if (headerStyle.Foreground != null)
             {
-                textBlockElement.SetValue(TextBlock.ForegroundProperty, headerStyle.Foreground);
+                textBlockElement.SetValue(TextBlock.ForegroundProperty, ConvertColorToBrush(headerStyle.Foreground));
             }
 
             if (headerStyle.Background != null)
             {
-                textBlockElement.SetValue(TextBlock.BackgroundProperty, headerStyle.Background);
+                textBlockElement.SetValue(TextBlock.BackgroundProperty, ConvertColorToBrush(headerStyle.Background));
             }
 
             if (headerStyle.HorizontalAlignment != null)
