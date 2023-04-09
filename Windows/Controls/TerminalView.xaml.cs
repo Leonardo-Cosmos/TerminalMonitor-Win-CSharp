@@ -461,9 +461,10 @@ namespace TerminalMonitor.Windows.Controls
             visibleFields = columnSettingHelper.Init(fieldListView.Fields);
 
             GridView gridView = new();
-            //var gridViewHeaderStyle = new Style(typeof(GridViewColumnHeader));
-            //gridViewHeaderStyle.Setters.Add(new Setter(GridViewColumnHeader.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
-            //gridView.ColumnHeaderContainerStyle = gridViewHeaderStyle;
+            var gridViewHeaderStyle = new Style(typeof(GridViewColumnHeader));
+            gridViewHeaderStyle.Setters.Add(new Setter(GridViewColumnHeader.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
+            //gridViewHeaderStyle.Setters.Add(new Setter(GridViewColumnHeader.HorizontalAlignmentProperty, HorizontalAlignment.Center));
+            gridView.ColumnHeaderContainerStyle = gridViewHeaderStyle;
 
             terminalDataTable.Columns.Clear();
             terminalDataTable.Rows.Clear();

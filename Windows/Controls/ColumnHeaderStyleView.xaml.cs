@@ -66,12 +66,10 @@ namespace TerminalMonitor.Windows.Controls
             switch (e.PropertyName)
             {
                 case nameof(ColumnHeaderStyleViewDataContextVO.ForegroundColor):
-                    columnHeaderStyle.Foreground ??= new TextColorConfig();
-                    columnHeaderStyle.Foreground.Color = (dataContextVO.ForegroundColor as SolidColorBrush).Color;
+                    columnHeaderStyle.Foreground ??= (dataContextVO.ForegroundColor as SolidColorBrush).Color;
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.BackgroundColor):
-                    columnHeaderStyle.Background ??= new TextColorConfig();
-                    columnHeaderStyle.Background.Color = (dataContextVO.BackgroundColor as SolidColorBrush).Color;
+                    columnHeaderStyle.Background ??= (dataContextVO.BackgroundColor as SolidColorBrush).Color;
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.HorizontalAlignment):
                     columnHeaderStyle.HorizontalAlignment = dataContextVO.HorizontalAlignment;
@@ -124,21 +122,15 @@ namespace TerminalMonitor.Windows.Controls
                 dataContextVO.PropertyChanged -= OnDataContextPropertyChanged;
 
                 dataContextVO.EnableForeground = columnHeaderStyle.Foreground != null;
-                if (columnHeaderStyle.Foreground != null)
+                if (columnHeaderStyle.Foreground.HasValue)
                 {
-                    if (columnHeaderStyle.Foreground.Color.HasValue)
-                    {
-                        dataContextVO.ForegroundColor = new SolidColorBrush(columnHeaderStyle.Foreground.Color.Value);
-                    }
+                    dataContextVO.ForegroundColor = new SolidColorBrush(columnHeaderStyle.Foreground.Value);
                 }
 
                 dataContextVO.EnableBackground = columnHeaderStyle.Background != null;
-                if (columnHeaderStyle.Background != null)
+                if (columnHeaderStyle.Background.HasValue)
                 {
-                    if (columnHeaderStyle.Background.Color.HasValue)
-                    {
-                        dataContextVO.BackgroundColor = new SolidColorBrush(columnHeaderStyle.Background.Color.Value);
-                    }
+                    dataContextVO.BackgroundColor = new SolidColorBrush(columnHeaderStyle.Background.Value);
                 }
 
                 dataContextVO.EnableHorizontalAlignment = columnHeaderStyle.HorizontalAlignment.HasValue;
