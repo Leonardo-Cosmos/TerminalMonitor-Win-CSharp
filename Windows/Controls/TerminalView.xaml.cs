@@ -461,10 +461,22 @@ namespace TerminalMonitor.Windows.Controls
             visibleFields = columnSettingHelper.Init(fieldListView.Fields);
 
             GridView gridView = new();
-            var gridViewHeaderStyle = new Style(typeof(GridViewColumnHeader));
-            gridViewHeaderStyle.Setters.Add(new Setter(GridViewColumnHeader.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
-            //gridViewHeaderStyle.Setters.Add(new Setter(GridViewColumnHeader.HorizontalAlignmentProperty, HorizontalAlignment.Center));
-            gridView.ColumnHeaderContainerStyle = gridViewHeaderStyle;
+
+            var isAnyColumnHeaderCustomized =
+                    visibleFields.Any(visibleField => visibleField.CustomizeHeader);
+
+            if (isAnyColumnHeaderCustomized)
+            {
+                var gridViewHeaderStyle = new Style(typeof(GridViewColumnHeader));
+
+                /* Default style
+                gridViewHeaderStyle.Setters.Add(new Setter(GridViewColumnHeader.HorizontalAlignmentProperty, HorizontalAlignment.Stretch));
+                gridViewHeaderStyle.Setters.Add(new Setter(GridViewColumnHeader.HorizontalContentAlignmentProperty, HorizontalAlignment.Center));
+                */
+
+                gridViewHeaderStyle.Setters.Add(new Setter(GridViewColumnHeader.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
+                gridView.ColumnHeaderContainerStyle = gridViewHeaderStyle;
+            }            
 
             terminalDataTable.Columns.Clear();
             terminalDataTable.Rows.Clear();
@@ -511,7 +523,12 @@ namespace TerminalMonitor.Windows.Controls
 
                     if (visibleField.CustomizeHeader)
                     {
-                        DataTemplate columnTemplate = TerminalViewHelper.BuildColumnHeaderTemplate(visibleField);
+                        var columnTemplate = TerminalViewHelper.BuildColumnHeaderTemplate(visibleField);
+                        viewColumn.HeaderTemplate = columnTemplate;
+                    }
+                    else if (isAnyColumnHeaderCustomized)
+                    {
+                        var columnTemplate = TerminalViewHelper.BuildDefaultColumnHeaderTemplate(visibleField);
                         viewColumn.HeaderTemplate = columnTemplate;
                     }
 

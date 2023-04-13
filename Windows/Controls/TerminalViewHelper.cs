@@ -319,5 +319,22 @@ namespace TerminalMonitor.Windows.Controls
             dataTemplate.VisualTree = panelElement;
             return dataTemplate;
         }
+
+        public static DataTemplate BuildDefaultColumnHeaderTemplate(FieldDisplayDetail visibleField)
+        {
+            string columnHeader = visibleField.HeaderName ?? visibleField.FieldKey;
+
+            FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
+            textBlockElement.SetValue(TextBlock.TextProperty, columnHeader);
+            textBlockElement.SetValue(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            textBlockElement.SetValue(TextBlock.TextAlignmentProperty, TextAlignment.Left);
+
+            FrameworkElementFactory panelElement = new(typeof(DockPanel));
+            panelElement.AppendChild(textBlockElement);
+
+            DataTemplate dataTemplate = new();
+            dataTemplate.VisualTree = panelElement;
+            return dataTemplate;
+        }
     }
 }
