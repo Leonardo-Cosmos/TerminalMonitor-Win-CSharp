@@ -17,6 +17,8 @@ namespace TerminalMonitor.Models
 
         public HorizontalAlignment? HorizontalAlignment { get; set; }
 
+        public VerticalAlignment? VerticalAlignment { get; set; }
+
         public TextAlignment? TextAlignment { get; set; }
 
         public object Clone()
@@ -26,6 +28,7 @@ namespace TerminalMonitor.Models
                 Foreground = this.Foreground,
                 Background = this.Background,
                 HorizontalAlignment = this.HorizontalAlignment,
+                VerticalAlignment = this.VerticalAlignment,
                 TextAlignment = this.TextAlignment,
             };
         }

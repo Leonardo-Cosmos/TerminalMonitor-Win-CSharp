@@ -470,11 +470,14 @@ namespace TerminalMonitor.Windows.Controls
                 var gridViewHeaderStyle = new Style(typeof(GridViewColumnHeader));
 
                 /* Default style
-                gridViewHeaderStyle.Setters.Add(new Setter(GridViewColumnHeader.HorizontalAlignmentProperty, HorizontalAlignment.Stretch));
-                gridViewHeaderStyle.Setters.Add(new Setter(GridViewColumnHeader.HorizontalContentAlignmentProperty, HorizontalAlignment.Center));
+                gridViewHeaderStyle.Setters.Add(
+                    new Setter(GridViewColumnHeader.HorizontalAlignmentProperty, HorizontalAlignment.Stretch));
+                gridViewHeaderStyle.Setters.Add(
+                    new Setter(GridViewColumnHeader.HorizontalContentAlignmentProperty, HorizontalAlignment.Center));
                 */
 
-                gridViewHeaderStyle.Setters.Add(new Setter(GridViewColumnHeader.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
+                gridViewHeaderStyle.Setters.Add(
+                    new Setter(GridViewColumnHeader.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
                 gridView.ColumnHeaderContainerStyle = gridViewHeaderStyle;
             }            
 

@@ -67,6 +67,19 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
+                    <CheckBox Name="chkBoVerticalAlignment" IsChecked="{Binding EnableVerticalAlignment}" />
+                    <Label Name="lblVerticalAlignment" Content="Vertical alignment" IsEnabled="{Binding EnableVerticalAlignment}" />
+                    <ComboBox Name="cmbBxVerticalAlignment" IsEnabled="{Binding EnableVerticalAlignment}"
+                              ItemsSource="{StaticResource VerticalAlignmentValues}" SelectedValue="{Binding VerticalAlignment}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource VerticalAlignmentToStringConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
                     <CheckBox Name="chkBoTextAlignment" IsChecked="{Binding EnableTextAlignment}" />
                     <Label Name="lblTextAlignment" Content="Text alignment" IsEnabled="{Binding EnableTextAlignment}" />
                     <ComboBox Name="cmbBxTextAlignment" IsEnabled="{Binding EnableTextAlignment}"

@@ -74,6 +74,9 @@ namespace TerminalMonitor.Windows.Controls
                 case nameof(ColumnHeaderStyleViewDataContextVO.HorizontalAlignment):
                     columnHeaderStyle.HorizontalAlignment = dataContextVO.HorizontalAlignment;
                     break;
+                case nameof(ColumnHeaderStyleViewDataContextVO.VerticalAlignment):
+                    columnHeaderStyle.VerticalAlignment = dataContextVO.VerticalAlignment;
+                    break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.TextAlignment):
                     columnHeaderStyle.TextAlignment = dataContextVO.TextAlignment;
                     break;
@@ -94,6 +97,12 @@ namespace TerminalMonitor.Windows.Controls
                     if (!dataContextVO.EnableHorizontalAlignment)
                     {
                         columnHeaderStyle.HorizontalAlignment = null;
+                    }
+                    break;
+                case nameof(ColumnHeaderStyleViewDataContextVO.EnableVerticalAlignment):
+                    if (!dataContextVO.EnableVerticalAlignment)
+                    {
+                        columnHeaderStyle.VerticalAlignment = null;
                     }
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.EnableTextAlignment):
@@ -137,6 +146,12 @@ namespace TerminalMonitor.Windows.Controls
                 if (columnHeaderStyle.HorizontalAlignment.HasValue)
                 {
                     dataContextVO.HorizontalAlignment = columnHeaderStyle.HorizontalAlignment.Value;
+                }
+
+                dataContextVO.EnableVerticalAlignment = columnHeaderStyle.VerticalAlignment.HasValue;
+                if (columnHeaderStyle.VerticalAlignment.HasValue)
+                {
+                    dataContextVO.VerticalAlignment = columnHeaderStyle.VerticalAlignment.Value;
                 }
 
                 dataContextVO.EnableTextAlignment = columnHeaderStyle.TextAlignment.HasValue;

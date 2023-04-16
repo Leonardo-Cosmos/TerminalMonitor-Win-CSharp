@@ -306,6 +306,11 @@ namespace TerminalMonitor.Windows.Controls
                 textBlockElement.SetValue(TextBlock.HorizontalAlignmentProperty, headerStyle.HorizontalAlignment);
             }
 
+            if (headerStyle.VerticalAlignment != null)
+            {
+                textBlockElement.SetValue(TextBlock.VerticalAlignmentProperty, headerStyle.VerticalAlignment);
+            }
+
             if (headerStyle.TextAlignment != null)
             {
                 textBlockElement.SetValue(TextBlock.TextAlignmentProperty, headerStyle.TextAlignment);
@@ -326,8 +331,7 @@ namespace TerminalMonitor.Windows.Controls
 
             FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
             textBlockElement.SetValue(TextBlock.TextProperty, columnHeader);
-            textBlockElement.SetValue(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center);
-            textBlockElement.SetValue(TextBlock.TextAlignmentProperty, TextAlignment.Left);
+            textBlockElement.SetValue(TextBlock.TextAlignmentProperty, TextAlignment.Center);
 
             FrameworkElementFactory panelElement = new(typeof(DockPanel));
             panelElement.AppendChild(textBlockElement);

@@ -35,8 +35,7 @@
 
                 <Label Name="lblHeaderName" Grid.Row="1" Grid.Column="0" Content="Header" />
                 <TextBox Name="txtBxHeaderName" Grid.Row="1" Grid.Column="1" Text="{Binding HeaderName}"
-                         Style="{StaticResource textBoxInValidation}"
-                         Validation.ErrorTemplate="{StaticResource validationTemplate}" />
+                         TextWrapping="Wrap" AcceptsReturn="True" />
             </Grid>
         </GroupBox>
 

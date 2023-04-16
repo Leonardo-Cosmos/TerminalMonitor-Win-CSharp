@@ -87,6 +87,30 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private bool enableVerticalAlignment;
+
+        public bool EnableVerticalAlignment
+        {
+            get => enableVerticalAlignment;
+            set
+            {
+                enableVerticalAlignment = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private VerticalAlignment verticalAlignment;
+
+        public VerticalAlignment VerticalAlignment
+        {
+            get => verticalAlignment;
+            set
+            {
+                verticalAlignment = value;
+                OnPropertyChanged();
+            }
+        }
+
         private bool enableTextAlignment;
 
         public bool EnableTextAlignment
