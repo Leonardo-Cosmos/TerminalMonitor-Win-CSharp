@@ -336,6 +336,11 @@ namespace TerminalMonitor.Windows
                     Conditions = styleConditions.ToArray(),
                 };
             }
+
+            if (String.IsNullOrEmpty(fieldDetail.HeaderName))
+            {
+                fieldDetail.HeaderName = null;
+            }
         }
 
         public bool IsSaved { get; set; }

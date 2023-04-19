@@ -479,7 +479,7 @@ namespace TerminalMonitor.Windows.Controls
                 gridViewHeaderStyle.Setters.Add(
                     new Setter(GridViewColumnHeader.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
                 gridView.ColumnHeaderContainerStyle = gridViewHeaderStyle;
-            }            
+            }
 
             terminalDataTable.Columns.Clear();
             terminalDataTable.Rows.Clear();
@@ -501,7 +501,23 @@ namespace TerminalMonitor.Windows.Controls
 
                     GridViewColumn viewColumn = new();
 
-                    viewColumn.Header = visibleField.HeaderName ?? visibleField.FieldKey;
+                    if (visibleField.CustomizeHeader)
+                    {
+                        var columnTemplate = TerminalViewHelper.BuildColumnHeaderTemplate(visibleField);
+                        viewColumn.HeaderTemplate = columnTemplate;
+                    }
+                    else if (isAnyColumnHeaderCustomized)
+                    {
+                        var columnTemplate = TerminalViewHelper.BuildDefaultColumnHeaderTemplate(visibleField);
+                        viewColumn.HeaderTemplate = columnTemplate;
+                    }
+                    else
+                    {
+                        string headerText = visibleField.HeaderName ?? visibleField.FieldKey;
+                        // Escape the underscore that is access key indicator.
+                        headerText = headerText.Replace("_", "__");
+                        viewColumn.Header = headerText;
+                    }
 
                     if (visibleField.CustomizeStyle)
                     {
@@ -522,17 +538,6 @@ namespace TerminalMonitor.Windows.Controls
                     else
                     {
                         viewColumn.DisplayMemberBinding = new Binding(visibleField.Id);
-                    }
-
-                    if (visibleField.CustomizeHeader)
-                    {
-                        var columnTemplate = TerminalViewHelper.BuildColumnHeaderTemplate(visibleField);
-                        viewColumn.HeaderTemplate = columnTemplate;
-                    }
-                    else if (isAnyColumnHeaderCustomized)
-                    {
-                        var columnTemplate = TerminalViewHelper.BuildDefaultColumnHeaderTemplate(visibleField);
-                        viewColumn.HeaderTemplate = columnTemplate;
                     }
 
                     gridView.Columns.Add(viewColumn);

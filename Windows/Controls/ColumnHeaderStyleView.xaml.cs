@@ -33,6 +33,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             ForegroundColor = Brushes.Black,
             BackgroundColor = Brushes.White,
+            CellBackgroundColor = Brushes.White,
         };
 
         public ColumnHeaderStyleView()
@@ -61,6 +62,15 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private void RctCellBackgroundColor_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var brush = ColorDialogHelper.ShowColorDialog(dataContextVO.CellBackgroundColor as SolidColorBrush);
+            if (brush != null)
+            {
+                dataContextVO.CellBackgroundColor = brush;
+            }
+        }
+
         private void OnDataContextPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
@@ -70,6 +80,9 @@ namespace TerminalMonitor.Windows.Controls
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.BackgroundColor):
                     columnHeaderStyle.Background ??= (dataContextVO.BackgroundColor as SolidColorBrush).Color;
+                    break;
+                case nameof(ColumnHeaderStyleViewDataContextVO.CellBackgroundColor):
+                    columnHeaderStyle.CellBackground ??= (dataContextVO.CellBackgroundColor as SolidColorBrush).Color;
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.HorizontalAlignment):
                     columnHeaderStyle.HorizontalAlignment = dataContextVO.HorizontalAlignment;
@@ -91,6 +104,12 @@ namespace TerminalMonitor.Windows.Controls
                     if (!dataContextVO.EnableBackground)
                     {
                         columnHeaderStyle.Background = null;
+                    }
+                    break;
+                case nameof(ColumnHeaderStyleViewDataContextVO.EnableCellBackground):
+                    if (!dataContextVO.EnableCellBackground)
+                    {
+                        columnHeaderStyle.CellBackground = null;
                     }
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.EnableHorizontalAlignment):
@@ -140,6 +159,12 @@ namespace TerminalMonitor.Windows.Controls
                 if (columnHeaderStyle.Background.HasValue)
                 {
                     dataContextVO.BackgroundColor = new SolidColorBrush(columnHeaderStyle.Background.Value);
+                }
+
+                dataContextVO.EnableCellBackground = columnHeaderStyle.CellBackground != null;
+                if (columnHeaderStyle.CellBackground.HasValue)
+                {
+                    dataContextVO.CellBackgroundColor = new SolidColorBrush(columnHeaderStyle.CellBackground.Value);
                 }
 
                 dataContextVO.EnableHorizontalAlignment = columnHeaderStyle.HorizontalAlignment.HasValue;

@@ -15,6 +15,8 @@ namespace TerminalMonitor.Models
 
         public Color? Background { get; set; }
 
+        public Color? CellBackground { get; set; }
+
         public HorizontalAlignment? HorizontalAlignment { get; set; }
 
         public VerticalAlignment? VerticalAlignment { get; set; }
@@ -27,6 +29,7 @@ namespace TerminalMonitor.Models
             {
                 Foreground = this.Foreground,
                 Background = this.Background,
+                CellBackground = this.CellBackground,
                 HorizontalAlignment = this.HorizontalAlignment,
                 VerticalAlignment = this.VerticalAlignment,
                 TextAlignment = this.TextAlignment,

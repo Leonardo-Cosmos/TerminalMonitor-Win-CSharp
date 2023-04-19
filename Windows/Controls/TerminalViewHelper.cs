@@ -317,6 +317,10 @@ namespace TerminalMonitor.Windows.Controls
             }
 
             FrameworkElementFactory panelElement = new(typeof(DockPanel));
+            if (headerStyle.CellBackground != null)
+            {
+                panelElement.SetValue(Panel.BackgroundProperty, ConvertColorToBrush(headerStyle.CellBackground));
+            }
 
             panelElement.AppendChild(textBlockElement);
 

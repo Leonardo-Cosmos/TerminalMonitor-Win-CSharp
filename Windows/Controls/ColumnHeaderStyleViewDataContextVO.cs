@@ -63,6 +63,30 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
+        private bool enableCellBackground;
+
+        public bool EnableCellBackground
+        {
+            get => enableCellBackground;
+            set
+            {
+                enableCellBackground = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Brush cellBackground;
+
+        public Brush CellBackgroundColor
+        {
+            get => cellBackground;
+            set
+            {
+                cellBackground = value;
+                OnPropertyChanged();
+            }
+        }
+
         private bool enableHorizontalAlignment;
 
         public bool EnableHorizontalAlignment

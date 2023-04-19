@@ -48,6 +48,15 @@
                                Fill="{Binding BackgroundColor}" MouseDown="RctBackgroundColor_MouseDown">
                     </Rectangle>
                 </StackPanel>
+
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox Name="chkBxCellBackground" IsChecked="{Binding EnableCellBackground}" />
+                    <Label Name="lblCellBackground" Content="Cell background" IsEnabled="{Binding EnableCellBackground}" />
+                    <Rectangle Name="rctCellBackgroundColor" Width="10" Height="10"
+                               Stroke="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                               Fill="{Binding CellBackgroundColor}" MouseDown="RctCellBackgroundColor_MouseDown">
+                    </Rectangle>
+                </StackPanel>
             </WrapPanel>
         </GroupBox>
 
