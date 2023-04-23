@@ -100,6 +100,12 @@ namespace TerminalMonitor.Windows
             dataContextVO.IsAnyConditionSelected = count > 0;
         }
 
+        private void LstStyleCondtions_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            var verticalOffset = sclVw.VerticalOffset;
+            sclVw.ScrollToVerticalOffset(verticalOffset - e.Delta);
+        }
+
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             var fieldKeyHasError = Validation.GetHasError(txtBxKey);
