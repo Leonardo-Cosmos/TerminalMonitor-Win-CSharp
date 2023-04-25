@@ -300,6 +300,7 @@ namespace TerminalMonitor.Windows
             if (fieldDetail != null)
             {
                 dataContextVO.FieldKey = fieldDetail.FieldKey;
+                dataContextVO.Hidden = fieldDetail.Hidden;
                 dataContextVO.HeaderName = fieldDetail.HeaderName;
 
                 dataContextVO.CustomizeHeaderStyle = fieldDetail.CustomizeHeader;
@@ -321,6 +322,7 @@ namespace TerminalMonitor.Windows
             if (fieldDetail != null)
             {
                 fieldDetail.FieldKey = dataContextVO.FieldKey;
+                fieldDetail.Hidden = dataContextVO.Hidden;
                 fieldDetail.HeaderName = dataContextVO.HeaderName;
                 fieldDetail.CustomizeHeader = dataContextVO.CustomizeHeaderStyle;
                 fieldDetail.HeaderStyle = dataContextVO.HeaderStyle;
@@ -334,6 +336,7 @@ namespace TerminalMonitor.Windows
                 {
                     Id = Guid.NewGuid().ToString(),
                     FieldKey = dataContextVO.FieldKey,
+                    Hidden = dataContextVO.Hidden,
                     HeaderName = dataContextVO.HeaderName,
                     CustomizeHeader = dataContextVO.CustomizeHeaderStyle,
                     HeaderStyle = dataContextVO.HeaderStyle,

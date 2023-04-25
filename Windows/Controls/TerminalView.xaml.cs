@@ -463,7 +463,7 @@ namespace TerminalMonitor.Windows.Controls
             GridView gridView = new();
 
             var isAnyColumnHeaderCustomized =
-                    visibleFields.Any(visibleField => visibleField.CustomizeHeader);
+                    visibleFields.Any(visibleField => visibleField.CustomizeHeader && !visibleField.Hidden);
 
             if (isAnyColumnHeaderCustomized)
             {
@@ -495,6 +495,11 @@ namespace TerminalMonitor.Windows.Controls
                  */
                 foreach (var visibleField in visibleFields)
                 {
+                    if (visibleField.Hidden)
+                    {
+                        continue;
+                    }
+
                     DataColumn column = new(visibleField.Id);
                     column.DataType = typeof(string);
                     terminalDataTable.Columns.Add(column);
@@ -581,6 +586,11 @@ namespace TerminalMonitor.Windows.Controls
             {
                 foreach (var visibleField in visibleFields)
                 {
+                    if (visibleField.Hidden)
+                    {
+                        continue;
+                    }
+
                     var fieldValue = terminalLineDto.LineFieldDict.ContainsKey(visibleField.FieldKey) ?
                         terminalLineDto.LineFieldDict[visibleField.FieldKey].Text : "";
 
