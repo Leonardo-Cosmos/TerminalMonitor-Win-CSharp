@@ -201,7 +201,8 @@ namespace TerminalMonitor.Windows.Controls
                     FieldListItemVO itemVO = new()
                     {
                         Id = fieldDetail.Id,
-                        FieldKey = fieldDetail.FieldKey
+                        FieldKey = fieldDetail.FieldKey,
+                        Hidden = fieldDetail.Hidden,
                     };
 
                     InsertAtSelectedItem((fieldDetail, itemVO));
@@ -254,6 +255,7 @@ namespace TerminalMonitor.Windows.Controls
                 if (window.IsSaved)
                 {
                     itemVO.FieldKey = fieldDetail.FieldKey;
+                    itemVO.Hidden = fieldDetail.Hidden;
                 }
             };
 
@@ -353,7 +355,8 @@ namespace TerminalMonitor.Windows.Controls
                         FieldListItemVO itemVO = new()
                         {
                             Id = fieldDetail.Id,
-                            FieldKey = fieldDetail.FieldKey
+                            FieldKey = fieldDetail.FieldKey,
+                            Hidden = fieldDetail.Hidden,
                         };
 
                         return (fieldDetail, itemVO);
@@ -373,9 +376,10 @@ namespace TerminalMonitor.Windows.Controls
                 fields = value ?? new();
 
                 fieldVOs.Clear();
-                fields.Select(field => new FieldListItemVO()
+                fields.Select(fieldDetail => new FieldListItemVO()
                 {
-                    FieldKey = field.FieldKey,
+                    FieldKey = fieldDetail.FieldKey,
+                    Hidden = fieldDetail.Hidden,
                 }).ToList()
                 .ForEach(fieldVO => fieldVOs.Add(fieldVO));
             }

@@ -56,7 +56,19 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Border BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" BorderThickness="1">
-                        <TextBlock Text="{Binding FieldKey}" Margin="3" />
+                        <TextBlock Text="{Binding FieldKey}" Margin="3">
+                            <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Hidden}" Value="True">
+                                        <DataTrigger.Setters>
+                                            <Setter Property="Opacity" Value="0.5" />
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                        </TextBlock>
                     </Border>
                 </DataTemplate>
             </ListView.ItemTemplate>

@@ -26,5 +26,18 @@ namespace TerminalMonitor.Windows.Controls
                 OnPropertyChanged();
             }
         }
+
+        private bool hidden;
+
+        public bool Hidden
+        {
+            get { return hidden; }
+
+            set
+            {
+                hidden = value;
+                OnPropertyChanged();
+            }
+        }
     }
 }
