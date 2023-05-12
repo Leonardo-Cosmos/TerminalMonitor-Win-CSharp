@@ -198,12 +198,7 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     var fieldDetail = window.FieldDetail;
 
-                    FieldListItemVO itemVO = new()
-                    {
-                        Id = fieldDetail.Id,
-                        FieldKey = fieldDetail.FieldKey,
-                        Hidden = fieldDetail.Hidden,
-                    };
+                    FieldListItemVO itemVO = FieldListItemVO.Create(fieldDetail);
 
                     InsertAtSelectedItem((fieldDetail, itemVO));
                 }
@@ -254,8 +249,7 @@ namespace TerminalMonitor.Windows.Controls
             {
                 if (window.IsSaved)
                 {
-                    itemVO.FieldKey = fieldDetail.FieldKey;
-                    itemVO.Hidden = fieldDetail.Hidden;
+                    FieldListItemVO.Update(itemVO, fieldDetail);
                 }
             };
 
@@ -352,12 +346,7 @@ namespace TerminalMonitor.Windows.Controls
                         var fieldDetail = clipboardStatus == ItemClipboardStatus.Move ?
                             pastedFieldDetail : (FieldDisplayDetail)pastedFieldDetail.Clone();
 
-                        FieldListItemVO itemVO = new()
-                        {
-                            Id = fieldDetail.Id,
-                            FieldKey = fieldDetail.FieldKey,
-                            Hidden = fieldDetail.Hidden,
-                        };
+                        FieldListItemVO itemVO = FieldListItemVO.Create(fieldDetail);
 
                         return (fieldDetail, itemVO);
                     }).ToArray();
@@ -376,12 +365,9 @@ namespace TerminalMonitor.Windows.Controls
                 fields = value ?? new();
 
                 fieldVOs.Clear();
-                fields.Select(fieldDetail => new FieldListItemVO()
-                {
-                    FieldKey = fieldDetail.FieldKey,
-                    Hidden = fieldDetail.Hidden,
-                }).ToList()
-                .ForEach(fieldVO => fieldVOs.Add(fieldVO));
+                fields.Select(fieldDetail => FieldListItemVO.Create(fieldDetail))
+                    .ToList()
+                    .ForEach(fieldVO => fieldVOs.Add(fieldVO));
             }
         }
 

@@ -56,9 +56,8 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Border BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" BorderThickness="1">
-                        <TextBlock Text="{Binding FieldKey}" Margin="3">
-                            <TextBlock.Style>
-                            <Style TargetType="TextBlock">
+                        <Border.Style>
+                            <Style TargetType="Border">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Hidden}" Value="True">
                                         <DataTrigger.Setters>
@@ -67,8 +66,26 @@
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </TextBlock.Style>
-                        </TextBlock>
+                        </Border.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding FieldKey}" Margin="3" />
+                            <StackPanel Orientation="Horizontal">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HeaderName, Converter={StaticResource ObjectNullOrEmptyConverter}}" Value="True">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="(" Margin="0, 3, 0, 3" />
+                                <TextBlock Text="{Binding HeaderName}" Margin="0, 3" />
+                                <TextBlock Text=")" Margin="0, 3, 3, 3" />
+                            </StackPanel>
+                        </StackPanel>
                     </Border>
                 </DataTemplate>
             </ListView.ItemTemplate>
