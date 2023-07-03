@@ -42,6 +42,7 @@ namespace TerminalMonitor.Windows
 
             dataContextVO = new()
             {
+                HeaderStyle = ColumnHeaderStyle.Empty,
                 Style = TextStyle.Empty,
 
                 AddCommand = new RelayCommand(AddCondition, () => true),
@@ -97,6 +98,12 @@ namespace TerminalMonitor.Windows
         {
             var count = lstStyleCondtions.SelectedItems.Count;
             dataContextVO.IsAnyConditionSelected = count > 0;
+        }
+
+        private void LstStyleCondtions_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            var verticalOffset = sclVw.VerticalOffset;
+            sclVw.ScrollToVerticalOffset(verticalOffset - e.Delta);
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
@@ -293,8 +300,13 @@ namespace TerminalMonitor.Windows
             if (fieldDetail != null)
             {
                 dataContextVO.FieldKey = fieldDetail.FieldKey;
-                dataContextVO.CustomizeStyle = fieldDetail.CustomizeStyle;
+                dataContextVO.Hidden = fieldDetail.Hidden;
+                dataContextVO.HeaderName = fieldDetail.HeaderName;
 
+                dataContextVO.CustomizeHeaderStyle = fieldDetail.CustomizeHeader;
+                dataContextVO.HeaderStyle = fieldDetail.HeaderStyle ?? ColumnHeaderStyle.Empty;
+
+                dataContextVO.CustomizeStyle = fieldDetail.CustomizeStyle;
                 dataContextVO.Style = fieldDetail.Style ?? TextStyle.Empty;
 
                 styleConditions.Clear();
@@ -310,6 +322,10 @@ namespace TerminalMonitor.Windows
             if (fieldDetail != null)
             {
                 fieldDetail.FieldKey = dataContextVO.FieldKey;
+                fieldDetail.Hidden = dataContextVO.Hidden;
+                fieldDetail.HeaderName = dataContextVO.HeaderName;
+                fieldDetail.CustomizeHeader = dataContextVO.CustomizeHeaderStyle;
+                fieldDetail.HeaderStyle = dataContextVO.HeaderStyle;
                 fieldDetail.CustomizeStyle = dataContextVO.CustomizeStyle;
                 fieldDetail.Style = dataContextVO.Style;
                 fieldDetail.Conditions = styleConditions.ToArray();
@@ -320,10 +336,19 @@ namespace TerminalMonitor.Windows
                 {
                     Id = Guid.NewGuid().ToString(),
                     FieldKey = dataContextVO.FieldKey,
+                    Hidden = dataContextVO.Hidden,
+                    HeaderName = dataContextVO.HeaderName,
+                    CustomizeHeader = dataContextVO.CustomizeHeaderStyle,
+                    HeaderStyle = dataContextVO.HeaderStyle,
                     CustomizeStyle = dataContextVO.CustomizeStyle,
                     Style = dataContextVO.Style,
                     Conditions = styleConditions.ToArray(),
                 };
+            }
+
+            if (String.IsNullOrEmpty(fieldDetail.HeaderName))
+            {
+                fieldDetail.HeaderName = null;
             }
         }
 

@@ -198,11 +198,7 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     var fieldDetail = window.FieldDetail;
 
-                    FieldListItemVO itemVO = new()
-                    {
-                        Id = fieldDetail.Id,
-                        FieldKey = fieldDetail.FieldKey
-                    };
+                    FieldListItemVO itemVO = FieldListItemVO.Create(fieldDetail);
 
                     InsertAtSelectedItem((fieldDetail, itemVO));
                 }
@@ -253,7 +249,7 @@ namespace TerminalMonitor.Windows.Controls
             {
                 if (window.IsSaved)
                 {
-                    itemVO.FieldKey = fieldDetail.FieldKey;
+                    FieldListItemVO.Update(itemVO, fieldDetail);
                 }
             };
 
@@ -350,11 +346,7 @@ namespace TerminalMonitor.Windows.Controls
                         var fieldDetail = clipboardStatus == ItemClipboardStatus.Move ?
                             pastedFieldDetail : (FieldDisplayDetail)pastedFieldDetail.Clone();
 
-                        FieldListItemVO itemVO = new()
-                        {
-                            Id = fieldDetail.Id,
-                            FieldKey = fieldDetail.FieldKey
-                        };
+                        FieldListItemVO itemVO = FieldListItemVO.Create(fieldDetail);
 
                         return (fieldDetail, itemVO);
                     }).ToArray();
@@ -373,11 +365,9 @@ namespace TerminalMonitor.Windows.Controls
                 fields = value ?? new();
 
                 fieldVOs.Clear();
-                fields.Select(field => new FieldListItemVO()
-                {
-                    FieldKey = field.FieldKey,
-                }).ToList()
-                .ForEach(fieldVO => fieldVOs.Add(fieldVO));
+                fields.Select(fieldDetail => FieldListItemVO.Create(fieldDetail))
+                    .ToList()
+                    .ForEach(fieldVO => fieldVOs.Add(fieldVO));
             }
         }
 

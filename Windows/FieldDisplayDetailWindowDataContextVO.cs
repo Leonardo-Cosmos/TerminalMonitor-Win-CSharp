@@ -25,7 +25,59 @@ namespace TerminalMonitor.Windows
         public string FieldKey
         {
             get => fieldKey;
-            set { fieldKey = value; OnPropertyChanged(); }
+            set
+            {
+                fieldKey = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool hidden;
+
+        public bool Hidden
+        {
+            get => hidden;
+            set
+            {
+                hidden = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string headerName;
+
+        public string HeaderName
+        {
+            get => headerName;
+            set
+            {
+                headerName = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool customizeHeaderStyle;
+
+        public bool CustomizeHeaderStyle
+        {
+            get => customizeHeaderStyle;
+            set
+            {
+                customizeHeaderStyle = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private ColumnHeaderStyle headerStyle;
+
+        public ColumnHeaderStyle HeaderStyle
+        {
+            get => headerStyle;
+            set
+            {
+                headerStyle = value;
+                OnPropertyChanged();
+            }
         }
 
         private bool customizeStyle;
@@ -33,7 +85,11 @@ namespace TerminalMonitor.Windows
         public bool CustomizeStyle
         {
             get => customizeStyle;
-            set { customizeStyle = value; OnPropertyChanged(); }
+            set
+            {
+                customizeStyle = value;
+                OnPropertyChanged();
+            }
         }
 
         private TextStyle style;
@@ -41,7 +97,11 @@ namespace TerminalMonitor.Windows
         public TextStyle Style
         {
             get => style;
-            set { style = value; OnPropertyChanged(); }
+            set
+            {
+                style = value;
+                OnPropertyChanged();
+            }
         }
 
         private bool isAnyConditionSelected;

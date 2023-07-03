@@ -281,5 +281,68 @@ namespace TerminalMonitor.Windows.Controls
                 dataRow[getStyleColumnName(fieldId)] = convert(finalStyleProperty);
             }
         }
+
+        public static DataTemplate BuildColumnHeaderTemplate(FieldDisplayDetail visibleField)
+        {
+            string columnHeader = visibleField.HeaderName ?? visibleField.FieldKey;
+
+            FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
+            textBlockElement.SetValue(TextBlock.TextProperty, columnHeader);
+
+            var headerStyle = visibleField.HeaderStyle;
+
+            if (headerStyle.Foreground != null)
+            {
+                textBlockElement.SetValue(TextBlock.ForegroundProperty, ConvertColorToBrush(headerStyle.Foreground));
+            }
+
+            if (headerStyle.Background != null)
+            {
+                textBlockElement.SetValue(TextBlock.BackgroundProperty, ConvertColorToBrush(headerStyle.Background));
+            }
+
+            if (headerStyle.HorizontalAlignment != null)
+            {
+                textBlockElement.SetValue(TextBlock.HorizontalAlignmentProperty, headerStyle.HorizontalAlignment);
+            }
+
+            if (headerStyle.VerticalAlignment != null)
+            {
+                textBlockElement.SetValue(TextBlock.VerticalAlignmentProperty, headerStyle.VerticalAlignment);
+            }
+
+            if (headerStyle.TextAlignment != null)
+            {
+                textBlockElement.SetValue(TextBlock.TextAlignmentProperty, headerStyle.TextAlignment);
+            }
+
+            FrameworkElementFactory panelElement = new(typeof(DockPanel));
+            if (headerStyle.CellBackground != null)
+            {
+                panelElement.SetValue(Panel.BackgroundProperty, ConvertColorToBrush(headerStyle.CellBackground));
+            }
+
+            panelElement.AppendChild(textBlockElement);
+
+            DataTemplate dataTemplate = new();
+            dataTemplate.VisualTree = panelElement;
+            return dataTemplate;
+        }
+
+        public static DataTemplate BuildDefaultColumnHeaderTemplate(FieldDisplayDetail visibleField)
+        {
+            string columnHeader = visibleField.HeaderName ?? visibleField.FieldKey;
+
+            FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
+            textBlockElement.SetValue(TextBlock.TextProperty, columnHeader);
+            textBlockElement.SetValue(TextBlock.TextAlignmentProperty, TextAlignment.Center);
+
+            FrameworkElementFactory panelElement = new(typeof(DockPanel));
+            panelElement.AppendChild(textBlockElement);
+
+            DataTemplate dataTemplate = new();
+            dataTemplate.VisualTree = panelElement;
+            return dataTemplate;
+        }
     }
 }

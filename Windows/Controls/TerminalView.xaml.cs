@@ -462,6 +462,25 @@ namespace TerminalMonitor.Windows.Controls
 
             GridView gridView = new();
 
+            var isAnyColumnHeaderCustomized =
+                    visibleFields.Any(visibleField => visibleField.CustomizeHeader && !visibleField.Hidden);
+
+            if (isAnyColumnHeaderCustomized)
+            {
+                var gridViewHeaderStyle = new Style(typeof(GridViewColumnHeader));
+
+                /* Default style
+                gridViewHeaderStyle.Setters.Add(
+                    new Setter(GridViewColumnHeader.HorizontalAlignmentProperty, HorizontalAlignment.Stretch));
+                gridViewHeaderStyle.Setters.Add(
+                    new Setter(GridViewColumnHeader.HorizontalContentAlignmentProperty, HorizontalAlignment.Center));
+                */
+
+                gridViewHeaderStyle.Setters.Add(
+                    new Setter(GridViewColumnHeader.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch));
+                gridView.ColumnHeaderContainerStyle = gridViewHeaderStyle;
+            }
+
             terminalDataTable.Columns.Clear();
             terminalDataTable.Rows.Clear();
 
@@ -476,11 +495,35 @@ namespace TerminalMonitor.Windows.Controls
                  */
                 foreach (var visibleField in visibleFields)
                 {
+                    if (visibleField.Hidden)
+                    {
+                        continue;
+                    }
+
                     DataColumn column = new(visibleField.Id);
                     column.DataType = typeof(string);
                     terminalDataTable.Columns.Add(column);
 
-                    GridViewColumn viewColumn;
+                    GridViewColumn viewColumn = new();
+
+                    if (visibleField.CustomizeHeader)
+                    {
+                        var columnTemplate = TerminalViewHelper.BuildColumnHeaderTemplate(visibleField);
+                        viewColumn.HeaderTemplate = columnTemplate;
+                    }
+                    else if (isAnyColumnHeaderCustomized)
+                    {
+                        var columnTemplate = TerminalViewHelper.BuildDefaultColumnHeaderTemplate(visibleField);
+                        viewColumn.HeaderTemplate = columnTemplate;
+                    }
+                    else
+                    {
+                        string headerText = visibleField.HeaderName ?? visibleField.FieldKey;
+                        // Escape the underscore that is access key indicator.
+                        headerText = headerText.Replace("_", "__");
+                        viewColumn.Header = headerText;
+                    }
+
                     if (visibleField.CustomizeStyle)
                     {
                         MouseButtonEventHandler mouseDownHandler = (sender, e) =>
@@ -495,19 +538,11 @@ namespace TerminalMonitor.Windows.Controls
                                     MouseDownEvent, mouseDownHandler)
                             });
 
-                        viewColumn = new()
-                        {
-                            Header = visibleField.FieldKey,
-                            CellTemplate = dataTemplate,
-                        };
+                        viewColumn.CellTemplate = dataTemplate;
                     }
                     else
                     {
-                        viewColumn = new()
-                        {
-                            Header = visibleField.FieldKey,
-                            DisplayMemberBinding = new Binding(visibleField.Id),
-                        };
+                        viewColumn.DisplayMemberBinding = new Binding(visibleField.Id);
                     }
 
                     gridView.Columns.Add(viewColumn);
@@ -551,6 +586,11 @@ namespace TerminalMonitor.Windows.Controls
             {
                 foreach (var visibleField in visibleFields)
                 {
+                    if (visibleField.Hidden)
+                    {
+                        continue;
+                    }
+
                     var fieldValue = terminalLineDto.LineFieldDict.ContainsKey(visibleField.FieldKey) ?
                         terminalLineDto.LineFieldDict[visibleField.FieldKey].Text : "";
 

@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
+    <VersionPrefix>1.3.0</VersionPrefix>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>TerminalMonitor.ico</ApplicationIcon>
   </PropertyGroup>
