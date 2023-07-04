@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using TerminalMonitor.Properties;
 
 namespace TerminalMonitor
 {
@@ -19,7 +20,31 @@ namespace TerminalMonitor
         public App()
         {
             DispatcherUnhandledException += App_DispatcherUnhandledException;
+
+            UpgradeSettings();
         }
+
+        private static void UpgradeSettings()
+        {
+            var windowSettings = WindowSettings.Default;
+            if (!windowSettings.Upgraded)
+            {
+                Debug.WriteLine("Upgrade window settings");
+                windowSettings.Upgrade();
+                windowSettings.Upgraded = true;
+                windowSettings.Save();
+            }
+
+            var terminalSettings = TerminalSettings.Default;
+            if (!terminalSettings.Upgraded)
+            {
+                Debug.WriteLine("Upgrade terminal settings");
+                terminalSettings.Upgrade();
+                terminalSettings.Upgraded = true;
+                terminalSettings.Save();
+            }
+        }
+
         void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             // Process unhandled exception
