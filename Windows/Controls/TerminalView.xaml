@@ -115,6 +115,7 @@
                     <MenuItem Name="menuItemClear" Header="Clear All until This" Click="MenuItemClear_Click" />
                     <MenuItem Name="menuItemAutoScroll" Header="Auto Scroll" IsChecked="{Binding AutoScroll}" Click="MenuItemAutoScroll_Click" />
                     <Separator />
+                    <MenuItem Name="menuItemCopyPlaintext" Header="Copy as Plaintext" Click="MenuItemCopyPlaintext_Click" />
                     <MenuItem Name="menuItemAddFilterCondition" Header="Add to Filter" Click="MenuItemAddFilterCondition_Click" />
                     <MenuItem Name="menuItemAddFindCondtion" Header="Add to Find" Click="MenuItemAddFindCondtion_Click" />
                     <Separator />

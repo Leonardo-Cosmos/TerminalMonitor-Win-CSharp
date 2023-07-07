@@ -135,6 +135,11 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.AutoScroll = !dataContextVO.AutoScroll;
         }
 
+        private void MenuItemCopyPlaintext_Click(object sender, RoutedEventArgs e)
+        {
+            CopyClickedDataCellToSystemClipboard();
+        }
+
         private void MenuItemAddFilterCondition_Click(object sender, RoutedEventArgs e)
         {
             AddClickedCellToConditionListView(filterConditionListView);
@@ -205,7 +210,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private Condition ConvertClickedDataCellToCondition()
+        private string getClickedDataCell()
         {
             if (clickedRowTerminalLineId == null || clickedColumnFieldKey == null)
             {
@@ -224,12 +229,34 @@ namespace TerminalMonitor.Windows.Controls
                 return null;
             }
 
+            return terminalLineFieldDict[clickedColumnFieldKey].Text;
+        }
+
+        private Condition ConvertClickedDataCellToCondition()
+        {
+            var clickedDataCell = getClickedDataCell();
+            if (clickedDataCell == null)
+            {
+                return null;
+            }
+
             return new FieldCondition()
             {
                 FieldKey = clickedColumnFieldKey,
                 MatchOperator = Matchers.TextMatchOperator.Equals,
-                TargetValue = terminalLineFieldDict[clickedColumnFieldKey].Text,
+                TargetValue = clickedDataCell,
             };
+        }
+
+        private void CopyClickedDataCellToSystemClipboard()
+        {
+            var clickedDataCell = getClickedDataCell();
+            if (clickedDataCell == null)
+            {
+                return;
+            }
+
+            System.Windows.Clipboard.SetData(DataFormats.UnicodeText, clickedDataCell);
         }
 
         public void AddNewTerminalLines(IEnumerable<TerminalLineDto> terminalLineDtos)
