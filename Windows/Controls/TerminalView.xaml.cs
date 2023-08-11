@@ -120,6 +120,13 @@ namespace TerminalMonitor.Windows.Controls
             FindLast();
         }
 
+        private void ContextMenu_Loaded(object sender, RoutedEventArgs e)
+        {
+            var clipboardContainsText = CheckSystemClipboard();
+            menuItemPastePlaintextFilter.IsEnabled = clipboardContainsText;
+            menuItemPastePlaintextFind.IsEnabled = clipboardContainsText;
+        }
+
         private void MenuItemShowDetail_Click(object sender, RoutedEventArgs e)
         {
             ShowDetailWindow(clickedRowTerminalLineId);
@@ -135,11 +142,6 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO.AutoScroll = !dataContextVO.AutoScroll;
         }
 
-        private void MenuItemCopyPlaintext_Click(object sender, RoutedEventArgs e)
-        {
-            CopyClickedDataCellToSystemClipboard();
-        }
-
         private void MenuItemAddFilterCondition_Click(object sender, RoutedEventArgs e)
         {
             AddClickedCellToConditionListView(filterConditionListView);
@@ -148,6 +150,21 @@ namespace TerminalMonitor.Windows.Controls
         private void MenuItemAddFindCondtion_Click(object sender, RoutedEventArgs e)
         {
             AddClickedCellToConditionListView(findConditionListView);
+        }
+
+        private void MenuItemCopyPlaintext_Click(object sender, RoutedEventArgs e)
+        {
+            CopyClickedDataCellToSystemClipboard();
+        }
+
+        private void MenuItemPastePlaintextFilter_Click(object sender, RoutedEventArgs e)
+        {
+            PasteSystemClipboardToConditionListView(filterConditionListView);
+        }
+
+        private void MenuItemPastePlaintextFind_Click(object sender, RoutedEventArgs e)
+        {
+            PasteSystemClipboardToConditionListView(findConditionListView);
         }
 
         private void ListTerminal_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -210,7 +227,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private string getClickedDataCell()
+        private string GetClickedDataCell()
         {
             if (clickedRowTerminalLineId == null || clickedColumnFieldKey == null)
             {
@@ -234,7 +251,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private Condition ConvertClickedDataCellToCondition()
         {
-            var clickedDataCell = getClickedDataCell();
+            var clickedDataCell = GetClickedDataCell();
             if (clickedDataCell == null)
             {
                 return null;
@@ -250,13 +267,35 @@ namespace TerminalMonitor.Windows.Controls
 
         private void CopyClickedDataCellToSystemClipboard()
         {
-            var clickedDataCell = getClickedDataCell();
+            var clickedDataCell = GetClickedDataCell();
             if (clickedDataCell == null)
             {
                 return;
             }
 
-            System.Windows.Clipboard.SetData(DataFormats.UnicodeText, clickedDataCell);
+            System.Windows.Clipboard.SetText(clickedDataCell, TextDataFormat.UnicodeText);
+        }
+
+        private static bool CheckSystemClipboard()
+        {
+            return System.Windows.Clipboard.ContainsText(TextDataFormat.UnicodeText);
+        }
+
+        private void PasteSystemClipboardToConditionListView(ConditionListView conditionListView)
+        {
+            if (!CheckSystemClipboard())
+            {
+                return;
+            }
+
+            var condition = new FieldCondition()
+            {
+                FieldKey = clickedColumnFieldKey,
+                MatchOperator = Matchers.TextMatchOperator.Contains,
+                TargetValue = System.Windows.Clipboard.GetText(TextDataFormat.UnicodeText),
+            };
+
+            conditionListView.AddCondition(condition);
         }
 
         public void AddNewTerminalLines(IEnumerable<TerminalLineDto> terminalLineDtos)

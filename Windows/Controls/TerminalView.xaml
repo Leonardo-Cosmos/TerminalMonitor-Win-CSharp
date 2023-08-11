@@ -111,15 +111,18 @@
                 </Style>
             </ListView.ItemContainerStyle>
             <ListView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Name="menuItemClear" Header="Clear All until This" Click="MenuItemClear_Click" />
-                    <MenuItem Name="menuItemAutoScroll" Header="Auto Scroll" IsChecked="{Binding AutoScroll}" Click="MenuItemAutoScroll_Click" />
+                <ContextMenu Loaded="ContextMenu_Loaded">
+                    <MenuItem Name="menuItemShowDetail" Header="Detail" Click="MenuItemShowDetail_Click" />
                     <Separator />
-                    <MenuItem Name="menuItemCopyPlaintext" Header="Copy as Plaintext" Click="MenuItemCopyPlaintext_Click" />
                     <MenuItem Name="menuItemAddFilterCondition" Header="Add to Filter" Click="MenuItemAddFilterCondition_Click" />
                     <MenuItem Name="menuItemAddFindCondtion" Header="Add to Find" Click="MenuItemAddFindCondtion_Click" />
                     <Separator />
-                    <MenuItem Name="menuItemShowDetail" Header="Detail" Click="MenuItemShowDetail_Click" />
+                    <MenuItem Name="menuItemCopyPlaintext" Header="Copy as Plaintext" Click="MenuItemCopyPlaintext_Click" />
+                    <MenuItem Name="menuItemPastePlaintextFilter" Header="Paste Plaintext to Filter" Click="MenuItemPastePlaintextFilter_Click" />
+                    <MenuItem Name="menuItemPastePlaintextFind" Header="Paste Plaintext to Find" Click="MenuItemPastePlaintextFind_Click" />
+                    <Separator />
+                    <MenuItem Name="menuItemClear" Header="Clear All until This" Click="MenuItemClear_Click" />
+                    <MenuItem Name="menuItemAutoScroll" Header="Auto Scroll" IsChecked="{Binding AutoScroll}" Click="MenuItemAutoScroll_Click" />
                 </ContextMenu>
             </ListView.ContextMenu>
         </ListView>
