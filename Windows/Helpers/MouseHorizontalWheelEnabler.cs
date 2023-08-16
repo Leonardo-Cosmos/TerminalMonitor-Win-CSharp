@@ -336,23 +336,6 @@ namespace TerminalMonitor.Windows.Helpers
             element.RaiseEvent(eventArgs);
         }
 
-        private static class Win32
-        {
-            // ReSharper disable InconsistentNaming
-            public const int WM_MOUSEHWHEEL = 0x020E;
-            // ReSharper restore InconsistentNaming
-
-            public static int GetIntUnchecked(IntPtr value)
-            {
-                return IntPtr.Size == 8 ? unchecked((int)value.ToInt64()) : value.ToInt32();
-            }
-
-            public static int HiWord(IntPtr ptr)
-            {
-                return unchecked((short)((uint)GetIntUnchecked(ptr) >> 16));
-            }
-        }
-
         #region MouseWheelHorizontal Event
 
         public static readonly RoutedEvent MouseHorizontalWheelEvent =

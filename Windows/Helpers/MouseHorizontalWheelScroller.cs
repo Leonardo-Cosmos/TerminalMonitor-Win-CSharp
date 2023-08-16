@@ -46,13 +46,6 @@ namespace TerminalMonitor.Windows.Helpers
 
         private class MouseHorizontalWheelScrollHelper
         {
-            /// <summary>
-            /// Multiplier of how far to scroll horizontally. Change as desired.
-            /// </summary>
-            private const int scrollFactor = 3;
-
-            private const int WM_MOUSEHWEEL = 0x20e;
-
             private readonly ScrollViewer scrollViewer;
 
             private readonly HwndSource hwndSource;
@@ -76,11 +69,11 @@ namespace TerminalMonitor.Windows.Helpers
                 }
             }
 
-            IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+            private IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
             {
                 switch (msg)
                 {
-                    case WM_MOUSEHWEEL:
+                    case Win32.WM_MOUSEHWHEEL:
                         Scroll(wParam);
                         handled = true;
                         break;
@@ -90,11 +83,9 @@ namespace TerminalMonitor.Windows.Helpers
 
             private void Scroll(IntPtr wParam)
             {
-                int delta = (HIWORD(wParam) > 0 ? 1 : -1) * scrollFactor;
+                int delta = Win32.HiWord(wParam);
                 scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + delta);
             }
-
-            private static int HIWORD(IntPtr ptr) => (short)((((int)ptr.ToInt64()) >> 16) & 0xFFFF);
         }
     }
 }
