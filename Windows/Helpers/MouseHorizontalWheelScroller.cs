@@ -7,36 +7,41 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows;
+using System.Diagnostics;
 
 namespace TerminalMonitor.Windows.Helpers
 {
     public static class MouseHorizontalWheelScroller
     {
-        public static bool GetMouseHorizontalWheelScrollingEnabled(DependencyObject dependencyObject)
+        public static bool GetScrollingEnabled(DependencyObject dependencyObject)
         {
-            return (bool)dependencyObject.GetValue(MouseHorizontalWheelScrollingEnabledProperty);
+            return (bool)dependencyObject.GetValue(ScrollingEnabledProperty);
         }
-        public static void SetMouseHorizontalWheelScrollingEnabled(DependencyObject dependencyObject, bool value)
+        public static void SetScrollingEnabled(DependencyObject dependencyObject, bool value)
         {
-            dependencyObject.SetValue(MouseHorizontalWheelScrollingEnabledProperty, value);
+            dependencyObject.SetValue(ScrollingEnabledProperty, value);
         }
 
-        public static readonly DependencyProperty MouseHorizontalWheelScrollingEnabledProperty =
-                DependencyProperty.RegisterAttached("MouseHorizontalWheelScrollingEnabled",
+        public static readonly DependencyProperty ScrollingEnabledProperty =
+                DependencyProperty.RegisterAttached("ScrollingEnabled",
                     typeof(bool), typeof(MouseHorizontalWheelScroller),
-                    new UIPropertyMetadata(false, OnMouseHorizontalWheelScrollingEnabledChanged));
+                    new UIPropertyMetadata(false, OnScrollingEnabledChanged));
 
         private static readonly HashSet<int> controls = new();
-        public static void OnMouseHorizontalWheelScrollingEnabledChanged(DependencyObject dependencyObject,
+
+        private static readonly HashSet<int> scrollViewers = new();
+
+        public static void OnScrollingEnabledChanged(DependencyObject dependencyObject,
             DependencyPropertyChangedEventArgs args)
         {
-            if (dependencyObject is Control control && GetMouseHorizontalWheelScrollingEnabled(dependencyObject)
-                && controls.Add(control.GetHashCode()))
+            if (GetScrollingEnabled(dependencyObject) &&
+                dependencyObject is Control control &&
+                controls.Add(control.GetHashCode()))
             {
                 control.MouseEnter += (sender, e) =>
                 {
                     var scrollViewer = dependencyObject.FindChildOfType<ScrollViewer>();
-                    if (scrollViewer != null)
+                    if (scrollViewer != null && scrollViewers.Add(scrollViewer.GetHashCode()))
                     {
                         new MouseHorizontalWheelScrollHelper(scrollViewer, dependencyObject);
                     }
@@ -52,21 +57,26 @@ namespace TerminalMonitor.Windows.Helpers
 
             private readonly HwndSourceHook hook;
 
-            private static readonly HashSet<int> scrollViewers = new();
-
             public MouseHorizontalWheelScrollHelper(ScrollViewer scrollViewer, DependencyObject dependencyObject)
             {
                 this.scrollViewer = scrollViewer;
                 hwndSource = PresentationSource.FromDependencyObject(dependencyObject) as HwndSource;
-                hook = WindowProc;
-                hwndSource?.AddHook(hook);
-                if (scrollViewers.Add(scrollViewer.GetHashCode()))
+                if (hwndSource == null)
                 {
-                    scrollViewer.MouseLeave += (sender, e) =>
-                    {
-                        hwndSource.RemoveHook(hook);
-                    };
+                    return;
                 }
+
+                hook = WindowProc;
+
+                scrollViewer.MouseEnter += (sender, e) =>
+                {
+                    hwndSource.AddHook(hook);
+                };
+
+                scrollViewer.MouseLeave += (sender, e) =>
+                {
+                    hwndSource.RemoveHook(hook);
+                };
             }
 
             private IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)

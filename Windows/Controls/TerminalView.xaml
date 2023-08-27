@@ -103,7 +103,7 @@
         <GridSplitter Grid.Row="5" Height="5" HorizontalAlignment="Stretch" />
 
         <ListView Name="listTerminal" Grid.Row="6" SelectionMode="Single" SelectionChanged="ListTerminal_SelectionChanged"
-                  helpers:MouseHorizontalWheelScroller.MouseHorizontalWheelScrollingEnabled="True">
+                  helpers:MouseHorizontalWheelScroller.ScrollingEnabled="True">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>

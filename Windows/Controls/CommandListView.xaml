@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
+             xmlns:helpers="clr-namespace:TerminalMonitor.Windows.Helpers"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=local:CommandListViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="800">
@@ -14,7 +15,8 @@
         </Grid.RowDefinitions>
         
         <ListView Name="lstCommands" Grid.Row="1" MinHeight="30" SelectionChanged="LstCommands_SelectionChanged"
-                  MouseDown="LstCommands_MouseDown" MouseDoubleClick="LstCommands_MouseDoubleClick">
+                  MouseDown="LstCommands_MouseDown" MouseDoubleClick="LstCommands_MouseDoubleClick"
+                  helpers:MouseHorizontalWheelScroller.ScrollingEnabled="True">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Start" Icon="▷" Command="{Binding Path=StartCommand}" />
