@@ -26,7 +26,6 @@ using TerminalMonitor.Models;
 using TerminalMonitor.Models.Settings;
 using TerminalMonitor.Terminal;
 using TerminalMonitor.Windows.Converters;
-using TerminalMonitor.Windows.Helpers;
 using Condition = TerminalMonitor.Matchers.Models.Condition;
 
 namespace TerminalMonitor.Windows.Controls
@@ -84,14 +83,6 @@ namespace TerminalMonitor.Windows.Controls
             listTerminal.DataContext = dataContextVO;
             listTerminal.ContextMenu.DataContext = dataContextVO;
             ApplyVisibleField();
-
-            MouseHorizontalWheelEnabler.AddMouseHorizontalWheelHandler(listTerminal, (sender, e) =>
-            {
-                if (e is MouseHorizontalWheelEventArgs eventArgs)
-                {
-                    Debug.WriteLine(eventArgs.HorizontalDelta);
-                }
-            });
         }
 
         private void ButtonApplyFields_Click(object sender, RoutedEventArgs e)
