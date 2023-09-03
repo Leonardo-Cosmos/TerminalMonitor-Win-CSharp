@@ -43,13 +43,14 @@ namespace TerminalMonitor.Windows.Helpers
                     var scrollViewer = dependencyObject.FindChildOfType<ScrollViewer>();
                     if (scrollViewer != null && scrollViewers.Add(scrollViewer.GetHashCode()))
                     {
-                        new MouseHorizontalWheelScrollHelper(scrollViewer, dependencyObject);
+                        var helper = new MouseHorizontalWheelScrollHelper(scrollViewer, dependencyObject);
+                        helper.AddEventHandler();
                     }
                 };
             }
         }
 
-        private class MouseHorizontalWheelScrollHelper
+        private sealed class MouseHorizontalWheelScrollHelper
         {
             private readonly ScrollViewer scrollViewer;
 
@@ -67,7 +68,10 @@ namespace TerminalMonitor.Windows.Helpers
                 }
 
                 hook = WindowProc;
+            }
 
+            public void AddEventHandler()
+            {
                 scrollViewer.MouseEnter += (sender, e) =>
                 {
                     hwndSource.AddHook(hook);
