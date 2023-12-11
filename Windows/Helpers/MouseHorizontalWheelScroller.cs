@@ -58,6 +58,8 @@ namespace TerminalMonitor.Windows.Helpers
 
             private readonly HwndSourceHook hook;
 
+            private bool eventHandleradded = false;
+
             public MouseHorizontalWheelScrollHelper(ScrollViewer scrollViewer, DependencyObject dependencyObject)
             {
                 this.scrollViewer = scrollViewer;
@@ -72,14 +74,29 @@ namespace TerminalMonitor.Windows.Helpers
 
             public void AddEventHandler()
             {
+                hwndSource.AddHook(hook);
+                eventHandleradded = true;
+
                 scrollViewer.MouseEnter += (sender, e) =>
                 {
+                    if (eventHandleradded)
+                    {
+                        return;
+                    }
+
                     hwndSource.AddHook(hook);
+                    eventHandleradded = true;
                 };
 
                 scrollViewer.MouseLeave += (sender, e) =>
                 {
+                    if (!eventHandleradded)
+                    {
+                        return;
+                    }
+
                     hwndSource.RemoveHook(hook);
+                    eventHandleradded = false;
                 };
             }
 

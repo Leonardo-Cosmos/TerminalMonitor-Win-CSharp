@@ -4,10 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TerminalMonitor.Windows"
+        xmlns:helpers="clr-namespace:TerminalMonitor.Windows.Helpers"
         mc:Ignorable="d"
         Title="Terminal Line Detail" Height="450" Width="800">
     <Grid>
-        <ListView Name="lstFields">
+        <ListView Name="lstFields" helpers:MouseHorizontalWheelScroller.ScrollingEnabled="True">
             <ListView.Resources>
                 <!--<Style TargetType="GridViewColumnHeader">
                     <Setter Property="Visibility" Value="Collapsed" />

@@ -214,6 +214,11 @@ namespace TerminalMonitor.Windows.Controls
                         ConditionTreeClipboard = findConditionListView.ConditionTreeClipboard,
                     };
                     window.Show();
+                    Task.Delay(TimeSpan.FromMilliseconds(100))
+                        .ContinueWith(_ =>
+                        {
+                            Application.Current.Dispatcher.Invoke(() => window.Focus());
+                        });
                 }
             }
         }
