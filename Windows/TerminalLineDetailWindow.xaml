@@ -27,7 +27,8 @@
                     <GridViewColumn Header="Value">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBox BorderThickness="0" IsReadOnly="True" Text="{Binding Text}" TextWrapping="Wrap" />
+                                <TextBox BorderThickness="0" IsReadOnly="True" Text="{Binding Text}" TextWrapping="Wrap"
+                                         MaxHeight="200" VerticalScrollBarVisibility="Auto" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

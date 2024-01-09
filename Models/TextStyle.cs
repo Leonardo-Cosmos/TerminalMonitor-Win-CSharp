@@ -22,6 +22,10 @@ namespace TerminalMonitor.Models
 
         public TextAlignment? TextAlignment { get; set; }
 
+        public double? MaxWidth { get; set; }
+
+        public double? MaxHeight { get; set; }
+
         public object Clone()
         {
             return new TextStyle()
@@ -32,6 +36,8 @@ namespace TerminalMonitor.Models
                 HorizontalAlignment = this.HorizontalAlignment,
                 VerticalAlignment = this.VerticalAlignment,
                 TextAlignment = this.TextAlignment,
+                MaxWidth = this.MaxWidth,
+                MaxHeight = this.MaxHeight,
             };
         }
     }
