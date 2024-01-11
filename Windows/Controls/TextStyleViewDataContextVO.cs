@@ -213,5 +213,53 @@ namespace TerminalMonitor.Windows.Controls
                 OnPropertyChanged();
             }
         }
+
+        private bool enableWidth;
+
+        public bool EnableWidth
+        {
+            get => enableWidth;
+            set
+            {
+                enableWidth = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private double width;
+
+        public double Width
+        {
+            get => width;
+            set
+            {
+                width = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool enableHeight;
+
+        public bool EnableHeight
+        {
+            get => enableHeight;
+            set
+            {
+                enableHeight = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private double height;
+
+        public double Height
+        {
+            get => height;
+            set
+            {
+                height = value;
+                OnPropertyChanged();
+            }
+        }
     }
 }
