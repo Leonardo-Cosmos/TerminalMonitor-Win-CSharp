@@ -35,6 +35,8 @@ namespace TerminalMonitor.Windows.Controls
             ForegroundColor = Brushes.Black,
             BackgroundColor = Brushes.White,
             CellBackgroundColor = Brushes.White,
+            MaxWidth = 100,
+            MaxHeight = 50,
         };
 
         public TextStyleView()
@@ -115,6 +117,15 @@ namespace TerminalMonitor.Windows.Controls
                 case nameof(TextStyleViewDataContextVO.TextAlignment):
                     textStyle.TextAlignment = dataContextVO.TextAlignment;
                     break;
+                case nameof(TextStyleViewDataContextVO.MaxWidth):
+                    textStyle.MaxWidth = dataContextVO.MaxWidth;
+                    break;
+                case nameof(TextStyleViewDataContextVO.MaxHeight):
+                    textStyle.MaxHeight = dataContextVO.MaxHeight;
+                    break;
+                case nameof(TextStyleViewDataContextVO.TextWrapping):
+                    textStyle.TextWrapping = dataContextVO.TextWrapping ? true : null;
+                    break;
 
                 case nameof(TextStyleViewDataContextVO.EnableForeground):
                     if (!dataContextVO.EnableForeground)
@@ -150,6 +161,18 @@ namespace TerminalMonitor.Windows.Controls
                     if (!dataContextVO.EnableTextAlignment)
                     {
                         textStyle.TextAlignment = null;
+                    }
+                    break;
+                case nameof(TextStyleViewDataContextVO.EnableMaxWidth):
+                    if (!dataContextVO.EnableMaxWidth)
+                    {
+                        textStyle.MaxWidth = null;
+                    }
+                    break;
+                case nameof(TextStyleViewDataContextVO.EnableMaxHeight):
+                    if (!dataContextVO.EnableMaxHeight)
+                    {
+                        textStyle.MaxHeight = null;
                     }
                     break;
 

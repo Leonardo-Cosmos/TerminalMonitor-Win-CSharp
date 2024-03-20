@@ -25,6 +25,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private static object ConvertColorToBrush(object color) => new SolidColorBrush((Color)color);
 
+        private static object ConvertBoolToTextWrapping(object textWrapping) => (textWrapping as bool? ?? false) ? TextWrapping.Wrap : TextWrapping.NoWrap;
+
         private static Color GenerateColorByHash(object value)
         {
             int hashCode = value?.GetHashCode() ?? 0;
@@ -85,6 +87,9 @@ namespace TerminalMonitor.Windows.Controls
             SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(HorizontalAlignment), GetHorizontalAlignmentColumnName);
             SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(VerticalAlignment), GetVertialAlignmentColumnName);
             SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(TextAlignment), GetTextAlignmentColumnName);
+            SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(double), GetMaxWidthColumnName);
+            SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(double), GetMaxHeightColumnName);
+            SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(TextWrapping), GetTextWrappingColumnName);
 
             FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
 
@@ -119,6 +124,10 @@ namespace TerminalMonitor.Windows.Controls
             SetElementStyleProperty(visibleField, textBlockElement, TextBlock.MaxHeightProperty,
                 null, null,
                 textStyle => textStyle.MaxHeight, GetMaxHeightColumnName);
+
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.TextWrappingProperty,
+                null, ConvertBoolToTextWrapping,
+                textStyle => textStyle.TextWrapping, GetTextWrappingColumnName);
 
             FrameworkElementFactory panelElement = new(typeof(DockPanel));
 
@@ -179,6 +188,11 @@ namespace TerminalMonitor.Windows.Controls
         private static string GetMaxHeightColumnName(string columnName)
         {
             return $"{columnName!}__MaxHeight";
+        }
+
+        private static string GetTextWrappingColumnName(string columnName)
+        {
+            return $"{columnName!}__TextWrapping";
         }
 
         private static void SetStyleDataColumn(string fieldId, DataColumnCollection columns, Type dataType,
@@ -271,6 +285,8 @@ namespace TerminalMonitor.Windows.Controls
                 textStyle => textStyle.MaxWidth, GetMaxWidthColumnName, row, null);
             BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.MaxHeight, GetMaxHeightColumnName, row, null);
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
+                textStyle => textStyle.TextWrapping, GetTextWrappingColumnName, row, null);
         }
 
         private static void BuildFinalStyleCell(string fieldId, TextStyle defaultStyle, TextStyle conditionalStyle,

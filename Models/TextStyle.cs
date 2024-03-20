@@ -26,6 +26,8 @@ namespace TerminalMonitor.Models
 
         public double? MaxHeight { get; set; }
 
+        public bool? TextWrapping { get; set; }
+
         public object Clone()
         {
             return new TextStyle()
@@ -38,6 +40,7 @@ namespace TerminalMonitor.Models
                 TextAlignment = this.TextAlignment,
                 MaxWidth = this.MaxWidth,
                 MaxHeight = this.MaxHeight,
+                TextWrapping = this.TextWrapping,
             };
         }
     }

@@ -1,6 +1,7 @@
 ﻿/* 2024/1/11 */
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -22,31 +23,87 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class NumericTextBox : UserControl
     {
-        public static readonly DependencyProperty NumberProperty;
-        
-        private static readonly Regex numberRegex = new(@"[^1-9][\d]+");
+        private static readonly Regex digitRegex = new(@"\d+");
+
+        private static readonly Regex numberRegex = new(@"^[1-9]\d*");
+
+        public static readonly DependencyProperty valueProperty =
+            DependencyProperty.Register(nameof(Value), typeof(int), typeof(NumericTextBox),
+                new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnNumberPropertyChanged));
+
+        private int value;
+
+        private int maxValue = 100;
+
+        private int minValue = 0;
+
+        private readonly NumericTextBoxDataContextVO dataContextVO = new();
+
+        private bool isPropertyChangedCallbackSuspended = false;
 
         public NumericTextBox()
         {
             InitializeComponent();
+
+            txtBx.DataContext = dataContextVO;
         }
 
         private void TxtBx_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = IsTextAllowed(e.Text);
+            e.Handled = !IsValidInput(e.Text);
         }
 
-        private bool IsTextAllowed(string text)
+        private static bool IsValidInput(string text)
         {
-            return numberRegex.IsMatch(text);
+            return digitRegex.IsMatch(text);
+        }
+
+        private bool IsValidText(string text)
+        {
+            if (!numberRegex.IsMatch(text))
+            {
+                return false;
+            }
+
+            int number = Int32.Parse(text);
+            return IsValidNumber(number);
+            
+        }
+
+        private bool IsValidNumber(int number)
+        {
+            return number <= maxValue && number >= minValue;
+        }
+
+        private string GetValidText(string text)
+        {
+            if (!numberRegex.IsMatch(text))
+            {
+                return null;
+            }
+
+            int number = Int32.Parse(text);
+            if (number > maxValue)
+            {
+                return maxValue.ToString();
+
+            }
+            else if (number < minValue)
+            {
+                return minValue.ToString();
+            }
+            else
+            {
+                return null;
+            }
         }
 
         private void TxtBx_Pasting(object sender, DataObjectPastingEventArgs e)
         {
-            if (e.DataObject.GetDataPresent(typeof(String)))
+            if (e.DataObject.GetDataPresent(typeof(string)))
             {
-                String text = (String)e.DataObject.GetData(typeof(String));
-                if (!IsTextAllowed(text))
+                string text = (string)e.DataObject.GetData(typeof(string));
+                if (!IsValidInput(text))
                 {
                     e.CancelCommand();
                 }
@@ -57,9 +114,68 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public string Number
+        private void OnDataContextPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            get; set;
+            switch (e.PropertyName)
+            {
+                case nameof(NumericTextBoxDataContextVO.NumberText):
+                    var numberText = dataContextVO.NumberText;
+                    if (IsValidText(numberText))
+                    {
+                        isPropertyChangedCallbackSuspended = true;
+                        Value = Int32.Parse(numberText);
+                        isPropertyChangedCallbackSuspended = false;
+                    }
+                    else
+                    {
+                        dataContextVO.PropertyChanged -= OnDataContextPropertyChanged;
+                        dataContextVO.NumberText = GetValidText(numberText) ?? value.ToString();
+                        dataContextVO.PropertyChanged += OnDataContextPropertyChanged;
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        private static void OnNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
+        {
+            var numericTextBox = dependencyObject as NumericTextBox;
+            numericTextBox.OnNumberPropertyChanged(e);
+        }
+
+        private void OnNumberPropertyChanged(DependencyPropertyChangedEventArgs e)
+        {
+            if (isPropertyChangedCallbackSuspended)
+            {
+                return;
+            }
+            value = (e.NewValue as int?) ?? 0;
+            if (IsValidNumber(value))
+            {
+                dataContextVO.PropertyChanged -= OnDataContextPropertyChanged;
+                dataContextVO.NumberText = value.ToString();
+                dataContextVO.PropertyChanged += OnDataContextPropertyChanged;
+            }
+        }
+
+        public int Value
+        {
+            get => (int)GetValue(valueProperty);
+            set => SetValue(valueProperty, value);
+        }
+
+        public int MaxValue
+        {
+            get => maxValue;
+            set => maxValue = value;
+        }
+
+        public int MinValue
+        {
+            get => minValue;
+            set => minValue = value;
         }
     }
 }

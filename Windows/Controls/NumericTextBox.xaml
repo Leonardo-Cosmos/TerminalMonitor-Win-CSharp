@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=local:NumericTextBoxDataContextVO}"
              d:DesignHeight="450" d:DesignWidth="800">
-    <TextBox x:Name="txtBx" PreviewTextInput="TxtBx_PreviewTextInput"  DataObject.Pasting="TxtBx_Pasting" />
+    <TextBox x:Name="txtBx" Text="{Binding NumberText}"
+             PreviewTextInput="TxtBx_PreviewTextInput" DataObject.Pasting="TxtBx_Pasting" />
 </UserControl>
