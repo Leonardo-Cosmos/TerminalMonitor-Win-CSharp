@@ -123,6 +123,44 @@ namespace TerminalMonitor.Windows.Converters
         }
     }
 
+    class IntToTextWrappingConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (targetType != typeof(TextWrapping))
+            {
+                return null;
+            }
+
+            if (value is Int32)
+            {
+                return (TextWrapping)value;
+            }
+            else
+            {
+                return TextWrapping.NoWrap;
+            }
+
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (targetType != typeof(Int32))
+            {
+                return null;
+            }
+
+            if (value is TextWrapping)
+            {
+                return (Int32)value;
+            }
+            else
+            {
+                return (Int32)TextWrapping.NoWrap;
+            }
+        }
+    }
+
     class HorizontalAlignmentToStringConverter : IValueConverter
     {
         private static readonly ReadOnlyDictionary<HorizontalAlignment, string> textDict =

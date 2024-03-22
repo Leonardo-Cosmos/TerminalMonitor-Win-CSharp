@@ -95,37 +95,61 @@ namespace TerminalMonitor.Windows.Controls
                     break;
 
                 case nameof(ColumnHeaderStyleViewDataContextVO.EnableForeground):
-                    if (!dataContextVO.EnableForeground)
+                    if (dataContextVO.EnableForeground)
+                    {
+                        columnHeaderStyle.Foreground ??= (dataContextVO.ForegroundColor as SolidColorBrush).Color;
+                    }
+                    else
                     {
                         columnHeaderStyle.Foreground = null;
                     }
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.EnableBackground):
-                    if (!dataContextVO.EnableBackground)
+                    if (dataContextVO.EnableBackground)
+                    {
+                        columnHeaderStyle.Background ??= (dataContextVO.BackgroundColor as SolidColorBrush).Color;
+                    }
+                    else
                     {
                         columnHeaderStyle.Background = null;
                     }
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.EnableCellBackground):
-                    if (!dataContextVO.EnableCellBackground)
+                    if (dataContextVO.EnableCellBackground)
+                    {
+                        columnHeaderStyle.CellBackground ??= (dataContextVO.CellBackgroundColor as SolidColorBrush).Color;
+                    }
+                    else
                     {
                         columnHeaderStyle.CellBackground = null;
                     }
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.EnableHorizontalAlignment):
-                    if (!dataContextVO.EnableHorizontalAlignment)
+                    if (dataContextVO.EnableHorizontalAlignment)
+                    {
+                        columnHeaderStyle.HorizontalAlignment = dataContextVO.HorizontalAlignment;
+                    }
+                    else
                     {
                         columnHeaderStyle.HorizontalAlignment = null;
                     }
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.EnableVerticalAlignment):
-                    if (!dataContextVO.EnableVerticalAlignment)
+                    if (dataContextVO.EnableVerticalAlignment)
+                    {
+                        columnHeaderStyle.VerticalAlignment = dataContextVO.VerticalAlignment;
+                    }
+                    else 
                     {
                         columnHeaderStyle.VerticalAlignment = null;
                     }
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.EnableTextAlignment):
-                    if (!dataContextVO.EnableTextAlignment)
+                    if (dataContextVO.EnableTextAlignment)
+                    {
+                        columnHeaderStyle.TextAlignment = dataContextVO.TextAlignment;
+                    }
+                    else 
                     {
                         columnHeaderStyle.TextAlignment = null;
                     }

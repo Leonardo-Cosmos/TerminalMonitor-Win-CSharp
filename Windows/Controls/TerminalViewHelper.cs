@@ -23,6 +23,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private static readonly IntToTextAlignmentConverter textAlignmentConverter = new();
 
+        private static readonly IntToTextWrappingConverter textWrappingConverter = new();
+
         private static object ConvertColorToBrush(object color) => new SolidColorBrush((Color)color);
 
         private static object ConvertBoolToTextWrapping(object textWrapping) => (textWrapping as bool? ?? false) ? TextWrapping.Wrap : TextWrapping.NoWrap;
@@ -126,7 +128,7 @@ namespace TerminalMonitor.Windows.Controls
                 textStyle => textStyle.MaxHeight, GetMaxHeightColumnName);
 
             SetElementStyleProperty(visibleField, textBlockElement, TextBlock.TextWrappingProperty,
-                null, ConvertBoolToTextWrapping,
+                textWrappingConverter, null,
                 textStyle => textStyle.TextWrapping, GetTextWrappingColumnName);
 
             FrameworkElementFactory panelElement = new(typeof(DockPanel));

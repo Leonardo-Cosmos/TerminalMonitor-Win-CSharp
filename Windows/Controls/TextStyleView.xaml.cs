@@ -124,53 +124,94 @@ namespace TerminalMonitor.Windows.Controls
                     textStyle.MaxHeight = dataContextVO.MaxHeight;
                     break;
                 case nameof(TextStyleViewDataContextVO.TextWrapping):
-                    textStyle.TextWrapping = dataContextVO.TextWrapping ? true : null;
+                    textStyle.TextWrapping = dataContextVO.TextWrapping ? TextWrapping.Wrap : null;
                     break;
 
                 case nameof(TextStyleViewDataContextVO.EnableForeground):
-                    if (!dataContextVO.EnableForeground)
+                    if (dataContextVO.EnableForeground)
+                    {
+                        textStyle.Foreground ??= new TextColorConfig();
+                        textStyle.Foreground.Mode = dataContextVO.ForegroundColorMode;
+                        textStyle.Foreground.Color = dataContextVO.IsForegroundColorStatic ?
+                            (dataContextVO.ForegroundColor as SolidColorBrush).Color : null;
+                    }
+                    else
                     {
                         textStyle.Foreground = null;
                     }
                     break;
                 case nameof(TextStyleViewDataContextVO.EnableBackground):
-                    if (!dataContextVO.EnableBackground)
+                    if (dataContextVO.EnableBackground)
+                    {
+                        textStyle.Background ??= new TextColorConfig();
+                        textStyle.Background.Mode = dataContextVO.BackgroundColorMode;
+                        textStyle.Background.Color = dataContextVO.IsBackgroundColorStatic ?
+                            (dataContextVO.BackgroundColor as SolidColorBrush).Color : null;
+                    }
+                    else
                     {
                         textStyle.Background = null;
                     }
                     break;
                 case nameof(TextStyleViewDataContextVO.EnableCellBackground):
-                    if (!dataContextVO.EnableCellBackground)
+                    if (dataContextVO.EnableCellBackground)
+                    {
+                        textStyle.CellBackground ??= new TextColorConfig();
+                        textStyle.CellBackground.Mode = dataContextVO.CellBackgroundColorMode;
+                        textStyle.CellBackground.Color = dataContextVO.IsCellBackgroundColorStatic ?
+                            (dataContextVO.CellBackgroundColor as SolidColorBrush).Color : null;
+                    }
+                    else
                     {
                         textStyle.CellBackground = null;
                     }
                     break;
                 case nameof(TextStyleViewDataContextVO.EnableHorizontalAlignment):
-                    if (!dataContextVO.EnableHorizontalAlignment)
+                    if (dataContextVO.EnableHorizontalAlignment)
+                    {
+                        textStyle.HorizontalAlignment = dataContextVO.HorizontalAlignment;
+                    }
+                    else
                     {
                         textStyle.HorizontalAlignment = null;
                     }
                     break;
                 case nameof(TextStyleViewDataContextVO.EnableVerticalAlignment):
-                    if (!dataContextVO.EnableVerticalAlignment)
+                    if (dataContextVO.EnableVerticalAlignment)
+                    {
+                        textStyle.VerticalAlignment = dataContextVO.VerticalAlignment;
+                    }
+                    else
                     {
                         textStyle.VerticalAlignment = null;
                     }
                     break;
                 case nameof(TextStyleViewDataContextVO.EnableTextAlignment):
-                    if (!dataContextVO.EnableTextAlignment)
+                    if (dataContextVO.EnableTextAlignment)
+                    {
+                        textStyle.TextAlignment = dataContextVO.TextAlignment;
+                    }
+                    else
                     {
                         textStyle.TextAlignment = null;
                     }
                     break;
                 case nameof(TextStyleViewDataContextVO.EnableMaxWidth):
-                    if (!dataContextVO.EnableMaxWidth)
+                    if (dataContextVO.EnableMaxWidth)
+                    {
+                        textStyle.MaxWidth = dataContextVO.MaxWidth;
+                    }
+                    else
                     {
                         textStyle.MaxWidth = null;
                     }
                     break;
                 case nameof(TextStyleViewDataContextVO.EnableMaxHeight):
-                    if (!dataContextVO.EnableMaxHeight)
+                    if (dataContextVO.EnableMaxHeight)
+                    {
+                        textStyle.MaxHeight = dataContextVO.MaxHeight;
+                    }
+                    else
                     {
                         textStyle.MaxHeight = null;
                     }
@@ -244,6 +285,20 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     dataContextVO.TextAlignment = textStyle.TextAlignment.Value;
                 }
+
+                dataContextVO.EnableMaxWidth = textStyle.MaxWidth.HasValue;
+                if (textStyle.MaxWidth.HasValue)
+                {
+                    dataContextVO.MaxWidth = (int)textStyle.MaxWidth.Value;
+                }
+
+                dataContextVO.EnableMaxHeight = textStyle.MaxHeight.HasValue;
+                if (textStyle.MaxHeight.HasValue)
+                {
+                    dataContextVO.MaxHeight = (int)textStyle.MaxHeight.Value;
+                }
+
+                dataContextVO.TextWrapping = textStyle.TextWrapping == TextWrapping.Wrap;
 
                 dataContextVO.PropertyChanged += OnDataContextPropertyChanged;
             }
