@@ -156,15 +156,21 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <CheckBox Name="chkBxHeight" IsChecked="{Binding EnableMaxHeight}" />
-                    <StackPanel Orientation="Horizontal" IsEnabled="{Binding EnableMaxHeight}">
-                        <Label Name="lblHeight" Content="Max height" IsEnabled="{Binding EnableMaxHeight}" />
-                        <local:NumericTextBox x:Name="numBxHeight" Width="40" IsEnabled="{Binding EnableMaxHeight}"
-                                              Value="{Binding MaxHeight}" MaxValue="500" MinValue="10" />
-                    </StackPanel>
+                    <Label Name="lblHeight" Content="Max height" IsEnabled="{Binding EnableMaxHeight}" />
+                    <local:NumericTextBox x:Name="numBxHeight" Width="40" IsEnabled="{Binding EnableMaxHeight}"
+                                            Value="{Binding MaxHeight}" MaxValue="500" MinValue="10" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox Name="chkBxTextWrapping" IsChecked="{Binding TextWrapping}" />
+                    <CheckBox Name="chkBxTextWrapping" IsChecked="{Binding EnableTextWrapping}" />
                     <Label Name="lblTextWrapping" Content="Text Wrapping" />
+                    <ComboBox Name="cmbBxTextWrapping" IsEnabled="{Binding EnableTextWrapping}" 
+                              ItemsSource="{StaticResource TextWrappingValues}" SelectedValue="{Binding TextWrapping}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource TextWrappingToStringConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                 </StackPanel>
             </WrapPanel>
         </GroupBox>

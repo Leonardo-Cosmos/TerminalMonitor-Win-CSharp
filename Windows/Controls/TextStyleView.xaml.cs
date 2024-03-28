@@ -124,7 +124,7 @@ namespace TerminalMonitor.Windows.Controls
                     textStyle.MaxHeight = dataContextVO.MaxHeight;
                     break;
                 case nameof(TextStyleViewDataContextVO.TextWrapping):
-                    textStyle.TextWrapping = dataContextVO.TextWrapping ? TextWrapping.Wrap : null;
+                    textStyle.TextWrapping = dataContextVO.TextWrapping;
                     break;
 
                 case nameof(TextStyleViewDataContextVO.EnableForeground):
@@ -216,6 +216,16 @@ namespace TerminalMonitor.Windows.Controls
                         textStyle.MaxHeight = null;
                     }
                     break;
+                case nameof(TextStyleViewDataContextVO.EnableTextWrapping):
+                    if (dataContextVO.EnableTextWrapping)
+                    {
+                        textStyle.TextWrapping = dataContextVO.TextWrapping;
+                    }
+                    else
+                    {
+                        textStyle.TextWrapping = null;
+                    }
+                    break;
 
                 default:
                     break;
@@ -298,7 +308,11 @@ namespace TerminalMonitor.Windows.Controls
                     dataContextVO.MaxHeight = (int)textStyle.MaxHeight.Value;
                 }
 
-                dataContextVO.TextWrapping = textStyle.TextWrapping == TextWrapping.Wrap;
+                dataContextVO.EnableTextWrapping = textStyle.TextWrapping.HasValue;
+                if (textStyle.TextWrapping.HasValue)
+                {
+                    dataContextVO.TextWrapping = textStyle.TextWrapping.Value;
+                }
 
                 dataContextVO.PropertyChanged += OnDataContextPropertyChanged;
             }

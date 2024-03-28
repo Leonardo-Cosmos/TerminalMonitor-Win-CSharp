@@ -262,9 +262,21 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private bool textWrapping;
+        private bool enableTextWrapping;
 
-        public bool TextWrapping
+        public bool EnableTextWrapping
+        {
+            get => enableTextWrapping;
+            set
+            {
+                enableTextWrapping = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private TextWrapping textWrapping;
+
+        public TextWrapping TextWrapping
         {
             get => textWrapping;
             set

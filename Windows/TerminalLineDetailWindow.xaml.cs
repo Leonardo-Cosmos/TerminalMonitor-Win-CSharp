@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using TerminalMonitor.Clipboard;
 using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
+using TerminalMonitor.Windows.Helpers;
 using Condition = TerminalMonitor.Matchers.Models.Condition;
 
 namespace TerminalMonitor.Windows
@@ -86,6 +87,42 @@ namespace TerminalMonitor.Windows
                 .Select(kvPair => kvPair.Value)
                 .ToList();
             lstFields.ItemsSource = fields;
+
+            // Adjust column width to make it fit to list view size.
+            Task.Delay(TimeSpan.FromMilliseconds(100))
+                .ContinueWith(_ =>
+                {
+                    Application.Current.Dispatcher.Invoke(() => ResetColumnWidth());
+                });
+
+            // Adjust column width may lead to vertical scroll bar become visible, adjust column width again.
+            Task.Delay(TimeSpan.FromMilliseconds(500))
+                .ContinueWith(_ =>
+                {
+                    Application.Current.Dispatcher.Invoke(() => ResetColumnWidthByScrollBar());
+                });
+        }
+
+        private void ResetColumnWidth()
+        {
+            var gridView = lstFields.View as GridView;
+            var keyColumn = gridView.Columns[0];
+            var valueColumn = gridView.Columns[1];
+
+            valueColumn.Width = lstFields.ActualWidth - keyColumn.ActualWidth - 10;
+        }
+
+        private void ResetColumnWidthByScrollBar()
+        {
+            ScrollViewer scrollViewer = VisualTreeHelpers.FindChildOfType<ScrollViewer>(lstFields);
+            if (scrollViewer.ComputedVerticalScrollBarVisibility == Visibility.Visible)
+            {
+                var gridView = lstFields.View as GridView;
+                var keyColumn = gridView.Columns[0];
+                var valueColumn = gridView.Columns[1];
+
+                valueColumn.Width = lstFields.ActualWidth - keyColumn.ActualWidth - 30;
+            }
         }
 
         public TerminalLineDto TerminalLine
