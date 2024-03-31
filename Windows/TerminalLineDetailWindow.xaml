@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="Terminal Line Detail" Height="450" Width="800">
     <Grid>
-        <ListView Name="lstFields" helpers:MouseHorizontalWheelScroller.ScrollingEnabled="True">
+        <ListView Name="lstFields" helpers:MouseHorizontalWheelScroller.ScrollingEnabled="True" Loaded="LstFields_Loaded">
             <ListView.Resources>
                 <!--<Style TargetType="GridViewColumnHeader">
                     <Setter Property="Visibility" Value="Collapsed" />
