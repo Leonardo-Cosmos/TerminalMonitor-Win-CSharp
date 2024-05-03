@@ -27,8 +27,6 @@ namespace TerminalMonitor.Windows.Controls
 
         private static object ConvertColorToBrush(object color) => new SolidColorBrush((Color)color);
 
-        private static object ConvertBoolToTextWrapping(object textWrapping) => (textWrapping as bool? ?? false) ? TextWrapping.Wrap : TextWrapping.NoWrap;
-
         private static Color GenerateColorByHash(object value)
         {
             int hashCode = value?.GetHashCode() ?? 0;

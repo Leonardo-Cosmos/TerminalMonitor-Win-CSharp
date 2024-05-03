@@ -32,11 +32,6 @@ namespace TerminalMonitor.Windows.Controls
                 new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnNumberPropertyChanged));
 
         private int value;
-
-        private int maxValue = 100;
-
-        private int minValue = 0;
-
         private readonly NumericTextBoxDataContextVO dataContextVO = new();
 
         private bool isPropertyChangedCallbackSuspended = false;
@@ -72,7 +67,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private bool IsValidNumber(int number)
         {
-            return number <= maxValue && number >= minValue;
+            return number <= MaxValue && number >= MinValue;
         }
 
         private string GetValidText(string text)
@@ -83,14 +78,14 @@ namespace TerminalMonitor.Windows.Controls
             }
 
             int number = Int32.Parse(text);
-            if (number > maxValue)
+            if (number > MaxValue)
             {
-                return maxValue.ToString();
+                return MaxValue.ToString();
 
             }
-            else if (number < minValue)
+            else if (number < MinValue)
             {
-                return minValue.ToString();
+                return MinValue.ToString();
             }
             else
             {
@@ -166,16 +161,8 @@ namespace TerminalMonitor.Windows.Controls
             set => SetValue(valueProperty, value);
         }
 
-        public int MaxValue
-        {
-            get => maxValue;
-            set => maxValue = value;
-        }
+        public int MaxValue { get; set; } = 100;
 
-        public int MinValue
-        {
-            get => minValue;
-            set => minValue = value;
-        }
+        public int MinValue { get; set; } = 0;
     }
 }
