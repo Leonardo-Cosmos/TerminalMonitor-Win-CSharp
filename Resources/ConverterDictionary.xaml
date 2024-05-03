@@ -49,6 +49,13 @@
 
     <converters:TextAlignmentToStringConverter x:Key="TextAlignmentToStringConverter" />
 
+    <x:Array x:Key="TextWrappingValues" Type="windows:TextWrapping" xmlns:windows="clr-namespace:System.Windows;assembly=PresentationCore">
+        <windows:TextWrapping>NoWrap</windows:TextWrapping>
+        <windows:TextWrapping>Wrap</windows:TextWrapping>
+    </x:Array>
+
+    <converters:TextWrappingToStringConverter x:Key="TextWrappingToStringConverter" />
+
     <x:Array x:Key="TextColorModes" Type="models:TextColorMode" xmlns:models="clr-namespace:TerminalMonitor.Models">
         <models:TextColorMode>Static</models:TextColorMode>
         <models:TextColorMode>Hash</models:TextColorMode>

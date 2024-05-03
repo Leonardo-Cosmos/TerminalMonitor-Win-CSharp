@@ -23,6 +23,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private static readonly IntToTextAlignmentConverter textAlignmentConverter = new();
 
+        private static readonly IntToTextWrappingConverter textWrappingConverter = new();
+
         private static object ConvertColorToBrush(object color) => new SolidColorBrush((Color)color);
 
         private static Color GenerateColorByHash(object value)
@@ -85,6 +87,9 @@ namespace TerminalMonitor.Windows.Controls
             SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(HorizontalAlignment), GetHorizontalAlignmentColumnName);
             SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(VerticalAlignment), GetVertialAlignmentColumnName);
             SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(TextAlignment), GetTextAlignmentColumnName);
+            SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(double), GetMaxWidthColumnName);
+            SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(double), GetMaxHeightColumnName);
+            SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(TextWrapping), GetTextWrappingColumnName);
 
             FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
 
@@ -111,6 +116,18 @@ namespace TerminalMonitor.Windows.Controls
             SetElementStyleProperty(visibleField, textBlockElement, TextBlock.TextAlignmentProperty,
                 textAlignmentConverter, null,
                 textStyle => textStyle.TextAlignment, GetTextAlignmentColumnName);
+
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.MaxWidthProperty,
+                null, null,
+                textStyle => textStyle.MaxWidth, GetMaxWidthColumnName);
+
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.MaxHeightProperty,
+                null, null,
+                textStyle => textStyle.MaxHeight, GetMaxHeightColumnName);
+
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.TextWrappingProperty,
+                textWrappingConverter, null,
+                textStyle => textStyle.TextWrapping, GetTextWrappingColumnName);
 
             FrameworkElementFactory panelElement = new(typeof(DockPanel));
 
@@ -163,6 +180,21 @@ namespace TerminalMonitor.Windows.Controls
             return $"{columnName!}__TextAlignment";
         }
 
+        private static string GetMaxWidthColumnName(string columnName)
+        {
+            return $"{columnName!}__MaxWidth";
+        }
+
+        private static string GetMaxHeightColumnName(string columnName)
+        {
+            return $"{columnName!}__MaxHeight";
+        }
+
+        private static string GetTextWrappingColumnName(string columnName)
+        {
+            return $"{columnName!}__TextWrapping";
+        }
+
         private static void SetStyleDataColumn(string fieldId, DataColumnCollection columns, Type dataType,
             Func<string, string> getStyleColumnName)
         {
@@ -176,18 +208,11 @@ namespace TerminalMonitor.Windows.Controls
             Func<TextStyle, object> getStyleProperty, Func<string, string> getStyleColumnName)
         {
             object staticStyleProperty = GetStaticStyleProperty(visibleField, getStyleProperty);
-            if (staticStyleProperty == null)
+            if (staticStyleProperty != null)
             {
-                Binding binding = new();
-                binding.Path = new PropertyPath(getStyleColumnName(visibleField.Id), Array.Empty<object>());
-                if (bindingConverter != null)
-                {
-                    binding.Converter = bindingConverter;
-                }
-                elementFactory.SetBinding(dependencyProperty, binding);
-            }
-            else
-            {
+                /*
+                 * No conditional style, set default style as static style.
+                 */
                 if (convertToValue == null)
                 {
                     elementFactory.SetValue(dependencyProperty, staticStyleProperty);
@@ -196,6 +221,19 @@ namespace TerminalMonitor.Windows.Controls
                 {
                     elementFactory.SetValue(dependencyProperty, convertToValue(staticStyleProperty));
                 }
+            }
+            else
+            {
+                /*
+                 * Set binding to apply conditional style.
+                 */
+                Binding binding = new();
+                binding.Path = new PropertyPath(getStyleColumnName(visibleField.Id), Array.Empty<object>());
+                if (bindingConverter != null)
+                {
+                    binding.Converter = bindingConverter;
+                }
+                elementFactory.SetBinding(dependencyProperty, binding);
             }
         }
 
@@ -242,6 +280,13 @@ namespace TerminalMonitor.Windows.Controls
                 textStyle => textStyle.VerticalAlignment, GetVertialAlignmentColumnName, row, null);
             BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.TextAlignment, GetTextAlignmentColumnName, row, null);
+
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
+                textStyle => textStyle.MaxWidth, GetMaxWidthColumnName, row, null);
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
+                textStyle => textStyle.MaxHeight, GetMaxHeightColumnName, row, null);
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
+                textStyle => textStyle.TextWrapping, GetTextWrappingColumnName, row, null);
         }
 
         private static void BuildFinalStyleCell(string fieldId, TextStyle defaultStyle, TextStyle conditionalStyle,

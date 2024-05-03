@@ -1,6 +1,7 @@
 ﻿/* 2021/6/23 */
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ using System.Windows.Shapes;
 using TerminalMonitor.Clipboard;
 using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
+using TerminalMonitor.Windows.Helpers;
 using Condition = TerminalMonitor.Matchers.Models.Condition;
 
 namespace TerminalMonitor.Windows
@@ -26,9 +28,25 @@ namespace TerminalMonitor.Windows
     {
         private TerminalLineDto terminalLineDto;
 
+        private readonly GridView gridView;
+
+        private readonly GridViewColumn keyColumn;
+
+        private readonly GridViewColumn valueColumn;
+
         public TerminalLineDetailWindow()
         {
             InitializeComponent();
+
+            gridView = lstFields.View as GridView;
+            keyColumn = gridView.Columns[0];
+            valueColumn = gridView.Columns[1];
+        }
+
+        private void LstFields_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Adjust column width to make it fit to list view size.
+            AdjustColumnWidth();
         }
 
         private void BtnCopyListItem_Click(object sender, RoutedEventArgs e)
@@ -86,6 +104,35 @@ namespace TerminalMonitor.Windows
                 .Select(kvPair => kvPair.Value)
                 .ToList();
             lstFields.ItemsSource = fields;
+        }
+
+        private void ScrollViewer_VerticalScrollBarVisibilityChanged(object sender, EventArgs e)
+        {
+            ScrollViewer scrollViewer = sender as ScrollViewer;
+            if (scrollViewer.ComputedVerticalScrollBarVisibility == Visibility.Visible)
+            {
+                valueColumn.Width = lstFields.ActualWidth - keyColumn.ActualWidth - 30;
+            }
+        }
+
+        private void AdjustColumnWidth()
+        {
+            PropertyDescriptor propertyDescriptor = DependencyPropertyDescriptor.FromProperty(
+                ScrollViewer.ComputedVerticalScrollBarVisibilityProperty, typeof(ScrollViewer));
+
+            ScrollViewer scrollViewer = VisualTreeHelpers.FindChildOfType<ScrollViewer>(lstFields);
+            propertyDescriptor.AddValueChanged(scrollViewer, ScrollViewer_VerticalScrollBarVisibilityChanged);
+
+            valueColumn.Width = lstFields.ActualWidth - keyColumn.ActualWidth - 10;
+
+            Task.Delay(TimeSpan.FromMilliseconds(100))
+                .ContinueWith(_ =>
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        propertyDescriptor.RemoveValueChanged(scrollViewer, ScrollViewer_VerticalScrollBarVisibilityChanged);
+                    });
+                });
         }
 
         public TerminalLineDto TerminalLine

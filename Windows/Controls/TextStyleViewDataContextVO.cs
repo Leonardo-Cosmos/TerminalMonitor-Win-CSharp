@@ -213,5 +213,77 @@ namespace TerminalMonitor.Windows.Controls
                 OnPropertyChanged();
             }
         }
+
+        private bool enableMaxWidth;
+
+        public bool EnableMaxWidth
+        {
+            get => enableMaxWidth;
+            set
+            {
+                enableMaxWidth = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int maxWidth;
+
+        public int MaxWidth
+        {
+            get => maxWidth;
+            set
+            {
+                maxWidth = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool enableMaxHeight;
+
+        public bool EnableMaxHeight
+        {
+            get => enableMaxHeight;
+            set
+            {
+                enableMaxHeight = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int maxHeight;
+
+        public int MaxHeight
+        {
+            get => maxHeight;
+            set
+            {
+                maxHeight = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool enableTextWrapping;
+
+        public bool EnableTextWrapping
+        {
+            get => enableTextWrapping;
+            set
+            {
+                enableTextWrapping = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private TextWrapping textWrapping;
+
+        public TextWrapping TextWrapping
+        {
+            get => textWrapping;
+            set
+            {
+                textWrapping = value;
+                OnPropertyChanged();
+            }
+        }
     }
 }

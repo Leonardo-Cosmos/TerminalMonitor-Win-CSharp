@@ -6,7 +6,7 @@ namespace TerminalMonitor.Settings.Models
 {
     record TextStyleSetting(ColorSetting Foreground, ColorSetting Background, ColorSetting CellBackground,
         TextColorConfigSetting ForegroundConfig, TextColorConfigSetting BackgroundConfig, TextColorConfigSetting CellBackgroundConfig,
-        string HorizontalAlignment, string VerticalAlignment, string TextAlignment);
+        string HorizontalAlignment, string VerticalAlignment, string TextAlignment, double? MaxWidth, double? MaxHeight, string TextWrapping);
 
     static class TextStyleSettings
     {
@@ -26,7 +26,10 @@ namespace TerminalMonitor.Settings.Models
                 CellBackgroundConfig: TextColorConfigSettings.Save(obj.CellBackground),
                 HorizontalAlignment: HorizontalAlignmentSettings.Save(obj.HorizontalAlignment),
                 VerticalAlignment: VerticalAlignmentSettings.Save(obj.VerticalAlignment),
-                TextAlignment: TextAlignmentSettings.Save(obj.TextAlignment)
+                TextAlignment: TextAlignmentSettings.Save(obj.TextAlignment),
+                MaxWidth: obj.MaxWidth,
+                MaxHeight: obj.MaxHeight,
+                TextWrapping: TextWrappingSettings.Save(obj.TextWrapping)
                 );
         }
 
@@ -73,6 +76,9 @@ namespace TerminalMonitor.Settings.Models
                 HorizontalAlignment = HorizontalAlignmentSettings.Load(setting.HorizontalAlignment),
                 VerticalAlignment = VerticalAlignmentSettings.Load(setting.VerticalAlignment),
                 TextAlignment = TextAlignmentSettings.Load(setting.TextAlignment),
+                MaxWidth = setting.MaxWidth,
+                MaxHeight = setting.MaxHeight,
+                TextWrapping = TextWrappingSettings.Load(setting.TextWrapping),
             };
         }
     }
