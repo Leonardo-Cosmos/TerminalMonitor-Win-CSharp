@@ -52,7 +52,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static HorizontalAlignment? Load(string setting)
+        public static HorizontalAlignment? Load(string? setting)
         {
             if (setting == null)
             {

@@ -4,12 +4,12 @@ using TerminalMonitor.Matchers.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record FilterConditionSetting(FieldConditionSetting Condition, bool Excluded);
+    record FilterConditionSetting(FieldConditionSetting? Condition, bool Excluded);
 
     [Obsolete]
     static class FilterConditionSettings
     {
-        public static FilterConditionSetting Save(FilterCondition obj)
+        public static FilterConditionSetting? Save(FilterCondition? obj)
         {
             if (obj == null)
             {
@@ -22,7 +22,7 @@ namespace TerminalMonitor.Settings.Models
                 );
         }
 
-        public static FilterCondition Load(FilterConditionSetting setting)
+        public static FilterCondition? Load(FilterConditionSetting? setting)
         {
             if (setting == null)
             {

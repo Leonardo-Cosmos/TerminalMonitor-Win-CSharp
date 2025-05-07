@@ -8,8 +8,8 @@ namespace TerminalMonitor.Settings
     [Obsolete]
     class TerminalSetting
     {
-        public List<FieldDisplayDetailSetting> Fields { get; set; }
+        public List<FieldDisplayDetailSetting>? Fields { get; set; }
 
-        public List<FilterConditionSetting> Filters { get; set; }
+        public List<FilterConditionSetting>? Filters { get; set; }
     }
 }

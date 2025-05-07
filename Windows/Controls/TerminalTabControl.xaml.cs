@@ -361,7 +361,7 @@ namespace TerminalMonitor.Windows.Controls
             return terminalConfigs.AsEnumerable();
         }
 
-        private void SetTerminalConfigs(IEnumerable<TerminalConfig> value)
+        private void SetTerminalConfigs(IEnumerable<TerminalConfig>? value)
         {
             var columnSettingDict = JsonSerializer.Deserialize<Dictionary<string, GridViewColumnSetting[]>>(
                 Properties.TerminalSettings.Default.GridViewColumns);
@@ -447,7 +447,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public IEnumerable<TerminalConfig> Terminals
+        public IEnumerable<TerminalConfig>? Terminals
         {
             get => GetTerminalConfigs();
             set => SetTerminalConfigs(value);

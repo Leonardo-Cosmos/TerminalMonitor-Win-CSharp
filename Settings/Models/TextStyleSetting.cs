@@ -10,7 +10,7 @@ namespace TerminalMonitor.Settings.Models
 
     static class TextStyleSettings
     {
-        public static TextStyleSetting Save(TextStyle obj)
+        public static TextStyleSetting? Save(TextStyle? obj)
         {
             if (obj == null)
             {
@@ -33,7 +33,7 @@ namespace TerminalMonitor.Settings.Models
                 );
         }
 
-        public static TextStyle Load(TextStyleSetting setting)
+        public static TextStyle? Load(TextStyleSetting? setting)
         {
             if (setting == null)
             {

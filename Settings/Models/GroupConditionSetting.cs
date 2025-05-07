@@ -7,19 +7,19 @@ using TerminalMonitor.Matchers.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record GroupConditionSetting(string MatchMode, List<ConditionSetting> Conditions,
+    record GroupConditionSetting(string MatchMode, List<ConditionSetting>? Conditions,
          string Id, string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
          : ConditionSetting(Id: Id, Name: Name,
              IsInverted: IsInverted, DefaultResult: DefaultResult, IsDisabled: IsDisabled);
 
     static class GroupConditionSettings
     {
-        private static IReadOnlyDictionary<string, GroupMatchMode> matchModeDict
+        private static readonly ReadOnlyDictionary<string, GroupMatchMode> matchModeDict
             = InitMatchModeDict();
 
-        private static IReadOnlyDictionary<string, GroupMatchMode> InitMatchModeDict()
+        private static ReadOnlyDictionary<string, GroupMatchMode> InitMatchModeDict()
         {
-            Dictionary<string, GroupMatchMode> dict = new();
+            Dictionary<string, GroupMatchMode> dict = [];
             var matchModes = (GroupMatchMode[])Enum.GetValues(typeof(GroupMatchMode));
             foreach (var matchMode in matchModes)
             {
@@ -36,9 +36,9 @@ namespace TerminalMonitor.Settings.Models
 
         static GroupMatchMode StringToMode(string str)
         {
-            if (matchModeDict.ContainsKey(str))
+            if (matchModeDict.TryGetValue(str, out GroupMatchMode value))
             {
-                return matchModeDict[str];
+                return value;
             }
             else
             {
@@ -46,7 +46,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static GroupConditionSetting Save(GroupCondition obj)
+        public static GroupConditionSetting? Save(GroupCondition? obj)
         {
             if (obj == null)
             {
@@ -56,7 +56,7 @@ namespace TerminalMonitor.Settings.Models
             return new GroupConditionSetting(
                 MatchMode: ModeToString(obj.MatchMode),
                 Conditions: obj.Conditions?
-                    .Select(condition => ConditionSettings.Save(condition)).ToList(),
+                    .Select(condition => ConditionSettings.Save(condition)!).ToList(),
                 Id: obj.Id,
                 Name: obj.Name,
                 IsInverted: obj.IsInverted,
@@ -65,7 +65,7 @@ namespace TerminalMonitor.Settings.Models
                 );
         }
 
-        public static GroupCondition Load(GroupConditionSetting setting)
+        public static GroupCondition? Load(GroupConditionSetting? setting)
         {
             if (setting == null)
             {
@@ -76,7 +76,7 @@ namespace TerminalMonitor.Settings.Models
             {
                 MatchMode = StringToMode(setting.MatchMode),
                 Conditions = setting.Conditions?
-                    .Select(condition => ConditionSettings.Load(condition)).ToList(),
+                    .Select(condition => ConditionSettings.Load(condition)!).ToList(),
                 Id = setting.Id,
                 Name = setting.Name,
                 IsInverted = setting.IsInverted,

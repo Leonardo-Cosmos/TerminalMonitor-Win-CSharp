@@ -17,7 +17,7 @@ namespace TerminalMonitor.Matchers.Models
             MatchMode = obj.MatchMode;
             if (obj.Conditions != null)
             {
-                Conditions = obj.Conditions.Select(condition => (Condition)condition.Clone()).ToList();
+                Conditions = [.. obj.Conditions.Select(condition => (Condition)condition.Clone())];
             }
         }
 
@@ -28,6 +28,6 @@ namespace TerminalMonitor.Matchers.Models
 
         public GroupMatchMode MatchMode { get; set; }
 
-        public List<Condition> Conditions { get; set; }
+        public List<Condition>? Conditions { get; set; }
     }
 }

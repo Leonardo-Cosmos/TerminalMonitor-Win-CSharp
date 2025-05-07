@@ -14,12 +14,12 @@ namespace TerminalMonitor.Settings.Models
 
     static class FieldConditionSettings
     {
-        private static readonly IReadOnlyDictionary<string, TextMatchOperator> matchOperatorDict
+        private static readonly ReadOnlyDictionary<string, TextMatchOperator> matchOperatorDict
             = InitMatchOperatorDict();
 
-        private static IReadOnlyDictionary<string, TextMatchOperator> InitMatchOperatorDict()
+        private static ReadOnlyDictionary<string, TextMatchOperator> InitMatchOperatorDict()
         {
-            Dictionary<string, TextMatchOperator> dict = new();
+            Dictionary<string, TextMatchOperator> dict = [];
             var matchOperators = Enum.GetValues(typeof(TextMatchOperator));
             foreach (var item in matchOperators)
             {
@@ -39,9 +39,9 @@ namespace TerminalMonitor.Settings.Models
 
         static TextMatchOperator StringToOperator(string str)
         {
-            if (str != null && matchOperatorDict.ContainsKey(str))
+            if (str != null && matchOperatorDict.TryGetValue(str, out TextMatchOperator value))
             {
-                return matchOperatorDict[str];
+                return value;
             }
             else
             {
@@ -49,7 +49,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static FieldConditionSetting Save(FieldCondition obj)
+        public static FieldConditionSetting? Save(FieldCondition? obj)
         {
             if (obj == null)
             {
@@ -68,7 +68,7 @@ namespace TerminalMonitor.Settings.Models
                 );
         }
 
-        public static FieldCondition Load(FieldConditionSetting setting)
+        public static FieldCondition? Load(FieldConditionSetting? setting)
         {
             if (setting == null)
             {

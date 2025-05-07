@@ -295,7 +295,7 @@ namespace TerminalMonitor.Windows.Controls
 
         public event CommandRunEventHandler CommandStarted;
 
-        public IEnumerable<CommandConfig> Commands
+        public IEnumerable<CommandConfig>? Commands
         {
             get
             {

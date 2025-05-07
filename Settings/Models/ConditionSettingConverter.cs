@@ -11,7 +11,7 @@ namespace TerminalMonitor.Settings.Models
 
         public override bool CanConvert(Type typeToConvert) => typeof(ConditionSetting).IsAssignableFrom(typeToConvert);
 
-        public override ConditionSetting Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override ConditionSetting? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             Utf8JsonReader readerClone = reader;
 
@@ -26,7 +26,7 @@ namespace TerminalMonitor.Settings.Models
                 throw new JsonException();
             }
 
-            string propertyName = readerClone.GetString();
+            var propertyName = readerClone.GetString();
             if (propertyName == propertyNameMatchMode)
             {
                 return JsonSerializer.Deserialize<GroupConditionSetting>(ref reader);

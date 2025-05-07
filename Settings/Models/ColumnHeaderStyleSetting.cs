@@ -8,12 +8,12 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record ColumnHeaderStyleSetting(ColorSetting Foreground, ColorSetting Background, ColorSetting CellBackground,
-        string HorizontalAlignment, string VerticalAlignment, string TextAlignment);
+    record ColumnHeaderStyleSetting(ColorSetting? Foreground, ColorSetting? Background, ColorSetting? CellBackground,
+        string? HorizontalAlignment, string? VerticalAlignment, string? TextAlignment);
 
     static class ColumnHeaderStyleSettings
     {
-        public static ColumnHeaderStyleSetting Save(ColumnHeaderStyle obj)
+        public static ColumnHeaderStyleSetting? Save(ColumnHeaderStyle? obj)
         {
             if (obj == null)
             {
@@ -30,7 +30,7 @@ namespace TerminalMonitor.Settings.Models
                 );
         }
 
-        public static ColumnHeaderStyle Load(ColumnHeaderStyleSetting setting)
+        public static ColumnHeaderStyle? Load(ColumnHeaderStyleSetting? setting)
         {
             if (setting == null)
             {

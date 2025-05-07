@@ -40,7 +40,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static string Save(VerticalAlignment? obj)
+        public static string? Save(VerticalAlignment? obj)
         {
             if (obj.HasValue)
             {
@@ -52,7 +52,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static VerticalAlignment? Load(string setting)
+        public static VerticalAlignment? Load(string? setting)
         {
             if (setting == null)
             {

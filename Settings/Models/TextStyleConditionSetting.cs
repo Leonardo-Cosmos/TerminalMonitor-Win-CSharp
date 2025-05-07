@@ -7,7 +7,7 @@ namespace TerminalMonitor.Settings.Models
 
     static class TextStyleConditionSettings
     {
-        public static TextStyleConditionSetting Save(TextStyleCondition obj)
+        public static TextStyleConditionSetting? Save(TextStyleCondition? obj)
         {
             if (obj == null)
             {
@@ -20,7 +20,7 @@ namespace TerminalMonitor.Settings.Models
                 );
         }
 
-        public static TextStyleCondition Load(TextStyleConditionSetting setting)
+        public static TextStyleCondition? Load(TextStyleConditionSetting? setting)
         {
             if (setting == null)
             {

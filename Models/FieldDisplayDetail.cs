@@ -7,23 +7,23 @@ namespace TerminalMonitor.Models
 {
     public class FieldDisplayDetail : ICloneable
     {
-        public string Id { get; init; }
+        public required string Id { get; init; }
 
-        public string FieldKey { get; set; }
+        public required string FieldKey { get; set; }
 
         public bool Hidden { get; set; }
 
-        public string HeaderName { get; set; }
+        public string? HeaderName { get; set; }
 
         public bool CustomizeHeader { get; set; }
 
-        public ColumnHeaderStyle HeaderStyle { get; set; }
+        public ColumnHeaderStyle? HeaderStyle { get; set; }
 
         public bool CustomizeStyle { get; set; }
 
-        public TextStyle Style { get; set; }
+        public TextStyle? Style { get; set; }
 
-        public IEnumerable<TextStyleCondition> Conditions { get; set; }
+        public IEnumerable<TextStyleCondition>? Conditions { get; set; }
 
         public object Clone()
         {
@@ -34,9 +34,9 @@ namespace TerminalMonitor.Models
                 Hidden = this.Hidden,
                 HeaderName = this.HeaderName,
                 CustomizeHeader = this.CustomizeHeader,
-                HeaderStyle = (ColumnHeaderStyle)this.HeaderStyle?.Clone(),
+                HeaderStyle = this.HeaderStyle?.Clone() as ColumnHeaderStyle,
                 CustomizeStyle = this.CustomizeStyle,
-                Style = (TextStyle)this.Style?.Clone(),
+                Style = this.Style?.Clone() as TextStyle,
                 Conditions = this.Conditions?.Select(condition => (TextStyleCondition)condition.Clone()),
             };
         }

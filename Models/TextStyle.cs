@@ -10,11 +10,11 @@ namespace TerminalMonitor.Models
         {
         };
 
-        public TextColorConfig Foreground { get; set; }
+        public TextColorConfig? Foreground { get; set; }
 
-        public TextColorConfig Background { get; set; }
+        public TextColorConfig? Background { get; set; }
 
-        public TextColorConfig CellBackground { get; set; }
+        public TextColorConfig? CellBackground { get; set; }
 
         public HorizontalAlignment? HorizontalAlignment { get; set; }
 
@@ -32,9 +32,9 @@ namespace TerminalMonitor.Models
         {
             return new TextStyle()
             {
-                Foreground = (TextColorConfig)this.Foreground?.Clone(),
-                Background = (TextColorConfig)this.Background?.Clone(),
-                CellBackground = (TextColorConfig)this.CellBackground?.Clone(),
+                Foreground = this.Foreground?.Clone() as TextColorConfig,
+                Background = this.Background?.Clone() as TextColorConfig,
+                CellBackground = this.CellBackground?.Clone() as TextColorConfig,
                 HorizontalAlignment = this.HorizontalAlignment,
                 VerticalAlignment = this.VerticalAlignment,
                 TextAlignment = this.TextAlignment,

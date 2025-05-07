@@ -7,7 +7,7 @@ namespace TerminalMonitor.Settings.Models
 
     static class ColorSettings
     {
-        public static ColorSetting Save(Color? obj)
+        public static ColorSetting? Save(Color? obj)
         {
             if (obj.HasValue)
             {
@@ -24,7 +24,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static Color? Load(ColorSetting setting)
+        public static Color? Load(ColorSetting? setting)
         {
             if (setting == null)
             {

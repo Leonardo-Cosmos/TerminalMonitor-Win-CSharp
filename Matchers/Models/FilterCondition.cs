@@ -6,7 +6,7 @@ namespace TerminalMonitor.Matchers.Models
     [Obsolete]
     public class FilterCondition : ICloneable
     {
-        public FieldCondition Condition { get; set; }
+        public FieldCondition? Condition { get; set; }
 
         public bool Excluded { get; set; }
 
@@ -14,7 +14,7 @@ namespace TerminalMonitor.Matchers.Models
         {
             return new FilterCondition()
             {
-                Condition = (FieldCondition)this.Condition.Clone(),
+                Condition = this.Condition?.Clone() as FieldCondition,
                 Excluded = this.Excluded,
             };
         }

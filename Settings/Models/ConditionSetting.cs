@@ -13,7 +13,7 @@ namespace TerminalMonitor.Settings.Models
 
     static class ConditionSettings
     {
-        public static ConditionSetting Save(Condition obj)
+        public static ConditionSetting? Save(Condition? obj)
         {
             if (obj == null)
             {
@@ -36,7 +36,7 @@ namespace TerminalMonitor.Settings.Models
             return setting;
         }
 
-        public static Condition Load(ConditionSetting setting)
+        public static Condition? Load(ConditionSetting? setting)
         {
             if (setting == null)
             {

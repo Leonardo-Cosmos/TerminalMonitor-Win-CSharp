@@ -8,12 +8,12 @@ namespace TerminalMonitor.Settings.Models
 {
     static class TextWrappingSettings
     {
-        private static readonly IReadOnlyDictionary<string, TextWrapping> textWrappingDict
+        private static readonly ReadOnlyDictionary<string, TextWrapping> textWrappingDict
             = InitTextWrappingDict();
 
-        private static IReadOnlyDictionary<string, TextWrapping> InitTextWrappingDict()
+        private static ReadOnlyDictionary<string, TextWrapping> InitTextWrappingDict()
         {
-            Dictionary<string, TextWrapping> dict = new();
+            Dictionary<string, TextWrapping> dict = [];
             var values = Enum.GetValues(typeof(TextWrapping));
             foreach (var item in values)
             {
@@ -30,9 +30,9 @@ namespace TerminalMonitor.Settings.Models
 
         static TextWrapping StringToTextWrapping(string str)
         {
-            if (str != null && textWrappingDict.ContainsKey(str))
+            if (str != null && textWrappingDict.TryGetValue(str, out TextWrapping value))
             {
-                return textWrappingDict[str];
+                return value;
             }
             else
             {
@@ -40,7 +40,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static string Save(TextWrapping? obj)
+        public static string? Save(TextWrapping? obj)
         {
             if (obj.HasValue)
             {
@@ -52,7 +52,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static TextWrapping? Load(string setting)
+        public static TextWrapping? Load(string? setting)
         {
             if (setting == null)
             {
