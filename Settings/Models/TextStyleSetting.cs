@@ -4,9 +4,9 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record TextStyleSetting(ColorSetting Foreground, ColorSetting Background, ColorSetting CellBackground,
-        TextColorConfigSetting ForegroundConfig, TextColorConfigSetting BackgroundConfig, TextColorConfigSetting CellBackgroundConfig,
-        string HorizontalAlignment, string VerticalAlignment, string TextAlignment, double? MaxWidth, double? MaxHeight, string TextWrapping);
+    record TextStyleSetting(ColorSetting? Foreground, ColorSetting? Background, ColorSetting? CellBackground,
+        TextColorConfigSetting? ForegroundConfig, TextColorConfigSetting? BackgroundConfig, TextColorConfigSetting? CellBackgroundConfig,
+        string? HorizontalAlignment, string? VerticalAlignment, string? TextAlignment, double? MaxWidth, double? MaxHeight, string? TextWrapping);
 
     static class TextStyleSettings
     {
@@ -40,7 +40,7 @@ namespace TerminalMonitor.Settings.Models
                 return null;
             }
 
-            static TextColorConfig LoadColorConfig(TextColorConfig colorConfigSetting, Color? colorSetting)
+            static TextColorConfig? LoadColorConfig(TextColorConfig? colorConfigSetting, Color? colorSetting)
             {
                 if (colorConfigSetting != null)
                 {

@@ -3,7 +3,7 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record TextStyleConditionSetting(TextStyleSetting Style, FieldConditionSetting Condition);
+    record TextStyleConditionSetting(TextStyleSetting? Style, FieldConditionSetting? Condition);
 
     static class TextStyleConditionSettings
     {
