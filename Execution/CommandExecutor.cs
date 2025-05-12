@@ -14,13 +14,13 @@ namespace TerminalMonitor.Execution
 {
     class CommandExecutor : IExecutor, ITerminalLineProducer
     {
-        private readonly List<string> executionNames = new();
+        private readonly List<string> executionNames = [];
 
-        private readonly Dictionary<string, Execution> executionDict = new();
+        private readonly Dictionary<string, Execution> executionDict = [];
 
         private readonly ConcurrentQueue<TerminalLineDto> terminalLineQueue = new();
 
-        private readonly BlockingCollection<TerminalLine> terminalLineCollection = new();
+        private readonly BlockingCollection<TerminalLine> terminalLineCollection = [];
 
         public CommandExecutor()
         {
@@ -54,13 +54,12 @@ namespace TerminalMonitor.Execution
 
         public void Terminate(string executionName)
         {
-            if (!executionDict.ContainsKey(executionName))
+            if (!executionDict.TryGetValue(executionName, out Execution? execution))
             {
                 Debug.Print($"Executor {executionName} doesn't exist when terminate.");
                 return;
             }
 
-            var execution = executionDict[executionName];
             try
             {
                 execution.Kill();
@@ -122,7 +121,7 @@ namespace TerminalMonitor.Execution
             OnExecutionStarted(name, execution.Id);
         }
 
-        private void RemoveExecution(string name, string id, Exception exception = null)
+        private void RemoveExecution(string name, string id, Exception? exception = null)
         {
             executionNames.Remove(name);
             executionDict.Remove(name);
@@ -150,7 +149,7 @@ namespace TerminalMonitor.Execution
             ExecutionStarted?.Invoke(this, e);
         }
 
-        protected void OnExecutionExited(string name, string id, Exception exception)
+        protected void OnExecutionExited(string name, string id, Exception? exception)
         {
             var status = exception == null ? ExecutionStatus.Completed : ExecutionStatus.Error;
             ExecutionInfoEventArgs e = new()
@@ -200,17 +199,17 @@ namespace TerminalMonitor.Execution
             Completed?.Invoke(this, EventArgs.Empty);
         }
 
-        public event ExecutionInfoEventHandler ExecutionStarted;
+        public event ExecutionInfoEventHandler? ExecutionStarted;
 
-        public event ExecutionInfoEventHandler ExecutionExited;
+        public event ExecutionInfoEventHandler? ExecutionExited;
 
-        public event EventHandler Started;
+        public event EventHandler? Started;
 
-        public event EventHandler Completed;
+        public event EventHandler? Completed;
 
         public IEnumerable<TerminalLineDto> ReadTerminalLines()
         {
-            List<TerminalLineDto> terminalLines = new();
+            List<TerminalLineDto> terminalLines = [];
             while (!terminalLineQueue.IsEmpty)
             {
                 if (terminalLineQueue.TryDequeue(out var terminalLine))

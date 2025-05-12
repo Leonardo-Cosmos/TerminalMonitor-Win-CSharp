@@ -11,9 +11,9 @@ namespace TerminalMonitor.Execution
 
         IEnumerable<TerminalLineDto> ReadTerminalLines();
 
-        event EventHandler Started;
+        event EventHandler? Started;
 
-        event EventHandler Completed;
+        event EventHandler? Completed;
 
         bool IsCompleted
         {

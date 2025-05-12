@@ -10,14 +10,9 @@ using TerminalMonitor.Windows.Controls;
 
 namespace TerminalMonitor.Matchers
 {
-    class TerminalLineMatcher
+    class TerminalLineMatcher(Condition matchCondition)
     {
-        private readonly Condition matchCondition;
-
-        public TerminalLineMatcher(Condition matchCondition)
-        {
-            this.matchCondition = matchCondition;
-        }
+        private readonly Condition matchCondition = matchCondition;
 
         public bool IsMatch(TerminalLineDto terminalLineDto)
         {
@@ -42,12 +37,9 @@ namespace TerminalMonitor.Matchers
 
         public static bool IsMatch(TerminalLineDto terminalLineDto, GroupCondition groupCondition)
         {
-            if (groupCondition == null)
-            {
-                throw new ArgumentNullException(nameof(groupCondition));
-            }
+            ArgumentNullException.ThrowIfNull(groupCondition);
 
-            var conditions = groupCondition.Conditions?.Where(condition => !(condition?.IsDisabled ?? true)) ?? new List<Condition>();
+            var conditions = groupCondition.Conditions?.Where(condition => !(condition?.IsDisabled ?? true)) ?? [];
 
             bool groupMatched;
             if (groupCondition.IsDisabled)
@@ -73,23 +65,19 @@ namespace TerminalMonitor.Matchers
 
         public static bool IsMatch(TerminalLineDto terminalLineDto, FieldCondition fieldCondition)
         {
-            if (fieldCondition == null)
-            {
-                throw new ArgumentNullException(nameof(fieldCondition));
-            }
+            ArgumentNullException.ThrowIfNull(fieldCondition);
 
             bool fieldMatched;
             if (fieldCondition.IsDisabled)
             {
                 fieldMatched = false;
             }
-            else if (terminalLineDto.LineFieldDict == null || !terminalLineDto.LineFieldDict.ContainsKey(fieldCondition.FieldKey))
+            else if (terminalLineDto.LineFieldDict == null || !terminalLineDto.LineFieldDict.TryGetValue(fieldCondition.FieldKey, out TerminalLineFieldDto? jsonProperty))
             {
                 fieldMatched = fieldCondition.DefaultResult;
             }
             else
             {
-                var jsonProperty = terminalLineDto.LineFieldDict[fieldCondition.FieldKey];
                 fieldMatched = TextMatcher.IsMatch(jsonProperty.Text, fieldCondition.TargetValue, fieldCondition.MatchOperator);
             }
 
