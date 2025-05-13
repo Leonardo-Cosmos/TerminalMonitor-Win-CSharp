@@ -75,13 +75,12 @@ namespace TerminalMonitor.Settings.Models
                 return null;
             }
 
-            return new FieldCondition()
+            return new FieldCondition(
+                setting.Id ?? Guid.NewGuid().ToString(),
+                setting.Name, setting.FieldKey,
+                StringToOperator(setting.MatchOperator),
+                setting.TargetValue)
             {
-                FieldKey = setting.FieldKey,
-                MatchOperator = StringToOperator(setting.MatchOperator),
-                TargetValue = setting.TargetValue,
-                Id = setting.Id ?? Guid.NewGuid().ToString(),
-                Name = setting.Name,
                 IsInverted = setting.IsInverted,
                 DefaultResult = setting.DefaultResult,
                 IsDisabled = setting.IsDisabled,

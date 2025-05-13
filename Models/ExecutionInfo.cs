@@ -4,10 +4,10 @@ namespace TerminalMonitor.Models
 {
     public class ExecutionInfo
     {
-        public string Id { get; init; }
+        public required string Id { get; init; }
 
-        public string Name { get; init; }
+        public required string Name { get; init; }
 
-        public ExecutionStatus Status { get; init; }
+        public required ExecutionStatus Status { get; init; }
     }
 }

@@ -72,13 +72,11 @@ namespace TerminalMonitor.Settings.Models
                 return null;
             }
 
-            return new GroupCondition()
+            return new GroupCondition(
+                setting.Id ?? Guid.NewGuid().ToString(),
+                setting.Name, StringToMode(setting.MatchMode),
+                setting.Conditions?.Select(condition => ConditionSettings.Load(condition)!).ToList())
             {
-                MatchMode = StringToMode(setting.MatchMode),
-                Conditions = setting.Conditions?
-                    .Select(condition => ConditionSettings.Load(condition)!).ToList(),
-                Id = setting.Id,
-                Name = setting.Name,
                 IsInverted = setting.IsInverted,
                 DefaultResult = setting.DefaultResult,
                 IsDisabled = setting.IsDisabled,

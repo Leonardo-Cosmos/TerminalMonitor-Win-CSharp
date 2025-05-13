@@ -46,25 +46,21 @@ namespace TerminalMonitor.Windows.Controls
         {
             InitializeComponent();
 
-            conditions = new();
-            groupCondition = new()
-            {
-                Id = Guid.NewGuid().ToString(),
-                Conditions = conditions,
-            };
+            conditions = [];
+            groupCondition = new(GroupMatchMode.All, conditions);
 
             dataContextVO = new()
             {
                 AddCommand = new RelayCommand(AddCondition, () => true),
-                RemoveCommand = new RelayCommand(RemoveSelectedConditions, () => dataContextVO.IsAnyConditionSelected),
-                EditCommand = new RelayCommand(EditSelectedConditions, () => dataContextVO.IsAnyConditionSelected),
-                MoveLeftCommand = new RelayCommand(MoveSelectedConditionsLeft, () => dataContextVO.IsAnyConditionSelected),
-                MoveRightCommand = new RelayCommand(MoveSelectedConditionsRight, () => dataContextVO.IsAnyConditionSelected),
+                RemoveCommand = new RelayCommand(RemoveSelectedConditions, () => dataContextVO!.IsAnyConditionSelected),
+                EditCommand = new RelayCommand(EditSelectedConditions, () => dataContextVO!.IsAnyConditionSelected),
+                MoveLeftCommand = new RelayCommand(MoveSelectedConditionsLeft, () => dataContextVO!.IsAnyConditionSelected),
+                MoveRightCommand = new RelayCommand(MoveSelectedConditionsRight, () => dataContextVO!.IsAnyConditionSelected),
                 CutCommand = new RelayCommand(CutSelectedConditions,
-                    () => dataContextVO.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
+                    () => dataContextVO!.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
                 CopyCommand = new RelayCommand(CopySelectedConditions,
-                    () => dataContextVO.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
-                PasteCommnad = new RelayCommand(PasteConditions, () => dataContextVO.IsAnyConditionInClipboard),
+                    () => dataContextVO!.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
+                PasteCommnad = new RelayCommand(PasteConditions, () => dataContextVO!.IsAnyConditionInClipboard),
             };
 
             dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
@@ -73,7 +69,7 @@ namespace TerminalMonitor.Windows.Controls
             lstConditions.ItemsSource = conditionVOs;
         }
 
-        private void DataContextVO_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void DataContextVO_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -437,7 +433,7 @@ namespace TerminalMonitor.Windows.Controls
                 conditionVOs.Clear();
 
                 dataContextVO.PropertyChanged -= DataContextVO_PropertyChanged;
-                groupCondition = value ?? new();
+                groupCondition = value ?? GroupCondition.Empty;
                 dataContextVO.MatchMode = groupCondition.MatchMode;
                 dataContextVO.IsInverted = groupCondition.IsInverted;
                 dataContextVO.DefaultResult = groupCondition.DefaultResult;
