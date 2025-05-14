@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using TerminalMonitor.Clipboard;
+using TerminalMonitor.Matchers;
 using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
 using TerminalMonitor.Windows.Helpers;
@@ -69,10 +70,9 @@ namespace TerminalMonitor.Windows
         {
             if (ConditionTreeClipboard != null)
             {
-                Condition groupCondition = new GroupCondition()
-                {
-                    Conditions = ConvertSelectedItemsToConditions(),
-                };
+                Condition groupCondition = new GroupCondition(
+                    GroupMatchMode.All,
+                    ConvertSelectedItemsToConditions());
 
                 ConditionTreeClipboard.Copy(groupCondition);
             }
@@ -85,12 +85,10 @@ namespace TerminalMonitor.Windows
             {
                 if (selectedItem is TerminalLineFieldDto lineField)
                 {
-                    Condition fieldCondition = new FieldCondition()
-                    {
-                        FieldKey = lineField.FieldKey,
-                        MatchOperator = Matchers.TextMatchOperator.Equals,
-                        TargetValue = lineField.Text,
-                    };
+                    Condition fieldCondition = new FieldCondition(
+                        lineField.FieldKey,
+                        TextMatchOperator.Equals,
+                        lineField.Text);
                     conditions.Add(fieldCondition);
                 }
             }

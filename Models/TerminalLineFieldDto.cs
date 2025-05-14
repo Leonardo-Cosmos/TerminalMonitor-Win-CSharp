@@ -8,7 +8,7 @@ namespace TerminalMonitor.Models
 
         public required string FieldKey { get; init; }
 
-        public required object Value { get; init; }
+        public required object? Value { get; init; }
 
         public required string Text { get; init; }
 

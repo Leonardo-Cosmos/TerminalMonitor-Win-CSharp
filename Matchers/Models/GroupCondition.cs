@@ -11,13 +11,13 @@ namespace TerminalMonitor.Matchers.Models
 
         private List<Condition>? _conditions;
 
-        public GroupCondition(string id, string name, GroupMatchMode matchMode, List<Condition>? conditions) : base(id, name)
+        public GroupCondition(string id, string? name, GroupMatchMode matchMode, List<Condition>? conditions) : base(id, name)
         {
             _matchMode = matchMode;
             _conditions = conditions;
         }
 
-        public GroupCondition(string name, GroupMatchMode matchMode, List<Condition>? conditions) : base(name)
+        public GroupCondition(string? name, GroupMatchMode matchMode, List<Condition>? conditions) : base(name)
         {
             _matchMode = matchMode;
             _conditions = conditions;

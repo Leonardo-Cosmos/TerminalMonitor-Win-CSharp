@@ -12,14 +12,14 @@ namespace TerminalMonitor.Matchers.Models
 
         private string _targetValue;
 
-        public FieldCondition(string id, string name, string fieldKey, TextMatchOperator matchOperator, string targetValue) : base(id, name)
+        public FieldCondition(string id, string? name, string fieldKey, TextMatchOperator matchOperator, string targetValue) : base(id, name)
         {
             _fieldKey = fieldKey;
             _matchOperator = matchOperator;
             _targetValue = targetValue;
         }
 
-        public FieldCondition(string name, string fieldKey, TextMatchOperator matchOperator, string targetValue) : base(name)
+        public FieldCondition(string? name, string fieldKey, TextMatchOperator matchOperator, string targetValue) : base(name)
         {
             _fieldKey = fieldKey;
             _matchOperator = matchOperator;

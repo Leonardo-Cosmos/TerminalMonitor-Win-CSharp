@@ -14,8 +14,8 @@ namespace TerminalMonitor.Terminal
 
         TerminalLineDtoCollection TerminalLines { get; }
 
-        event TerminalLineDtosEventHandler TerminalLinesAdded;
+        event TerminalLineDtosEventHandler? TerminalLinesAdded;
 
-        event TerminalLineDtosEventHandler TerminalLinesRemoved;
+        event TerminalLineDtosEventHandler? TerminalLinesRemoved;
     }
 }

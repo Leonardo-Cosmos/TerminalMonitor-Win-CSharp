@@ -53,9 +53,9 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly TerminalViewColumnSettingHelper columnSettingHelper = new();
 
-        private GroupCondition filterCondition = new();
+        private GroupCondition filterCondition = GroupCondition.Empty;
 
-        private GroupCondition findCondition = new();
+        private GroupCondition findCondition = GroupCondition.Empty;
 
         private readonly TerminalViewDataContextVO dataContextVO;
 
@@ -254,7 +254,7 @@ namespace TerminalMonitor.Windows.Controls
             return terminalLineFieldDict[clickedColumnFieldKey].Text;
         }
 
-        private Condition ConvertClickedDataCellToCondition()
+        private FieldCondition? ConvertClickedDataCellToCondition()
         {
             var clickedDataCell = GetClickedDataCell();
             if (clickedDataCell == null)
@@ -262,12 +262,10 @@ namespace TerminalMonitor.Windows.Controls
                 return null;
             }
 
-            return new FieldCondition()
-            {
-                FieldKey = clickedColumnFieldKey,
-                MatchOperator = Matchers.TextMatchOperator.Equals,
-                TargetValue = clickedDataCell,
-            };
+            return new FieldCondition(
+                clickedColumnFieldKey,
+                TextMatchOperator.Equals,
+                clickedDataCell);
         }
 
         private void CopyClickedDataCellToSystemClipboard()
@@ -293,12 +291,10 @@ namespace TerminalMonitor.Windows.Controls
                 return;
             }
 
-            var condition = new FieldCondition()
-            {
-                FieldKey = clickedColumnFieldKey,
-                MatchOperator = Matchers.TextMatchOperator.Contains,
-                TargetValue = System.Windows.Clipboard.GetText(TextDataFormat.UnicodeText),
-            };
+            var condition = new FieldCondition(
+                clickedColumnFieldKey,
+                TextMatchOperator.Contains,
+                System.Windows.Clipboard.GetText(TextDataFormat.UnicodeText));
 
             conditionListView.AddCondition(condition);
         }

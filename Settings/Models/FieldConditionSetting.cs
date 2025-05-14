@@ -8,7 +8,7 @@ using TerminalMonitor.Matchers.Models;
 namespace TerminalMonitor.Settings.Models
 {
     record FieldConditionSetting(string FieldKey, string MatchOperator, string TargetValue,
-        string Id, string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
+        string Id, string? Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
         : ConditionSetting(Id: Id, Name: Name,
             IsInverted: IsInverted, DefaultResult: DefaultResult, IsDisabled: IsDisabled);
 
