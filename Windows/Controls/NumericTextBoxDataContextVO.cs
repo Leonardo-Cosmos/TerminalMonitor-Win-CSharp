@@ -6,18 +6,18 @@ namespace TerminalMonitor.Windows.Controls
 {
     class NumericTextBoxDataContextVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private string numberText;
+        private string? numberText;
 
-        public string NumberText
+        public required string NumberText
         {
-            get => numberText;
+            get => numberText!;
             set
             {
                 numberText = value;

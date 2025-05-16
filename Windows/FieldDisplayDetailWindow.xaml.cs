@@ -377,7 +377,7 @@ namespace TerminalMonitor.Windows
             set => LoadFieldDetail(value);
         }
 
-        public ItemClipboard<TextStyleCondition> StyleConditionClipboard
+        public ItemClipboard<TextStyleCondition>? StyleConditionClipboard
         {
             get => styleConditionClipboard;
 

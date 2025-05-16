@@ -8,46 +8,52 @@ namespace TerminalMonitor.Windows.Converters
 {
     class ObjectNullOrEmptyConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null)
             {
                 return true;
             }
 
-            if (typeof(string).IsAssignableFrom(targetType))
+            if (value is string str)
             {
-                return String.IsNullOrEmpty(value as string);
+                return String.IsNullOrEmpty(str);
             }
 
-            if (typeof(ICollection).IsAssignableFrom(targetType))
+            if (value is ICollection collection)
             {
-                return (value as ICollection).Count == 0;
+                return collection.Count == 0;
             }
 
-            if (typeof(IDictionary).IsAssignableFrom(targetType))
+            if (value is IDictionary dictionary)
             {
-                return (value as IDictionary).Count == 0;
+                return dictionary.Count == 0;
             }
 
             return false;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null)
             {
                 return null;
             }
 
-            var isNull = value as bool?;
-            if (isNull ?? false)
+            if (value is bool isNull)
             {
-                return null;
+                if (isNull)
+                {
+                    return null;
+                }
+                else
+                {
+                    return new Object();
+                }
             }
             else
             {
-                return new Object();
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
     }

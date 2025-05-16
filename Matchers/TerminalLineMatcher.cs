@@ -72,7 +72,7 @@ namespace TerminalMonitor.Matchers
             {
                 fieldMatched = false;
             }
-            else if (terminalLineDto.LineFieldDict == null || !terminalLineDto.LineFieldDict.TryGetValue(fieldCondition.FieldKey, out TerminalLineFieldDto? jsonProperty))
+            else if (!terminalLineDto.LineFieldDict.TryGetValue(fieldCondition.FieldKey, out TerminalLineFieldDto? jsonProperty))
             {
                 fieldMatched = fieldCondition.DefaultResult;
             }

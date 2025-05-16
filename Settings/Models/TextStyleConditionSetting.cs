@@ -3,7 +3,7 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record TextStyleConditionSetting(TextStyleSetting? Style, FieldConditionSetting? Condition);
+    record TextStyleConditionSetting(TextStyleSetting Style, FieldConditionSetting Condition);
 
     static class TextStyleConditionSettings
     {
@@ -15,8 +15,8 @@ namespace TerminalMonitor.Settings.Models
             }
 
             return new TextStyleConditionSetting(
-                Style: TextStyleSettings.Save(obj.Style),
-                Condition: FieldConditionSettings.Save(obj.Condition)
+                Style: TextStyleSettings.Save(obj.Style)!,
+                Condition: FieldConditionSettings.Save(obj.Condition)!
                 );
         }
 
@@ -29,8 +29,8 @@ namespace TerminalMonitor.Settings.Models
 
             return new TextStyleCondition()
             {
-                Style = TextStyleSettings.Load(setting.Style),
-                Condition = FieldConditionSettings.Load(setting.Condition),
+                Style = TextStyleSettings.Load(setting.Style)!,
+                Condition = FieldConditionSettings.Load(setting.Condition)!,
             };
         }
     }

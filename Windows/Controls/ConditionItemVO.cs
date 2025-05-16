@@ -7,17 +7,17 @@ namespace TerminalMonitor.Windows.Controls
 {
     class ConditionItemVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        public string Id { get; init; }
+        public required string Id { get; init; }
 
-        private string fieldKey;
+        private string? fieldKey;
 
-        public string FieldKey
+        public string? FieldKey
         {
             get { return fieldKey; }
 
@@ -28,9 +28,9 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private TextMatchOperator matchOperator;
+        private TextMatchOperator? matchOperator;
 
-        public TextMatchOperator MatchOperator
+        public TextMatchOperator? MatchOperator
         {
             get { return matchOperator; }
 
@@ -41,9 +41,9 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private string targetValue;
+        private string? targetValue;
 
-        public string TargetValue
+        public string? TargetValue
         {
             get { return targetValue; }
             set
@@ -53,9 +53,9 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private string conditionName;
+        private string? conditionName;
 
-        public string ConditionName
+        public string? ConditionName
         {
             get { return conditionName; }
             set

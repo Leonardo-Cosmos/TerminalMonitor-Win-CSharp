@@ -11,8 +11,8 @@ namespace TerminalMonitor.Windows.Controls
 {
     class TerminalViewDataContextVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
@@ -43,11 +43,11 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private string foundSelectedNumber;
+        private string? foundSelectedNumber;
 
-        public string FoundSelectedNumber
+        public required string FoundSelectedNumber
         {
-            get => foundSelectedNumber;
+            get => foundSelectedNumber!;
 
             set
             {

@@ -7,9 +7,9 @@ namespace TerminalMonitor.Windows.Controls
 {
     class ExecutionListViewDataContextVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
@@ -26,6 +26,6 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public ICommand StopCommand { get; init; }
+        public required ICommand StopCommand { get; init; }
     }
 }

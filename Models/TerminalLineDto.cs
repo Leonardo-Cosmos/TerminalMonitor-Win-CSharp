@@ -20,12 +20,12 @@ namespace TerminalMonitor.Models
         /// <summary>
         /// Deserialized JSON object by hierarchy.
         /// </summary>
-        public Dictionary<string, object>? JsonObjectDict { get; set; }
+        public required Dictionary<string, object> JsonObjectDict { get; set; }
 
         /// <summary>
         /// Line fields with full path as key.
         /// </summary>
-        public Dictionary<string, TerminalLineFieldDto>? LineFieldDict { get; set; }
+        public required Dictionary<string, TerminalLineFieldDto> LineFieldDict { get; set; }
 
     }
 }

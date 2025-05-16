@@ -12,23 +12,23 @@ namespace TerminalMonitor.Windows.Controls
         /// <summary>
         /// A dictionary between original field ID and cloned field ID.
         /// </summary>
-        private readonly Dictionary<string, string> fieldIdDict = new();
+        private readonly Dictionary<string, string> fieldIdDict = [];
 
         /// <summary>
         /// A dictionary between cloned field ID and original field ID.
         /// </summary>
-        private readonly Dictionary<string, string> fieldCloneIdDict = new();
+        private readonly Dictionary<string, string> fieldCloneIdDict = [];
 
         /// <summary>
         /// A dictionary between cloned field ID and grid view column.
         /// </summary>
-        private readonly Dictionary<string, GridViewColumn> gridViewColumnDict = new();
+        private readonly Dictionary<string, GridViewColumn> gridViewColumnDict = [];
 
         public List<FieldDisplayDetail> Init(IEnumerable<FieldDisplayDetail> fieldDetails)
         {
             fieldIdDict.Clear();
             fieldCloneIdDict.Clear();
-            List<FieldDisplayDetail> fieldDetailClones = new();
+            List<FieldDisplayDetail> fieldDetailClones = [];
 
             foreach (var fieldDetail in fieldDetails)
             {
@@ -51,7 +51,7 @@ namespace TerminalMonitor.Windows.Controls
 
         public IEnumerable<GridViewColumnSetting> GetGridViewColumnSettings()
         {
-            return gridViewColumnDict.Select(keyValuePair =>
+            return [.. gridViewColumnDict.Select(keyValuePair =>
             {
                 string fieldCloneId = keyValuePair.Key;
                 var column = keyValuePair.Value;
@@ -59,20 +59,18 @@ namespace TerminalMonitor.Windows.Controls
                     FieldId: fieldCloneIdDict[fieldCloneId],
                     Width: column.ActualWidth
                     );
-            }).ToArray();
+            })];
         }
 
         public void SetGridViewColumnSettings(IEnumerable<GridViewColumnSetting> gridViewColumnSettings)
         {
             foreach (var columnSetting in gridViewColumnSettings)
             {
-                if (fieldIdDict.ContainsKey(columnSetting.FieldId))
+                if (fieldIdDict.TryGetValue(columnSetting.FieldId, out string? fieldCloneId))
                 {
-                    var fieldCloneId = fieldIdDict[columnSetting.FieldId];
-
-                    if (gridViewColumnDict.ContainsKey(fieldCloneId))
+                    if (gridViewColumnDict.TryGetValue(fieldCloneId, out GridViewColumn? column))
                     {
-                        gridViewColumnDict[fieldCloneId].Width = columnSetting.Width;
+                        column.Width = columnSetting.Width;
                     }
                 }
             }

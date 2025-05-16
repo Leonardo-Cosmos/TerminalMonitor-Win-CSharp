@@ -28,13 +28,13 @@ namespace TerminalMonitor.Windows.Controls
     {
         private readonly FieldListViewDataContextVO dataContextVO;
 
-        private readonly ObservableCollection<FieldListItemVO> fieldVOs = new();
+        private readonly ObservableCollection<FieldListItemVO> fieldVOs = [];
 
-        private List<FieldDisplayDetail> fields = new();
+        private List<FieldDisplayDetail> fields = [];
 
-        private ItemClipboard<FieldDisplayDetail> fieldClipboard;
+        private ItemClipboard<FieldDisplayDetail>? fieldClipboard;
 
-        private ItemClipboard<TextStyleCondition> styleConditionClipboard;
+        private ItemClipboard<TextStyleCondition>? styleConditionClipboard;
 
         public FieldListView()
         {
@@ -43,15 +43,15 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO = new()
             {
                 AddCommand = new RelayCommand(AddFieldDetail, () => true),
-                RemoveCommand = new RelayCommand(RemoveSelectedFieldDetails, () => dataContextVO.IsAnyFieldSelected),
-                EditCommand = new RelayCommand(EditSelectedFieldDetails, () => dataContextVO.IsAnyFieldSelected),
-                MoveLeftCommand = new RelayCommand(MoveSelectedFieldDetailsLeft, () => dataContextVO.IsAnyFieldSelected),
-                MoveRightCommand = new RelayCommand(MoveSelectedFieldDetailsRight, () => dataContextVO.IsAnyFieldSelected),
+                RemoveCommand = new RelayCommand(RemoveSelectedFieldDetails, () => dataContextVO!.IsAnyFieldSelected),
+                EditCommand = new RelayCommand(EditSelectedFieldDetails, () => dataContextVO!.IsAnyFieldSelected),
+                MoveLeftCommand = new RelayCommand(MoveSelectedFieldDetailsLeft, () => dataContextVO!.IsAnyFieldSelected),
+                MoveRightCommand = new RelayCommand(MoveSelectedFieldDetailsRight, () => dataContextVO!.IsAnyFieldSelected),
                 CutCommand = new RelayCommand(CutSelectedFieldDetails,
-                    () => dataContextVO.IsAnyFieldSelected && !dataContextVO.IsAnyFieldCutInClipboard),
+                    () => dataContextVO!.IsAnyFieldSelected && !dataContextVO.IsAnyFieldCutInClipboard),
                 CopyCommand = new RelayCommand(CopySelectedFieldDetails,
-                    () => dataContextVO.IsAnyFieldSelected && !dataContextVO.IsAnyFieldCutInClipboard),
-                PasteCommnad = new RelayCommand(PasteFieldDetails, () => dataContextVO.IsAnyFieldInClipboard),
+                    () => dataContextVO!.IsAnyFieldSelected && !dataContextVO.IsAnyFieldCutInClipboard),
+                PasteCommnad = new RelayCommand(PasteFieldDetails, () => dataContextVO!.IsAnyFieldInClipboard),
             };
 
             dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
@@ -60,7 +60,7 @@ namespace TerminalMonitor.Windows.Controls
             lstFields.ItemsSource = fieldVOs;
         }
 
-        private void DataContextVO_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void DataContextVO_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -104,7 +104,7 @@ namespace TerminalMonitor.Windows.Controls
             EditSelectedFieldDetail();
         }
 
-        private void FieldClipboard_StatusChanged(object sender, EventArgs e)
+        private void FieldClipboard_StatusChanged(object? sender, EventArgs e)
         {
             UpdateClipboardStatus();
         }
@@ -126,7 +126,7 @@ namespace TerminalMonitor.Windows.Controls
         private void ForEachSelectedItem(Action<FieldListItemVO> action,
             bool byOrder = false, bool reverseOrder = false, bool recoverSelection = false)
         {
-            List<FieldListItemVO> itemVOs = new();
+            List<FieldListItemVO> itemVOs = [];
             foreach (var selectedItem in lstFields.SelectedItems)
             {
                 if (selectedItem is FieldListItemVO itemVO)
@@ -192,7 +192,7 @@ namespace TerminalMonitor.Windows.Controls
                 StyleConditionClipboard = styleConditionClipboard,
             };
 
-            window.Closing += (object sender, CancelEventArgs e) =>
+            window.Closing += (object? sender, CancelEventArgs e) =>
             {
                 if (window.IsSaved)
                 {
@@ -245,7 +245,7 @@ namespace TerminalMonitor.Windows.Controls
                 StyleConditionClipboard = styleConditionClipboard,
             };
 
-            window.Closing += (object sender, CancelEventArgs e) =>
+            window.Closing += (object? sender, CancelEventArgs e) =>
             {
                 if (window.IsSaved)
                 {
@@ -296,7 +296,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             if (fieldClipboard != null)
             {
-                List<FieldDisplayDetail> cutFieldDetails = new();
+                List<FieldDisplayDetail> cutFieldDetails = [];
                 foreach (var selectedItem in lstFields.SelectedItems)
                 {
                     if (selectedItem is FieldListItemVO itemVO)
@@ -308,7 +308,7 @@ namespace TerminalMonitor.Windows.Controls
                     }
                 }
 
-                fieldClipboard.Cut(cutFieldDetails.ToArray());
+                fieldClipboard.Cut([.. cutFieldDetails]);
                 RemoveSelectedFieldDetails();
             }
         }
@@ -317,7 +317,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             if (fieldClipboard != null)
             {
-                List<FieldDisplayDetail> copiedFieldDetails = new();
+                List<FieldDisplayDetail> copiedFieldDetails = [];
                 foreach (var selectedItem in lstFields.SelectedItems)
                 {
                     if (selectedItem is FieldListItemVO itemVO)
@@ -329,7 +329,7 @@ namespace TerminalMonitor.Windows.Controls
                     }
                 }
 
-                fieldClipboard.Copy(copiedFieldDetails.ToArray());
+                fieldClipboard.Copy([.. copiedFieldDetails]);
             }
         }
 
@@ -362,7 +362,7 @@ namespace TerminalMonitor.Windows.Controls
 
             set
             {
-                fields = value ?? new();
+                fields = value ?? [];
 
                 fieldVOs.Clear();
                 fields.Select(fieldDetail => FieldListItemVO.Create(fieldDetail))
@@ -371,7 +371,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public ItemClipboard<FieldDisplayDetail> FieldClipboard
+        public ItemClipboard<FieldDisplayDetail>? FieldClipboard
         {
             get => fieldClipboard;
 
@@ -402,7 +402,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public ItemClipboard<TextStyleCondition> StyleConditionClipboard
+        public ItemClipboard<TextStyleCondition>? StyleConditionClipboard
         {
             get => styleConditionClipboard;
             set => styleConditionClipboard = value;

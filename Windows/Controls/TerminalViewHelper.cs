@@ -66,15 +66,15 @@ namespace TerminalMonitor.Windows.Controls
 
         private static object ConvertTextColorToBrush(object textColor, object value)
         {
-            object color = ((TextColorConfig)textColor).Mode switch
+            object? color = ((TextColorConfig)textColor).Mode switch
             {
                 TextColorMode.Static => ((TextColorConfig)textColor).Color,
                 TextColorMode.Hash => GenerateColorByHash(value),
                 TextColorMode.HashInverted => ToInvertedColor(GenerateColorByHash(value)),
                 TextColorMode.HashSymmetric => ToSymmetricColor(GenerateColorByHash(value)),
-                _ => null,
+                _ => throw new NotImplementedException(),
             };
-            return ConvertColorToBrush(color);
+            return ConvertColorToBrush(color!);
         }
 
         public static DataTemplate BuildFieldDataTemplate(FieldDisplayDetail visibleField, DataTable terminalDataTable,
@@ -93,8 +93,10 @@ namespace TerminalMonitor.Windows.Controls
 
             FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
 
-            Binding textBinding = new();
-            textBinding.Path = new PropertyPath(visibleField.Id, Array.Empty<object>());
+            Binding textBinding = new()
+            {
+                Path = new PropertyPath(visibleField.Id, [])
+            };
             textBlockElement.SetBinding(TextBlock.TextProperty, textBinding);
 
             SetElementStyleProperty(visibleField, textBlockElement, TextBlock.ForegroundProperty,
@@ -145,8 +147,10 @@ namespace TerminalMonitor.Windows.Controls
 
             panelElement.AppendChild(textBlockElement);
 
-            DataTemplate dataTemplate = new();
-            dataTemplate.VisualTree = panelElement;
+            DataTemplate dataTemplate = new()
+            {
+                VisualTree = panelElement
+            };
             return dataTemplate;
         }
 
@@ -198,16 +202,18 @@ namespace TerminalMonitor.Windows.Controls
         private static void SetStyleDataColumn(string fieldId, DataColumnCollection columns, Type dataType,
             Func<string, string> getStyleColumnName)
         {
-            DataColumn styleColumn = new(getStyleColumnName(fieldId));
-            styleColumn.DataType = dataType;
+            DataColumn styleColumn = new(getStyleColumnName(fieldId))
+            {
+                DataType = dataType
+            };
             columns.Add(styleColumn);
         }
 
         private static void SetElementStyleProperty(FieldDisplayDetail visibleField, FrameworkElementFactory elementFactory,
-            DependencyProperty dependencyProperty, IValueConverter bindingConverter, Func<object, object> convertToValue,
-            Func<TextStyle, object> getStyleProperty, Func<string, string> getStyleColumnName)
+            DependencyProperty dependencyProperty, IValueConverter? bindingConverter, Func<object, object>? convertToValue,
+            Func<TextStyle, object?> getStyleProperty, Func<string, string> getStyleColumnName)
         {
-            object staticStyleProperty = GetStaticStyleProperty(visibleField, getStyleProperty);
+            object? staticStyleProperty = GetStaticStyleProperty(visibleField, getStyleProperty);
             if (staticStyleProperty != null)
             {
                 /*
@@ -227,8 +233,10 @@ namespace TerminalMonitor.Windows.Controls
                 /*
                  * Set binding to apply conditional style.
                  */
-                Binding binding = new();
-                binding.Path = new PropertyPath(getStyleColumnName(visibleField.Id), Array.Empty<object>());
+                Binding binding = new()
+                {
+                    Path = new PropertyPath(getStyleColumnName(visibleField.Id), [])
+                };
                 if (bindingConverter != null)
                 {
                     binding.Converter = bindingConverter;
@@ -237,18 +245,18 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private static object GetStaticStyleProperty(FieldDisplayDetail visibleField,
-            Func<TextStyle, object> getStyleProperty)
+        private static object? GetStaticStyleProperty(FieldDisplayDetail visibleField,
+            Func<TextStyle, object?> getStyleProperty)
         {
-            object defaultStyle = getStyleProperty(visibleField.Style);
+            object? defaultStyle = getStyleProperty(visibleField.Style);
             if (defaultStyle == null)
             {
                 return null;
             }
 
-            bool anyConditionalStyle = (visibleField.Conditions ?? Array.Empty<TextStyleCondition>())
+            bool anyConditionalStyle = (visibleField.Conditions ?? [])
                 .Select(textStyleCondition => textStyleCondition.Style)
-                .Any(style => getStyleProperty(style) != null);
+                .Any(style => style != null && getStyleProperty(style) != null);
 
             if (anyConditionalStyle)
             {
@@ -261,7 +269,7 @@ namespace TerminalMonitor.Windows.Controls
         }
 
         public static void BuildDataRowStyleCells(DataRow row, FieldDisplayDetail visibleField,
-            TextStyle matchedTextStyle)
+            TextStyle? matchedTextStyle)
         {
             var fieldId = visibleField.Id;
             BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
@@ -289,19 +297,19 @@ namespace TerminalMonitor.Windows.Controls
                 textStyle => textStyle.TextWrapping, GetTextWrappingColumnName, row, null);
         }
 
-        private static void BuildFinalStyleCell(string fieldId, TextStyle defaultStyle, TextStyle conditionalStyle,
-            Func<TextStyle, object> getStyleProperty, Func<string, string> getStyleColumnName, DataRow dataRow,
-            Func<object, object> convert)
+        private static void BuildFinalStyleCell(string fieldId, TextStyle defaultStyle, TextStyle? conditionalStyle,
+            Func<TextStyle, object?> getStyleProperty, Func<string, string> getStyleColumnName, DataRow dataRow,
+            Func<object, object>? convert)
         {
-            object finalStyleProperty;
-            object defaultStyleProperty = getStyleProperty(defaultStyle);
+            object? finalStyleProperty;
+            object? defaultStyleProperty = getStyleProperty(defaultStyle);
             if (conditionalStyle == null)
             {
                 finalStyleProperty = defaultStyleProperty;
             }
             else
             {
-                object conditionalStyleProperty = getStyleProperty(conditionalStyle);
+                object? conditionalStyleProperty = getStyleProperty(conditionalStyle);
                 if (conditionalStyleProperty == null)
                 {
                     finalStyleProperty = defaultStyleProperty;
@@ -369,8 +377,10 @@ namespace TerminalMonitor.Windows.Controls
 
             panelElement.AppendChild(textBlockElement);
 
-            DataTemplate dataTemplate = new();
-            dataTemplate.VisualTree = panelElement;
+            DataTemplate dataTemplate = new()
+            {
+                VisualTree = panelElement
+            };
             return dataTemplate;
         }
 
@@ -385,8 +395,10 @@ namespace TerminalMonitor.Windows.Controls
             FrameworkElementFactory panelElement = new(typeof(DockPanel));
             panelElement.AppendChild(textBlockElement);
 
-            DataTemplate dataTemplate = new();
-            dataTemplate.VisualTree = panelElement;
+            DataTemplate dataTemplate = new()
+            {
+                VisualTree = panelElement
+            };
             return dataTemplate;
         }
     }

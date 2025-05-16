@@ -504,7 +504,7 @@ namespace TerminalMonitor.Windows
             set => LoadCondition(value);
         }
 
-        public ItemClipboard<Condition> ConditionClipboard
+        public ItemClipboard<Condition>? ConditionClipboard
         {
             get => conditionClipboard;
 

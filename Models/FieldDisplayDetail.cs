@@ -17,11 +17,11 @@ namespace TerminalMonitor.Models
 
         public bool CustomizeHeader { get; set; }
 
-        public ColumnHeaderStyle? HeaderStyle { get; set; }
+        public required ColumnHeaderStyle HeaderStyle { get; set; }
 
         public bool CustomizeStyle { get; set; }
 
-        public TextStyle? Style { get; set; }
+        public required TextStyle Style { get; set; }
 
         public IEnumerable<TextStyleCondition>? Conditions { get; set; }
 
@@ -34,9 +34,9 @@ namespace TerminalMonitor.Models
                 Hidden = this.Hidden,
                 HeaderName = this.HeaderName,
                 CustomizeHeader = this.CustomizeHeader,
-                HeaderStyle = this.HeaderStyle?.Clone() as ColumnHeaderStyle,
+                HeaderStyle = (ColumnHeaderStyle)this.HeaderStyle.Clone(),
                 CustomizeStyle = this.CustomizeStyle,
-                Style = this.Style?.Clone() as TextStyle,
+                Style = (this.Style.Clone() as TextStyle)!,
                 Conditions = this.Conditions?.Select(condition => (TextStyleCondition)condition.Clone()),
             };
         }

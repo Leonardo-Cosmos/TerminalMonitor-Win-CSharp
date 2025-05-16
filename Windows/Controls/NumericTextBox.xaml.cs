@@ -23,16 +23,21 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class NumericTextBox : UserControl
     {
-        private static readonly Regex digitRegex = new(@"\d+");
+        [GeneratedRegex(@"\d+")]
+        private static partial Regex digitRegex();
 
-        private static readonly Regex numberRegex = new(@"^[1-9]\d*");
+        [GeneratedRegex(@"^[1-9]\d*")] 
+        private static partial Regex numberRegex();
 
         public static readonly DependencyProperty valueProperty =
             DependencyProperty.Register(nameof(Value), typeof(int), typeof(NumericTextBox),
                 new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnNumberPropertyChanged));
 
         private int value;
-        private readonly NumericTextBoxDataContextVO dataContextVO = new();
+        private readonly NumericTextBoxDataContextVO dataContextVO = new()
+        {
+            NumberText = String.Empty,
+        };
 
         private bool isPropertyChangedCallbackSuspended = false;
 
@@ -50,12 +55,12 @@ namespace TerminalMonitor.Windows.Controls
 
         private static bool IsValidInput(string text)
         {
-            return digitRegex.IsMatch(text);
+            return digitRegex().IsMatch(text);
         }
 
         private bool IsValidText(string text)
         {
-            if (!numberRegex.IsMatch(text))
+            if (!numberRegex().IsMatch(text))
             {
                 return false;
             }
@@ -70,9 +75,9 @@ namespace TerminalMonitor.Windows.Controls
             return number <= MaxValue && number >= MinValue;
         }
 
-        private string GetValidText(string text)
+        private string? GetValidText(string text)
         {
-            if (!numberRegex.IsMatch(text))
+            if (!numberRegex().IsMatch(text))
             {
                 return null;
             }
@@ -109,7 +114,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private void OnDataContextPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void OnDataContextPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -137,7 +142,7 @@ namespace TerminalMonitor.Windows.Controls
         private static void OnNumberPropertyChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
         {
             var numericTextBox = dependencyObject as NumericTextBox;
-            numericTextBox.OnNumberPropertyChanged(e);
+            numericTextBox?.OnNumberPropertyChanged(e);
         }
 
         private void OnNumberPropertyChanged(DependencyPropertyChangedEventArgs e)
