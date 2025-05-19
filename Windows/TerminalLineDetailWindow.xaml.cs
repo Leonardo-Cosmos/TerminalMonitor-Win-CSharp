@@ -27,7 +27,7 @@ namespace TerminalMonitor.Windows
     /// </summary>
     public partial class TerminalLineDetailWindow : Window
     {
-        private TerminalLineDto terminalLineDto;
+        private TerminalLineDto? terminalLineDto;
 
         private readonly GridView gridView;
 
@@ -39,7 +39,7 @@ namespace TerminalMonitor.Windows
         {
             InitializeComponent();
 
-            gridView = lstFields.View as GridView;
+            gridView = (lstFields.View as GridView)!;
             keyColumn = gridView.Columns[0];
             valueColumn = gridView.Columns[1];
         }
@@ -52,18 +52,12 @@ namespace TerminalMonitor.Windows
 
         private void BtnCopyListItem_Click(object sender, RoutedEventArgs e)
         {
-            if (ConditionListClipboard != null)
-            {
-                ConditionListClipboard.Copy(ConvertSelectedItemsToConditions());
-            }
+            ConditionListClipboard?.Copy(ConvertSelectedItemsToConditions());
         }
 
         private void BtnCopyTreeFieldNode_Click(object sender, RoutedEventArgs e)
         {
-            if (ConditionTreeClipboard != null)
-            {
-                ConditionTreeClipboard.Copy(ConvertSelectedItemsToConditions());
-            }
+            ConditionTreeClipboard?.Copy(ConvertSelectedItemsToConditions());
         }
 
         private void BtnCopyTreeGroupNode_Click(object sender, RoutedEventArgs e)
@@ -80,7 +74,7 @@ namespace TerminalMonitor.Windows
 
         private List<Condition> ConvertSelectedItemsToConditions()
         {
-            List<Condition> conditions = new();
+            List<Condition> conditions = [];
             foreach (var selectedItem in lstFields.SelectedItems)
             {
                 if (selectedItem is TerminalLineFieldDto lineField)
@@ -104,9 +98,9 @@ namespace TerminalMonitor.Windows
             lstFields.ItemsSource = fields;
         }
 
-        private void ScrollViewer_VerticalScrollBarVisibilityChanged(object sender, EventArgs e)
+        private void ScrollViewer_VerticalScrollBarVisibilityChanged(object? sender, EventArgs e)
         {
-            ScrollViewer scrollViewer = sender as ScrollViewer;
+            ScrollViewer scrollViewer = (sender as ScrollViewer)!;
             if (scrollViewer.ComputedVerticalScrollBarVisibility == Visibility.Visible)
             {
                 valueColumn.Width = lstFields.ActualWidth - keyColumn.ActualWidth - 30;
@@ -118,7 +112,7 @@ namespace TerminalMonitor.Windows
             PropertyDescriptor propertyDescriptor = DependencyPropertyDescriptor.FromProperty(
                 ScrollViewer.ComputedVerticalScrollBarVisibilityProperty, typeof(ScrollViewer));
 
-            ScrollViewer scrollViewer = VisualTreeHelpers.FindChildOfType<ScrollViewer>(lstFields);
+            ScrollViewer scrollViewer = VisualTreeHelpers.FindChildOfType<ScrollViewer>(lstFields)!;
             propertyDescriptor.AddValueChanged(scrollViewer, ScrollViewer_VerticalScrollBarVisibilityChanged);
 
             valueColumn.Width = lstFields.ActualWidth - keyColumn.ActualWidth - 10;
@@ -133,23 +127,26 @@ namespace TerminalMonitor.Windows
                 });
         }
 
-        public TerminalLineDto TerminalLine
+        public TerminalLineDto? TerminalLine
         {
             get => terminalLineDto;
             set
             {
                 terminalLineDto = value;
-                SetTerminalLineFields(terminalLineDto.LineFieldDict);
+                if (terminalLineDto != null)
+                {
+                    SetTerminalLineFields(terminalLineDto.LineFieldDict);
+                }
             }
         }
 
-        public ItemClipboard<Condition> ConditionListClipboard
+        public ItemClipboard<Condition>? ConditionListClipboard
         {
             get;
             set;
         }
 
-        public ItemClipboard<Condition> ConditionTreeClipboard
+        public ItemClipboard<Condition>? ConditionTreeClipboard
         {
             get;
             set;

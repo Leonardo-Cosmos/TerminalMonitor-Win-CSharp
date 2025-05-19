@@ -47,9 +47,9 @@ namespace TerminalMonitor.Settings.Models
                 Hidden = setting.Hidden,
                 HeaderName = setting.HeaderName,
                 CustomizeHeader = setting.CustomizeHeader,
-                HeaderStyle = ColumnHeaderStyleSettings.Load(setting.HeaderStyle),
+                HeaderStyle = ColumnHeaderStyleSettings.Load(setting.HeaderStyle) ?? ColumnHeaderStyle.Empty,
                 CustomizeStyle = setting.CustomizeStyle,
-                Style = TextStyleSettings.Load(setting.Style),
+                Style = TextStyleSettings.Load(setting.Style) ?? TextStyle.Empty,
                 Conditions = setting.Conditions?
                     .Select(condition => TextStyleConditionSettings.Load(condition)!).ToArray(),
             };

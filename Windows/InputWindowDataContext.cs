@@ -11,25 +11,25 @@ namespace TerminalMonitor.Windows
 {
     class InputWindowDataContext : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private string message;
+        private string? message;
 
-        public string Message
+        public required string Message
         {
-            get => message;
+            get => message!;
             set { message = value; OnPropertyChanged(); }
         }
 
-        private string text;
+        private string? text;
 
-        public string Text
+        public required string Text
         {
-            get => text;
+            get => text!;
             set { text = value; OnPropertyChanged(); }
         }
     }

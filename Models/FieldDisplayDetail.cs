@@ -36,7 +36,7 @@ namespace TerminalMonitor.Models
                 CustomizeHeader = this.CustomizeHeader,
                 HeaderStyle = (ColumnHeaderStyle)this.HeaderStyle.Clone(),
                 CustomizeStyle = this.CustomizeStyle,
-                Style = (this.Style.Clone() as TextStyle)!,
+                Style = (TextStyle)this.Style.Clone(),
                 Conditions = this.Conditions?.Select(condition => (TextStyleCondition)condition.Clone()),
             };
         }

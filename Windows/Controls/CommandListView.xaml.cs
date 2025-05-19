@@ -172,7 +172,7 @@ namespace TerminalMonitor.Windows.Controls
 
             window.Closing += (object? sender, CancelEventArgs e) =>
             {
-                if (window.IsSaved)
+                if (window.IsSaved && window.Command != null)
                 {
                     var commandConfig = window.Command;
 

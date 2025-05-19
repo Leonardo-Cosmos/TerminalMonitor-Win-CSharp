@@ -14,17 +14,17 @@ namespace TerminalMonitor.Windows
 {
     class FieldDisplayDetailWindowDataContextVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private string fieldKey;
+        private string? fieldKey;
 
-        public string FieldKey
+        public required string FieldKey
         {
-            get => fieldKey;
+            get => fieldKey!;
             set
             {
                 fieldKey = value;
@@ -44,9 +44,9 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private string headerName;
+        private string? headerName;
 
-        public string HeaderName
+        public string? HeaderName
         {
             get => headerName;
             set
@@ -68,11 +68,11 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private ColumnHeaderStyle headerStyle;
+        private ColumnHeaderStyle? headerStyle;
 
-        public ColumnHeaderStyle HeaderStyle
+        public required ColumnHeaderStyle HeaderStyle
         {
-            get => headerStyle;
+            get => headerStyle!;
             set
             {
                 headerStyle = value;
@@ -92,11 +92,11 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private TextStyle style;
+        private TextStyle? style;
 
-        public TextStyle Style
+        public required TextStyle Style
         {
-            get => style;
+            get => style!;
             set
             {
                 style = value;
@@ -140,18 +140,18 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        public ICommand AddCommand { get; init; }
+        public required ICommand AddCommand { get; init; }
 
-        public ICommand RemoveCommand { get; init; }
+        public required ICommand RemoveCommand { get; init; }
 
-        public ICommand MoveUpCommand { get; init; }
+        public required ICommand MoveUpCommand { get; init; }
 
-        public ICommand MoveDownCommand { get; init; }
+        public required ICommand MoveDownCommand { get; init; }
 
-        public ICommand CutCommand { get; init; }
+        public required ICommand CutCommand { get; init; }
 
-        public ICommand CopyCommand { get; init; }
+        public required ICommand CopyCommand { get; init; }
 
-        public ICommand PasteCommnad { get; init; }
+        public required ICommand PasteCommnad { get; init; }
     }
 }

@@ -194,7 +194,7 @@ namespace TerminalMonitor.Windows.Controls
 
             window.Closing += (object? sender, CancelEventArgs e) =>
             {
-                if (window.IsSaved)
+                if (window.IsSaved && window.FieldDetail != null)
                 {
                     var fieldDetail = window.FieldDetail;
 

@@ -8,8 +8,8 @@ namespace TerminalMonitor.Windows
 {
     class ConditionDetailWindowDataContextVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
@@ -50,9 +50,9 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private string conditionName;
+        private string? conditionName;
 
-        public string ConditionName
+        public string? ConditionName
         {
             get => conditionName;
             set { conditionName = value; OnPropertyChanged(); }
@@ -90,20 +90,20 @@ namespace TerminalMonitor.Windows
             set { matchMode = value; OnPropertyChanged(); }
         }
 
-        public ICommand AddFieldCommand { get; init; }
+        public required ICommand AddFieldCommand { get; init; }
 
-        public ICommand AddGroupCommand { get; init; }
+        public required ICommand AddGroupCommand { get; init; }
 
-        public ICommand RemoveCommand { get; init; }
+        public required ICommand RemoveCommand { get; init; }
 
-        public ICommand MoveUpCommand { get; init; }
+        public required ICommand MoveUpCommand { get; init; }
 
-        public ICommand MoveDownCommand { get; init; }
+        public required ICommand MoveDownCommand { get; init; }
 
-        public ICommand CutCommand { get; init; }
+        public required ICommand CutCommand { get; init; }
 
-        public ICommand CopyCommand { get; init; }
+        public required ICommand CopyCommand { get; init; }
 
-        public ICommand PasteCommnad { get; init; }
+        public required ICommand PasteCommnad { get; init; }
     }
 }

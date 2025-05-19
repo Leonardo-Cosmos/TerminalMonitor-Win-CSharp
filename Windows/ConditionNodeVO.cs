@@ -7,13 +7,13 @@ namespace TerminalMonitor.Windows
 {
     abstract class ConditionNodeVO
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        public ObservableCollection<ConditionNodeVO> Siblings { get; set; }
+        public required ObservableCollection<ConditionNodeVO> Siblings { get; set; }
 
         private bool isInverted;
 

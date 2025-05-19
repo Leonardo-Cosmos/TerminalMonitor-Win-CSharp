@@ -9,7 +9,7 @@ namespace TerminalMonitor.Windows
     {
         private GroupMatchMode matchMode;
 
-        public GroupMatchMode MatchMode
+        public required GroupMatchMode MatchMode
         {
             get => matchMode;
             set
@@ -19,7 +19,7 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private readonly ObservableCollection<ConditionNodeVO> conditions = new ObservableCollection<ConditionNodeVO>();
+        private readonly ObservableCollection<ConditionNodeVO> conditions = [];
 
         public ObservableCollection<ConditionNodeVO> Conditions
         {

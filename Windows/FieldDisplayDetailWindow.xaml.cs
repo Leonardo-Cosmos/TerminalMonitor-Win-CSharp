@@ -28,13 +28,13 @@ namespace TerminalMonitor.Windows
     {
         private readonly FieldDisplayDetailWindowDataContextVO dataContextVO;
 
-        private readonly ObservableCollection<TextStyleCondition> styleConditions = new();
+        private readonly ObservableCollection<TextStyleCondition> styleConditions = [];
 
-        private readonly List<string> existingFieldKeys = new();
+        private readonly List<string> existingFieldKeys = [];
 
-        private FieldDisplayDetail fieldDetail;
+        private FieldDisplayDetail? fieldDetail;
 
-        private ItemClipboard<TextStyleCondition> styleConditionClipboard;
+        private ItemClipboard<TextStyleCondition>? styleConditionClipboard;
 
         public FieldDisplayDetailWindow()
         {
@@ -42,18 +42,20 @@ namespace TerminalMonitor.Windows
 
             dataContextVO = new()
             {
+                FieldKey = String.Empty,
+
                 HeaderStyle = ColumnHeaderStyle.Empty,
                 Style = TextStyle.Empty,
 
                 AddCommand = new RelayCommand(AddCondition, () => true),
-                RemoveCommand = new RelayCommand(RemoveSelectedConditions, () => dataContextVO.IsAnyConditionSelected),
-                MoveUpCommand = new RelayCommand(MoveSelectedConditionsUp, () => dataContextVO.IsAnyConditionSelected),
-                MoveDownCommand = new RelayCommand(MoveSelectedConditionsDown, () => dataContextVO.IsAnyConditionSelected),
+                RemoveCommand = new RelayCommand(RemoveSelectedConditions, () => dataContextVO!.IsAnyConditionSelected),
+                MoveUpCommand = new RelayCommand(MoveSelectedConditionsUp, () => dataContextVO!.IsAnyConditionSelected),
+                MoveDownCommand = new RelayCommand(MoveSelectedConditionsDown, () => dataContextVO!.IsAnyConditionSelected),
                 CutCommand = new RelayCommand(CutSelectedConditions,
-                    () => dataContextVO.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
+                    () => dataContextVO!.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
                 CopyCommand = new RelayCommand(CopySelectedConditions,
-                    () => dataContextVO.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
-                PasteCommnad = new RelayCommand(PasteConditions, () => dataContextVO.IsAnyConditionInClipboard),
+                    () => dataContextVO!.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
+                PasteCommnad = new RelayCommand(PasteConditions, () => dataContextVO!.IsAnyConditionInClipboard),
             };
 
             dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
@@ -61,9 +63,11 @@ namespace TerminalMonitor.Windows
 
             lstStyleCondtions.ItemsSource = styleConditions;
 
-            Binding fieldKeyBinding = new("FieldKey");
-            fieldKeyBinding.Source = dataContextVO;
-            fieldKeyBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            Binding fieldKeyBinding = new("FieldKey")
+            {
+                Source = dataContextVO,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
             fieldKeyBinding.ValidationRules.Add(new NotEmptyRule()
             {
                 ErrorMessage = "Field key should not be empty",
@@ -71,7 +75,7 @@ namespace TerminalMonitor.Windows
             txtBxKey.SetBinding(TextBox.TextProperty, fieldKeyBinding);
         }
 
-        private void DataContextVO_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void DataContextVO_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -121,21 +125,24 @@ namespace TerminalMonitor.Windows
             Close();
         }
 
-        private void ConditionClipboard_StatusChanged(object sender, EventArgs e)
+        private void ConditionClipboard_StatusChanged(object? sender, EventArgs e)
         {
             UpdateClipboardStatus();
         }
 
         private void UpdateClipboardStatus()
         {
-            dataContextVO.IsAnyConditionInClipboard = styleConditionClipboard.ContainsItem;
-            dataContextVO.IsAnyConditionCutInClipboard = styleConditionClipboard.Status == ItemClipboardStatus.Move;
+            if (styleConditionClipboard != null)
+            {
+                dataContextVO.IsAnyConditionInClipboard = styleConditionClipboard.ContainsItem;
+                dataContextVO.IsAnyConditionCutInClipboard = styleConditionClipboard.Status == ItemClipboardStatus.Move;
+            }
         }
 
         private void ForEachSelectedItem(Action<TextStyleCondition> action,
             bool byOrder = false, bool reverseOrder = false, bool recoverSelection = false)
         {
-            List<TextStyleCondition> items = new();
+            List<TextStyleCondition> items = [];
             foreach (var selectedItem in lstStyleCondtions.SelectedItems)
             {
                 if (selectedItem is TextStyleCondition item)
@@ -240,7 +247,7 @@ namespace TerminalMonitor.Windows
         {
             if (styleConditionClipboard != null)
             {
-                List<TextStyleCondition> cutConditions = new();
+                List<TextStyleCondition> cutConditions = [];
                 foreach (var selectedItem in lstStyleCondtions.SelectedItems)
                 {
                     if (selectedItem is TextStyleCondition condition)
@@ -249,7 +256,7 @@ namespace TerminalMonitor.Windows
                     }
                 }
 
-                styleConditionClipboard.Cut(cutConditions.ToArray());
+                styleConditionClipboard.Cut([.. cutConditions]);
                 RemoveSelectedConditions();
             }
         }
@@ -258,7 +265,7 @@ namespace TerminalMonitor.Windows
         {
             if (styleConditionClipboard != null)
             {
-                List<TextStyleCondition> copiedConditions = new();
+                List<TextStyleCondition> copiedConditions = [];
                 foreach (var selectedItem in lstStyleCondtions.SelectedItems)
                 {
                     if (selectedItem is TextStyleCondition condition)
@@ -267,7 +274,7 @@ namespace TerminalMonitor.Windows
                     }
                 }
 
-                styleConditionClipboard.Copy(copiedConditions.ToArray());
+                styleConditionClipboard.Copy([.. copiedConditions]);
             }
         }
 
@@ -292,7 +299,7 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private void LoadFieldDetail(FieldDisplayDetail fieldDetail)
+        private void LoadFieldDetail(FieldDisplayDetail? fieldDetail)
         {
             this.fieldDetail = fieldDetail;
             IsSaved = false;
@@ -304,13 +311,13 @@ namespace TerminalMonitor.Windows
                 dataContextVO.HeaderName = fieldDetail.HeaderName;
 
                 dataContextVO.CustomizeHeaderStyle = fieldDetail.CustomizeHeader;
-                dataContextVO.HeaderStyle = fieldDetail.HeaderStyle ?? ColumnHeaderStyle.Empty;
+                dataContextVO.HeaderStyle = fieldDetail.HeaderStyle;
 
                 dataContextVO.CustomizeStyle = fieldDetail.CustomizeStyle;
-                dataContextVO.Style = fieldDetail.Style ?? TextStyle.Empty;
+                dataContextVO.Style = fieldDetail.Style;
 
                 styleConditions.Clear();
-                foreach (var condition in fieldDetail.Conditions ?? Array.Empty<TextStyleCondition>())
+                foreach (var condition in fieldDetail.Conditions ?? [])
                 {
                     styleConditions.Add(condition);
                 }
@@ -328,7 +335,7 @@ namespace TerminalMonitor.Windows
                 fieldDetail.HeaderStyle = dataContextVO.HeaderStyle;
                 fieldDetail.CustomizeStyle = dataContextVO.CustomizeStyle;
                 fieldDetail.Style = dataContextVO.Style;
-                fieldDetail.Conditions = styleConditions.ToArray();
+                fieldDetail.Conditions = [.. styleConditions];
             }
             else
             {
@@ -342,7 +349,7 @@ namespace TerminalMonitor.Windows
                     HeaderStyle = dataContextVO.HeaderStyle,
                     CustomizeStyle = dataContextVO.CustomizeStyle,
                     Style = dataContextVO.Style,
-                    Conditions = styleConditions.ToArray(),
+                    Conditions = [.. styleConditions],
                 };
             }
 
@@ -358,7 +365,7 @@ namespace TerminalMonitor.Windows
         {
             get
             {
-                return new ReadOnlyCollection<string>(existingFieldKeys.ToArray());
+                return new ReadOnlyCollection<string>([.. existingFieldKeys]);
             }
 
             set
@@ -371,7 +378,7 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        public FieldDisplayDetail FieldDetail
+        public FieldDisplayDetail? FieldDetail
         {
             get => fieldDetail;
             set => LoadFieldDetail(value);
