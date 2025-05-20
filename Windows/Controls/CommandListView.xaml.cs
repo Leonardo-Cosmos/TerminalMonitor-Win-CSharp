@@ -27,9 +27,9 @@ namespace TerminalMonitor.Windows.Controls
     {
         private readonly CommandListViewDataContextVO dataContextVO;
 
-        private readonly ObservableCollection<CommandListItemVO> commandVOs = new();
+        private readonly ObservableCollection<CommandListItemVO> commandVOs = [];
 
-        private readonly List<CommandConfig> commands = new();
+        private readonly List<CommandConfig> commands = [];
 
         public CommandListView()
         {
@@ -38,11 +38,11 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO = new()
             {
                 AddCommand = new RelayCommand(AddCommand, () => true),
-                RemoveCommand = new RelayCommand(RemoveSelectedCommands, () => dataContextVO.IsAnyCommandSelected),
-                EditCommand = new RelayCommand(EditSelectedCommands, () => dataContextVO.IsAnyCommandSelected),
-                MoveUpCommand = new RelayCommand(MoveSelectedCommandsUp, () => dataContextVO.IsAnyCommandSelected),
-                MoveDownCommand = new RelayCommand(MoveSelectedCommandsDown, () => dataContextVO.IsAnyCommandSelected),
-                StartCommand = new RelayCommand(StartSelectedCommands, () => dataContextVO.IsAnyCommandSelected),
+                RemoveCommand = new RelayCommand(RemoveSelectedCommands, () => dataContextVO!.IsAnyCommandSelected),
+                EditCommand = new RelayCommand(EditSelectedCommands, () => dataContextVO!.IsAnyCommandSelected),
+                MoveUpCommand = new RelayCommand(MoveSelectedCommandsUp, () => dataContextVO!.IsAnyCommandSelected),
+                MoveDownCommand = new RelayCommand(MoveSelectedCommandsDown, () => dataContextVO!.IsAnyCommandSelected),
+                StartCommand = new RelayCommand(StartSelectedCommands, () => dataContextVO!.IsAnyCommandSelected),
             };
 
             dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
@@ -51,7 +51,7 @@ namespace TerminalMonitor.Windows.Controls
             lstCommands.ItemsSource = commandVOs;
         }
 
-        private void DataContextVO_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void DataContextVO_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -89,8 +89,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private void BtnStart_Click(object sender, RoutedEventArgs e)
         {
-            var tag = (sender as Button).Tag;
-            var commandName = tag as string;
+            var tag = (sender as Button)?.Tag;
+            var commandName = (tag as string)!;
             var commandVO = commandVOs.First(itemVO => itemVO.Name == commandName);
             StartCommand(commandVO);
         }
@@ -106,7 +106,7 @@ namespace TerminalMonitor.Windows.Controls
         private void ForEachSelectedItem(Action<CommandListItemVO> action,
             bool byOrder = false, bool reverseOrder = false, bool recoverSelection = false)
         {
-            List<CommandListItemVO> itemVOs = new();
+            List<CommandListItemVO> itemVOs = [];
             foreach (var selectedItem in lstCommands.SelectedItems)
             {
                 if (selectedItem is CommandListItemVO itemVO)
@@ -170,9 +170,9 @@ namespace TerminalMonitor.Windows.Controls
                 ExistingCommandNames = existingCommandNames,
             };
 
-            window.Closing += (object sender, CancelEventArgs e) =>
+            window.Closing += (object? sender, CancelEventArgs e) =>
             {
-                if (window.IsSaved)
+                if (window.IsSaved && window.Command != null)
                 {
                     var commandConfig = window.Command;
 
@@ -225,7 +225,7 @@ namespace TerminalMonitor.Windows.Controls
                 ExistingCommandNames = existingCommandNames,
             };
 
-            window.Closing += (object sender, CancelEventArgs e) =>
+            window.Closing += (object? sender, CancelEventArgs e) =>
             {
                 if (window.IsSaved)
                 {
@@ -293,13 +293,13 @@ namespace TerminalMonitor.Windows.Controls
             CommandStarted?.Invoke(this, e);
         }
 
-        public event CommandRunEventHandler CommandStarted;
+        public event CommandRunEventHandler? CommandStarted;
 
-        public IEnumerable<CommandConfig> Commands
+        public IEnumerable<CommandConfig>? Commands
         {
             get
             {
-                return new ReadOnlyCollection<CommandConfig>(commands.ToArray());
+                return new ReadOnlyCollection<CommandConfig>([.. commands]);
             }
 
             set

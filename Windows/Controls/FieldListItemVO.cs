@@ -7,7 +7,7 @@ namespace TerminalMonitor.Windows.Controls
 {
     class FieldListItemVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public static FieldListItemVO Create(FieldDisplayDetail fieldDetail)
         {
@@ -27,18 +27,18 @@ namespace TerminalMonitor.Windows.Controls
             itemVO.Hidden = fieldDetail.Hidden;
         }
 
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        public string Id { get; init; }
+        public required string Id { get; init; }
 
-        private string fieldKey;
+        private string? fieldKey;
 
-        public string FieldKey
+        public required string FieldKey
         {
-            get { return fieldKey; }
+            get { return fieldKey!; }
 
             set
             {
@@ -47,9 +47,9 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private string headerName;
+        private string? headerName;
 
-        public string HeaderName
+        public required string? HeaderName
         {
             get { return headerName; }
             set
@@ -61,7 +61,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private bool hidden;
 
-        public bool Hidden
+        public required bool Hidden
         {
             get { return hidden; }
 

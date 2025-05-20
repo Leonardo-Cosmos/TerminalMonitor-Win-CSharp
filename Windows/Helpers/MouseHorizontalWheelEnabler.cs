@@ -19,7 +19,7 @@ namespace TerminalMonitor.Windows.Helpers
         /// </summary>
         public static readonly bool AutoEnableMouseHorizontalWheelSupport = true;
 
-        private static readonly HashSet<IntPtr> hookedWindows = new();
+        private static readonly HashSet<IntPtr> hookedWindows = [];
 
         /// <summary>
         ///   Enable Horizontal Wheel support for all the controls inside the window.
@@ -30,10 +30,7 @@ namespace TerminalMonitor.Windows.Helpers
         /// <param name="window">Window to enable support for.</param>
         public static void EnableMouseHorizontalWheelSupport([NotNull] Window window)
         {
-            if (window == null)
-            {
-                throw new ArgumentNullException(nameof(window));
-            }
+            ArgumentNullException.ThrowIfNull(window);
 
             if (window.IsLoaded)
             {
@@ -60,23 +57,28 @@ namespace TerminalMonitor.Windows.Helpers
         /// <param name="popup">Popup to enable support for.</param>
         public static void EnableMouseHorizontalWheelSupport([NotNull] Popup popup)
         {
-            if (popup == null)
-            {
-                throw new ArgumentNullException(nameof(popup));
-            }
+            ArgumentNullException.ThrowIfNull(popup);
 
             if (popup.IsOpen)
             {
                 // handle should be available at this level
                 // ReSharper disable once PossibleInvalidOperationException
-                EnableMouseHorizontalWheelSupport(GetObjectParentHandle(popup.Child).Value);
+                var parentHandle = GetObjectParentHandle(popup.Child);
+                if (parentHandle != null)
+                {
+                    EnableMouseHorizontalWheelSupport(parentHandle.Value);
+                }
             }
 
             // also hook for IsOpened since a new window is created each time
             popup.Opened += (sender, args) =>
             {
                 // ReSharper disable once PossibleInvalidOperationException
-                EnableMouseHorizontalWheelSupport(GetObjectParentHandle(popup.Child).Value);
+                var parentHandle = GetObjectParentHandle(popup.Child);
+                if (parentHandle != null)
+                {
+                    EnableMouseHorizontalWheelSupport(parentHandle.Value);
+                }
             };
         }
 
@@ -89,23 +91,28 @@ namespace TerminalMonitor.Windows.Helpers
         /// <param name="contextMenu">Context menu to enable support for.</param>
         public static void EnableMouseHorizontalWheelSupport([NotNull] ContextMenu contextMenu)
         {
-            if (contextMenu == null)
-            {
-                throw new ArgumentNullException(nameof(contextMenu));
-            }
+            ArgumentNullException.ThrowIfNull(contextMenu);
 
             if (contextMenu.IsOpen)
             {
                 // handle should be available at this level
                 // ReSharper disable once PossibleInvalidOperationException
-                EnableMouseHorizontalWheelSupport(GetObjectParentHandle(contextMenu).Value);
+                var parentHandle = GetObjectParentHandle(contextMenu);
+                if (parentHandle != null)
+                {
+                    EnableMouseHorizontalWheelSupport(parentHandle.Value);
+                }
             }
 
             // also hook for IsOpened since a new window is created each time
             contextMenu.Opened += (sender, args) =>
             {
                 // ReSharper disable once PossibleInvalidOperationException
-                EnableMouseHorizontalWheelSupport(GetObjectParentHandle(contextMenu).Value);
+                var parentHandle = GetObjectParentHandle(contextMenu);
+                if (parentHandle != null)
+                {
+                    EnableMouseHorizontalWheelSupport(parentHandle.Value);
+                }
             };
         }
 
@@ -137,10 +144,7 @@ namespace TerminalMonitor.Windows.Helpers
 
         private static IntPtr? GetObjectParentHandle([NotNull] DependencyObject depObj)
         {
-            if (depObj == null)
-            {
-                throw new ArgumentNullException(nameof(depObj));
-            }
+            ArgumentNullException.ThrowIfNull(depObj);
 
             var presentationSource = PresentationSource.FromDependencyObject(depObj) as HwndSource;
             return presentationSource?.Handle;
@@ -182,10 +186,7 @@ namespace TerminalMonitor.Windows.Helpers
         /// <returns>True if it was disabled or already disabled, false if it couldn't be disabled.</returns>
         public static bool DisableMouseHorizontalWheelSupport([NotNull] Window window)
         {
-            if (window == null)
-            {
-                throw new ArgumentNullException(nameof(window));
-            }
+            ArgumentNullException.ThrowIfNull(window);
 
             IntPtr handle = new WindowInteropHelper(window).Handle;
             return DisableMouseHorizontalWheelSupport(handle);
@@ -201,10 +202,7 @@ namespace TerminalMonitor.Windows.Helpers
         /// <returns>True if it was disabled or already disabled, false if it couldn't be disabled.</returns>
         public static bool DisableMouseHorizontalWheelSupport([NotNull] Popup popup)
         {
-            if (popup == null)
-            {
-                throw new ArgumentNullException(nameof(popup));
-            }
+            ArgumentNullException.ThrowIfNull(popup);
 
             IntPtr? handle = GetObjectParentHandle(popup.Child);
             if (handle == null)
@@ -225,10 +223,7 @@ namespace TerminalMonitor.Windows.Helpers
         /// <returns>True if it was disabled or already disabled, false if it couldn't be disabled.</returns>
         public static bool DisableMouseHorizontalWheelSupport([NotNull] ContextMenu contextMenu)
         {
-            if (contextMenu == null)
-            {
-                throw new ArgumentNullException(nameof(contextMenu));
-            }
+            ArgumentNullException.ThrowIfNull(contextMenu);
 
             IntPtr? handle = GetObjectParentHandle(contextMenu);
             if (handle == null)
@@ -276,8 +271,7 @@ namespace TerminalMonitor.Windows.Helpers
 
         private static void PresenationSourceChangedHandler(object sender, SourceChangedEventArgs sourceChangedEventArgs)
         {
-            var src = sourceChangedEventArgs.NewSource as HwndSource;
-            if (src != null)
+            if (sourceChangedEventArgs.NewSource is HwndSource src)
             {
                 EnableMouseHorizontalWheelSupport(src.Handle);
             }
@@ -303,15 +297,15 @@ namespace TerminalMonitor.Windows.Helpers
                 return;
             }
 
-            IInputElement element = Mouse.DirectlyOver;
+            IInputElement? element = Mouse.DirectlyOver;
             if (element == null)
             {
                 return;
             }
 
-            if (element is not UIElement)
+            if (element is not UIElement && element is DependencyObject dependencyObject)
             {
-                element = VisualTreeHelpers.FindAncestor<UIElement>(element as DependencyObject);
+                element = VisualTreeHelpers.FindAncestor<UIElement>(dependencyObject);
             }
             if (element == null)
             {
@@ -344,8 +338,7 @@ namespace TerminalMonitor.Windows.Helpers
 
         public static void AddMouseHorizontalWheelHandler(DependencyObject dependencyObject, RoutedEventHandler handler)
         {
-            var uiElement = dependencyObject as UIElement;
-            if (uiElement != null)
+            if (dependencyObject is UIElement uiElement)
             {
                 uiElement.AddHandler(MouseHorizontalWheelEvent, handler);
 
@@ -372,8 +365,7 @@ namespace TerminalMonitor.Windows.Helpers
 
         public static void AddPreviewMouseHorizontalWheelHandler(DependencyObject dependencyObject, RoutedEventHandler handler)
         {
-            var uiElement = dependencyObject as UIElement;
-            if (uiElement != null)
+            if (dependencyObject is UIElement uiElement)
             {
                 uiElement.AddHandler(PreviewMouseHorizontalWheelEvent, handler);
 
@@ -393,15 +385,9 @@ namespace TerminalMonitor.Windows.Helpers
         #endregion
     }
 
-    public class MouseHorizontalWheelEventArgs : MouseEventArgs
+    public class MouseHorizontalWheelEventArgs(MouseDevice mouse, int timestamp, int horizontalDelta) : MouseEventArgs(mouse, timestamp)
     {
-        public int HorizontalDelta { get; }
-
-        public MouseHorizontalWheelEventArgs(MouseDevice mouse, int timestamp, int horizontalDelta)
-          : base(mouse, timestamp)
-        {
-            HorizontalDelta = horizontalDelta;
-        }
+        public int HorizontalDelta { get; } = horizontalDelta;
     }
 
     public delegate void MouseMouseHorizontalWheelEventHandler(object sender, MouseEventArgs e);

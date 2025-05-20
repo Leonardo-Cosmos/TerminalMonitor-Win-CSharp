@@ -5,7 +5,7 @@ namespace TerminalMonitor.Execution
 {
     class ProcessInfoEventArgs : EventArgs
     {
-        public Exception Exception { get; init; }
+        public Exception? Exception { get; init; }
     }
 
     delegate void ProcessInfoEventHandler(object sender, ProcessInfoEventArgs e);

@@ -19,7 +19,11 @@ namespace TerminalMonitor.Windows
     /// </summary>
     public partial class InputWindow : Window
     {
-        private readonly InputWindowDataContext dataContextVO = new();
+        private readonly InputWindowDataContext dataContextVO = new()
+        {
+            Message = String.Empty,
+            Text = String.Empty,
+        };
 
         public InputWindow()
         {
@@ -27,7 +31,7 @@ namespace TerminalMonitor.Windows
             DataContext = dataContextVO;
         }
 
-        private void btnDialogOk_Click(object sender, RoutedEventArgs e)
+        private void BtnDialogOk_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = true;
         }

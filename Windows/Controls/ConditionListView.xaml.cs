@@ -32,39 +32,37 @@ namespace TerminalMonitor.Windows.Controls
     {
         private readonly ConditionListViewDataContextVO dataContextVO;
 
-        private readonly ObservableCollection<ConditionItemVO> conditionVOs = new();
+        private readonly ObservableCollection<ConditionItemVO> conditionVOs = [];
 
         private List<Condition> conditions;
 
         private GroupCondition groupCondition;
 
-        private ItemClipboard<Condition> conditionListClipboard;
+        private ItemClipboard<Condition>? conditionListClipboard;
 
-        private ItemClipboard<Condition> conditionTreeClipboard;
+        private ItemClipboard<Condition>? conditionTreeClipboard;
 
         public ConditionListView()
         {
             InitializeComponent();
 
-            conditions = new();
-            groupCondition = new()
-            {
-                Id = Guid.NewGuid().ToString(),
-                Conditions = conditions,
-            };
+            conditions = [];
+            groupCondition = new(GroupMatchMode.All, conditions);
 
             dataContextVO = new()
             {
+                MatchMode = GroupMatchMode.All,
+
                 AddCommand = new RelayCommand(AddCondition, () => true),
-                RemoveCommand = new RelayCommand(RemoveSelectedConditions, () => dataContextVO.IsAnyConditionSelected),
-                EditCommand = new RelayCommand(EditSelectedConditions, () => dataContextVO.IsAnyConditionSelected),
-                MoveLeftCommand = new RelayCommand(MoveSelectedConditionsLeft, () => dataContextVO.IsAnyConditionSelected),
-                MoveRightCommand = new RelayCommand(MoveSelectedConditionsRight, () => dataContextVO.IsAnyConditionSelected),
+                RemoveCommand = new RelayCommand(RemoveSelectedConditions, () => dataContextVO!.IsAnyConditionSelected),
+                EditCommand = new RelayCommand(EditSelectedConditions, () => dataContextVO!.IsAnyConditionSelected),
+                MoveLeftCommand = new RelayCommand(MoveSelectedConditionsLeft, () => dataContextVO!.IsAnyConditionSelected),
+                MoveRightCommand = new RelayCommand(MoveSelectedConditionsRight, () => dataContextVO!.IsAnyConditionSelected),
                 CutCommand = new RelayCommand(CutSelectedConditions,
-                    () => dataContextVO.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
+                    () => dataContextVO!.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
                 CopyCommand = new RelayCommand(CopySelectedConditions,
-                    () => dataContextVO.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
-                PasteCommnad = new RelayCommand(PasteConditions, () => dataContextVO.IsAnyConditionInClipboard),
+                    () => dataContextVO!.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
+                PasteCommnad = new RelayCommand(PasteConditions, () => dataContextVO!.IsAnyConditionInClipboard),
             };
 
             dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
@@ -73,7 +71,7 @@ namespace TerminalMonitor.Windows.Controls
             lstConditions.ItemsSource = conditionVOs;
         }
 
-        private void DataContextVO_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void DataContextVO_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -129,13 +127,17 @@ namespace TerminalMonitor.Windows.Controls
             EditSelectedCondition();
         }
 
-        private void ConditionClipboard_StatusChanged(object sender, EventArgs e)
+        private void ConditionClipboard_StatusChanged(object? sender, EventArgs e)
         {
             UpdateClipboardStatus();
         }
 
         private void UpdateClipboardStatus()
         {
+            if (conditionListClipboard == null)
+            {
+                return;
+            }
             dataContextVO.IsAnyConditionInClipboard = conditionListClipboard.ContainsItem;
             dataContextVO.IsAnyConditionCutInClipboard = conditionListClipboard.Status == ItemClipboardStatus.Move;
         }
@@ -151,7 +153,7 @@ namespace TerminalMonitor.Windows.Controls
         private void ForEachSelectedItem(Action<ConditionItemVO> action,
             bool byOrder = false, bool reverseOrder = false, bool recoverSelection = false)
         {
-            List<ConditionItemVO> itemVOs = new();
+            List<ConditionItemVO> itemVOs = [];
             foreach (var selectedItem in lstConditions.SelectedItems)
             {
                 if (selectedItem is ConditionItemVO itemVO)
@@ -214,9 +216,9 @@ namespace TerminalMonitor.Windows.Controls
                 ConditionClipboard = conditionTreeClipboard,
             };
 
-            window.Closing += (object sender, CancelEventArgs e) =>
+            window.Closing += (object? sender, CancelEventArgs e) =>
             {
-                if (window.IsSaved)
+                if (window.IsSaved && window.Condition != null)
                 {
                     var condition = window.Condition;
 
@@ -263,7 +265,7 @@ namespace TerminalMonitor.Windows.Controls
                 ConditionClipboard = conditionTreeClipboard,
             };
 
-            window.Closing += (object sender, CancelEventArgs e) =>
+            window.Closing += (object? sender, CancelEventArgs e) =>
             {
                 if (window.IsSaved)
                 {
@@ -323,7 +325,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             if (conditionListClipboard != null)
             {
-                List<Condition> selectedConditions = new();
+                List<Condition> selectedConditions = [];
                 foreach (var selectedItem in lstConditions.SelectedItems)
                 {
                     if (selectedItem is ConditionItemVO itemVO)
@@ -335,7 +337,7 @@ namespace TerminalMonitor.Windows.Controls
                     }
                 }
 
-                conditionListClipboard.Cut(selectedConditions.ToArray());
+                conditionListClipboard.Cut([.. selectedConditions]);
                 RemoveSelectedConditions();
             }
         }
@@ -344,7 +346,7 @@ namespace TerminalMonitor.Windows.Controls
         {
             if (conditionListClipboard != null)
             {
-                List<Condition> copiedConditions = new();
+                List<Condition> copiedConditions = [];
                 foreach (var selectedItem in lstConditions.SelectedItems)
                 {
                     if (selectedItem is ConditionItemVO itemVO)
@@ -356,7 +358,7 @@ namespace TerminalMonitor.Windows.Controls
                     }
                 }
 
-                conditionListClipboard.Copy(copiedConditions.ToArray());
+                conditionListClipboard.Copy([.. copiedConditions]);
             }
         }
 
@@ -437,13 +439,13 @@ namespace TerminalMonitor.Windows.Controls
                 conditionVOs.Clear();
 
                 dataContextVO.PropertyChanged -= DataContextVO_PropertyChanged;
-                groupCondition = value ?? new();
+                groupCondition = value ?? GroupCondition.Empty;
                 dataContextVO.MatchMode = groupCondition.MatchMode;
                 dataContextVO.IsInverted = groupCondition.IsInverted;
                 dataContextVO.DefaultResult = groupCondition.DefaultResult;
                 dataContextVO.IsDisabled = groupCondition.IsDisabled;
 
-                groupCondition.Conditions ??= new();
+                groupCondition.Conditions ??= [];
                 conditions = groupCondition.Conditions;
                 foreach (Condition condition in conditions)
                 {
@@ -454,7 +456,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public ItemClipboard<Condition> ConditionListClipboard
+        public ItemClipboard<Condition>? ConditionListClipboard
         {
             get => conditionListClipboard;
 
@@ -485,7 +487,7 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public ItemClipboard<Condition> ConditionTreeClipboard
+        public ItemClipboard<Condition>? ConditionTreeClipboard
         {
             get => conditionTreeClipboard;
             set => conditionTreeClipboard = value;

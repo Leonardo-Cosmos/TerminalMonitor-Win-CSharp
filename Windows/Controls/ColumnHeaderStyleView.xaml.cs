@@ -27,7 +27,7 @@ namespace TerminalMonitor.Windows.Controls
             DependencyProperty.Register(nameof(ColumnHeaderStyle), typeof(ColumnHeaderStyle), typeof(ColumnHeaderStyleView),
                 new PropertyMetadata(ColumnHeaderStyle.Empty, OnColumnHeaderStyleChanged));
 
-        private ColumnHeaderStyle columnHeaderStyle;
+        private ColumnHeaderStyle? columnHeaderStyle;
 
         private readonly ColumnHeaderStyleViewDataContextVO dataContextVO = new()
         {
@@ -46,7 +46,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void RctForegroundColor_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var brush = ColorDialogHelper.ShowColorDialog(dataContextVO.ForegroundColor as SolidColorBrush);
+            var brush = ColorDialogHelper.ShowColorDialog(dataContextVO.ForegroundColor);
             if (brush != null)
             {
                 dataContextVO.ForegroundColor = brush;
@@ -55,7 +55,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void RctBackgroundColor_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var brush = ColorDialogHelper.ShowColorDialog(dataContextVO.BackgroundColor as SolidColorBrush);
+            var brush = ColorDialogHelper.ShowColorDialog(dataContextVO.BackgroundColor);
             if (brush != null)
             {
                 dataContextVO.BackgroundColor = brush;
@@ -64,25 +64,30 @@ namespace TerminalMonitor.Windows.Controls
 
         private void RctCellBackgroundColor_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var brush = ColorDialogHelper.ShowColorDialog(dataContextVO.CellBackgroundColor as SolidColorBrush);
+            var brush = ColorDialogHelper.ShowColorDialog(dataContextVO.CellBackgroundColor);
             if (brush != null)
             {
                 dataContextVO.CellBackgroundColor = brush;
             }
         }
 
-        private void OnDataContextPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void OnDataContextPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (columnHeaderStyle == null)
+            {
+                return;
+            }
+
             switch (e.PropertyName)
             {
                 case nameof(ColumnHeaderStyleViewDataContextVO.ForegroundColor):
-                    columnHeaderStyle.Foreground ??= (dataContextVO.ForegroundColor as SolidColorBrush).Color;
+                    columnHeaderStyle.Foreground ??= dataContextVO.ForegroundColor.Color;
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.BackgroundColor):
-                    columnHeaderStyle.Background ??= (dataContextVO.BackgroundColor as SolidColorBrush).Color;
+                    columnHeaderStyle.Background ??= dataContextVO.BackgroundColor.Color;
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.CellBackgroundColor):
-                    columnHeaderStyle.CellBackground ??= (dataContextVO.CellBackgroundColor as SolidColorBrush).Color;
+                    columnHeaderStyle.CellBackground ??= dataContextVO.CellBackgroundColor.Color;
                     break;
                 case nameof(ColumnHeaderStyleViewDataContextVO.HorizontalAlignment):
                     columnHeaderStyle.HorizontalAlignment = dataContextVO.HorizontalAlignment;
@@ -97,7 +102,7 @@ namespace TerminalMonitor.Windows.Controls
                 case nameof(ColumnHeaderStyleViewDataContextVO.EnableForeground):
                     if (dataContextVO.EnableForeground)
                     {
-                        columnHeaderStyle.Foreground ??= (dataContextVO.ForegroundColor as SolidColorBrush).Color;
+                        columnHeaderStyle.Foreground ??= dataContextVO.ForegroundColor.Color;
                     }
                     else
                     {
@@ -107,7 +112,7 @@ namespace TerminalMonitor.Windows.Controls
                 case nameof(ColumnHeaderStyleViewDataContextVO.EnableBackground):
                     if (dataContextVO.EnableBackground)
                     {
-                        columnHeaderStyle.Background ??= (dataContextVO.BackgroundColor as SolidColorBrush).Color;
+                        columnHeaderStyle.Background ??= dataContextVO.BackgroundColor.Color;
                     }
                     else
                     {
@@ -117,7 +122,7 @@ namespace TerminalMonitor.Windows.Controls
                 case nameof(ColumnHeaderStyleViewDataContextVO.EnableCellBackground):
                     if (dataContextVO.EnableCellBackground)
                     {
-                        columnHeaderStyle.CellBackground ??= (dataContextVO.CellBackgroundColor as SolidColorBrush).Color;
+                        columnHeaderStyle.CellBackground ??= dataContextVO.CellBackgroundColor.Color;
                     }
                     else
                     {
@@ -163,7 +168,7 @@ namespace TerminalMonitor.Windows.Controls
         private static void OnColumnHeaderStyleChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
         {
             var columnHeaderStyleView = dependencyObject as ColumnHeaderStyleView;
-            columnHeaderStyleView.OnColumnHeaderStyleChanged(e);
+            columnHeaderStyleView?.OnColumnHeaderStyleChanged(e);
         }
 
         private void OnColumnHeaderStyleChanged(DependencyPropertyChangedEventArgs e)

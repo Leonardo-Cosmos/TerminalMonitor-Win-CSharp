@@ -7,7 +7,7 @@ namespace TerminalMonitor.Clipboard
 {
     public class ItemClipboard<T>
     {
-        private T[] items;
+        private T[]? items;
 
         private ItemClipboardStatus status = ItemClipboardStatus.Empty;
 
@@ -26,7 +26,7 @@ namespace TerminalMonitor.Clipboard
 
         public void Cut(IEnumerable<T> items)
         {
-            Cut(items?.ToArray());
+            Cut([.. items]);
         }
 
         public void Copy(params T[] items)
@@ -44,12 +44,12 @@ namespace TerminalMonitor.Clipboard
 
         public void Copy(IEnumerable<T> items)
         {
-            Copy(items?.ToArray());
+            Copy([.. items]);
         }
 
-        public (T[], ItemClipboardStatus status) Paste()
+        public (T[]?, ItemClipboardStatus status) Paste()
         {
-            T[] results;
+            T[]? results;
             var pasteStatus = status;
             switch (status)
             {
@@ -95,10 +95,10 @@ namespace TerminalMonitor.Clipboard
 
         public bool ContainsItem => status != ItemClipboardStatus.Empty;
 
-        public event EventHandler ItemCut;
+        public event EventHandler? ItemCut;
 
-        public event EventHandler ItemCopied;
+        public event EventHandler? ItemCopied;
 
-        public event EventHandler ItemPasted;
+        public event EventHandler? ItemPasted;
     }
 }

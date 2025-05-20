@@ -21,11 +21,11 @@ namespace TerminalMonitor.Terminal
             }
             else
             {
-                this.terminalLines = terminalLines.ToList();
+                this.terminalLines = terminalLines.ToList().AsReadOnly();
             }
         }
 
-        public TerminalLineDto this[string id] =>
+        public TerminalLineDto? this[string id] =>
             terminalLines.FirstOrDefault(terminalLine => terminalLine.Id == id!);
 
         public TerminalLineDto this[int index] => terminalLines[index];

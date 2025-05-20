@@ -5,11 +5,11 @@ namespace TerminalMonitor.Windows
 {
     class FieldConditionNodeVO : ConditionNodeVO
     {
-        private string fieldKey;
+        private string? fieldKey;
 
-        public string FieldKey
+        public required string FieldKey
         {
-            get => fieldKey;
+            get => fieldKey!;
             set
             {
                 fieldKey = value;
@@ -19,7 +19,7 @@ namespace TerminalMonitor.Windows
 
         private TextMatchOperator matchOperator;
 
-        public TextMatchOperator MatchOperator
+        public required TextMatchOperator MatchOperator
         {
             get => matchOperator;
             set
@@ -29,11 +29,11 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private string targetValue;
+        private string? targetValue;
 
-        public string TargetValue
+        public required string TargetValue
         {
-            get => targetValue;
+            get => targetValue!;
             set
             {
                 targetValue = value;

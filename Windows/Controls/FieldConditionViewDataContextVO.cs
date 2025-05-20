@@ -7,18 +7,18 @@ namespace TerminalMonitor.Windows.Controls
 {
     class FieldConditionViewDataContextVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private string fieldKey;
+        private string? fieldKey;
 
-        public string FieldKey
+        public required string FieldKey
         {
-            get { return fieldKey; }
+            get { return fieldKey!; }
             set
             {
                 fieldKey = value;
@@ -28,7 +28,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private TextMatchOperator matchOperator;
 
-        public TextMatchOperator MatchOperator
+        public required TextMatchOperator MatchOperator
         {
             get { return matchOperator; }
             set
@@ -38,11 +38,11 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private string targetValue;
+        private string? targetValue;
 
-        public string TargetValue
+        public required string TargetValue
         {
-            get { return targetValue; }
+            get { return targetValue!; }
             set
             {
                 targetValue = value;

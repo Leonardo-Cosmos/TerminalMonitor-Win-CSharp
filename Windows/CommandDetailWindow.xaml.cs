@@ -24,13 +24,16 @@ namespace TerminalMonitor.Windows
     /// </summary>
     public partial class CommandDetailWindow : Window
     {
-        private readonly CommandDetailWindowDataContextVO dataContextVO = new();
+        private readonly CommandDetailWindowDataContextVO dataContextVO = new()
+        {
+            Name = String.Empty,
+        };
 
-        private readonly List<string> existingCommandNames = new();
+        private readonly List<string> existingCommandNames = [];
 
-        private IEnumerable<string> latestExistingCommandNames;
+        private IEnumerable<string>? latestExistingCommandNames;
 
-        private CommandConfig command;
+        private CommandConfig? command;
 
         public CommandDetailWindow()
         {
@@ -38,9 +41,11 @@ namespace TerminalMonitor.Windows
 
             DataContext = dataContextVO;
 
-            Binding commandNameBinding = new("Name");
-            commandNameBinding.Source = dataContextVO;
-            commandNameBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            Binding commandNameBinding = new("Name")
+            {
+                Source = dataContextVO,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
             commandNameBinding.ValidationRules.Add(new UniqueItemRule()
             {
                 ExistingValues = existingCommandNames,
@@ -93,7 +98,7 @@ namespace TerminalMonitor.Windows
             Close();
         }
 
-        private void LoadCommand(CommandConfig command)
+        private void LoadCommand(CommandConfig? command)
         {
             this.command = command;
             IsSaved = false;
@@ -134,7 +139,7 @@ namespace TerminalMonitor.Windows
         {
             get
             {
-                return new ReadOnlyCollection<string>(existingCommandNames.ToArray());
+                return new ReadOnlyCollection<string>([.. existingCommandNames]);
             }
 
             set
@@ -143,7 +148,7 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        public CommandConfig Command
+        public CommandConfig? Command
         {
             get => command;
             set => LoadCommand(value);

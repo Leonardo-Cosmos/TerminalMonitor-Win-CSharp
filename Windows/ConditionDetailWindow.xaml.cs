@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -27,11 +28,11 @@ namespace TerminalMonitor.Windows
     {
         private readonly ConditionDetailWindowDataContextVO dataContextVO;
 
-        private readonly ObservableCollection<ConditionNodeVO> rootConditions = new();
+        private readonly ObservableCollection<ConditionNodeVO> rootConditions = [];
 
-        private Condition condition;
+        private Condition? condition;
 
-        private ItemClipboard<Condition> conditionClipboard;
+        private ItemClipboard<Condition>? conditionClipboard;
 
         public ConditionDetailWindow()
         {
@@ -41,25 +42,25 @@ namespace TerminalMonitor.Windows
             {
                 AddFieldCommand = new RelayCommand(AddFieldCondition, () => true),
                 AddGroupCommand = new RelayCommand(AddGroupCondition, () => true),
-                RemoveCommand = new RelayCommand(RemoveSelectedCondition, () => dataContextVO.IsConditionSelected),
-                MoveUpCommand = new RelayCommand(MoveSelectedConditionUp, () => dataContextVO.IsConditionSelected),
-                MoveDownCommand = new RelayCommand(MoveSelectedConditionDown, () => dataContextVO.IsConditionSelected),
+                RemoveCommand = new RelayCommand(RemoveSelectedCondition, () => dataContextVO!.IsConditionSelected),
+                MoveUpCommand = new RelayCommand(MoveSelectedConditionUp, () => dataContextVO!.IsConditionSelected),
+                MoveDownCommand = new RelayCommand(MoveSelectedConditionDown, () => dataContextVO!.IsConditionSelected),
                 CutCommand = new RelayCommand(CutSelectedCondition,
-                    () => dataContextVO.IsConditionSelected && !dataContextVO.IsConditionCutInClipboard),
+                    () => dataContextVO!.IsConditionSelected && !dataContextVO.IsConditionCutInClipboard),
                 CopyCommand = new RelayCommand(CopySelectedCondition,
-                    () => dataContextVO.IsConditionSelected && !dataContextVO.IsConditionCutInClipboard),
-                PasteCommnad = new RelayCommand(PasteCondition, () => dataContextVO.IsConditionInClipboard),
+                    () => dataContextVO!.IsConditionSelected && !dataContextVO.IsConditionCutInClipboard),
+                PasteCommnad = new RelayCommand(PasteCondition, () => dataContextVO!.IsConditionInClipboard),
             };
 
             dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
             DataContext = dataContextVO;
 
             rdBtnSingle.IsChecked = true;
-            fieldConditionView.FieldCondition = new FieldCondition();
+            fieldConditionView.FieldCondition = FieldCondition.Empty;
             trConditions.ItemsSource = rootConditions;
         }
 
-        private void DataContextVO_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void DataContextVO_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -131,25 +132,40 @@ namespace TerminalMonitor.Windows
             Close();
         }
 
-        private void ConditionClipboard_StatusChanged(object sender, EventArgs e)
+        private void ConditionClipboard_StatusChanged(object? sender, EventArgs e)
         {
             UpdateClipboardStatus();
         }
 
         private void UpdateClipboardStatus()
         {
-            dataContextVO.IsConditionInClipboard = conditionClipboard.ContainsItem;
-            dataContextVO.IsConditionCutInClipboard = conditionClipboard.Status == ItemClipboardStatus.Move;
+            if (conditionClipboard != null)
+            {
+                dataContextVO.IsConditionInClipboard = conditionClipboard.ContainsItem;
+                dataContextVO.IsConditionCutInClipboard = conditionClipboard.Status == ItemClipboardStatus.Move;
+            }
         }
 
         private void AddFieldCondition()
         {
-            AddCondition(conditions => new FieldConditionNodeVO() { Siblings = conditions });
+            AddCondition(conditions => new FieldConditionNodeVO()
+            {
+                FieldKey = String.Empty,
+                MatchOperator = Matchers.TextMatchOperator.None,
+                TargetValue = String.Empty,
+
+                Siblings = conditions,
+            });
         }
 
         private void AddGroupCondition()
         {
-            AddCondition(conditions => new GroupConditionNodeVO() { Siblings = conditions });
+            AddCondition(conditions => new GroupConditionNodeVO()
+            {
+                MatchMode = GroupMatchMode.All,
+
+                Siblings = conditions,
+            });
         }
 
         private void AddCondition(Func<ObservableCollection<ConditionNodeVO>, ConditionNodeVO> createNodeVO)
@@ -264,7 +280,7 @@ namespace TerminalMonitor.Windows
                 {
                     var addedConditions = clipboardStatus == ItemClipboardStatus.Move ?
                         pastedConditions :
-                        pastedConditions.Select(condition => (Condition)condition.Clone()).ToArray();
+                        [.. pastedConditions.Select(condition => (Condition)condition.Clone())];
 
                     foreach (var addedCondition in addedConditions)
                     {
@@ -281,10 +297,7 @@ namespace TerminalMonitor.Windows
 
         private void SelectConditionTreeNode(ConditionNodeVO conditionVO)
         {
-            var treeViewItem =
-                trConditions.ItemContainerGenerator.ContainerFromItem(conditionVO) as TreeViewItem;
-
-            if (treeViewItem != null)
+            if (trConditions.ItemContainerGenerator.ContainerFromItem(conditionVO) is TreeViewItem treeViewItem)
             {
                 treeViewItem.IsSelected = true;
             }
@@ -292,10 +305,7 @@ namespace TerminalMonitor.Windows
 
         private void UnselectConditionTreeNode(ConditionNodeVO conditionVO)
         {
-            var treeViewItem =
-                trConditions.ItemContainerGenerator.ContainerFromItem(conditionVO) as TreeViewItem;
-
-            if (treeViewItem != null)
+            if (trConditions.ItemContainerGenerator.ContainerFromItem(conditionVO) is TreeViewItem treeViewItem)
             {
                 treeViewItem.IsSelected = false;
             }
@@ -327,6 +337,8 @@ namespace TerminalMonitor.Windows
                 IsInverted = fieldCondition.IsInverted,
                 DefaultResult = fieldCondition.DefaultResult,
                 IsDisabled = fieldCondition.IsDisabled,
+
+                Siblings = [],
             };
 
             return fieldConditionVO;
@@ -341,6 +353,8 @@ namespace TerminalMonitor.Windows
                 IsInverted = groupCondition.IsInverted,
                 DefaultResult = groupCondition.DefaultResult,
                 IsDisabled = groupCondition.IsDisabled,
+
+                Siblings = [],
             };
 
             groupCondition.Conditions?
@@ -373,12 +387,11 @@ namespace TerminalMonitor.Windows
 
         private static FieldCondition FromVO(FieldConditionNodeVO fieldConditionVO)
         {
-            FieldCondition fieldCondition = new()
+            FieldCondition fieldCondition = new(
+                fieldConditionVO.FieldKey,
+                fieldConditionVO.MatchOperator,
+                fieldConditionVO.TargetValue)
             {
-                FieldKey = fieldConditionVO.FieldKey,
-                MatchOperator = fieldConditionVO.MatchOperator,
-                TargetValue = fieldConditionVO.TargetValue,
-
                 IsInverted = fieldConditionVO.IsInverted,
                 DefaultResult = fieldConditionVO.DefaultResult,
                 IsDisabled = fieldConditionVO.IsDisabled,
@@ -389,12 +402,10 @@ namespace TerminalMonitor.Windows
 
         private static GroupCondition FromVO(GroupConditionNodeVO groupConditionVO)
         {
-            GroupCondition groupCondition = new()
+            GroupCondition groupCondition = new(
+                groupConditionVO.MatchMode,
+                [.. groupConditionVO.Conditions.Select(conditionVO => FromVO(conditionVO))])
             {
-                MatchMode = groupConditionVO.MatchMode,
-                Conditions = groupConditionVO.Conditions
-                    .Select(conditionVO => FromVO(conditionVO)).ToList(),
-
                 IsInverted = groupConditionVO.IsInverted,
                 DefaultResult = groupConditionVO.DefaultResult,
                 IsDisabled = groupConditionVO.IsDisabled,
@@ -403,7 +414,7 @@ namespace TerminalMonitor.Windows
             return groupCondition;
         }
 
-        private void LoadCondition(Condition condition)
+        private void LoadCondition(Condition? condition)
         {
             this.condition = condition;
             IsSaved = false;
@@ -415,7 +426,7 @@ namespace TerminalMonitor.Windows
                 /*
                  * Clear single condition.
                  */
-                fieldConditionView.FieldCondition = new FieldCondition();
+                fieldConditionView.FieldCondition = FieldCondition.Empty;
 
                 /*
                  * Clear multiple condtion.
@@ -456,7 +467,7 @@ namespace TerminalMonitor.Windows
                 /*
                  * Clear single condition.
                  */
-                fieldConditionView.FieldCondition = new FieldCondition();
+                fieldConditionView.FieldCondition = FieldCondition.Empty;
             }
             else
             {
@@ -479,21 +490,20 @@ namespace TerminalMonitor.Windows
                     groupCondition.DefaultResult = dataContextVO.DefaultResult;
                     groupCondition.IsDisabled = dataContextVO.IsDisabled;
                     groupCondition.MatchMode = dataContextVO.MatchMode;
-                    groupCondition.Conditions = rootConditions
-                        .Select(conditionNodeVO => FromVO(conditionNodeVO)).ToList();
+                    groupCondition.Conditions = [.. rootConditions.Select(conditionNodeVO => FromVO(conditionNodeVO))];
                 }
                 else
                 {
-                    condition = new GroupCondition()
+                    condition = new GroupCondition(
+                        dataContextVO.ConditionName,
+                        dataContextVO.MatchMode,
+                        [.. rootConditions.Select(conditionNodeVO => FromVO(conditionNodeVO))])
                     {
-                        Id = Guid.NewGuid().ToString(),
-                        Name = dataContextVO.ConditionName,
+
                         IsInverted = dataContextVO.IsInverted,
                         DefaultResult = dataContextVO.DefaultResult,
                         IsDisabled = dataContextVO.IsDisabled,
-                        MatchMode = dataContextVO.MatchMode,
-                        Conditions = rootConditions
-                            .Select(conditionNodeVO => FromVO(conditionNodeVO)).ToList(),
+
                     };
                 }
             }
@@ -501,13 +511,13 @@ namespace TerminalMonitor.Windows
 
         public bool IsSaved { get; set; }
 
-        public Condition Condition
+        public Condition? Condition
         {
             get => condition;
             set => LoadCondition(value);
         }
 
-        public ItemClipboard<Condition> ConditionClipboard
+        public ItemClipboard<Condition>? ConditionClipboard
         {
             get => conditionClipboard;
 

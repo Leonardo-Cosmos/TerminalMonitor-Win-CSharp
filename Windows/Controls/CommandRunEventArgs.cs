@@ -6,7 +6,7 @@ namespace TerminalMonitor.Windows.Controls
 {
     public class CommandRunEventArgs : EventArgs
     {
-        public CommandConfig Command { get; set; }
+        public required CommandConfig Command { get; set; }
     }
 
     public delegate void CommandRunEventHandler(object sender, CommandRunEventArgs e);

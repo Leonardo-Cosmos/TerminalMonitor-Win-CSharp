@@ -6,17 +6,17 @@ namespace TerminalMonitor.Windows.Controls
 {
     class CommandListItemVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private string name;
+        private string? name;
 
-        public string Name
+        public required string Name
         {
-            get => name;
+            get => name!;
             set { name = value; OnPropertyChanged(); }
         }
     }

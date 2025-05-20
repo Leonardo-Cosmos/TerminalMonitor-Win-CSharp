@@ -11,16 +11,16 @@ namespace TerminalMonitor.Windows.Controls
 {
     static class ColorDialogHelper
     {
-        public static SolidColorBrush ShowColorDialog(SolidColorBrush brush)
+        public static SolidColorBrush? ShowColorDialog(SolidColorBrush brush)
         {
             var color = brush.Color;
-            System.Windows.Forms.ColorDialog colorDialog = new();
+            System.Windows.Forms.ColorDialog colorDialog = new()
+            {
+                CustomColors = GetCustomColorsSetting(),
+                Color = System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B)
+            };
 
-
-            colorDialog.CustomColors = GetCustomColorsSetting();
-            colorDialog.Color = System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
-
-            SolidColorBrush solidColorBrush = null;
+            SolidColorBrush? solidColorBrush = null;
             if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 var selectedColor = colorDialog.Color;
@@ -57,8 +57,7 @@ namespace TerminalMonitor.Windows.Controls
 
                 if (!added)
                 {
-                    customColors = customColors.Skip(1)
-                        .Concat(new int[] { selectedColor }).ToArray();
+                    customColors = [.. customColors.Skip(1), selectedColor];
                 }
 
                 colorDialog.CustomColors = customColors;
@@ -67,11 +66,11 @@ namespace TerminalMonitor.Windows.Controls
 
         private static int[] GetCustomColorsSetting()
         {
-            var customColors = Properties.WindowSettings.Default.CustomColors ??= new();
+            var customColors = Properties.WindowSettings.Default.CustomColors ??= [];
             var colors = new string[customColors.Count];
             customColors.CopyTo(colors, 0);
 
-            return colors.Select(colorStr => ConvertToInt32(colorStr)).ToArray();
+            return [.. colors.Select(colorStr => ConvertToInt32(colorStr))];
         }
 
         private static int ConvertToInt32(string value)

@@ -27,9 +27,9 @@ namespace TerminalMonitor.Windows.Helpers
                     typeof(bool), typeof(MouseHorizontalWheelScroller),
                     new UIPropertyMetadata(false, OnScrollingEnabledChanged));
 
-        private static readonly HashSet<int> controls = new();
+        private static readonly HashSet<int> controls = [];
 
-        private static readonly HashSet<int> scrollViewers = new();
+        private static readonly HashSet<int> scrollViewers = [];
 
         public static void OnScrollingEnabledChanged(DependencyObject dependencyObject,
             DependencyPropertyChangedEventArgs args)
@@ -63,11 +63,12 @@ namespace TerminalMonitor.Windows.Helpers
             public MouseHorizontalWheelScrollHelper(ScrollViewer scrollViewer, DependencyObject dependencyObject)
             {
                 this.scrollViewer = scrollViewer;
-                hwndSource = PresentationSource.FromDependencyObject(dependencyObject) as HwndSource;
-                if (hwndSource == null)
+
+                if (PresentationSource.FromDependencyObject(dependencyObject) is not HwndSource hwndSource)
                 {
-                    return;
+                    throw new InvalidOperationException();
                 }
+                this.hwndSource = hwndSource;
 
                 hook = WindowProc;
             }

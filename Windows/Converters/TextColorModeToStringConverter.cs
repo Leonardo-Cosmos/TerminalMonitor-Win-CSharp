@@ -21,20 +21,30 @@ namespace TerminalMonitor.Windows.Converters
                 { TextColorMode.HashSymmetric, "Hash Symmetric" },
             });
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return "Unknown";
+            }
+
             if (value is TextColorMode colorMode)
             {
                 return textDict[colorMode];
             }
             else
             {
-                return "Unknown";
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return default(TextColorMode);
+            }
+
             if (value is string text)
             {
                 return textDict
@@ -42,7 +52,7 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return TextColorMode.Static;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
     }

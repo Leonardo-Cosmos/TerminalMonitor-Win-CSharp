@@ -7,9 +7,9 @@ namespace TerminalMonitor.Windows.Controls
 {
     class FieldListViewDataContextVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
@@ -50,20 +50,20 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public ICommand AddCommand { get; init; }
+        public required ICommand AddCommand { get; init; }
 
-        public ICommand RemoveCommand { get; init; }
+        public required ICommand RemoveCommand { get; init; }
 
-        public ICommand EditCommand { get; init; }
+        public required ICommand EditCommand { get; init; }
 
-        public ICommand MoveLeftCommand { get; init; }
+        public required ICommand MoveLeftCommand { get; init; }
 
-        public ICommand MoveRightCommand { get; init; }
+        public required ICommand MoveRightCommand { get; init; }
 
-        public ICommand CutCommand { get; init; }
+        public required ICommand CutCommand { get; init; }
 
-        public ICommand CopyCommand { get; init; }
+        public required ICommand CopyCommand { get; init; }
 
-        public ICommand PasteCommnad { get; init; }
+        public required ICommand PasteCommnad { get; init; }
     }
 }

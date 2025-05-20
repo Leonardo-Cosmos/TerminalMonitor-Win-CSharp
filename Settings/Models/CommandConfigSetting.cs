@@ -3,11 +3,11 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record CommandConfigSetting(string Name, string StartFile, string Arguments, string WorkDirectory);
+    record CommandConfigSetting(string Name, string? StartFile, string? Arguments, string? WorkDirectory);
 
     static class CommandConfigSettings
     {
-        public static CommandConfigSetting Save(CommandConfig obj)
+        public static CommandConfigSetting? Save(CommandConfig? obj)
         {
             if (obj == null)
             {
@@ -22,7 +22,7 @@ namespace TerminalMonitor.Settings.Models
                 );
         }
 
-        public static CommandConfig Load(CommandConfigSetting setting)
+        public static CommandConfig? Load(CommandConfigSetting? setting)
         {
             if (setting == null)
             {

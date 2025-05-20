@@ -10,7 +10,7 @@ namespace TerminalMonitor.Windows.Helpers
         /// <summary>
         /// Returns the first ancestor of specified type
         /// </summary>
-        public static T FindAncestor<T>(this DependencyObject current) where T : DependencyObject
+        public static T? FindAncestor<T>(this DependencyObject current) where T : DependencyObject
         {
             current = GetVisualOrLogicalParent(current);
 
@@ -41,9 +41,9 @@ namespace TerminalMonitor.Windows.Helpers
         /// <typeparam name="T">Type of chiled to be found</typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static T FindChildOfType<T>(this DependencyObject source) where T : DependencyObject
+        public static T? FindChildOfType<T>(this DependencyObject source) where T : DependencyObject
         {
-            T result = source as T;
+            T? result = source as T;
             DependencyObject child;
             if (source != null && result == null)
             {

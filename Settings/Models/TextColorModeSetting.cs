@@ -8,12 +8,12 @@ namespace TerminalMonitor.Settings.Models
 {
     static class TextColorModeSettings
     {
-        private static readonly IReadOnlyDictionary<string, TextColorMode> textColorModeDict
+        private static readonly ReadOnlyDictionary<string, TextColorMode> textColorModeDict
             = InitTextColorDict();
 
-        private static IReadOnlyDictionary<string, TextColorMode> InitTextColorDict()
+        private static ReadOnlyDictionary<string, TextColorMode> InitTextColorDict()
         {
-            Dictionary<string, TextColorMode> dict = new();
+            Dictionary<string, TextColorMode> dict = [];
             var values = Enum.GetValues(typeof(TextColorMode));
             foreach (var item in values)
             {
@@ -30,9 +30,9 @@ namespace TerminalMonitor.Settings.Models
 
         static TextColorMode StringToTextColorMode(string str)
         {
-            if (str != null && textColorModeDict.ContainsKey(str))
+            if (str != null && textColorModeDict.TryGetValue(str, out TextColorMode value))
             {
-                return textColorModeDict[str];
+                return value;
             }
             else
             {
@@ -40,7 +40,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static string Save(TextColorMode? obj)
+        public static string? Save(TextColorMode? obj)
         {
             if (obj.HasValue)
             {
@@ -52,7 +52,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static TextColorMode? Load(string setting)
+        public static TextColorMode? Load(string? setting)
         {
             if (setting == null)
             {

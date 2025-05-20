@@ -4,13 +4,13 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record TextStyleSetting(ColorSetting Foreground, ColorSetting Background, ColorSetting CellBackground,
-        TextColorConfigSetting ForegroundConfig, TextColorConfigSetting BackgroundConfig, TextColorConfigSetting CellBackgroundConfig,
-        string HorizontalAlignment, string VerticalAlignment, string TextAlignment, double? MaxWidth, double? MaxHeight, string TextWrapping);
+    record TextStyleSetting(ColorSetting? Foreground, ColorSetting? Background, ColorSetting? CellBackground,
+        TextColorConfigSetting? ForegroundConfig, TextColorConfigSetting? BackgroundConfig, TextColorConfigSetting? CellBackgroundConfig,
+        string? HorizontalAlignment, string? VerticalAlignment, string? TextAlignment, double? MaxWidth, double? MaxHeight, string? TextWrapping);
 
     static class TextStyleSettings
     {
-        public static TextStyleSetting Save(TextStyle obj)
+        public static TextStyleSetting? Save(TextStyle? obj)
         {
             if (obj == null)
             {
@@ -33,14 +33,14 @@ namespace TerminalMonitor.Settings.Models
                 );
         }
 
-        public static TextStyle Load(TextStyleSetting setting)
+        public static TextStyle? Load(TextStyleSetting? setting)
         {
             if (setting == null)
             {
                 return null;
             }
 
-            static TextColorConfig LoadColorConfig(TextColorConfig colorConfigSetting, Color? colorSetting)
+            static TextColorConfig? LoadColorConfig(TextColorConfig? colorConfigSetting, Color? colorSetting)
             {
                 if (colorConfigSetting != null)
                 {

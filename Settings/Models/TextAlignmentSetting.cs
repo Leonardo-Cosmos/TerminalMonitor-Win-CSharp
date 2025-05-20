@@ -8,12 +8,12 @@ namespace TerminalMonitor.Settings.Models
 {
     static class TextAlignmentSettings
     {
-        private static readonly IReadOnlyDictionary<string, TextAlignment> textAlignmentDict
+        private static readonly ReadOnlyDictionary<string, TextAlignment> textAlignmentDict
                = InitTextAlignmentDict();
 
-        private static IReadOnlyDictionary<string, TextAlignment> InitTextAlignmentDict()
+        private static ReadOnlyDictionary<string, TextAlignment> InitTextAlignmentDict()
         {
-            Dictionary<string, TextAlignment> dict = new();
+            Dictionary<string, TextAlignment> dict = [];
             var values = Enum.GetValues(typeof(TextAlignment));
             foreach (var item in values)
             {
@@ -30,9 +30,9 @@ namespace TerminalMonitor.Settings.Models
 
         static TextAlignment StringToTextAlignment(string str)
         {
-            if (str != null && textAlignmentDict.ContainsKey(str))
+            if (str != null && textAlignmentDict.TryGetValue(str, out TextAlignment value))
             {
-                return textAlignmentDict[str];
+                return value;
             }
             else
             {
@@ -40,7 +40,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static string Save(TextAlignment? obj)
+        public static string? Save(TextAlignment? obj)
         {
             if (obj.HasValue)
             {
@@ -52,7 +52,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static TextAlignment? Load(string setting)
+        public static TextAlignment? Load(string? setting)
         {
             if (setting == null)
             {

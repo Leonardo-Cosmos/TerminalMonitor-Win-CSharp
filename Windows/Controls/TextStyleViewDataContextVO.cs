@@ -9,9 +9,9 @@ namespace TerminalMonitor.Windows.Controls
 {
     class TextStyleViewDataContextVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
@@ -28,11 +28,11 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private Brush foreground;
+        private SolidColorBrush? foreground;
 
-        public Brush ForegroundColor
+        public required SolidColorBrush ForegroundColor
         {
-            get => foreground;
+            get => foreground!;
             set
             {
                 foreground = value;
@@ -70,11 +70,11 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private Brush background;
+        private SolidColorBrush? background;
 
-        public Brush BackgroundColor
+        public required SolidColorBrush BackgroundColor
         {
-            get => background;
+            get => background!;
             set
             {
                 background = value;
@@ -112,11 +112,11 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private Brush cellBackground;
+        private SolidColorBrush? cellBackground;
 
-        public Brush CellBackgroundColor
+        public required SolidColorBrush CellBackgroundColor
         {
-            get => cellBackground;
+            get => cellBackground!;
             set
             {
                 cellBackground = value;

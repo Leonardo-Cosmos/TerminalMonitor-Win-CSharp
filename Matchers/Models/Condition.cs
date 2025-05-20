@@ -7,42 +7,74 @@ using System.Threading.Tasks;
 
 namespace TerminalMonitor.Matchers.Models
 {
-    public abstract class Condition : ICloneable
+    public abstract class Condition(string id, string? name) : ICloneable
     {
-        protected Condition()
+        private readonly string _id = id;
+
+        private string? _name = name;
+
+        private bool _isInverted = false;
+
+        private bool _defaultResult = false;
+
+        private bool _isDisabled = false;
+
+        protected Condition(string? name) : this(Guid.NewGuid().ToString(), name)
         {
 
         }
 
-        protected Condition(Condition obj)
+        protected Condition() : this(name: null)
         {
-            Id = Guid.NewGuid().ToString();
-            Name = obj.Name;
-            IsInverted = obj.IsInverted;
-            DefaultResult = obj.DefaultResult;
-            IsDisabled = obj.IsDisabled;
+
+        }
+
+        protected Condition(Condition obj) : this(obj.Name)
+        {
+            _isInverted = obj.IsInverted;
+            _defaultResult = obj.DefaultResult;
+            _isDisabled = obj.IsDisabled;
         }
 
         public abstract object Clone();
 
-        public string Id { get; init; }
+        public string Id
+        {
+            get => _id;
+        }
 
-        public string Name { get; set; }
+        public string? Name
+        {
+            get => _name;
+            set => _name = value;
+        }
 
         /// <summary>
         /// Gets or sets whehter the match result of this condition is inverted.
         /// </summary>
-        public bool IsInverted { get; set; }
+        public bool IsInverted
+        {
+            get => _isInverted;
+            set => _isInverted = value;
+        }
 
         /// <summary>
         /// Gets or sets default result of matching when required value is not presented
         /// (e.g. no specified field, group is empty).
         /// </summary>
-        public bool DefaultResult { get; set; }
+        public bool DefaultResult
+        {
+            get => _defaultResult;
+            set => _defaultResult = value;
+        }
 
         /// <summary>
         /// Gets or sets whether this condition is temporarily excluded from group.
         /// </summary>
-        public bool IsDisabled { get; set; }
+        public bool IsDisabled
+        {
+            get => _isDisabled;
+            set => _isDisabled = value;
+        }
     }
 }

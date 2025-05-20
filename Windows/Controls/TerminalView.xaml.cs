@@ -35,7 +35,7 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class TerminalView : UserControl
     {
-        private ITerminalSupervisor terminalLineSupervisor;
+        private ITerminalSupervisor? terminalLineSupervisor;
 
         private const string idColumnName = "Id";
 
@@ -49,25 +49,25 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly DataTable terminalDataTable = new();
 
-        private List<FieldDisplayDetail> visibleFields = new();
+        private List<FieldDisplayDetail> visibleFields = [];
 
         private readonly TerminalViewColumnSettingHelper columnSettingHelper = new();
 
-        private GroupCondition filterCondition = new();
+        private GroupCondition filterCondition = GroupCondition.Empty;
 
-        private GroupCondition findCondition = new();
+        private GroupCondition findCondition = GroupCondition.Empty;
 
         private readonly TerminalViewDataContextVO dataContextVO;
 
-        private readonly Dictionary<string, bool> lineFilterDict = new();
+        private readonly Dictionary<string, bool> lineFilterDict = [];
 
-        private readonly List<TerminalLineDto> shownLines = new();
+        private readonly List<TerminalLineDto> shownLines = [];
 
-        private readonly List<(TerminalLineDto terminalLine, int shownIndex)> foundLines = new();
+        private readonly List<(TerminalLineDto terminalLine, int shownIndex)> foundLines = [];
 
-        private string clickedColumnFieldKey;
+        private string? clickedColumnFieldKey;
 
-        private string clickedRowTerminalLineId;
+        private string? clickedRowTerminalLineId;
 
         public TerminalView()
         {
@@ -195,15 +195,15 @@ namespace TerminalMonitor.Windows.Controls
             if (listTerminal.SelectedValue is DataRowView item)
             {
                 var id = (string)item[idColumnName];
-                terminalLineSupervisor.RemoveTerminalLinesUntil(id);
+                terminalLineSupervisor?.RemoveTerminalLinesUntil(id);
             }
         }
 
-        private void ShowDetailWindow(string terminalLineId)
+        private void ShowDetailWindow(string? terminalLineId)
         {
             if (terminalLineId != null)
             {
-                var terminalLine = terminalLineSupervisor.TerminalLines[terminalLineId];
+                var terminalLine = terminalLineSupervisor?.TerminalLines[terminalLineId];
 
                 if (terminalLine != null)
                 {
@@ -232,42 +232,45 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private string GetClickedDataCell()
+        private string? GetClickedDataCell()
         {
             if (clickedRowTerminalLineId == null || clickedColumnFieldKey == null)
             {
                 return null;
             }
 
-            var terminalLine = terminalLineSupervisor.TerminalLines[clickedRowTerminalLineId];
+            var terminalLine = terminalLineSupervisor?.TerminalLines[clickedRowTerminalLineId];
             if (terminalLine == null)
             {
                 return null;
             }
 
             var terminalLineFieldDict = terminalLine.LineFieldDict;
-            if (!terminalLineFieldDict.ContainsKey(clickedColumnFieldKey))
+            if (!terminalLineFieldDict.TryGetValue(clickedColumnFieldKey, out TerminalLineFieldDto? lineFieldValue))
             {
                 return null;
             }
 
-            return terminalLineFieldDict[clickedColumnFieldKey].Text;
+            return lineFieldValue.Text;
         }
 
-        private Condition ConvertClickedDataCellToCondition()
+        private FieldCondition? ConvertClickedDataCellToCondition()
         {
+            if (clickedColumnFieldKey == null)
+            {
+                return null;
+            }
+
             var clickedDataCell = GetClickedDataCell();
             if (clickedDataCell == null)
             {
                 return null;
             }
 
-            return new FieldCondition()
-            {
-                FieldKey = clickedColumnFieldKey,
-                MatchOperator = Matchers.TextMatchOperator.Equals,
-                TargetValue = clickedDataCell,
-            };
+            return new FieldCondition(
+                clickedColumnFieldKey,
+                TextMatchOperator.Equals,
+                clickedDataCell);
         }
 
         private void CopyClickedDataCellToSystemClipboard()
@@ -288,17 +291,20 @@ namespace TerminalMonitor.Windows.Controls
 
         private void PasteSystemClipboardToConditionListView(ConditionListView conditionListView)
         {
+            if (clickedColumnFieldKey == null)
+            {
+                return;
+            }
+
             if (!CheckSystemClipboard())
             {
                 return;
             }
 
-            var condition = new FieldCondition()
-            {
-                FieldKey = clickedColumnFieldKey,
-                MatchOperator = Matchers.TextMatchOperator.Contains,
-                TargetValue = System.Windows.Clipboard.GetText(TextDataFormat.UnicodeText),
-            };
+            var condition = new FieldCondition(
+                clickedColumnFieldKey,
+                TextMatchOperator.Contains,
+                System.Windows.Clipboard.GetText(TextDataFormat.UnicodeText));
 
             conditionListView.AddCondition(condition);
         }
@@ -380,7 +386,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void UpdateFoundSelectedNumber()
         {
-            if (!foundLines.Any())
+            if (foundLines.Count == 0)
             {
                 dataContextVO.FoundSelectedNumber = invalidNumber;
                 return;
@@ -405,15 +411,15 @@ namespace TerminalMonitor.Windows.Controls
 
                 for (int i = 0; i < foundLines.Count; i++)
                 {
-                    var lineTuple = foundLines[i];
+                    var (_, shownIndex) = foundLines[i];
 
-                    if (lineTuple.shownIndex == selectedIndex)
+                    if (shownIndex == selectedIndex)
                     {
                         dataContextVO.FoundSelectedNumber = (i + 1).ToString();
 
                         break;
                     }
-                    else if (lineTuple.shownIndex > selectedIndex)
+                    else if (shownIndex > selectedIndex)
                     {
                         dataContextVO.FoundSelectedNumber = $"{i}{afterLineNumber}";
                         break;
@@ -439,10 +445,10 @@ namespace TerminalMonitor.Windows.Controls
 
             for (int i = foundLines.Count - 1; i >= 0; i--)
             {
-                var lineTuple = foundLines[i];
-                if (lineTuple.shownIndex < selectedIndex)
+                var (_, shownIndex) = foundLines[i];
+                if (shownIndex < selectedIndex)
                 {
-                    listTerminal.SelectedIndex = lineTuple.shownIndex;
+                    listTerminal.SelectedIndex = shownIndex;
                     listTerminal.ScrollIntoView(listTerminal.SelectedItem);
 
                     dataContextVO.FoundSelectedNumber = (i + 1).ToString();
@@ -470,10 +476,10 @@ namespace TerminalMonitor.Windows.Controls
 
             for (int i = 0; i < foundLines.Count; i++)
             {
-                var lineTuple = foundLines[i];
-                if (lineTuple.shownIndex > selectedIndex)
+                var (_, shownIndex) = foundLines[i];
+                if (shownIndex > selectedIndex)
                 {
-                    listTerminal.SelectedIndex = lineTuple.shownIndex;
+                    listTerminal.SelectedIndex = shownIndex;
                     listTerminal.ScrollIntoView(listTerminal.SelectedItem);
 
                     dataContextVO.FoundSelectedNumber = (i + 1).ToString();
@@ -493,11 +499,11 @@ namespace TerminalMonitor.Windows.Controls
 
             var selectedIndex = listTerminal.SelectedIndex;
 
-            (TerminalLineDto terminalLine, int shownIndex) lineTuple = foundLines.First();
+            var (_, shownIndex) = foundLines.First();
 
-            if (selectedIndex != lineTuple.shownIndex)
+            if (selectedIndex != shownIndex)
             {
-                listTerminal.SelectedIndex = lineTuple.shownIndex;
+                listTerminal.SelectedIndex = shownIndex;
                 listTerminal.ScrollIntoView(listTerminal.SelectedItem);
             }
 
@@ -513,11 +519,11 @@ namespace TerminalMonitor.Windows.Controls
 
             var selectedIndex = listTerminal.SelectedIndex;
 
-            (TerminalLineDto terminalLine, int shownIndex) lineTuple = foundLines.Last();
+            var (_, shownIndex) = foundLines.Last();
 
-            if (selectedIndex != lineTuple.shownIndex)
+            if (selectedIndex != shownIndex)
             {
-                listTerminal.SelectedIndex = lineTuple.shownIndex;
+                listTerminal.SelectedIndex = shownIndex;
                 listTerminal.ScrollIntoView(listTerminal.SelectedItem);
             }
 
@@ -555,11 +561,13 @@ namespace TerminalMonitor.Windows.Controls
             terminalDataTable.Columns.Clear();
             terminalDataTable.Rows.Clear();
 
-            DataColumn idColumn = new(idColumnName);
-            idColumn.DataType = typeof(string);
+            DataColumn idColumn = new(idColumnName)
+            {
+                DataType = typeof(string)
+            };
             terminalDataTable.Columns.Add(idColumn);
 
-            if (visibleFields.Any())
+            if (visibleFields.Count != 0)
             {
                 /*
                  * Add selected visible fields.
@@ -571,8 +579,10 @@ namespace TerminalMonitor.Windows.Controls
                         continue;
                     }
 
-                    DataColumn column = new(visibleField.Id);
-                    column.DataType = typeof(string);
+                    DataColumn column = new(visibleField.Id)
+                    {
+                        DataType = typeof(string)
+                    };
                     terminalDataTable.Columns.Add(column);
 
                     GridViewColumn viewColumn = new();
@@ -604,10 +614,9 @@ namespace TerminalMonitor.Windows.Controls
 
                         DataTemplate dataTemplate = TerminalViewHelper.BuildFieldDataTemplate(
                             visibleField, terminalDataTable,
-                            new TerminalViewHelper.RoutedEventHandlerRecord[] {
-                                new TerminalViewHelper.RoutedEventHandlerRecord(
-                                    MouseDownEvent, mouseDownHandler)
-                            });
+                            [
+                                new(MouseDownEvent, mouseDownHandler)
+                            ]);
 
                         viewColumn.CellTemplate = dataTemplate;
                     }
@@ -625,8 +634,10 @@ namespace TerminalMonitor.Windows.Controls
                 /*
                  * Add default column when no visible field selected.
                  */
-                DataColumn defaultColumn = new(plaintextColumnName);
-                defaultColumn.DataType = typeof(string);
+                DataColumn defaultColumn = new(plaintextColumnName)
+                {
+                    DataType = typeof(string)
+                };
                 terminalDataTable.Columns.Add(defaultColumn);
 
                 gridView.Columns.Add(new GridViewColumn()
@@ -653,7 +664,7 @@ namespace TerminalMonitor.Windows.Controls
 
             row[idColumnName] = terminalLineDto.Id;
 
-            if (visibleFields.Any())
+            if (visibleFields.Count != 0)
             {
                 foreach (var visibleField in visibleFields)
                 {
@@ -662,14 +673,13 @@ namespace TerminalMonitor.Windows.Controls
                         continue;
                     }
 
-                    var fieldValue = terminalLineDto.LineFieldDict.ContainsKey(visibleField.FieldKey) ?
-                        terminalLineDto.LineFieldDict[visibleField.FieldKey].Text : "";
+                    var fieldValue = terminalLineDto.LineFieldDict.TryGetValue(visibleField.FieldKey, out TerminalLineFieldDto? value) ? value.Text : "";
 
                     row[visibleField.Id] = fieldValue;
 
                     if (visibleField.CustomizeStyle)
                     {
-                        var matchedTextStyleCondition = visibleField.Conditions.FirstOrDefault(
+                        var matchedTextStyleCondition = visibleField.Conditions?.FirstOrDefault(
                             textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineDto, textStyleCondition.Condition));
 
                         TerminalViewHelper.BuildDataRowStyleCells(row, visibleField, matchedTextStyleCondition?.Style);
@@ -694,9 +704,9 @@ namespace TerminalMonitor.Windows.Controls
             foreach (var terminalLineDto in terminalLineSupervisor.TerminalLines)
             {
                 bool matched;
-                if (lineFilterDict.ContainsKey(terminalLineDto.Id))
+                if (lineFilterDict.TryGetValue(terminalLineDto.Id, out bool value))
                 {
-                    matched = lineFilterDict[terminalLineDto.Id];
+                    matched = value;
                 }
                 else
                 {
@@ -725,7 +735,7 @@ namespace TerminalMonitor.Windows.Controls
             FilterTerminal();
         }
 
-        public ITerminalSupervisor TerminalLineSupervisor
+        public ITerminalSupervisor? TerminalLineSupervisor
         {
             get => terminalLineSupervisor;
             set
@@ -778,37 +788,37 @@ namespace TerminalMonitor.Windows.Controls
             set => findConditionListView.Condition = value;
         }
 
-        public ItemClipboard<FieldDisplayDetail> FieldClipboard
+        public ItemClipboard<FieldDisplayDetail>? FieldClipboard
         {
             get => fieldListView.FieldClipboard;
             set => fieldListView.FieldClipboard = value;
         }
 
-        public ItemClipboard<TextStyleCondition> StyleConditionClipboard
+        public ItemClipboard<TextStyleCondition>? StyleConditionClipboard
         {
             get => fieldListView.StyleConditionClipboard;
             set => fieldListView.StyleConditionClipboard = value;
         }
 
-        public ItemClipboard<Condition> FilterListClipboard
+        public ItemClipboard<Condition>? FilterListClipboard
         {
             get => filterConditionListView.ConditionListClipboard;
             set => filterConditionListView.ConditionListClipboard = value;
         }
 
-        public ItemClipboard<Condition> FilterTreeClipboard
+        public ItemClipboard<Condition>? FilterTreeClipboard
         {
             get => filterConditionListView.ConditionTreeClipboard;
             set => filterConditionListView.ConditionTreeClipboard = value;
         }
 
-        public ItemClipboard<Condition> FindListClipboard
+        public ItemClipboard<Condition>? FindListClipboard
         {
             get => findConditionListView.ConditionListClipboard;
             set => findConditionListView.ConditionListClipboard = value;
         }
 
-        public ItemClipboard<Condition> FindTreeClipboard
+        public ItemClipboard<Condition>? FindTreeClipboard
         {
             get => findConditionListView.ConditionTreeClipboard;
             set => findConditionListView.ConditionTreeClipboard = value;

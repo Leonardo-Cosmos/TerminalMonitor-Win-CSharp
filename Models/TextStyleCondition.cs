@@ -6,9 +6,9 @@ namespace TerminalMonitor.Models
 {
     public class TextStyleCondition : ICloneable
     {
-        public TextStyle Style { get; set; }
+        public required TextStyle Style { get; set; }
 
-        public FieldCondition Condition { get; set; }
+        public required FieldCondition Condition { get; set; }
 
         public object Clone()
         {

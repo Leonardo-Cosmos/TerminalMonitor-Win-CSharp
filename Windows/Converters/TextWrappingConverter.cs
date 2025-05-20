@@ -11,11 +11,16 @@ namespace TerminalMonitor.Windows.Converters
 {
     class IntToTextWrappingConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
             if (targetType != typeof(TextWrapping))
             {
-                return null;
+                throw new ArgumentException($"Invalid value of {nameof(targetType)}");
+            }
+
+            if (value == null || value is DBNull)
+            {
+                return TextWrapping.NoWrap;
             }
 
             if (value is Int32)
@@ -24,16 +29,21 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return TextWrapping.NoWrap;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
 
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
             if (targetType != typeof(Int32))
             {
-                return null;
+                throw new ArgumentException($"Invalid value of {nameof(targetType)}");
+            }
+
+            if (value == null || value is DBNull)
+            {
+                return (Int32)TextWrapping.NoWrap;
             }
 
             if (value is TextWrapping)
@@ -42,7 +52,7 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return (Int32)TextWrapping.NoWrap;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
     }
@@ -56,20 +66,30 @@ namespace TerminalMonitor.Windows.Converters
                 { TextWrapping.Wrap, "Wrap" },
             });
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return "Unknown";
+            }
+
             if (value is TextWrapping textWrapping)
             {
                 return textDict[textWrapping];
             }
             else
             {
-                return "Unknown";
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return TextWrapping.NoWrap;
+            }
+
             if (value is string text)
             {
                 return textDict
@@ -77,7 +97,7 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return TextWrapping.NoWrap;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
     }

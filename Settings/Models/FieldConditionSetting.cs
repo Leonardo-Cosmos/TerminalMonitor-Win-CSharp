@@ -8,18 +8,18 @@ using TerminalMonitor.Matchers.Models;
 namespace TerminalMonitor.Settings.Models
 {
     record FieldConditionSetting(string FieldKey, string MatchOperator, string TargetValue,
-        string Id, string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
+        string Id, string? Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
         : ConditionSetting(Id: Id, Name: Name,
             IsInverted: IsInverted, DefaultResult: DefaultResult, IsDisabled: IsDisabled);
 
     static class FieldConditionSettings
     {
-        private static readonly IReadOnlyDictionary<string, TextMatchOperator> matchOperatorDict
+        private static readonly ReadOnlyDictionary<string, TextMatchOperator> matchOperatorDict
             = InitMatchOperatorDict();
 
-        private static IReadOnlyDictionary<string, TextMatchOperator> InitMatchOperatorDict()
+        private static ReadOnlyDictionary<string, TextMatchOperator> InitMatchOperatorDict()
         {
-            Dictionary<string, TextMatchOperator> dict = new();
+            Dictionary<string, TextMatchOperator> dict = [];
             var matchOperators = Enum.GetValues(typeof(TextMatchOperator));
             foreach (var item in matchOperators)
             {
@@ -39,9 +39,9 @@ namespace TerminalMonitor.Settings.Models
 
         static TextMatchOperator StringToOperator(string str)
         {
-            if (str != null && matchOperatorDict.ContainsKey(str))
+            if (str != null && matchOperatorDict.TryGetValue(str, out TextMatchOperator value))
             {
-                return matchOperatorDict[str];
+                return value;
             }
             else
             {
@@ -49,7 +49,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static FieldConditionSetting Save(FieldCondition obj)
+        public static FieldConditionSetting? Save(FieldCondition? obj)
         {
             if (obj == null)
             {
@@ -68,20 +68,19 @@ namespace TerminalMonitor.Settings.Models
                 );
         }
 
-        public static FieldCondition Load(FieldConditionSetting setting)
+        public static FieldCondition? Load(FieldConditionSetting? setting)
         {
             if (setting == null)
             {
                 return null;
             }
 
-            return new FieldCondition()
+            return new FieldCondition(
+                setting.Id ?? Guid.NewGuid().ToString(),
+                setting.Name, setting.FieldKey,
+                StringToOperator(setting.MatchOperator),
+                setting.TargetValue)
             {
-                FieldKey = setting.FieldKey,
-                MatchOperator = StringToOperator(setting.MatchOperator),
-                TargetValue = setting.TargetValue,
-                Id = setting.Id ?? Guid.NewGuid().ToString(),
-                Name = setting.Name,
                 IsInverted = setting.IsInverted,
                 DefaultResult = setting.DefaultResult,
                 IsDisabled = setting.IsDisabled,

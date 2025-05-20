@@ -15,6 +15,6 @@ namespace TerminalMonitor.Matchers.Models
 
         public FieldKeyType Type { get; init; }
 
-        public string Path { get; init; }
+        public string? Path { get; init; }
     }
 }

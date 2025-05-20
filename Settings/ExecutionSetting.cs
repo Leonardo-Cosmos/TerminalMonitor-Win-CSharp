@@ -7,10 +7,10 @@ namespace TerminalMonitor.Settings
     [Obsolete]
     class ExecutionSetting
     {
-        public string CommandName { get; set; }
+        public string? CommandName { get; set; }
 
-        public string ArgumentsText { get; set; }
+        public string? ArgumentsText { get; set; }
 
-        public string WorkingDirectory { get; set; }
+        public string? WorkingDirectory { get; set; }
     }
 }

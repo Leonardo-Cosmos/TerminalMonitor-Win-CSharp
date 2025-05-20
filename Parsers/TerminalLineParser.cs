@@ -19,16 +19,16 @@ namespace TerminalMonitor.Parsers
             Dictionary<string, object> jsonDict;
             Dictionary<string, object> jsonProperties;
             var trimmedText = text.Trim();
-            if ((trimmedText.StartsWith("{") && trimmedText.EndsWith("}")) ||
-                (trimmedText.StartsWith("[") && trimmedText.EndsWith("]")))
+            if ((trimmedText.StartsWith('{') && trimmedText.EndsWith('}')) ||
+                (trimmedText.StartsWith('[') && trimmedText.EndsWith(']')))
             {
                 jsonDict = JsonParser.ParseTerminalLine(text);
                 jsonProperties = JsonParser.FlattenJsonPath(jsonDict);
             }
             else
             {
-                jsonDict = new(0);
-                jsonProperties = new(0);
+                jsonDict = [];
+                jsonProperties = [];
             }
 
             Dictionary<string, object> systemFieldDict = new()
@@ -39,7 +39,7 @@ namespace TerminalMonitor.Parsers
                 { "plainText", text },
             };
 
-            Dictionary<string, TerminalLineFieldDto> lineFields = new();
+            Dictionary<string, TerminalLineFieldDto> lineFields = [];
             MergeKeyValuePairs(lineFields, systemFieldDict, "system.");
             MergeKeyValuePairs(lineFields, jsonProperties, "json.");
 
@@ -62,7 +62,7 @@ namespace TerminalMonitor.Parsers
                     Key = kvPair.Key,
                     FieldKey = $"{keyPrefix!}{kvPair.Key}",
                     Value = kvPair.Value,
-                    Text = (kvPair.Value ?? "%null%").ToString(),
+                    Text = kvPair.Value?.ToString() ?? "%null%",
                 });
             }
         }

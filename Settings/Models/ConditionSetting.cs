@@ -6,21 +6,18 @@ using TerminalMonitor.Matchers.Models;
 namespace TerminalMonitor.Settings.Models
 {
     [JsonConverter(typeof(ConditionSettingConverter))]
-    abstract record ConditionSetting(string Id, string Name, bool IsInverted, bool DefaultResult, bool IsDisabled)
-    {
-        public string ConditionType { get; set; }
-    }
+    abstract record ConditionSetting(string Id, string? Name, bool IsInverted, bool DefaultResult, bool IsDisabled);
 
     static class ConditionSettings
     {
-        public static ConditionSetting Save(Condition obj)
+        public static ConditionSetting? Save(Condition? obj)
         {
             if (obj == null)
             {
                 return null;
             }
 
-            ConditionSetting setting;
+            ConditionSetting? setting;
             if (obj is FieldCondition fieldCondition)
             {
                 setting = FieldConditionSettings.Save(fieldCondition);
@@ -36,14 +33,14 @@ namespace TerminalMonitor.Settings.Models
             return setting;
         }
 
-        public static Condition Load(ConditionSetting setting)
+        public static Condition? Load(ConditionSetting? setting)
         {
             if (setting == null)
             {
                 return null;
             }
 
-            Condition condition;
+            Condition? condition;
             if (setting is FieldConditionSetting fieldConditionSetting)
             {
                 condition = FieldConditionSettings.Load(fieldConditionSetting);

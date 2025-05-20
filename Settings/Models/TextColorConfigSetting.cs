@@ -3,11 +3,11 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record TextColorConfigSetting(string Mode, ColorSetting Color);
+    record TextColorConfigSetting(string? Mode, ColorSetting? Color);
 
     static class TextColorConfigSettings
     {
-        public static TextColorConfigSetting Save(TextColorConfig obj)
+        public static TextColorConfigSetting? Save(TextColorConfig? obj)
         {
             if (obj == null)
             {
@@ -20,7 +20,7 @@ namespace TerminalMonitor.Settings.Models
                 );
         }
 
-        public static TextColorConfig Load(TextColorConfigSetting setting)
+        public static TextColorConfig? Load(TextColorConfigSetting? setting)
         {
             if (setting == null)
             {

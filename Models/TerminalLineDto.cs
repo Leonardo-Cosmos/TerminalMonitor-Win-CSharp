@@ -11,21 +11,21 @@ namespace TerminalMonitor.Models
 {
     public class TerminalLineDto
     {
-        public string Id { get; set; }
+        public required string Id { get; init; }
 
-        public DateTime Timestamp { get; set; }
+        public required DateTime Timestamp { get; init; }
         
-        public string PlainText { get; set; }
+        public required string PlainText { get; init; }
 
         /// <summary>
         /// Deserialized JSON object by hierarchy.
         /// </summary>
-        public Dictionary<string, object> JsonObjectDict { get; set; }
+        public required Dictionary<string, object> JsonObjectDict { get; set; }
 
         /// <summary>
         /// Line fields with full path as key.
         /// </summary>
-        public Dictionary<string, TerminalLineFieldDto> LineFieldDict { get; set; }
+        public required Dictionary<string, TerminalLineFieldDto> LineFieldDict { get; set; }
 
     }
 }

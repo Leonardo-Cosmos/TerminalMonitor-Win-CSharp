@@ -7,9 +7,9 @@ namespace TerminalMonitor.Windows.Controls
 {
     class CommandListViewDataContextVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
@@ -26,16 +26,16 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        public ICommand AddCommand { get; init; }
+        public required ICommand AddCommand { get; init; }
 
-        public ICommand RemoveCommand { get; init; }
+        public required ICommand RemoveCommand { get; init; }
 
-        public ICommand EditCommand { get; init; }
+        public required ICommand EditCommand { get; init; }
 
-        public ICommand MoveUpCommand { get; init; }
+        public required ICommand MoveUpCommand { get; init; }
 
-        public ICommand MoveDownCommand { get; init; }
+        public required ICommand MoveDownCommand { get; init; }
 
-        public ICommand StartCommand { get; init; }
+        public required ICommand StartCommand { get; init; }
     }
 }

@@ -11,11 +11,16 @@ namespace TerminalMonitor.Windows.Converters
 {
     class IntToHorizontalAlignmentConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
             if (targetType != typeof(HorizontalAlignment))
             {
-                return null;
+                throw new ArgumentException($"Invalid value of {nameof(targetType)}");
+            }
+
+            if (value == null || value is DBNull)
+            {
+                return default(HorizontalAlignment);
             }
 
             if (value is Int32)
@@ -24,16 +29,20 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return HorizontalAlignment.Left;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
-
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
             if (targetType != typeof(Int32))
             {
-                return null;
+                return new ArgumentException($"Invalid value of {nameof(targetType)}");
+            }
+
+            if (value == null || value is DBNull)
+            {
+                return 0;
             }
 
             if (value is HorizontalAlignment)
@@ -42,18 +51,23 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return 0;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
     }
 
     class IntToVerticalAlignmentConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
             if (targetType != typeof(VerticalAlignment))
             {
-                return null;
+                throw new ArgumentException($"Invalid value of {nameof(targetType)}");
+            }
+
+            if (value == null || value is DBNull)
+            {
+                return default(VerticalAlignment);
             }
 
             if (value is Int32)
@@ -62,16 +76,21 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return VerticalAlignment.Top;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
 
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
             if (targetType != typeof(Int32))
             {
-                return null;
+                throw new ArgumentException($"Invalid value of {nameof(targetType)}");
+            }
+
+            if (value == null || value is DBNull)
+            {
+                return 0;
             }
 
             if (value is VerticalAlignment)
@@ -80,18 +99,23 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return 0;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
     }
 
     class IntToTextAlignmentConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
             if (targetType != typeof(TextAlignment))
             {
-                return null;
+                throw new ArgumentException($"Invalid value of {nameof(targetType)}");
+            }
+
+            if (value == null || value is DBNull)
+            {
+                return default(TextAlignment);
             }
 
             if (value is Int32)
@@ -100,16 +124,21 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return TextAlignment.Left;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
 
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
             if (targetType != typeof(Int32))
             {
-                return null;
+                throw new ArgumentException($"Invalid value of {nameof(targetType)}");
+            }
+
+            if (value == null || value is DBNull)
+            {
+                return 0;
             }
 
             if (value is TextAlignment)
@@ -118,7 +147,7 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return 0;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
     }
@@ -134,20 +163,30 @@ namespace TerminalMonitor.Windows.Converters
                 { HorizontalAlignment.Stretch, "Stretch" },
             });
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return "Unknown";
+            }
+
             if (value is HorizontalAlignment horizontalAlignment)
             {
                 return textDict[horizontalAlignment];
             }
             else
             {
-                return "Unknown";
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return default(HorizontalAlignment);
+            }
+
             if (value is string text)
             {
                 return textDict
@@ -155,7 +194,7 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return HorizontalAlignment.Left;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
     }
@@ -171,20 +210,30 @@ namespace TerminalMonitor.Windows.Converters
                 { VerticalAlignment.Stretch, "Stretch" },
             });
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return "Unknown";
+            }
+
             if (value is VerticalAlignment verticalAlignment)
             {
                 return textDict[verticalAlignment];
             }
             else
             {
-                return "Unknown";
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return default(VerticalAlignment);
+            }
+
             if (value is string text)
             {
                 return textDict
@@ -192,7 +241,7 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return VerticalAlignment.Top;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
     }
@@ -208,20 +257,30 @@ namespace TerminalMonitor.Windows.Converters
                 { TextAlignment.Justify, "Justify" },
             });
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return "Unknown";
+            }
+
             if (value is TextAlignment textAlignment)
             {
                 return textDict[textAlignment];
             }
             else
             {
-                return "Unknown";
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return default(TextAlignment);
+            }
+
             if (value is string text)
             {
                 return textDict
@@ -229,7 +288,7 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return TextAlignment.Left;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
     }

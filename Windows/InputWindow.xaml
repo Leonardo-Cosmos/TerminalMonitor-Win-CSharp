@@ -21,7 +21,7 @@
         <TextBox Name="txtText" Grid.Row="1" MinWidth="250" Text="{Binding Text}" />
 
         <WrapPanel Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="0,15,0,0">
-            <Button Name="btnDialogOk" IsDefault="True" Click="btnDialogOk_Click" MinWidth="60">_Ok</Button>
+            <Button Name="btnDialogOk" IsDefault="True" Click="BtnDialogOk_Click" MinWidth="60">_Ok</Button>
             <Button Name="btnDialogCancel" IsCancel="True" MinWidth="60">_Cancel</Button>
         </WrapPanel>
     </Grid>
