@@ -18,9 +18,9 @@ namespace TerminalMonitor.Windows.Converters
                 throw new ArgumentException($"Invalid value of {nameof(targetType)}");
             }
 
-            if (value == null)
+            if (value == null || value is DBNull)
             {
-                return HorizontalAlignment.Left;
+                return default(HorizontalAlignment);
             }
 
             if (value is Int32)
@@ -40,7 +40,7 @@ namespace TerminalMonitor.Windows.Converters
                 return new ArgumentException($"Invalid value of {nameof(targetType)}");
             }
 
-            if (value == null)
+            if (value == null || value is DBNull)
             {
                 return 0;
             }
@@ -65,9 +65,9 @@ namespace TerminalMonitor.Windows.Converters
                 throw new ArgumentException($"Invalid value of {nameof(targetType)}");
             }
 
-            if (value == null)
+            if (value == null || value is DBNull)
             {
-                return VerticalAlignment.Top;
+                return default(VerticalAlignment);
             }
 
             if (value is Int32)
@@ -88,7 +88,7 @@ namespace TerminalMonitor.Windows.Converters
                 throw new ArgumentException($"Invalid value of {nameof(targetType)}");
             }
 
-            if (value == null)
+            if (value == null || value is DBNull)
             {
                 return 0;
             }
@@ -113,9 +113,9 @@ namespace TerminalMonitor.Windows.Converters
                 throw new ArgumentException($"Invalid value of {nameof(targetType)}");
             }
 
-            if (value == null)
+            if (value == null || value is DBNull)
             {
-                return TextAlignment.Left;
+                return default(TextAlignment);
             }
 
             if (value is Int32)
@@ -136,7 +136,7 @@ namespace TerminalMonitor.Windows.Converters
                 throw new ArgumentException($"Invalid value of {nameof(targetType)}");
             }
 
-            if (value == null)
+            if (value == null || value is DBNull)
             {
                 return 0;
             }
@@ -165,7 +165,7 @@ namespace TerminalMonitor.Windows.Converters
 
         public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
             {
                 return "Unknown";
             }
@@ -182,9 +182,9 @@ namespace TerminalMonitor.Windows.Converters
 
         public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
             {
-                return HorizontalAlignment.Left;
+                return default(HorizontalAlignment);
             }
 
             if (value is string text)
@@ -212,7 +212,7 @@ namespace TerminalMonitor.Windows.Converters
 
         public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
             {
                 return "Unknown";
             }
@@ -229,9 +229,9 @@ namespace TerminalMonitor.Windows.Converters
 
         public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
             {
-                return VerticalAlignment.Top;
+                return default(VerticalAlignment);
             }
 
             if (value is string text)
@@ -259,7 +259,7 @@ namespace TerminalMonitor.Windows.Converters
 
         public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
             {
                 return "Unknown";
             }
@@ -276,9 +276,9 @@ namespace TerminalMonitor.Windows.Converters
 
         public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
             {
-                return TextAlignment.Left;
+                return default(TextAlignment);
             }
 
             if (value is string text)

@@ -23,7 +23,7 @@ namespace TerminalMonitor.Windows.Converters
 
         public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
             {
                 return "Unknown";
             }
@@ -40,9 +40,9 @@ namespace TerminalMonitor.Windows.Converters
 
         public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
             {
-                return TextColorMode.Static;
+                return default(TextColorMode);
             }
 
             if (value is string text)

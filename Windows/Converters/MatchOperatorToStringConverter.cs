@@ -25,7 +25,7 @@ namespace TerminalMonitor.Windows.Converters
 
         public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
             {
                 return "?";
             }
@@ -42,9 +42,9 @@ namespace TerminalMonitor.Windows.Converters
 
         public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
             {
-                return TextMatchOperator.None;
+                return default(TextMatchOperator);
             }
 
             if (value is string text)

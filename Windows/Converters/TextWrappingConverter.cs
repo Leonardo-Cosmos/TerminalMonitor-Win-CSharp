@@ -18,13 +18,18 @@ namespace TerminalMonitor.Windows.Converters
                 throw new ArgumentException($"Invalid value of {nameof(targetType)}");
             }
 
+            if (value == null || value is DBNull)
+            {
+                return TextWrapping.NoWrap;
+            }
+
             if (value is Int32)
             {
                 return (TextWrapping)value;
             }
             else
             {
-                return TextWrapping.NoWrap;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
 
         }
@@ -36,13 +41,18 @@ namespace TerminalMonitor.Windows.Converters
                 throw new ArgumentException($"Invalid value of {nameof(targetType)}");
             }
 
+            if (value == null || value is DBNull)
+            {
+                return (Int32)TextWrapping.NoWrap;
+            }
+
             if (value is TextWrapping)
             {
                 return (Int32)value;
             }
             else
             {
-                return (Int32)TextWrapping.NoWrap;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
     }
@@ -58,7 +68,7 @@ namespace TerminalMonitor.Windows.Converters
 
         public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
             {
                 return "Unknown";
             }
@@ -75,7 +85,7 @@ namespace TerminalMonitor.Windows.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
+            if (value == null || value is DBNull)
             {
                 return TextWrapping.NoWrap;
             }

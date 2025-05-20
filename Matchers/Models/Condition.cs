@@ -24,7 +24,7 @@ namespace TerminalMonitor.Matchers.Models
 
         }
 
-        protected Condition() : this(Guid.NewGuid().ToString())
+        protected Condition() : this(name: null)
         {
 
         }
