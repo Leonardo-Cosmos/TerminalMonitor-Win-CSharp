@@ -2,6 +2,9 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TerminalMonitor.Properties" GeneratedClassName="TerminalSettings">
   <Profiles />
   <Settings>
+    <Setting Name="Upgraded" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
     <Setting Name="GridViewColumns" Type="System.String" Scope="User">
       <Value Profile="(Default)">{}</Value>
     </Setting>

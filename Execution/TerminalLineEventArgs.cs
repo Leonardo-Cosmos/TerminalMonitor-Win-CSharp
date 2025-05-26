@@ -5,7 +5,7 @@ namespace TerminalMonitor.Execution
 {
     class TerminalLineEventArgs : EventArgs
     {
-        public string Line { get; init; }
+        public required string Line { get; init; }
     }
 
     delegate void TerminalLineEventHandler(object sender, TerminalLineEventArgs e);

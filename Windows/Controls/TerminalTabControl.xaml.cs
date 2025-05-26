@@ -17,9 +17,11 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using TerminalMonitor.Clipboard;
 using TerminalMonitor.Execution;
+using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
 using TerminalMonitor.Models.Settings;
 using TerminalMonitor.Parsers;
+using TerminalMonitor.Terminal;
 using Condition = TerminalMonitor.Matchers.Models.Condition;
 
 namespace TerminalMonitor.Windows.Controls
@@ -27,15 +29,13 @@ namespace TerminalMonitor.Windows.Controls
     /// <summary>
     /// Interaction logic for TerminalTabControl.xaml
     /// </summary>
-    public partial class TerminalTabControl : UserControl, ITerminalLineSupervisor
+    public partial class TerminalTabControl : UserControl
     {
-        private ITerminalLineProducer lineProducer;
+        private ITerminalLineProducer? terminalLineProducer;
 
-        private DispatcherTimer readTerminalTimer;
+        private DispatcherTimer? readTerminalTimer;
 
-        private readonly List<TerminalLineDto> terminalLineDtos = new();
-
-        private readonly List<TerminalView> terminalViews = new();
+        private readonly TerminalSupervisor terminalLineSupervisor = new();
 
         private readonly DispatcherTimer selectTabTimer;
 
@@ -45,14 +45,18 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly ItemClipboard<FieldDisplayDetail> fieldClipboard = new();
 
-        private readonly ItemClipboard<Condition> filterClipboard = new();
+        private readonly ItemClipboard<TextStyleCondition> styleConditionClipboard = new();
+
+        private readonly ItemClipboard<Condition> conditionListClipboard = new();
+
+        private readonly ItemClipboard<Condition> conditionTreeClipboard = new();
 
         public TerminalTabControl()
         {
             InitializeComponent();
 
-            var defaultTab = tbCtrl.Items[0] as TabItem;
-            GetTabTerminalView(defaultTab).LineSupervisor = this;
+            var defaultTab = (tbCtrl.Items[0] as TabItem)!;
+            GetTabTerminalView(defaultTab).TerminalLineSupervisor = terminalLineSupervisor;
 
             selectTabTimer = new();
             selectTabTimer.Tick += (sender, e) =>
@@ -86,14 +90,23 @@ namespace TerminalMonitor.Windows.Controls
 
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
-            var self = sender as Button;
+            var self = (sender as Button)!;
 
-            RemoveTab(self.Tag as string);
+            var tab = GetTab((self.Tag as string)!);
+            var tabConfig = GetTabConfig(tab)!;
+
+            var result = MessageBox.Show($"Do you want to close tab \"{tabConfig.Name}\"?\nAll settings in this tab will be deleted.", "Close Terminal Tab",
+                MessageBoxButton.YesNo, MessageBoxImage.None);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                RemoveTab((self.Tag as string)!);
+            }
         }
 
         private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            var self = sender as Border;
+            var self = (sender as Border)!;
 
             if ((self.Tag as string) == "+")
             {
@@ -103,13 +116,13 @@ namespace TerminalMonitor.Windows.Controls
 
         private void MnRename_Click(object sender, RoutedEventArgs e)
         {
-            var tab = GetMenuTab(sender as MenuItem);
+            var tab = GetMenuTab((sender as MenuItem)!);
 
             InputWindow window = new()
             {
                 Title = "Rename tab",
                 Message = "New tab name: ",
-                Text = tab.Header as string,
+                Text = (tab.Header as string)!,
             };
 
             if (window.ShowDialog() ?? false)
@@ -120,7 +133,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void MnMoveLeft_Click(object sender, RoutedEventArgs e)
         {
-            var tab = GetMenuTab(sender as MenuItem);
+            var tab = GetMenuTab((sender as MenuItem)!);
 
             var index = tbCtrl.Items.IndexOf(tab);
             if (index > 0)
@@ -136,7 +149,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void MnMoveRight_Click(object sender, RoutedEventArgs e)
         {
-            var tab = GetMenuTab(sender as MenuItem);
+            var tab = GetMenuTab((sender as MenuItem)!);
 
             var index = tbCtrl.Items.IndexOf(tab);
             if (index < tbCtrl.Items.Count - 2)
@@ -153,8 +166,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private void MnDuplicate_Click(object sender, RoutedEventArgs e)
         {
-            var tab = GetMenuTab(sender as MenuItem);
-            var terminalConfig = GetTabConfig(tab);
+            var tab = GetMenuTab((sender as MenuItem)!);
+            var terminalConfig = GetTabConfig(tab)!;
             var index = tbCtrl.Items.IndexOf(tab);
 
             TerminalConfig config = (TerminalConfig)terminalConfig.Clone();
@@ -166,9 +179,9 @@ namespace TerminalMonitor.Windows.Controls
 
         private TabItem GetMenuTab(MenuItem menuItem)
         {
-            var menu = menuItem.Parent as ContextMenu;
-            var border = menu.PlacementTarget as Border;
-            return GetTab(border.Tag as string);
+            var menu = (menuItem.Parent as ContextMenu)!;
+            var border = (menu.PlacementTarget as Border)!;
+            return GetTab((border.Tag as string)!);
         }
 
         private void StartTimer(ITerminalLineProducer producer)
@@ -176,11 +189,9 @@ namespace TerminalMonitor.Windows.Controls
             readTerminalTimer = new();
             readTerminalTimer.Tick += (sender, e) =>
             {
-                var terminalLines = producer.ReadTerminalLines();
-                foreach (var terminalLine in terminalLines)
-                {
-                    ParseTerminalLine(terminalLine.Text, terminalLine.ExecutionName);
-                }
+                var readTerminalLineDtos = producer.ReadTerminalLines();
+
+                terminalLineSupervisor.AddTerminalLines(readTerminalLineDtos);
 
                 if (producer.IsCompleted)
                 {
@@ -193,6 +204,10 @@ namespace TerminalMonitor.Windows.Controls
 
         private void StopTimer()
         {
+            if (readTerminalTimer == null)
+            {
+                return;
+            }
             readTerminalTimer.Stop();
             readTerminalTimer = null;
         }
@@ -215,59 +230,59 @@ namespace TerminalMonitor.Windows.Controls
             readTerminalTimer.Start();
         }
 
-        private void ParseTerminalLine(string text, string executionName)
-        {
-            TerminalLineDto terminalLineDto =
-                TerminalLineParser.ParseTerminalLine(text, executionName);
-
-            terminalLineDtos.Add(terminalLineDto);
-
-            OnTerminalLineAdded(terminalLineDto);
-        }
-
-        private static TerminalConfig GetTabConfig(TabItem tab)
+        private static TerminalConfig? GetTabConfig(TabItem tab)
         {
             var terminalView = GetTabTerminalView(tab);
             return new TerminalConfig()
             {
-                Id = tab.Tag as string,
-                Name = tab.Header as string,
+                Id = (tab.Tag as string)!,
+                Name = (tab.Header as string)!,
                 VisibleFields = terminalView.VisibleFields,
                 FilterCondition = terminalView.FilterCondition,
+                FindCondition = terminalView.FindCondition,
             };
         }
 
         private static TerminalView GetTabTerminalView(TabItem tab)
         {
-            return tab.Content as TerminalView;
+            return (tab.Content as TerminalView)!;
         }
 
         private TabItem GetTab(string id)
         {
-            TabItem matchedItem = null;
+            TabItem matchedItem;
             foreach (var item in tbCtrl.Items)
             {
                 if (item is TabItem tab && (tab.Tag as string) == id)
                 {
                     matchedItem = tab;
-                    break;
+                    return matchedItem;
                 }
             }
-            return matchedItem;
+            throw new ArgumentException($"Invalid {nameof(id)} {id}");
         }
 
         private TabItem CreateTab(TerminalConfig config)
         {
-            TabItem tab = new();
-            tab.Tag = config.Id ?? Guid.NewGuid().ToString();
-            tab.Header = config.Name ?? "Unknown View";
+            TabItem tab = new()
+            {
+                Tag = config.Id ?? Guid.NewGuid().ToString(),
+                Header = config.Name ?? "Unknown View"
+            };
 
-            TerminalView terminalView = new();
-            terminalView.VisibleFields = config.VisibleFields;
-            terminalView.FilterCondition = config.FilterCondition;
-            terminalView.FieldClipboard = fieldClipboard;
-            terminalView.FilterClipboard = filterClipboard;
-            terminalView.LineSupervisor = this;
+            TerminalView terminalView = new()
+            {
+                VisibleFields = config.VisibleFields?.ToList() ?? [],
+                FilterCondition = config.FilterCondition ?? GroupCondition.Empty,
+                FindCondition = config.FindCondition ?? GroupCondition.Empty,
+                FieldClipboard = fieldClipboard,
+                StyleConditionClipboard = styleConditionClipboard,
+                FilterListClipboard = conditionListClipboard,
+                FilterTreeClipboard = conditionTreeClipboard,
+                FindListClipboard = conditionListClipboard,
+                FindTreeClipboard = conditionTreeClipboard,
+                TerminalLineSupervisor = terminalLineSupervisor
+            };
             tab.Content = terminalView;
 
             return tab;
@@ -295,7 +310,7 @@ namespace TerminalMonitor.Windows.Controls
         private void RemoveTab(TabItem tab)
         {
             var terminalView = GetTabTerminalView(tab);
-            terminalView.LineSupervisor = null;
+            terminalView.TerminalLineSupervisor = null;
 
             tbCtrl.Items.Remove(tab);
         }
@@ -326,15 +341,15 @@ namespace TerminalMonitor.Windows.Controls
         private IEnumerable<TerminalConfig> GetTerminalConfigs()
         {
             var columnSettingDict = JsonSerializer.Deserialize<Dictionary<string, GridViewColumnSetting[]>>(
-                Properties.TerminalSettings.Default.GridViewColumns);
+                Properties.TerminalSettings.Default.GridViewColumns)!;
 
-            List<TerminalConfig> terminalConfigs = new();
+            List<TerminalConfig> terminalConfigs = [];
             var tabCount = tbCtrl.Items.Count;
             for (var i = 0; i < tabCount - 1; i++)
             {
-                var tab = tbCtrl.Items[i] as TabItem;
+                var tab = (tbCtrl.Items[i] as TabItem)!;
 
-                var terminalConfig = GetTabConfig(tab);
+                var terminalConfig = GetTabConfig(tab)!;
                 terminalConfigs.Add(terminalConfig);
 
                 /*
@@ -345,7 +360,7 @@ namespace TerminalMonitor.Windows.Controls
                 var isValidColumnSettings = columnSettings.Any(columnSetting => columnSetting.Width > 0);
                 if (isValidColumnSettings)
                 {
-                    columnSettingDict[terminalConfig.Id] = columnSettings.ToArray();
+                    columnSettingDict[terminalConfig.Id] = [.. columnSettings];
                 }
             }
 
@@ -355,21 +370,21 @@ namespace TerminalMonitor.Windows.Controls
             return terminalConfigs.AsEnumerable();
         }
 
-        private void SetTerminalConfigs(IEnumerable<TerminalConfig> value)
+        private void SetTerminalConfigs(IEnumerable<TerminalConfig>? value)
         {
             var columnSettingDict = JsonSerializer.Deserialize<Dictionary<string, GridViewColumnSetting[]>>(
-                Properties.TerminalSettings.Default.GridViewColumns);
+                Properties.TerminalSettings.Default.GridViewColumns)!;
 
             changingTab = true;
 
             /*
              * Remove existing tabs.
              */
-            List<TabItem> removeTabs = new();
+            List<TabItem> removeTabs = [];
             var tabCount = tbCtrl.Items.Count;
             for (var i = 0; i < tabCount - 1; i++)
             {
-                var tab = tbCtrl.Items[i] as TabItem;
+                var tab = (tbCtrl.Items[i] as TabItem)!;
 
                 removeTabs.Add(tab);
             }
@@ -403,11 +418,11 @@ namespace TerminalMonitor.Windows.Controls
                 /*
                  * Set terminal view UI settings if it was saved.
                  */
-                if (columnSettingDict.ContainsKey(terminalConfig.Id))
+                if (columnSettingDict.TryGetValue(terminalConfig.Id, out GridViewColumnSetting[]? columnSetting))
                 {
                     var tab = GetTab(terminalConfig.Id);
                     var terminalView = GetTabTerminalView(tab);
-                    terminalView.ColumnSettings = columnSettingDict[terminalConfig.Id];
+                    terminalView.ColumnSettings = columnSetting;
                 }
             }
 
@@ -416,52 +431,35 @@ namespace TerminalMonitor.Windows.Controls
             changingTab = false;
         }
 
-        protected void OnTerminalLineAdded(TerminalLineDto terminalLineDto)
+        private void LineProducer_Started(object? sender, EventArgs e)
         {
-            TerminalLineEventArgs e = new()
+            if (terminalLineProducer != null)
             {
-                TerminalLine = terminalLineDto,
-            };
-
-            TerminalLineAdded?.Invoke(this, e);
-        }
-
-        public TerminalLineCollection TerminalLines
-        {
-            get
-            {
-                return new TerminalLineCollection(terminalLineDtos.AsEnumerable());
+                StartTimer(terminalLineProducer);
             }
         }
 
-        public event TerminalLineEventHandler TerminalLineAdded;
-
-        private void LineProducer_Started(object sender, EventArgs e)
+        public ITerminalLineProducer? TerminalLineProducer
         {
-            StartTimer(lineProducer);
-        }
-
-        public ITerminalLineProducer LineProducer
-        {
-            get => lineProducer;
+            get => terminalLineProducer;
             set
             {
-                if (lineProducer != value && lineProducer != null)
+                if (terminalLineProducer != value && terminalLineProducer != null)
                 {
                     StopTimer();
-                    lineProducer.Started -= LineProducer_Started;
+                    terminalLineProducer.Started -= LineProducer_Started;
                 }
 
-                lineProducer = value;
+                terminalLineProducer = value;
 
-                if (lineProducer != null)
+                if (terminalLineProducer != null)
                 {
-                    lineProducer.Started += LineProducer_Started;
+                    terminalLineProducer.Started += LineProducer_Started;
                 }
             }
         }
 
-        public IEnumerable<TerminalConfig> Terminals
+        public IEnumerable<TerminalConfig>? Terminals
         {
             get => GetTerminalConfigs();
             set => SetTerminalConfigs(value);

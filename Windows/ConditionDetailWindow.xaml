@@ -67,25 +67,39 @@
             </Style>
         </ResourceDictionary>
     </Window.Resources>
-    <StackPanel Orientation="Vertical">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
         <RadioButton Name="rdBtnSingle" Grid.Row="0" Content="Use single field condtion" 
                      GroupName="condition" Checked="RdBtnCondition_Checked" />        
-        <GroupBox Name="grpBxSingleField" Header="Single Field">
+        <GroupBox Name="grpBxSingleField" Grid.Row="1" Header="Single Field">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <controls:FieldConditionView x:Name="conditionView" Grid.Row="1" />
+                <controls:FieldConditionView x:Name="fieldConditionView" Grid.Row="1" />
             </Grid>
         </GroupBox>
 
-        <RadioButton Name="rdBtnMultiple" Content="Use multiple field condtion"
+        <RadioButton Name="rdBtnMultiple" Grid.Row="2" Content="Use multiple field condtion"
                      GroupName="condition" Checked="RdBtnCondition_Checked" />
-        <GroupBox Name="grpBxMultipleField" Header="Multiple Field">
-            <StackPanel>
-                <Grid>
+        <GroupBox Name="grpBxMultipleField" Grid.Row="3" Header="Multiple Field">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                
+                <Grid Name="grdConditionName" Grid.Row="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
@@ -105,7 +119,7 @@
                     </TextBox>
                 </Grid>
 
-                <Grid>
+                <Grid Name="grdConditionButtons" Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -133,20 +147,39 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Button Name="btnAddField" Grid.Column="0" Width="20" Content="+" Click="BtnAddField_Click" />
-                        <Button Name="btnAddGroup" Grid.Column="1" Width="20" Content="+{}" Click="BtnAddGroup_Click" />
-                        <Button Name="btnDelete" Grid.Column="2" Width="20" Content="-" Click="BtnDelete_Click" />
-                        <Button Name="btnMoveUp" Grid.Column="3"  Width="20" Content="↑" ToolTip="Move Up" Click="BtnMoveUp_Click" />
-                        <Button Name="btnMoveDown" Grid.Column="4"  Width="20" Content="↓" ToolTip="Move Down" Click="BtnMoveDown_Click" />
+                        <Button Name="btnAddField" Grid.Column="0" Width="20" Content="➕" ToolTip="Add Field" Command="{Binding Path=AddFieldCommand}" />
+                        <Button Name="btnAddGroup" Grid.Column="1" Width="30" Content="➕{}" ToolTip="Add Group" Command="{Binding Path=AddGroupCommand}" />
+                        <Button Name="btnRemove" Grid.Column="2" Width="20" Content="➖" ToolTip="Remove" Command="{Binding Path=RemoveCommand}" />
+                        <Button Name="btnMoveUp" Grid.Column="3"  Width="20" Content="↑" ToolTip="Move Up" Command="{Binding Path=MoveUpCommand}" />
+                        <Button Name="btnMoveDown" Grid.Column="4"  Width="20" Content="↓" ToolTip="Move Down" Command="{Binding Path=MoveDownCommand}" />
                     </Grid>
                 </Grid>
 
-                <TreeView Name="trConditions" MinHeight="50">
+                <TreeView Name="trConditions" Grid.Row="2" MinHeight="50" SelectedItemChanged="TrConditions_SelectedItemChanged" MouseDown="TrConditions_MouseDown">
+                    <TreeView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Cut" Icon="✂" Command="{Binding Path=CutCommand}" />
+                            <MenuItem Header="Copy" Icon="📄" Command="{Binding Path=CopyCommand}" />
+                            <MenuItem Header="Paste" Icon="📋" Command="{Binding Path=PasteCommnad}" />
+                            <Separator />
+                            <MenuItem Header="Add Field" Icon="➕" Command="{Binding Path=AddFieldCommand}" />
+                            <MenuItem Header="Add Group" Icon="➕{}" Command="{Binding Path=AddGroupCommand}" />
+                            <MenuItem Header="Remove" Icon="➖" Command="{Binding Path=RemoveCommand}" />
+                        </ContextMenu>
+                    </TreeView.ContextMenu>
                     <TreeView.Resources>
+                        <Style x:Key="borderNode" TargetType="Border">
+                            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" />
+                            <Setter Property="BorderThickness" Value="1" />
+                            <Setter Property="Margin" Value="0, 2, 0, 2" />
+                            <Setter Property="Padding" Value="5, 5, 10, 5" />
+                        </Style>
+                        
                         <HierarchicalDataTemplate DataType="{x:Type local:GroupConditionNodeVO}" ItemsSource="{Binding Conditions}">
-                            <Border BorderBrush="GreenYellow" BorderThickness="1">
+                            <Border Style="{StaticResource borderNode}">
                                 <StackPanel Orientation="Horizontal">
-                                    <ComboBox ItemsSource="{StaticResource GroupMatchModes}" SelectedValue="{Binding MatchMode}">
+                                    <ComboBox Margin="0, 0, 10, 0"
+                                        ItemsSource="{StaticResource GroupMatchModes}" SelectedValue="{Binding MatchMode}">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Converter={StaticResource MatchModeToStringConverter}}" />
@@ -161,7 +194,7 @@
                         </HierarchicalDataTemplate>
                         
                         <DataTemplate DataType="{x:Type local:FieldConditionNodeVO}">
-                            <Border BorderBrush="SkyBlue" BorderThickness="1">
+                            <Border Style="{StaticResource borderNode}">
                                 <StackPanel Orientation="Horizontal">
                                     <Label Name="lblKey" Content="Key" />
                                     <TextBox Name="txtBxKey" MinWidth="100" MaxWidth="200" Margin="0, 0, 10, 0" Text="{Binding FieldKey}" />
@@ -192,10 +225,10 @@
                         </Style>
                     </TreeView.ItemContainerStyle>
                 </TreeView>
-            </StackPanel>
+            </Grid>
         </GroupBox>
 
-        <Grid>
+        <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -203,5 +236,5 @@
 
             <Button Name="btnSave" Grid.Column="1" Content="Save" Click="BtnSave_Click" />
         </Grid>
-    </StackPanel>
+    </Grid>
 </Window>

@@ -26,19 +26,19 @@ namespace TerminalMonitor.Windows
     {
         private readonly CommandExecutor commandExecutor = new();
 
-        private TerminalMonitorSetting setting;
+        private TerminalMonitorSetting? setting;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            commandListView.CommandRun += (sender, e) =>
+            commandListView.CommandStarted += (sender, e) =>
             {
                 commandExecutor.Execute(e.Command);
             };
 
             executionListView.Executor = commandExecutor;
-            terminalTabControl.LineProducer = commandExecutor;
+            terminalTabControl.TerminalLineProducer = commandExecutor;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -46,21 +46,26 @@ namespace TerminalMonitor.Windows
             setting = SettingSerializer.Load() ?? new();
 
             commandListView.Commands = setting.Commands?
-                .Select(command => CommandConfigSettings.Load(command));
+                .Select(command => CommandConfigSettings.Load(command)!);
 
             terminalTabControl.Terminals = setting.Terminals?
-                .Select(terminal => TerminalConfigSettings.Load(terminal));
+                .Select(terminal => TerminalConfigSettings.Load(terminal)!);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            commandExecutor.TerminateAll();
+            commandExecutor.Shutdown();
 
-            setting.Commands = commandListView.Commands
-                .Select(command => CommandConfigSettings.Save(command)).ToList();
+            if (setting == null)
+            {
+                return;
+            }
 
-            setting.Terminals = terminalTabControl.Terminals
-                .Select(terminal => TerminalConfigSettings.Save(terminal)).ToList();
+            setting.Commands = commandListView.Commands?
+                .Select(command => CommandConfigSettings.Save(command)!).ToList();
+
+            setting.Terminals = terminalTabControl.Terminals?
+                .Select(terminal => TerminalConfigSettings.Save(terminal)!).ToList();
 
             SettingSerializer.Save(setting);
 

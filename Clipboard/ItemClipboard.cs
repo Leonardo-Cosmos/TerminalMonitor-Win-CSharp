@@ -1,48 +1,104 @@
 ﻿/* 2021/8/27 */
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TerminalMonitor.Clipboard
 {
-    public class ItemClipboard<Item>
+    public class ItemClipboard<T>
     {
-        private Item item;
+        private T[]? items;
 
         private ItemClipboardStatus status = ItemClipboardStatus.Empty;
 
-        public void Cut(Item item)
+        public void Cut(params T[] items)
         {
-            this.item = item;
+            if (items == null)
+            {
+                return;
+            }
+
+            this.items = items;
             status = ItemClipboardStatus.Move;
+
+            OnItemCut();
         }
 
-        public void Copy(Item item)
+        public void Cut(IEnumerable<T> items)
         {
-            this.item = item;
+            Cut([.. items]);
+        }
+
+        public void Copy(params T[] items)
+        {
+            if (items == null)
+            {
+                return;
+            }
+
+            this.items = items;
             status = ItemClipboardStatus.Copy;
+
+            OnItemCopied();
         }
 
-        public Item Paste()
+        public void Copy(IEnumerable<T> items)
         {
-            Item item;
+            Copy([.. items]);
+        }
+
+        public (T[]?, ItemClipboardStatus status) Paste()
+        {
+            T[]? results;
+            var pasteStatus = status;
             switch (status)
             {
                 case ItemClipboardStatus.Move:
                     status = ItemClipboardStatus.Empty;
-                    item = this.item;
+                    results = items;
                     break;
 
                 case ItemClipboardStatus.Copy:
-                    item = this.item;
+                    results = items;
                     break;
 
                 case ItemClipboardStatus.Empty:
-                    item = default;
+                    results = default;
                     break;
 
                 default:
-                    item = default;
+                    results = default;
                     break;
             }
-            return item;
+
+            OnItemPasted();
+
+            return (results, pasteStatus);
         }
+
+        protected void OnItemCut()
+        {
+            ItemCut?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected void OnItemCopied()
+        {
+            ItemCopied?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected void OnItemPasted()
+        {
+            ItemPasted?.Invoke(this, EventArgs.Empty);
+        }
+
+        public ItemClipboardStatus Status => status;
+
+        public bool ContainsItem => status != ItemClipboardStatus.Empty;
+
+        public event EventHandler? ItemCut;
+
+        public event EventHandler? ItemCopied;
+
+        public event EventHandler? ItemPasted;
     }
 }

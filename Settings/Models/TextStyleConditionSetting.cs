@@ -7,7 +7,7 @@ namespace TerminalMonitor.Settings.Models
 
     static class TextStyleConditionSettings
     {
-        public static TextStyleConditionSetting Save(TextStyleCondition obj)
+        public static TextStyleConditionSetting? Save(TextStyleCondition? obj)
         {
             if (obj == null)
             {
@@ -15,12 +15,12 @@ namespace TerminalMonitor.Settings.Models
             }
 
             return new TextStyleConditionSetting(
-                Style: TextStyleSettings.Save(obj.Style),
-                Condition: FieldConditionSettings.Save(obj.Condition)
+                Style: TextStyleSettings.Save(obj.Style)!,
+                Condition: FieldConditionSettings.Save(obj.Condition)!
                 );
         }
 
-        public static TextStyleCondition Load(TextStyleConditionSetting setting)
+        public static TextStyleCondition? Load(TextStyleConditionSetting? setting)
         {
             if (setting == null)
             {
@@ -29,8 +29,8 @@ namespace TerminalMonitor.Settings.Models
 
             return new TextStyleCondition()
             {
-                Style = TextStyleSettings.Load(setting.Style),
-                Condition = FieldConditionSettings.Load(setting.Condition),
+                Style = TextStyleSettings.Load(setting.Style)!,
+                Condition = FieldConditionSettings.Load(setting.Condition)!,
             };
         }
     }

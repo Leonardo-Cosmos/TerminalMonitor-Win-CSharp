@@ -1,4 +1,5 @@
 ﻿/* 2021/7/9 */
+using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -13,6 +15,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TerminalMonitor.Clipboard;
 using TerminalMonitor.Matchers.Models;
 using Condition = TerminalMonitor.Matchers.Models.Condition;
 
@@ -23,19 +26,61 @@ namespace TerminalMonitor.Windows
     /// </summary>
     public partial class ConditionDetailWindow : Window
     {
-        private readonly ConditionDetailWindowDataContextVO dataContextVO = new();
+        private readonly ConditionDetailWindowDataContextVO dataContextVO;
 
-        private readonly ObservableCollection<ConditionNodeVO> rootConditions = new();
+        private readonly ObservableCollection<ConditionNodeVO> rootConditions = [];
+
+        private Condition? condition;
+
+        private ItemClipboard<Condition>? conditionClipboard;
 
         public ConditionDetailWindow()
         {
             InitializeComponent();
 
+            dataContextVO = new()
+            {
+                AddFieldCommand = new RelayCommand(AddFieldCondition, () => true),
+                AddGroupCommand = new RelayCommand(AddGroupCondition, () => true),
+                RemoveCommand = new RelayCommand(RemoveSelectedCondition, () => dataContextVO!.IsConditionSelected),
+                MoveUpCommand = new RelayCommand(MoveSelectedConditionUp, () => dataContextVO!.IsConditionSelected),
+                MoveDownCommand = new RelayCommand(MoveSelectedConditionDown, () => dataContextVO!.IsConditionSelected),
+                CutCommand = new RelayCommand(CutSelectedCondition,
+                    () => dataContextVO!.IsConditionSelected && !dataContextVO.IsConditionCutInClipboard),
+                CopyCommand = new RelayCommand(CopySelectedCondition,
+                    () => dataContextVO!.IsConditionSelected && !dataContextVO.IsConditionCutInClipboard),
+                PasteCommnad = new RelayCommand(PasteCondition, () => dataContextVO!.IsConditionInClipboard),
+            };
+
+            dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
             DataContext = dataContextVO;
 
             rdBtnSingle.IsChecked = true;
-            conditionView.FieldCondition = new FieldCondition();
+            fieldConditionView.FieldCondition = FieldCondition.Empty;
             trConditions.ItemsSource = rootConditions;
+        }
+
+        private void DataContextVO_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(ConditionDetailWindowDataContextVO.IsConditionSelected):
+                    (dataContextVO.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveUpCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveDownCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                case nameof(ConditionDetailWindowDataContextVO.IsConditionInClipboard):
+                    (dataContextVO.PasteCommnad as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                case nameof(ConditionDetailWindowDataContextVO.IsConditionCutInClipboard):
+                    (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void RdBtnCondition_Checked(object sender, RoutedEventArgs e)
@@ -53,31 +98,95 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private void BtnAddField_Click(object sender, RoutedEventArgs e)
+        private void TrConditions_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            AddNodeVO(conditions => conditions.Add(new FieldConditionNodeVO() { Siblings = conditions }));
+            dataContextVO.IsConditionSelected = trConditions.SelectedItem != null;
         }
 
-        private void BtnAddGroup_Click(object sender, RoutedEventArgs e)
+        private void TrConditions_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            AddNodeVO(conditions => conditions.Add(new GroupConditionNodeVO() { Siblings = conditions }));
+            HitTestResult hitResult = VisualTreeHelper.HitTest(this, e.GetPosition(this));
+            if (hitResult.VisualHit.GetType() != typeof(ConditionNodeVO) &&
+                e.ChangedButton == MouseButton.Left &&
+                trConditions.SelectedItem is ConditionNodeVO conditionNodeVO)
+            {
+                UnselectConditionTreeNode(conditionNodeVO);
+            }
         }
 
-        private void AddNodeVO(Action<ObservableCollection<ConditionNodeVO>> addNodeVO)
+        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (rdBtnMultiple.IsChecked ?? false)
+            {
+                txtBxConditionName.GetBindingExpression(TextBox.TextProperty).UpdateSource();
+
+                if (Validation.GetHasError(txtBxConditionName))
+                {
+                    txtBxConditionName.Focus();
+                    return;
+                }
+            }
+
+            SaveCondition();
+            IsSaved = true;
+            Close();
+        }
+
+        private void ConditionClipboard_StatusChanged(object? sender, EventArgs e)
+        {
+            UpdateClipboardStatus();
+        }
+
+        private void UpdateClipboardStatus()
+        {
+            if (conditionClipboard != null)
+            {
+                dataContextVO.IsConditionInClipboard = conditionClipboard.ContainsItem;
+                dataContextVO.IsConditionCutInClipboard = conditionClipboard.Status == ItemClipboardStatus.Move;
+            }
+        }
+
+        private void AddFieldCondition()
+        {
+            AddCondition(conditions => new FieldConditionNodeVO()
+            {
+                FieldKey = String.Empty,
+                MatchOperator = Matchers.TextMatchOperator.None,
+                TargetValue = String.Empty,
+
+                Siblings = conditions,
+            });
+        }
+
+        private void AddGroupCondition()
+        {
+            AddCondition(conditions => new GroupConditionNodeVO()
+            {
+                MatchMode = GroupMatchMode.All,
+
+                Siblings = conditions,
+            });
+        }
+
+        private void AddCondition(Func<ObservableCollection<ConditionNodeVO>, ConditionNodeVO> createNodeVO)
         {
             var selectedItem = trConditions.SelectedItem;
 
             if (selectedItem == null)
             {
-                addNodeVO(rootConditions);
+                var conditionNodeVO = createNodeVO(rootConditions);
+                rootConditions.Add(conditionNodeVO);
             }
             else if (selectedItem is GroupConditionNodeVO groupNodeVO)
             {
-                addNodeVO(groupNodeVO.Conditions);
+                var conditionNodeVO = createNodeVO(groupNodeVO.Conditions);
+                groupNodeVO.Conditions.Add(conditionNodeVO);
             }
             else if (selectedItem is FieldConditionNodeVO fieldNodeVO)
             {
-                addNodeVO(fieldNodeVO.Siblings);
+                var conditionNodeVO = createNodeVO(fieldNodeVO.Siblings);
+                var index = fieldNodeVO.Siblings.IndexOf(fieldNodeVO);
+                fieldNodeVO.Siblings.Insert(index, conditionNodeVO);
             }
             else
             {
@@ -85,17 +194,17 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        private void RemoveSelectedCondition()
         {
             var selectedItem = trConditions.SelectedItem;
-            
+
             if (selectedItem is ConditionNodeVO conditionNodeVO)
             {
                 conditionNodeVO.Siblings.Remove(conditionNodeVO);
             }
         }
 
-        private void BtnMoveUp_Click(object sender, RoutedEventArgs e)
+        private void MoveSelectedConditionUp()
         {
             var selectedItem = trConditions.SelectedItem;
 
@@ -113,7 +222,7 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private void BtnMoveDown_Click(object sender, RoutedEventArgs e)
+        private void MoveSelectedConditionDown()
         {
             var selectedItem = trConditions.SelectedItem;
 
@@ -131,30 +240,74 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        private void CutSelectedCondition()
         {
-            if (rdBtnMultiple.IsChecked ?? false)
+            if (conditionClipboard != null)
             {
-                txtBxConditionName.GetBindingExpression(TextBox.TextProperty).UpdateSource();
-
-                if (Validation.GetHasError(txtBxConditionName))
+                var selectedItem = trConditions.SelectedItem;
+                if (selectedItem is ConditionNodeVO conditionNodeVO)
                 {
-                    txtBxConditionName.Focus();
-                    return;
+                    var selectedCondition = FromVO(conditionNodeVO);
+
+                    conditionClipboard.Cut(selectedCondition);
+                }
+
+                RemoveSelectedCondition();
+            }
+        }
+
+        private void CopySelectedCondition()
+        {
+            if (conditionClipboard != null)
+            {
+                var selectedItem = trConditions.SelectedItem;
+                if (selectedItem is ConditionNodeVO conditionNodeVO)
+                {
+                    var selectedCondition = FromVO(conditionNodeVO);
+
+                    conditionClipboard.Copy(selectedCondition);
                 }
             }
+        }
 
-            DialogResult = true;
+        private void PasteCondition()
+        {
+            if (conditionClipboard != null)
+            {
+                (var pastedConditions, var clipboardStatus) = conditionClipboard.Paste();
+
+                if (pastedConditions?.Length > 0)
+                {
+                    var addedConditions = clipboardStatus == ItemClipboardStatus.Move ?
+                        pastedConditions :
+                        [.. pastedConditions.Select(condition => (Condition)condition.Clone())];
+
+                    foreach (var addedCondition in addedConditions)
+                    {
+                        var conditionVO = ToVO(addedCondition);
+                        AddCondition(conditions =>
+                        {
+                            conditionVO.Siblings = conditions;
+                            return conditionVO;
+                        });
+                    }
+                }
+            }
         }
 
         private void SelectConditionTreeNode(ConditionNodeVO conditionVO)
         {
-            var treeViewItem = 
-                trConditions.ItemContainerGenerator.ContainerFromItem(conditionVO) as TreeViewItem;
-
-            if (treeViewItem != null)
+            if (trConditions.ItemContainerGenerator.ContainerFromItem(conditionVO) is TreeViewItem treeViewItem)
             {
                 treeViewItem.IsSelected = true;
+            }
+        }
+
+        private void UnselectConditionTreeNode(ConditionNodeVO conditionVO)
+        {
+            if (trConditions.ItemContainerGenerator.ContainerFromItem(conditionVO) is TreeViewItem treeViewItem)
+            {
+                treeViewItem.IsSelected = false;
             }
         }
 
@@ -184,6 +337,8 @@ namespace TerminalMonitor.Windows
                 IsInverted = fieldCondition.IsInverted,
                 DefaultResult = fieldCondition.DefaultResult,
                 IsDisabled = fieldCondition.IsDisabled,
+
+                Siblings = [],
             };
 
             return fieldConditionVO;
@@ -198,6 +353,8 @@ namespace TerminalMonitor.Windows
                 IsInverted = groupCondition.IsInverted,
                 DefaultResult = groupCondition.DefaultResult,
                 IsDisabled = groupCondition.IsDisabled,
+
+                Siblings = [],
             };
 
             groupCondition.Conditions?
@@ -230,12 +387,11 @@ namespace TerminalMonitor.Windows
 
         private static FieldCondition FromVO(FieldConditionNodeVO fieldConditionVO)
         {
-            FieldCondition fieldCondition = new()
+            FieldCondition fieldCondition = new(
+                fieldConditionVO.FieldKey,
+                fieldConditionVO.MatchOperator,
+                fieldConditionVO.TargetValue)
             {
-                FieldKey = fieldConditionVO.FieldKey,
-                MatchOperator = fieldConditionVO.MatchOperator,
-                TargetValue = fieldConditionVO.TargetValue,
-
                 IsInverted = fieldConditionVO.IsInverted,
                 DefaultResult = fieldConditionVO.DefaultResult,
                 IsDisabled = fieldConditionVO.IsDisabled,
@@ -246,12 +402,10 @@ namespace TerminalMonitor.Windows
 
         private static GroupCondition FromVO(GroupConditionNodeVO groupConditionVO)
         {
-            GroupCondition groupCondition = new()
+            GroupCondition groupCondition = new(
+                groupConditionVO.MatchMode,
+                [.. groupConditionVO.Conditions.Select(conditionVO => FromVO(conditionVO))])
             {
-                MatchMode = groupConditionVO.MatchMode,
-                Conditions = groupConditionVO.Conditions
-                    .Select(conditionVO => FromVO(conditionVO)),
-
                 IsInverted = groupConditionVO.IsInverted,
                 DefaultResult = groupConditionVO.DefaultResult,
                 IsDisabled = groupConditionVO.IsDisabled,
@@ -260,86 +414,136 @@ namespace TerminalMonitor.Windows
             return groupCondition;
         }
 
-        public Condition Condition
+        private void LoadCondition(Condition? condition)
         {
-            get
+            this.condition = condition;
+            IsSaved = false;
+
+            if (condition == null)
             {
-                if (rdBtnSingle.IsChecked ?? false)
+                rdBtnSingle.IsChecked = true;
+
+                /*
+                 * Clear single condition.
+                 */
+                fieldConditionView.FieldCondition = FieldCondition.Empty;
+
+                /*
+                 * Clear multiple condtion.
+                 */
+                rootConditions.Clear();
+
+                return;
+            }
+
+            if (condition is FieldCondition fieldCondition)
+            {
+                rdBtnSingle.IsChecked = true;
+                fieldConditionView.FieldCondition = fieldCondition;
+
+                /*
+                 * Clear multiple condtion.
+                 */
+                rootConditions.Clear();
+            }
+            else if (condition is GroupCondition groupCondition)
+            {
+                rdBtnMultiple.IsChecked = true;
+                dataContextVO.ConditionName = groupCondition.Name;
+                dataContextVO.IsInverted = groupCondition.IsInverted;
+                dataContextVO.DefaultResult = groupCondition.DefaultResult;
+                dataContextVO.IsDisabled = groupCondition.IsDisabled;
+                dataContextVO.MatchMode = groupCondition.MatchMode;
+                rootConditions.Clear();
+                groupCondition.Conditions?
+                    .Select(condition => ToVO(condition))
+                    .ToList()
+                    .ForEach(conditionNodeVO =>
+                    {
+                        conditionNodeVO.Siblings = rootConditions;
+                        rootConditions.Add(conditionNodeVO);
+                    });
+
+                /*
+                 * Clear single condition.
+                 */
+                fieldConditionView.FieldCondition = FieldCondition.Empty;
+            }
+            else
+            {
+                throw new NotImplementedException("Unknown condition type");
+            }
+        }
+
+        private void SaveCondition()
+        {
+            if (rdBtnSingle.IsChecked ?? false)
+            {
+                condition = fieldConditionView.FieldCondition;
+            }
+            else
+            {
+                if (condition is GroupCondition groupCondition)
                 {
-                    return conditionView.FieldCondition;
+                    groupCondition.Name = dataContextVO.ConditionName;
+                    groupCondition.IsInverted = dataContextVO.IsInverted;
+                    groupCondition.DefaultResult = dataContextVO.DefaultResult;
+                    groupCondition.IsDisabled = dataContextVO.IsDisabled;
+                    groupCondition.MatchMode = dataContextVO.MatchMode;
+                    groupCondition.Conditions = [.. rootConditions.Select(conditionNodeVO => FromVO(conditionNodeVO))];
                 }
                 else
                 {
-                    var groupCondition = new GroupCondition()
+                    condition = new GroupCondition(
+                        dataContextVO.ConditionName,
+                        dataContextVO.MatchMode,
+                        [.. rootConditions.Select(conditionNodeVO => FromVO(conditionNodeVO))])
                     {
-                        Name = dataContextVO.ConditionName,
+
                         IsInverted = dataContextVO.IsInverted,
                         DefaultResult = dataContextVO.DefaultResult,
                         IsDisabled = dataContextVO.IsDisabled,
-                        MatchMode = dataContextVO.MatchMode,
-                        Conditions = rootConditions
-                            .Select(conditionNodeVO => FromVO(conditionNodeVO)).ToList(),
-                    };                    
-                  
-                    return groupCondition;
+
+                    };
                 }
             }
+        }
+
+        public bool IsSaved { get; set; }
+
+        public Condition? Condition
+        {
+            get => condition;
+            set => LoadCondition(value);
+        }
+
+        public ItemClipboard<Condition>? ConditionClipboard
+        {
+            get => conditionClipboard;
 
             set
             {
-                if (value == null)
+                if (conditionClipboard == value)
                 {
-                    rdBtnSingle.IsChecked = true;
-
-                    /*
-                     * Clear single condition.
-                     */
-                    conditionView.FieldCondition = new FieldCondition();
-
-                    /*
-                     * Clear multiple condtion.
-                     */
-                    rootConditions.Clear();
-
                     return;
                 }
 
-                if (value is FieldCondition fieldCondition)
+                if (conditionClipboard != null)
                 {
-                    rdBtnSingle.IsChecked = true;
-                    conditionView.FieldCondition = fieldCondition;
-
-                    /*
-                     * Clear multiple condtion.
-                     */
-                    rootConditions.Clear();
+                    conditionClipboard.ItemCut -= ConditionClipboard_StatusChanged;
+                    conditionClipboard.ItemCopied -= ConditionClipboard_StatusChanged;
+                    conditionClipboard.ItemPasted -= ConditionClipboard_StatusChanged;
                 }
-                else if (value is GroupCondition groupCondition)
-                {
-                    rdBtnMultiple.IsChecked = true;
-                    dataContextVO.ConditionName = groupCondition.Name;
-                    dataContextVO.IsInverted = groupCondition.IsInverted;
-                    dataContextVO.DefaultResult = groupCondition.DefaultResult;
-                    dataContextVO.IsDisabled = groupCondition.IsDisabled;
-                    dataContextVO.MatchMode = groupCondition.MatchMode;
-                    rootConditions.Clear();
-                    groupCondition.Conditions?
-                        .Select(condition => ToVO(condition))
-                        .ToList()
-                        .ForEach(conditionNodeVO =>
-                        {
-                            conditionNodeVO.Siblings = rootConditions;
-                            rootConditions.Add(conditionNodeVO);
-                        });
 
-                    /*
-                     * Clear single condition.
-                     */
-                    conditionView.FieldCondition = new FieldCondition();
-                }
-                else
+                conditionClipboard = value;
+
+                if (conditionClipboard != null)
                 {
-                    throw new NotImplementedException("Unknown condition type");
+                    conditionClipboard.ItemCut += ConditionClipboard_StatusChanged;
+                    conditionClipboard.ItemCopied += ConditionClipboard_StatusChanged;
+                    conditionClipboard.ItemPasted += ConditionClipboard_StatusChanged;
+
+                    UpdateClipboardStatus();
                 }
             }
         }

@@ -4,13 +4,13 @@ namespace TerminalMonitor.Models
 {
     public class TerminalLineFieldDto
     {
-        public string Key { get; set; }
+        public required string Key { get; init; }
 
-        public string FieldKey { get; set; }
+        public required string FieldKey { get; init; }
 
-        public object Value { get; set; }
+        public required object? Value { get; init; }
 
-        public string Text { get; set; }
+        public required string Text { get; init; }
 
     }
 }

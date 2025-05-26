@@ -19,20 +19,30 @@ namespace TerminalMonitor.Windows.Converters
                 { GroupMatchMode.Any, "Any"},
             });
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return "Unknown";
+            }
+
             if (value is GroupMatchMode matchMode)
             {
                 return textDict[matchMode];
             }
             else
             {
-                return "Unknown";
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return default(GroupMatchMode);
+            }
+
             if (value is string text)
             {
                 return textDict
@@ -40,7 +50,7 @@ namespace TerminalMonitor.Windows.Converters
             }
             else
             {
-                return GroupMatchMode.All;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
     }

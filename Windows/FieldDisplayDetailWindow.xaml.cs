@@ -1,4 +1,5 @@
 ﻿/* 2021/5/24 */
+using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TerminalMonitor.Clipboard;
 using TerminalMonitor.Matchers.Models;
 using TerminalMonitor.Models;
 using TerminalMonitor.Windows.ValidationRules;
@@ -24,81 +26,88 @@ namespace TerminalMonitor.Windows
     /// </summary>
     public partial class FieldDisplayDetailWindow : Window
     {
-        private readonly FieldDisplayDetailWindowDataContextVO dataContextVO = new()
-        {
-            Style = TextStyle.Empty,
-        };
+        private readonly FieldDisplayDetailWindowDataContextVO dataContextVO;
 
-        private readonly List<string> existingFieldKeys = new();
+        private readonly ObservableCollection<TextStyleCondition> styleConditions = [];
+
+        private readonly List<string> existingFieldKeys = [];
+
+        private FieldDisplayDetail? fieldDetail;
+
+        private ItemClipboard<TextStyleCondition>? styleConditionClipboard;
 
         public FieldDisplayDetailWindow()
         {
             InitializeComponent();
 
+            dataContextVO = new()
+            {
+                FieldKey = String.Empty,
+
+                HeaderStyle = ColumnHeaderStyle.Empty,
+                Style = TextStyle.Empty,
+
+                AddCommand = new RelayCommand(AddCondition, () => true),
+                RemoveCommand = new RelayCommand(RemoveSelectedConditions, () => dataContextVO!.IsAnyConditionSelected),
+                MoveUpCommand = new RelayCommand(MoveSelectedConditionsUp, () => dataContextVO!.IsAnyConditionSelected),
+                MoveDownCommand = new RelayCommand(MoveSelectedConditionsDown, () => dataContextVO!.IsAnyConditionSelected),
+                CutCommand = new RelayCommand(CutSelectedConditions,
+                    () => dataContextVO!.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
+                CopyCommand = new RelayCommand(CopySelectedConditions,
+                    () => dataContextVO!.IsAnyConditionSelected && !dataContextVO.IsAnyConditionCutInClipboard),
+                PasteCommnad = new RelayCommand(PasteConditions, () => dataContextVO!.IsAnyConditionInClipboard),
+            };
+
+            dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
             DataContext = dataContextVO;
 
-            Binding fieldKeyBinding = new("FieldKey");
-            fieldKeyBinding.Source = dataContextVO;
-            fieldKeyBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-            fieldKeyBinding.ValidationRules.Add(new UniqueItemRule()
+            lstStyleCondtions.ItemsSource = styleConditions;
+
+            Binding fieldKeyBinding = new("FieldKey")
             {
-                ExistingValues = existingFieldKeys,
-                ErrorMessage = "Field key has been used already",
+                Source = dataContextVO,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
+            fieldKeyBinding.ValidationRules.Add(new NotEmptyRule()
+            {
+                ErrorMessage = "Field key should not be empty",
             });
             txtBxKey.SetBinding(TextBox.TextProperty, fieldKeyBinding);
         }
 
-        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        private void DataContextVO_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            var conditions = dataContextVO.Conditions;
-            TextStyleCondition item = new()
+            switch (e.PropertyName)
             {
-                Style = TextStyle.Empty,
-                Condition = FieldCondition.Empty,
-            };
-            conditions.Add(item);
-            lstStyleCondtions.SelectedItem = item;
-        }
-
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
-        {
-            var conditions = dataContextVO.Conditions;
-            if (lstStyleCondtions.SelectedItem is TextStyleCondition selectedItem)
-            {
-                conditions.Remove(selectedItem);
+                case nameof(FieldDisplayDetailWindowDataContextVO.IsAnyConditionSelected):
+                    (dataContextVO.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveUpCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveDownCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                case nameof(FieldDisplayDetailWindowDataContextVO.IsAnyConditionInClipboard):
+                    (dataContextVO.PasteCommnad as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                case nameof(FieldDisplayDetailWindowDataContextVO.IsAnyConditionCutInClipboard):
+                    (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                default:
+                    break;
             }
         }
 
-        private void BtnMoveUp_Click(object sender, RoutedEventArgs e)
+        private void LstStyleCondtions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var conditions = dataContextVO.Conditions;
-            if (lstStyleCondtions.SelectedItem is TextStyleCondition selectedItem)
-            {
-                var index = conditions.IndexOf(selectedItem);
-                if (index > 0)
-                {
-                    conditions.Remove(selectedItem);
-                    conditions.Insert(index - 1, selectedItem);
-
-                    lstStyleCondtions.SelectedItem = selectedItem;
-                }
-            }
+            var count = lstStyleCondtions.SelectedItems.Count;
+            dataContextVO.IsAnyConditionSelected = count > 0;
         }
 
-        private void BtnMoveDown_Click(object sender, RoutedEventArgs e)
+        private void LstStyleCondtions_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            var conditions = dataContextVO.Conditions;
-            if (lstStyleCondtions.SelectedItem is TextStyleCondition selectedItem)
-            {
-                var index = conditions.IndexOf(selectedItem);
-                if (index < conditions.Count - 1)
-                {
-                    conditions.Remove(selectedItem);
-                    conditions.Insert(index + 1, selectedItem);
-
-                    lstStyleCondtions.SelectedItem = selectedItem;
-                }
-            }
+            var verticalOffset = sclVw.VerticalOffset;
+            sclVw.ScrollToVerticalOffset(verticalOffset - e.Delta);
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
@@ -111,14 +120,252 @@ namespace TerminalMonitor.Windows
                 return;
             }
 
-            DialogResult = true;
+            SaveFieldDetail();
+            IsSaved = true;
+            Close();
         }
+
+        private void ConditionClipboard_StatusChanged(object? sender, EventArgs e)
+        {
+            UpdateClipboardStatus();
+        }
+
+        private void UpdateClipboardStatus()
+        {
+            if (styleConditionClipboard != null)
+            {
+                dataContextVO.IsAnyConditionInClipboard = styleConditionClipboard.ContainsItem;
+                dataContextVO.IsAnyConditionCutInClipboard = styleConditionClipboard.Status == ItemClipboardStatus.Move;
+            }
+        }
+
+        private void ForEachSelectedItem(Action<TextStyleCondition> action,
+            bool byOrder = false, bool reverseOrder = false, bool recoverSelection = false)
+        {
+            List<TextStyleCondition> items = [];
+            foreach (var selectedItem in lstStyleCondtions.SelectedItems)
+            {
+                if (selectedItem is TextStyleCondition item)
+                {
+                    items.Add(item);
+                }
+            }
+
+            if (byOrder)
+            {
+                items.Sort((itemX, itemY) =>
+                    styleConditions.IndexOf(itemX) - styleConditions.IndexOf(itemY));
+            }
+
+            if (reverseOrder)
+            {
+                items.Reverse();
+            }
+
+            items.ForEach(action);
+
+            if (recoverSelection)
+            {
+                items.ForEach(item => lstStyleCondtions.SelectedItems.Add(item));
+            }
+        }
+
+        private void InsertAtSelectedItem(params TextStyleCondition[] conditions)
+        {
+            var selectedIndex = lstStyleCondtions.SelectedIndex;
+            if (selectedIndex == -1)
+            {
+                foreach (var condition in conditions)
+                {
+                    styleConditions.Add(condition);
+                    lstStyleCondtions.SelectedItems.Add(condition);
+                }
+            }
+            else
+            {
+                lstStyleCondtions.SelectedItems.Clear();
+
+                var reversedConditions = conditions.Reverse().ToArray();
+                foreach (var condition in reversedConditions)
+                {
+                    styleConditions.Insert(selectedIndex, condition);
+                    lstStyleCondtions.SelectedItems.Add(condition);
+                }
+            }
+        }
+
+        private void AddCondition()
+        {
+            TextStyleCondition item = new()
+            {
+                Style = TextStyle.Empty,
+                Condition = FieldCondition.Empty,
+            };
+
+            InsertAtSelectedItem(item);
+        }
+
+        private void RemoveSelectedConditions()
+        {
+            ForEachSelectedItem(RemoveCondition);
+        }
+
+        private void RemoveCondition(TextStyleCondition condition)
+        {
+            styleConditions.Remove(condition);
+        }
+
+        private void MoveSelectedConditionsUp()
+        {
+            ForEachSelectedItem(MoveConditionUp, byOrder: true, recoverSelection: true);
+        }
+
+        private void MoveConditionUp(TextStyleCondition condition)
+        {
+            var srcIndex = styleConditions.IndexOf(condition);
+            var dstIndex = (srcIndex - 1 + styleConditions.Count) % styleConditions.Count;
+
+            styleConditions.RemoveAt(srcIndex);
+            styleConditions.Insert(dstIndex, condition);
+        }
+
+        private void MoveSelectedConditionsDown()
+        {
+            ForEachSelectedItem(MoveConditionDown, byOrder: true, reverseOrder: true, recoverSelection: true);
+        }
+
+        private void MoveConditionDown(TextStyleCondition condition)
+        {
+            var srcIndex = styleConditions.IndexOf(condition);
+            var dstIndex = (srcIndex + 1) % styleConditions.Count;
+
+            styleConditions.RemoveAt(srcIndex);
+            styleConditions.Insert(dstIndex, condition);
+        }
+
+        private void CutSelectedConditions()
+        {
+            if (styleConditionClipboard != null)
+            {
+                List<TextStyleCondition> cutConditions = [];
+                foreach (var selectedItem in lstStyleCondtions.SelectedItems)
+                {
+                    if (selectedItem is TextStyleCondition condition)
+                    {
+                        cutConditions.Add(condition);
+                    }
+                }
+
+                styleConditionClipboard.Cut([.. cutConditions]);
+                RemoveSelectedConditions();
+            }
+        }
+
+        private void CopySelectedConditions()
+        {
+            if (styleConditionClipboard != null)
+            {
+                List<TextStyleCondition> copiedConditions = [];
+                foreach (var selectedItem in lstStyleCondtions.SelectedItems)
+                {
+                    if (selectedItem is TextStyleCondition condition)
+                    {
+                        copiedConditions.Add(condition);
+                    }
+                }
+
+                styleConditionClipboard.Copy([.. copiedConditions]);
+            }
+        }
+
+        private void PasteConditions()
+        {
+            if (styleConditionClipboard != null)
+            {
+                (var pastedConditions, var clipboardStatus) = styleConditionClipboard.Paste();
+
+                if (pastedConditions != null)
+                {
+                    var conditions = pastedConditions.Select(pastedCondition =>
+                    {
+                        var condition = clipboardStatus == ItemClipboardStatus.Move ?
+                            pastedCondition : (TextStyleCondition)pastedCondition.Clone();
+
+                        return condition;
+                    }).ToArray();
+
+                    InsertAtSelectedItem(conditions);
+                }
+            }
+        }
+
+        private void LoadFieldDetail(FieldDisplayDetail? fieldDetail)
+        {
+            this.fieldDetail = fieldDetail;
+            IsSaved = false;
+
+            if (fieldDetail != null)
+            {
+                dataContextVO.FieldKey = fieldDetail.FieldKey;
+                dataContextVO.Hidden = fieldDetail.Hidden;
+                dataContextVO.HeaderName = fieldDetail.HeaderName;
+
+                dataContextVO.CustomizeHeaderStyle = fieldDetail.CustomizeHeader;
+                dataContextVO.HeaderStyle = fieldDetail.HeaderStyle;
+
+                dataContextVO.CustomizeStyle = fieldDetail.CustomizeStyle;
+                dataContextVO.Style = fieldDetail.Style;
+
+                styleConditions.Clear();
+                foreach (var condition in fieldDetail.Conditions ?? [])
+                {
+                    styleConditions.Add(condition);
+                }
+            }
+        }
+
+        private void SaveFieldDetail()
+        {
+            if (fieldDetail != null)
+            {
+                fieldDetail.FieldKey = dataContextVO.FieldKey;
+                fieldDetail.Hidden = dataContextVO.Hidden;
+                fieldDetail.HeaderName = dataContextVO.HeaderName;
+                fieldDetail.CustomizeHeader = dataContextVO.CustomizeHeaderStyle;
+                fieldDetail.HeaderStyle = dataContextVO.HeaderStyle;
+                fieldDetail.CustomizeStyle = dataContextVO.CustomizeStyle;
+                fieldDetail.Style = dataContextVO.Style;
+                fieldDetail.Conditions = [.. styleConditions];
+            }
+            else
+            {
+                fieldDetail = new FieldDisplayDetail()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    FieldKey = dataContextVO.FieldKey,
+                    Hidden = dataContextVO.Hidden,
+                    HeaderName = dataContextVO.HeaderName,
+                    CustomizeHeader = dataContextVO.CustomizeHeaderStyle,
+                    HeaderStyle = dataContextVO.HeaderStyle,
+                    CustomizeStyle = dataContextVO.CustomizeStyle,
+                    Style = dataContextVO.Style,
+                    Conditions = [.. styleConditions],
+                };
+            }
+
+            if (String.IsNullOrEmpty(fieldDetail.HeaderName))
+            {
+                fieldDetail.HeaderName = null;
+            }
+        }
+
+        public bool IsSaved { get; set; }
 
         public IEnumerable<string> ExistingFieldKeys
         {
             get
             {
-                return new ReadOnlyCollection<string>(existingFieldKeys.ToArray());
+                return new ReadOnlyCollection<string>([.. existingFieldKeys]);
             }
 
             set
@@ -131,33 +378,39 @@ namespace TerminalMonitor.Windows
             }
         }
 
-        public FieldDisplayDetail Field
+        public FieldDisplayDetail? FieldDetail
         {
-            get
-            {
-                return new FieldDisplayDetail()
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    FieldKey = dataContextVO.FieldKey,
-                    CustomizeStyle = dataContextVO.CustomizeStyle,
-                    Style = dataContextVO.Style,
-                    Conditions = dataContextVO.Conditions.ToArray(),
-                };
-            }
+            get => fieldDetail;
+            set => LoadFieldDetail(value);
+        }
+
+        public ItemClipboard<TextStyleCondition>? StyleConditionClipboard
+        {
+            get => styleConditionClipboard;
+
             set
             {
-                if (value != null)
+                if (styleConditionClipboard == value)
                 {
-                    dataContextVO.FieldKey = value.FieldKey;
-                    dataContextVO.CustomizeStyle = value.CustomizeStyle;
+                    return;
+                }
 
-                    dataContextVO.Style = value.Style ?? TextStyle.Empty;
+                if (styleConditionClipboard != null)
+                {
+                    styleConditionClipboard.ItemCut -= ConditionClipboard_StatusChanged;
+                    styleConditionClipboard.ItemCopied -= ConditionClipboard_StatusChanged;
+                    styleConditionClipboard.ItemPasted -= ConditionClipboard_StatusChanged;
+                }
 
-                    dataContextVO.Conditions.Clear();
-                    foreach(var condition in value.Conditions ?? Array.Empty<TextStyleCondition>())
-                    {
-                        dataContextVO.Conditions.Add(condition);
-                    }
+                styleConditionClipboard = value;
+
+                if (styleConditionClipboard != null)
+                {
+                    styleConditionClipboard.ItemCut += ConditionClipboard_StatusChanged;
+                    styleConditionClipboard.ItemCopied += ConditionClipboard_StatusChanged;
+                    styleConditionClipboard.ItemPasted += ConditionClipboard_StatusChanged;
+
+                    UpdateClipboardStatus();
                 }
             }
         }

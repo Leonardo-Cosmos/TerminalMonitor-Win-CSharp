@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TerminalMonitor.Models;
+using TerminalMonitor.Parsers;
 using static TerminalMonitor.Execution.ITerminalLineProducer;
 
 namespace TerminalMonitor.Execution
@@ -16,23 +17,20 @@ namespace TerminalMonitor.Execution
         /// <summary>
         /// A list of names of running executions.
         /// </summary>
-        private readonly List<string> executionNames = new();
+        private readonly List<string> executionNames = [];
 
         /// <summary>
         /// A dictionary from execution name to execution detail.
         /// </summary>
-        private readonly Dictionary<string, Execution> executionDict = new();
+        private readonly Dictionary<string, Execution> executionDict = [];
 
-        /// <summary>
-        /// A dictionary from command ID to execution detail.
-        /// </summary>
-        private readonly Dictionary<string, Exception> commandExecutionDict = new();
+        private readonly ConcurrentQueue<TerminalLineDto> terminalLineQueue = new();
 
-        private readonly ConcurrentQueue<TerminalLine> terminalLineQueue = new();
+        private readonly BlockingCollection<TerminalLine> terminalLineCollection = [];
 
         public CommandExecutor()
         {
-
+            _ = Task.Run(ParseTerminalLine);
         }
 
         public void Execute(CommandConfig commandConfig)
@@ -43,7 +41,7 @@ namespace TerminalMonitor.Execution
             execution.LineReceived += (sender, e) =>
             {
                 TerminalLine terminalLine = new(Text: e.Line, ExecutionName: name);
-                terminalLineQueue.Enqueue(terminalLine);
+                terminalLineCollection.Add(terminalLine);
             };
 
             execution.Exited += (sender, e) =>
@@ -67,13 +65,12 @@ namespace TerminalMonitor.Execution
 
         public void Terminate(string executionName)
         {
-            if (!executionDict.ContainsKey(executionName))
+            if (!executionDict.TryGetValue(executionName, out Execution? execution))
             {
                 Debug.Print($"Executor {executionName} doesn't exist when terminate.");
                 return;
             }
 
-            var execution = executionDict[executionName];
             try
             {
                 execution.Kill();
@@ -95,6 +92,12 @@ namespace TerminalMonitor.Execution
 
             executionNames.Clear();
             executionDict.Clear();
+        }
+
+        public void Shutdown()
+        {
+            TerminateAll();
+            terminalLineCollection.CompleteAdding();
         }
 
         private string GetValidExecutionName(string configName)
@@ -129,7 +132,7 @@ namespace TerminalMonitor.Execution
             OnExecutionStarted(name, execution.Id);
         }
 
-        private void RemoveExecution(string name, string id, Exception exception = null)
+        private void RemoveExecution(string name, string id, Exception? exception = null)
         {
             executionNames.Remove(name);
             executionDict.Remove(name);
@@ -157,7 +160,7 @@ namespace TerminalMonitor.Execution
             ExecutionStarted?.Invoke(this, e);
         }
 
-        protected void OnExecutionExited(string name, string id, Exception exception)
+        protected void OnExecutionExited(string name, string id, Exception? exception)
         {
             var status = exception == null ? ExecutionStatus.Completed : ExecutionStatus.Error;
             ExecutionInfoEventArgs e = new()
@@ -180,23 +183,44 @@ namespace TerminalMonitor.Execution
             Started?.Invoke(this, EventArgs.Empty);
         }
 
+        private void ParseTerminalLine()
+        {
+            while (true)
+            {
+                TerminalLine terminalLine;
+                try
+                {
+                    terminalLine = terminalLineCollection.Take();
+                }
+                catch (InvalidOperationException)
+                {
+                    Debug.WriteLine("Parse task done");
+                    break;
+                }
+
+                TerminalLineDto terminalLineDto =
+                    TerminalLineParser.ParseTerminalLine(terminalLine.Text, terminalLine.ExecutionName);
+                terminalLineQueue.Enqueue(terminalLineDto);
+            }
+        }
+
         protected void OnCompleted()
         {
             IsCompleted = true;
             Completed?.Invoke(this, EventArgs.Empty);
         }
 
-        public event ExecutionInfoEventHandler ExecutionStarted;
+        public event ExecutionInfoEventHandler? ExecutionStarted;
 
-        public event ExecutionInfoEventHandler ExecutionExited;
+        public event ExecutionInfoEventHandler? ExecutionExited;
 
-        public event EventHandler Started;
+        public event EventHandler? Started;
 
-        public event EventHandler Completed;
+        public event EventHandler? Completed;
 
-        public IEnumerable<TerminalLine> ReadTerminalLines()
+        public IEnumerable<TerminalLineDto> ReadTerminalLines()
         {
-            List<TerminalLine> terminalLines = new();
+            List<TerminalLineDto> terminalLines = [];
             while (!terminalLineQueue.IsEmpty)
             {
                 if (terminalLineQueue.TryDequeue(out var terminalLine))

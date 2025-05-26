@@ -13,7 +13,7 @@ namespace TerminalMonitor.Windows.Converters
 {
     class MatchOperatorToStringConverter : IValueConverter
     {
-        private static readonly ReadOnlyDictionary<TextMatchOperator, string> opTextDict = 
+        private static readonly ReadOnlyDictionary<TextMatchOperator, string> opTextDict =
             new(new Dictionary<TextMatchOperator, string>() {
                 { TextMatchOperator.None, "--" },
                 { TextMatchOperator.Equals, "equals"},
@@ -23,27 +23,38 @@ namespace TerminalMonitor.Windows.Converters
                 { TextMatchOperator.Matches, "matches" },
             });
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return "?";
+            }
+
             if (value is TextMatchOperator matchOperator)
             {
                 return opTextDict[matchOperator];
             }
             else
             {
-                return "?";
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null || value is DBNull)
+            {
+                return default(TextMatchOperator);
+            }
+
             if (value is string text)
             {
                 return opTextDict
                     .FirstOrDefault(kvPair => kvPair.Value.Equals(text, StringComparison.OrdinalIgnoreCase));
-            } else
+            }
+            else
             {
-                return TextMatchOperator.None;
+                throw new ArgumentException($"Invalid type of {nameof(value)}");
             }
         }
     }

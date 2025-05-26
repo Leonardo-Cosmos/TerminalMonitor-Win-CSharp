@@ -15,16 +15,16 @@ namespace TerminalMonitor.Windows.ValidationRules
         {
             var currentValue = value as string;
 
-            if (ExistingValues?.Contains(currentValue) ?? false)
+            if (ExistingValues.Contains(currentValue))
             {
-                return new ValidationResult(false, ErrorMessage ?? "Value exists already");
+                return new ValidationResult(false, ErrorMessage);
             }
 
             return ValidationResult.ValidResult;
         }
 
-        public IEnumerable<string> ExistingValues { get; init; }
+        public required IEnumerable<string> ExistingValues { get; init; }
 
-        public string ErrorMessage { get; init; }
+        public required string ErrorMessage { get; init; }
     }
 }

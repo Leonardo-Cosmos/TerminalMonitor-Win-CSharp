@@ -1,7 +1,9 @@
 ﻿/* 2021/5/12 */
+using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,171 +26,386 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class FieldListView : UserControl
     {
-        private readonly ObservableCollection<FieldListItemVO> fieldVOs = new();
+        private readonly FieldListViewDataContextVO dataContextVO;
 
-        private readonly List<FieldDisplayDetail> fields = new();
+        private readonly ObservableCollection<FieldListItemVO> fieldVOs = [];
+
+        private List<FieldDisplayDetail> fields = [];
+
+        private ItemClipboard<FieldDisplayDetail>? fieldClipboard;
+
+        private ItemClipboard<TextStyleCondition>? styleConditionClipboard;
 
         public FieldListView()
         {
             InitializeComponent();
 
+            dataContextVO = new()
+            {
+                AddCommand = new RelayCommand(AddFieldDetail, () => true),
+                RemoveCommand = new RelayCommand(RemoveSelectedFieldDetails, () => dataContextVO!.IsAnyFieldSelected),
+                EditCommand = new RelayCommand(EditSelectedFieldDetails, () => dataContextVO!.IsAnyFieldSelected),
+                MoveLeftCommand = new RelayCommand(MoveSelectedFieldDetailsLeft, () => dataContextVO!.IsAnyFieldSelected),
+                MoveRightCommand = new RelayCommand(MoveSelectedFieldDetailsRight, () => dataContextVO!.IsAnyFieldSelected),
+                CutCommand = new RelayCommand(CutSelectedFieldDetails,
+                    () => dataContextVO!.IsAnyFieldSelected && !dataContextVO.IsAnyFieldCutInClipboard),
+                CopyCommand = new RelayCommand(CopySelectedFieldDetails,
+                    () => dataContextVO!.IsAnyFieldSelected && !dataContextVO.IsAnyFieldCutInClipboard),
+                PasteCommnad = new RelayCommand(PasteFieldDetails, () => dataContextVO!.IsAnyFieldInClipboard),
+            };
+
+            dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
+            DataContext = dataContextVO;
+
             lstFields.ItemsSource = fieldVOs;
         }
 
-        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        private void DataContextVO_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(FieldListViewDataContextVO.IsAnyFieldSelected):
+                    (dataContextVO.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.EditCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveLeftCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.MoveRightCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                case nameof(FieldListViewDataContextVO.IsAnyFieldInClipboard):
+                    (dataContextVO.PasteCommnad as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                case nameof(FieldListViewDataContextVO.IsAnyFieldCutInClipboard):
+                    (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.CopyCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void LstFields_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var count = lstFields.SelectedItems.Count;
+            dataContextVO.IsAnyFieldSelected = count > 0;
+        }
+
+        private void LstFields_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            HitTestResult hitResult = VisualTreeHelper.HitTest(this, e.GetPosition(this));
+            if (hitResult.VisualHit.GetType() != typeof(ListBoxItem))
+            {
+                lstFields.UnselectAll();
+            }
+        }
+
+        private void LstFields_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            EditSelectedFieldDetail();
+        }
+
+        private void FieldClipboard_StatusChanged(object? sender, EventArgs e)
+        {
+            UpdateClipboardStatus();
+        }
+
+        private void UpdateClipboardStatus()
+        {
+            dataContextVO.IsAnyFieldInClipboard = fieldClipboard?.ContainsItem ?? false;
+            dataContextVO.IsAnyFieldCutInClipboard = fieldClipboard?.Status == ItemClipboardStatus.Move;
+        }
+
+        private void ForSelectedItem(Action<FieldListItemVO> action)
+        {
+            if (lstFields.SelectedItem is FieldListItemVO itemVO)
+            {
+                action(itemVO);
+            }
+        }
+
+        private void ForEachSelectedItem(Action<FieldListItemVO> action,
+            bool byOrder = false, bool reverseOrder = false, bool recoverSelection = false)
+        {
+            List<FieldListItemVO> itemVOs = [];
+            foreach (var selectedItem in lstFields.SelectedItems)
+            {
+                if (selectedItem is FieldListItemVO itemVO)
+                {
+                    itemVOs.Add(itemVO);
+                }
+            }
+
+            if (byOrder)
+            {
+                itemVOs.Sort((itemX, itemY) =>
+                    fieldVOs.IndexOf(itemX) - fieldVOs.IndexOf(itemY));
+            }
+
+            if (reverseOrder)
+            {
+                itemVOs.Reverse();
+            }
+
+            itemVOs.ForEach(action);
+
+            if (recoverSelection)
+            {
+                itemVOs.ForEach(itemVO => lstFields.SelectedItems.Add(itemVO));
+            }
+        }
+
+        private void InsertAtSelectedItem(params (FieldDisplayDetail fieldDetail, FieldListItemVO itemVO)[] fieldTuples)
+        {
+            var selectedIndex = lstFields.SelectedIndex;
+            if (selectedIndex == -1)
+            {
+                foreach (var (fieldDetail, itemVO) in fieldTuples)
+                {
+                    fieldVOs.Add(itemVO);
+                    lstFields.SelectedItems.Add(itemVO);
+
+                    fields.Add(fieldDetail);
+                }
+            }
+            else
+            {
+                lstFields.SelectedItems.Clear();
+
+                var reversedFieldTuples = fieldTuples.Reverse().ToArray();
+                foreach (var (fieldDetail, itemVO) in reversedFieldTuples)
+                {
+                    fieldVOs.Insert(selectedIndex, itemVO);
+                    lstFields.SelectedItems.Add(itemVO);
+
+                    fields.Insert(selectedIndex, fieldDetail);
+                }
+            }
+        }
+
+        private void AddFieldDetail()
         {
             var existingFieldKeys = fields
                     .Select(field => field.FieldKey);
             FieldDisplayDetailWindow window = new()
             {
                 ExistingFieldKeys = existingFieldKeys,
+                StyleConditionClipboard = styleConditionClipboard,
             };
-            if (window.ShowDialog() ?? false)
+
+            window.Closing += (object? sender, CancelEventArgs e) =>
             {
-                var field = window.Field;
-
-                FieldListItemVO item = new()
+                if (window.IsSaved && window.FieldDetail != null)
                 {
-                    Id = field.Id,
-                    FieldKey = field.FieldKey
-                };
-                fieldVOs.Add(item);
-                lstFields.SelectedItem = item;
+                    var fieldDetail = window.FieldDetail;
 
-                fields.Add(field);
+                    FieldListItemVO itemVO = FieldListItemVO.Create(fieldDetail);
+
+                    InsertAtSelectedItem((fieldDetail, itemVO));
+                }
+            };
+
+            window.Show();
+        }
+
+        private void RemoveSelectedFieldDetails()
+        {
+            ForEachSelectedItem(RemoveFieldDetail);
+        }
+
+        private void RemoveFieldDetail(FieldListItemVO itemVO)
+        {
+            var index = fieldVOs.IndexOf(itemVO);
+            fieldVOs.RemoveAt(index);
+
+            fields.RemoveAt(index);
+        }
+
+        private void EditSelectedFieldDetail()
+        {
+            ForSelectedItem(EditFieldDetail);
+        }
+
+        private void EditSelectedFieldDetails()
+        {
+            ForEachSelectedItem(EditFieldDetail);
+        }
+
+        private void EditFieldDetail(FieldListItemVO itemVO)
+        {
+            var index = fieldVOs.IndexOf(itemVO);
+
+            var fieldDetail = fields[index];
+            var existingFieldKeys = fields
+                .Select(field => field.FieldKey)
+                .Where(fieldKey => fieldKey != fieldDetail.FieldKey);
+            FieldDisplayDetailWindow window = new()
+            {
+                FieldDetail = fieldDetail,
+                ExistingFieldKeys = existingFieldKeys,
+                StyleConditionClipboard = styleConditionClipboard,
+            };
+
+            window.Closing += (object? sender, CancelEventArgs e) =>
+            {
+                if (window.IsSaved)
+                {
+                    FieldListItemVO.Update(itemVO, fieldDetail);
+                }
+            };
+
+            window.Show();
+        }
+
+        private void MoveSelectedFieldDetailsLeft()
+        {
+            ForEachSelectedItem(MoveFieldDetailLeft, byOrder: true, recoverSelection: true);
+        }
+
+        private void MoveFieldDetailLeft(FieldListItemVO itemVO)
+        {
+            var srcIndex = fieldVOs.IndexOf(itemVO);
+            var dstIndex = (srcIndex - 1 + fieldVOs.Count) % fieldVOs.Count;
+
+            fieldVOs.RemoveAt(srcIndex);
+            fieldVOs.Insert(dstIndex, itemVO);
+
+            var fieldDetail = fields[srcIndex];
+            fields.RemoveAt(srcIndex);
+            fields.Insert(dstIndex, fieldDetail);
+        }
+
+        private void MoveSelectedFieldDetailsRight()
+        {
+            ForEachSelectedItem(MoveFieldDetailRight, byOrder: true, reverseOrder: true, recoverSelection: true);
+        }
+
+        private void MoveFieldDetailRight(FieldListItemVO itemVO)
+        {
+            var srcIndex = fieldVOs.IndexOf(itemVO);
+            var dstIndex = (srcIndex + 1) % fieldVOs.Count;
+
+            fieldVOs.RemoveAt(srcIndex);
+            fieldVOs.Insert(dstIndex, itemVO);
+
+            var fieldDetail = fields[srcIndex];
+            fields.RemoveAt(srcIndex);
+            fields.Insert(dstIndex, fieldDetail);
+        }
+
+        private void CutSelectedFieldDetails()
+        {
+            if (fieldClipboard != null)
+            {
+                List<FieldDisplayDetail> cutFieldDetails = [];
+                foreach (var selectedItem in lstFields.SelectedItems)
+                {
+                    if (selectedItem is FieldListItemVO itemVO)
+                    {
+                        var index = fieldVOs.IndexOf(itemVO);
+
+                        var fieldDetail = fields[index];
+                        cutFieldDetails.Add(fieldDetail);
+                    }
+                }
+
+                fieldClipboard.Cut([.. cutFieldDetails]);
+                RemoveSelectedFieldDetails();
             }
         }
 
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        private void CopySelectedFieldDetails()
         {
-            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
+            if (fieldClipboard != null)
             {
-                var index = fieldVOs.IndexOf(selectedItem);
-                fieldVOs.RemoveAt(index);
+                List<FieldDisplayDetail> copiedFieldDetails = [];
+                foreach (var selectedItem in lstFields.SelectedItems)
+                {
+                    if (selectedItem is FieldListItemVO itemVO)
+                    {
+                        var index = fieldVOs.IndexOf(itemVO);
 
-                fields.RemoveAt(index);
+                        var fieldDetail = fields[index];
+                        copiedFieldDetails.Add(fieldDetail);
+                    }
+                }
+
+                fieldClipboard.Copy([.. copiedFieldDetails]);
             }
         }
 
-        private void BtnModify_Click(object sender, RoutedEventArgs e)
+        private void PasteFieldDetails()
         {
-            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
+            if (fieldClipboard != null)
             {
-                var index = fieldVOs.IndexOf(selectedItem);
+                (var pastedFieldDetails, var clipboardStatus) = fieldClipboard.Paste();
 
-                var field = fields[index];
-                var existingFieldKeys = fields
-                    .Select(field => field.FieldKey)
-                    .Where(fieldKey => fieldKey != field.FieldKey);
-                FieldDisplayDetailWindow window = new()
+                if (pastedFieldDetails != null)
                 {
-                    Field = field,
-                    ExistingFieldKeys = existingFieldKeys,
-                };
-                if (window.ShowDialog() ?? false)
-                {
-                    field = window.Field;
-                    fields[index] = field;
+                    var fieldTuples = pastedFieldDetails.Select(pastedFieldDetail =>
+                    {
+                        var fieldDetail = clipboardStatus == ItemClipboardStatus.Move ?
+                            pastedFieldDetail : (FieldDisplayDetail)pastedFieldDetail.Clone();
 
-                    fieldVOs[index].FieldKey = field.FieldKey;
+                        FieldListItemVO itemVO = FieldListItemVO.Create(fieldDetail);
+
+                        return (fieldDetail, itemVO);
+                    }).ToArray();
+
+                    InsertAtSelectedItem(fieldTuples);
                 }
             }
         }
 
-        private void BtnCopy_Click(object sender, RoutedEventArgs e)
+        public List<FieldDisplayDetail> Fields
         {
-            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
-            {
-                var index = fieldVOs.IndexOf(selectedItem);
-
-                var field = fields[index];
-                FieldClipboard?.Copy(field);
-            }
-        }
-
-        private void BtnPaste_Click(object sender, RoutedEventArgs e)
-        {
-            var field = FieldClipboard?.Paste();
-            if (field != null)
-            {
-                field = (FieldDisplayDetail) field.Clone();
-
-                FieldListItemVO item = new()
-                {
-                    Id = field.Id,
-                    FieldKey = field.FieldKey
-                };
-                fieldVOs.Add(item);
-                lstFields.SelectedItem = item;
-
-                fields.Add(field);
-            }
-        }
-
-        private void BtnMoveLeft_Click(object sender, RoutedEventArgs e)
-        {
-            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
-            {
-                var srcIndex = fieldVOs.IndexOf(selectedItem);
-                var dstIndex = (srcIndex - 1 + fieldVOs.Count) % fieldVOs.Count;
-
-                fieldVOs.RemoveAt(srcIndex);
-                fieldVOs.Insert(dstIndex, selectedItem);
-
-                lstFields.SelectedItem = selectedItem;
-
-                var field = fields[srcIndex];
-                fields.RemoveAt(srcIndex);
-                fields.Insert(dstIndex, field);
-            }
-        }
-
-        private void BtnMoveRight_Click(object sender, RoutedEventArgs e)
-        {
-            if (lstFields.SelectedItem is FieldListItemVO selectedItem)
-            {
-                var srcIndex = fieldVOs.IndexOf(selectedItem);
-                var dstIndex = (srcIndex + 1) % fieldVOs.Count;
-
-                fieldVOs.RemoveAt(srcIndex);
-                fieldVOs.Insert(dstIndex, selectedItem);
-
-                lstFields.SelectedItem = selectedItem;
-
-                var field = fields[srcIndex];
-                fields.RemoveAt(srcIndex);
-                fields.Insert(dstIndex, field);
-            }
-        }
-
-        public IEnumerable<FieldDisplayDetail> Fields
-        {
-            get
-            {
-                return new ReadOnlyCollection<FieldDisplayDetail>(fields.ToArray());
-            }
+            get => fields;
 
             set
             {
-                fields.Clear();
+                fields = value ?? [];
+
                 fieldVOs.Clear();
-                if (value == null)
+                fields.Select(fieldDetail => FieldListItemVO.Create(fieldDetail))
+                    .ToList()
+                    .ForEach(fieldVO => fieldVOs.Add(fieldVO));
+            }
+        }
+
+        public ItemClipboard<FieldDisplayDetail>? FieldClipboard
+        {
+            get => fieldClipboard;
+
+            set
+            {
+                if (fieldClipboard == value)
                 {
                     return;
                 }
 
-                fields.AddRange(value);
-                value.Select(field => new FieldListItemVO()
+                if (fieldClipboard != null)
                 {
-                    FieldKey = field.FieldKey,
-                }).ToList()
-                .ForEach(fieldVO => fieldVOs.Add(fieldVO));
+                    fieldClipboard.ItemCut -= FieldClipboard_StatusChanged;
+                    fieldClipboard.ItemCopied -= FieldClipboard_StatusChanged;
+                    fieldClipboard.ItemPasted -= FieldClipboard_StatusChanged;
+                }
+
+                fieldClipboard = value;
+
+                if (fieldClipboard != null)
+                {
+                    fieldClipboard.ItemCut += FieldClipboard_StatusChanged;
+                    fieldClipboard.ItemCopied += FieldClipboard_StatusChanged;
+                    fieldClipboard.ItemPasted += FieldClipboard_StatusChanged;
+
+                    UpdateClipboardStatus();
+                }
             }
         }
 
-        public ItemClipboard<FieldDisplayDetail> FieldClipboard
+        public ItemClipboard<TextStyleCondition>? StyleConditionClipboard
         {
-            get; set;
+            get => styleConditionClipboard;
+            set => styleConditionClipboard = value;
         }
     }
 }

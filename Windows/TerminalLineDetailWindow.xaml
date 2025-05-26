@@ -4,22 +4,31 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TerminalMonitor.Windows"
+        xmlns:helpers="clr-namespace:TerminalMonitor.Windows.Helpers"
         mc:Ignorable="d"
-        Title="Detail" Height="450" Width="800">
+        Title="Terminal Line Detail" Height="450" Width="800">
     <Grid>
-        <ListView Name="lstFields">
+        <ListView Name="lstFields" helpers:MouseHorizontalWheelScroller.ScrollingEnabled="True" Loaded="LstFields_Loaded">
             <ListView.Resources>
                 <!--<Style TargetType="GridViewColumnHeader">
                     <Setter Property="Visibility" Value="Collapsed" />
                 </Style>-->
             </ListView.Resources>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Name="btnCopyListItem" Header="Copy as Condition List Item" Click="BtnCopyListItem_Click" />
+                    <MenuItem Name="btnCopyTreeFieldNode" Header="Copy as Condition Tree Field Node" Click="BtnCopyTreeFieldNode_Click" />
+                    <MenuItem Name="btnCopyTreeGroupNode" Header="Copy as Condition Tree Group Node" Click="BtnCopyTreeGroupNode_Click" />
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Key" DisplayMemberBinding="{Binding FieldKey}" />
                     <GridViewColumn Header="Value">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBox BorderThickness="0" IsReadOnly="True" Text="{Binding Text}" TextWrapping="Wrap" />
+                                <TextBox BorderThickness="0" IsReadOnly="True" Text="{Binding Text}" TextWrapping="Wrap"
+                                         MaxHeight="200" VerticalScrollBarVisibility="Auto" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

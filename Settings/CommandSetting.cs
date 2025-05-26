@@ -7,8 +7,8 @@ namespace TerminalMonitor.Settings
     [Obsolete]
     class CommandSetting
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
-        public string FilePath { get; set; }
+        public string? FilePath { get; set; }
     }
 }

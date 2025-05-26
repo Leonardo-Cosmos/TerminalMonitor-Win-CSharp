@@ -10,13 +10,14 @@ namespace TerminalMonitor.Settings
     {
         private const string settingFilePath = "./setting.json";
 
+        private static readonly JsonSerializerOptions options = new()
+        {
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        };
+
         public static void Save(TerminalMonitorSetting setting)
         {
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            };
             var json = JsonSerializer.Serialize<TerminalMonitorSetting>(setting, options);
 
             try
@@ -29,7 +30,7 @@ namespace TerminalMonitor.Settings
             }
         }
 
-        public static TerminalMonitorSetting Load()
+        public static TerminalMonitorSetting? Load()
         {
             string json;
             try

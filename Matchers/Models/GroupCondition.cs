@@ -7,9 +7,26 @@ namespace TerminalMonitor.Matchers.Models
 {
     public class GroupCondition : Condition, ICloneable
     {
-        public GroupCondition()
-        {
+        private GroupMatchMode _matchMode;
 
+        private List<Condition>? _conditions;
+
+        public GroupCondition(string id, string? name, GroupMatchMode matchMode, List<Condition>? conditions) : base(id, name)
+        {
+            _matchMode = matchMode;
+            _conditions = conditions;
+        }
+
+        public GroupCondition(string? name, GroupMatchMode matchMode, List<Condition>? conditions) : base(name)
+        {
+            _matchMode = matchMode;
+            _conditions = conditions;
+        }
+
+        public GroupCondition(GroupMatchMode matchMode, List<Condition>? conditions) : base()
+        {
+            _matchMode = matchMode;
+            _conditions = conditions;
         }
 
         protected GroupCondition(GroupCondition obj) : base(obj)
@@ -17,7 +34,7 @@ namespace TerminalMonitor.Matchers.Models
             MatchMode = obj.MatchMode;
             if (obj.Conditions != null)
             {
-                Conditions = obj.Conditions.Select(condition => (Condition)condition.Clone());
+                Conditions = [.. obj.Conditions.Select(condition => (Condition)condition.Clone())];
             }
         }
 
@@ -26,8 +43,21 @@ namespace TerminalMonitor.Matchers.Models
             return new GroupCondition(this);
         }
 
-        public GroupMatchMode MatchMode { get; set; }
+        public static GroupCondition Empty => new(
+            GroupMatchMode.All,
+            null
+        );
 
-        public IEnumerable<Condition> Conditions { get; set; }
+        public GroupMatchMode MatchMode
+        {
+            get => _matchMode;
+            set => _matchMode = value;
+        }
+
+        public List<Condition>? Conditions
+        {
+            get => _conditions;
+            set => _conditions = value;
+        }
     }
 }

@@ -8,12 +8,12 @@ namespace TerminalMonitor.Settings.Models
 {
     static class VerticalAlignmentSettings
     {
-        private static readonly IReadOnlyDictionary<string, VerticalAlignment> verticalAlignmentDict
+        private static readonly ReadOnlyDictionary<string, VerticalAlignment> verticalAlignmentDict
                = InitVerticalAlignmentDict();
 
-        private static IReadOnlyDictionary<string, VerticalAlignment> InitVerticalAlignmentDict()
+        private static ReadOnlyDictionary<string, VerticalAlignment> InitVerticalAlignmentDict()
         {
-            Dictionary<string, VerticalAlignment> dict = new();
+            Dictionary<string, VerticalAlignment> dict = [];
             var values = Enum.GetValues(typeof(VerticalAlignment));
             foreach (var item in values)
             {
@@ -30,9 +30,9 @@ namespace TerminalMonitor.Settings.Models
 
         static VerticalAlignment StringToVerticalAlignment(string str)
         {
-            if (str != null && verticalAlignmentDict.ContainsKey(str))
+            if (str != null && verticalAlignmentDict.TryGetValue(str, out VerticalAlignment value))
             {
-                return verticalAlignmentDict[str];
+                return value;
             }
             else
             {
@@ -40,7 +40,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static string Save(VerticalAlignment? obj)
+        public static string? Save(VerticalAlignment? obj)
         {
             if (obj.HasValue)
             {
@@ -52,7 +52,7 @@ namespace TerminalMonitor.Settings.Models
             }
         }
 
-        public static VerticalAlignment? Load(string setting)
+        public static VerticalAlignment? Load(string? setting)
         {
             if (setting == null)
             {

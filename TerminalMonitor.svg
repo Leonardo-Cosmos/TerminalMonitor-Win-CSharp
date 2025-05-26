@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <defs>
+    <style>.canvas{fill: none; opacity: 0;}.light-defaultwrite{fill: #F0F0F0; opacity: 0.9;}.light-defaultblack{fill: #212121; opacity: 1;}.cls-1{opacity:0.75;}.light-defaultred{fill: #C62121; opacity: 1;}.light-defaultgreen{fill: #21C621; opacity: 1;}.light-defaultblue{fill: #2121C6; opacity: 1;}</style>
+  </defs>
+  <title>TerminalMonitor</title>
+  <g id="canvas">
+    <path class="canvas" d="M16,16H0V0H16Z" />
+  </g>
+  <g id="level-1">
+    <g class="cls-1">
+    <path class="light-defaultwrite" d="M14.5,1.5v3H1.5v-3Z" />
+    <path class="light-defaultblack" d="M14.5,1H1.5L1,1.5v3l.5.5h13l.5-.5v-3ZM14,4H2V2H14Z" />
+    </g>
+      <path class="light-defaultwrite" d="M7.049,13.5H1.5V5h13V13.5Z" />
+      <path class="light-defaultblack" d="M7,14H1.5L1,13.5v-9l.5.5H2v8H14v1Zm8-4V4.5l-.5.5H14V14H14.5l.5-.5Z" />
+    <path class="light-defaultblack" d="M7,2.8h-1v1h1Z" />
+    <path class="light-defaultblack" d="M9,2.8h-1v1h1Z" />
+    <path class="light-defaultblack" d="M11,2.8h-1v1h1Z" />
+    <path class="light-defaultblack" d="M3,5.2l2,2v.7l-2,2-.7-.7l1.65,-1.65,-1.65,-1.65Z" />
+    <path class="light-defaultblack" d="M9,9h-3v1h3Z" />
+    <path class="light-defaultred" d="M13,9h-3v1h3Z" />
+    <path class="light-defaultgreen" d="M9,10.5h-3v1h3Z" />
+    <path class="light-defaultblue" d="M13,10.5h-3v1h3Z" />
+  </g>
+</svg>

@@ -16,12 +16,12 @@ namespace TerminalMonitor.Parsers
             try
             {
                 var dict = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
-                return dict ?? new();
+                return dict ?? [];
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex.StackTrace);
-                return new();
+                return [];
             }
         }
 
@@ -29,8 +29,8 @@ namespace TerminalMonitor.Parsers
         {
             var jsonProperties = dict.Select(kvPair => new
             {
-                Key = kvPair.Key,
-                Value = kvPair.Value,
+                kvPair.Key,
+                kvPair.Value,
             })
            .ToDictionary(kvPair => kvPair.Key, kvPair => kvPair.Value);
 

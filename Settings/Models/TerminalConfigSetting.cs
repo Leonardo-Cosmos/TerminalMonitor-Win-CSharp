@@ -5,11 +5,12 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record TerminalConfigSetting(string Id, string Name, List<FieldDisplayDetailSetting> VisibleFields, GroupConditionSetting FilterCondition);
+    record TerminalConfigSetting(string Id, string Name, List<FieldDisplayDetailSetting>? VisibleFields,
+        GroupConditionSetting? FilterCondition, GroupConditionSetting? FindCondition);
 
     static class TerminalConfigSettings
     {
-        public static TerminalConfigSetting Save(TerminalConfig obj)
+        public static TerminalConfigSetting? Save(TerminalConfig? obj)
         {
             if (obj == null)
             {
@@ -20,12 +21,13 @@ namespace TerminalMonitor.Settings.Models
                     Id: obj.Id,
                     Name: obj.Name,
                     VisibleFields: obj.VisibleFields?
-                        .Select(field => FieldDisplayDetailSettings.Save(field)).ToList(),
-                    FilterCondition: GroupConditionSettings.Save(obj.FilterCondition)
+                        .Select(field => FieldDisplayDetailSettings.Save(field)!).ToList(),
+                    FilterCondition: GroupConditionSettings.Save(obj.FilterCondition),
+                    FindCondition: GroupConditionSettings.Save(obj.FindCondition)
                 );
         }
 
-        public static TerminalConfig Load(TerminalConfigSetting setting)
+        public static TerminalConfig? Load(TerminalConfigSetting? setting)
         {
             if (setting == null)
             {
@@ -37,8 +39,9 @@ namespace TerminalMonitor.Settings.Models
                 Id = setting.Id,
                 Name = setting.Name,
                 VisibleFields = setting.VisibleFields?
-                    .Select(field => FieldDisplayDetailSettings.Load(field)),
+                    .Select(field => FieldDisplayDetailSettings.Load(field)!).ToArray(),
                 FilterCondition = GroupConditionSettings.Load(setting.FilterCondition),
+                FindCondition = GroupConditionSettings.Load(setting.FindCondition),
             };
         }
     }

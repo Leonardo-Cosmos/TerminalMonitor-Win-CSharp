@@ -3,14 +3,15 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
+using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
 {
     class TextStyleViewDataContextVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
@@ -27,16 +28,34 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private Brush foreground;
+        private SolidColorBrush? foreground;
 
-        public Brush Foreground
+        public required SolidColorBrush ForegroundColor
         {
-            get => foreground;
+            get => foreground!;
             set
             {
                 foreground = value;
                 OnPropertyChanged();
             }
+        }
+
+        private TextColorMode foregroundColorMode;
+
+        public TextColorMode ForegroundColorMode
+        {
+            get => foregroundColorMode;
+            set
+            {
+                foregroundColorMode = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsForegroundColorStatic));
+            }
+        }
+
+        public bool IsForegroundColorStatic
+        {
+            get => foregroundColorMode == TextColorMode.Static;
         }
 
         private bool enableBackground;
@@ -51,16 +70,34 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private Brush background;
+        private SolidColorBrush? background;
 
-        public Brush Background
+        public required SolidColorBrush BackgroundColor
         {
-            get => background;
+            get => background!;
             set
             {
                 background = value;
                 OnPropertyChanged();
             }
+        }
+
+        private TextColorMode backgroundColorMode;
+
+        public TextColorMode BackgroundColorMode
+        {
+            get => backgroundColorMode;
+            set
+            {
+                backgroundColorMode = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsBackgroundColorStatic));
+            }
+        }
+
+        public bool IsBackgroundColorStatic
+        {
+            get => backgroundColorMode == TextColorMode.Static;
         }
 
         private bool enableCellbackground;
@@ -75,16 +112,34 @@ namespace TerminalMonitor.Windows.Controls
             }
         }
 
-        private Brush cellBackground;
+        private SolidColorBrush? cellBackground;
 
-        public Brush CellBackground
+        public required SolidColorBrush CellBackgroundColor
         {
-            get => cellBackground;
+            get => cellBackground!;
             set
             {
                 cellBackground = value;
                 OnPropertyChanged();
             }
+        }
+
+        private TextColorMode cellBackgroundColorMode;
+
+        public TextColorMode CellBackgroundColorMode
+        {
+            get => cellBackgroundColorMode;
+            set
+            {
+                cellBackgroundColorMode = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsCellBackgroundColorStatic));
+            }
+        }
+
+        public bool IsCellBackgroundColorStatic
+        {
+            get => cellBackgroundColorMode == TextColorMode.Static;
         }
 
         private bool enableHorizontalAlignment;
@@ -155,6 +210,78 @@ namespace TerminalMonitor.Windows.Controls
             set
             {
                 textAlignment = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool enableMaxWidth;
+
+        public bool EnableMaxWidth
+        {
+            get => enableMaxWidth;
+            set
+            {
+                enableMaxWidth = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int maxWidth;
+
+        public int MaxWidth
+        {
+            get => maxWidth;
+            set
+            {
+                maxWidth = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool enableMaxHeight;
+
+        public bool EnableMaxHeight
+        {
+            get => enableMaxHeight;
+            set
+            {
+                enableMaxHeight = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int maxHeight;
+
+        public int MaxHeight
+        {
+            get => maxHeight;
+            set
+            {
+                maxHeight = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool enableTextWrapping;
+
+        public bool EnableTextWrapping
+        {
+            get => enableTextWrapping;
+            set
+            {
+                enableTextWrapping = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private TextWrapping textWrapping;
+
+        public TextWrapping TextWrapping
+        {
+            get => textWrapping;
+            set
+            {
+                textWrapping = value;
                 OnPropertyChanged();
             }
         }

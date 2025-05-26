@@ -1,6 +1,7 @@
 ﻿/* 2021/5/9 */
 using System;
 using System.Collections.Generic;
+using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Execution
 {
@@ -8,11 +9,11 @@ namespace TerminalMonitor.Execution
     {
         public record TerminalLine(string Text, string ExecutionName);
 
-        IEnumerable<TerminalLine> ReadTerminalLines();
+        IEnumerable<TerminalLineDto> ReadTerminalLines();
 
-        event EventHandler Started;
+        event EventHandler? Started;
 
-        event EventHandler Completed;
+        event EventHandler? Completed;
 
         bool IsCompleted
         {

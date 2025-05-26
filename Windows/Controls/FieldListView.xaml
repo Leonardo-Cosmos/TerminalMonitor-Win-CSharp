@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=local:FieldListItemVO}"
+             d:DataContext="{d:DesignInstance Type=local:FieldListViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -13,32 +13,41 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Grid Name="grdButton" Grid.Row="1" Grid.Column="1">
+        <Grid Name="grdButton" Grid.Row="1" Grid.Column="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Click="BtnAdd_Click" />
-            <Button Name="btnDelete" Grid.Column="1" Width="20" Content="➖" ToolTip="Delete" Click="BtnDelete_Click" />
-            <Button Name="btnModify" Grid.Column="2" Width="20" Content="⚙" ToolTip="Modify" Click="BtnModify_Click" />
-            <Button Name="btnCopy" Grid.Column="3" Width="20" Content="📄" ToolTip="Copy" Click="BtnCopy_Click" />
-            <Button Name="btnPaste" Grid.Column="4" Width="20" Content="📋" ToolTip="Paste" Click="BtnPaste_Click" />
-            <Button Name="btnMoveLeft" Grid.Column="5" Width="20" Content="←" ToolTip="Move Left" Click="BtnMoveLeft_Click" />
-            <Button Name="btnMoveRight" Grid.Column="6" Width="20" Content="→" ToolTip="Move Right" Click="BtnMoveRight_Click" />
+            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Command="{Binding Path=AddCommand}" />
+            <Button Name="btnRemove" Grid.Column="1" Width="20" Content="➖" ToolTip="Remove" Command="{Binding Path=RemoveCommand}" />
+            <Button Name="btnEdit" Grid.Column="2" Width="20" Content="✏" ToolTip="Edit" Command="{Binding Path=EditCommand}" />
+            <Button Name="btnMoveLeft" Grid.Column="3" Width="20" Content="←" ToolTip="Move Left" Command="{Binding Path=MoveLeftCommand}" />
+            <Button Name="btnMoveRight" Grid.Column="4" Width="20" Content="→" ToolTip="Move Right" Command="{Binding Path=MoveRightCommand}" />
         </Grid>
 
         <ListView Name="lstFields" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" MinHeight="25"
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                  SelectionMode="Single">
+                  SelectionChanged="LstFields_SelectionChanged"
+                  MouseDown="LstFields_MouseDown" MouseDoubleClick="LstFields_MouseDoubleClick">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Edit" Icon="✏" Command="{Binding Path=EditCommand}" />
+                    <Separator />
+                    <MenuItem Header="Cut" Icon="✂" Command="{Binding Path=CutCommand}" />
+                    <MenuItem Header="Copy" Icon="📄" Command="{Binding Path=CopyCommand}" />
+                    <MenuItem Header="Paste" Icon="📋" Command="{Binding Path=PasteCommnad}" />
+                    <Separator />
+                    <MenuItem Header="Add" Icon="➕" Command="{Binding Path=AddCommand}" />
+                    <MenuItem Header="Remove" Icon="➖" Command="{Binding Path=RemoveCommand}" />
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel></WrapPanel>
@@ -46,8 +55,37 @@
             </ListView.ItemsPanel>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border BorderBrush="SkyBlue" BorderThickness="1">
-                        <TextBlock Text="{Binding FieldKey}" Margin="3" />
+                    <Border BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" BorderThickness="1">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Hidden}" Value="True">
+                                        <DataTrigger.Setters>
+                                            <Setter Property="Opacity" Value="0.5" />
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding FieldKey}" Margin="3" />
+                            <StackPanel Orientation="Horizontal">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HeaderName, Converter={StaticResource ObjectNullOrEmptyConverter}}" Value="True">
+                                                <DataTrigger.Setters>
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger.Setters>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="(" Margin="0, 3, 0, 3" />
+                                <TextBlock Text="{Binding HeaderName}" Margin="0, 3" />
+                                <TextBlock Text=")" Margin="0, 3, 3, 3" />
+                            </StackPanel>
+                        </StackPanel>
                     </Border>
                 </DataTemplate>
             </ListView.ItemTemplate>

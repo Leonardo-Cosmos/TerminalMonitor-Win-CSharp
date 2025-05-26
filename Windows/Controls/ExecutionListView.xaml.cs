@@ -1,4 +1,5 @@
 ﻿/* 2021/6/10 */
+using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -25,22 +26,83 @@ namespace TerminalMonitor.Windows.Controls
     /// </summary>
     public partial class ExecutionListView : UserControl
     {
-        private readonly ObservableCollection<ExecutionListItemVO> executionVOs = new();
+        private readonly ExecutionListViewDataContextVO dataContextVO;
 
-        private IExecutor executor;
+        private readonly ObservableCollection<ExecutionListItemVO> executionVOs = [];
+
+        private IExecutor? executor;
 
         public ExecutionListView()
         {
             InitializeComponent();
 
+            dataContextVO = new()
+            {
+                StopCommand = new RelayCommand(StopSelectedExecutions, () => dataContextVO!.IsAnyExecutionSelected),
+            };
+
+            dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
+            DataContext = dataContextVO;
+
             lstExecutions.ItemsSource = executionVOs;
+        }
+
+        private void DataContextVO_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(ExecutionListViewDataContextVO.IsAnyExecutionSelected):
+                    (dataContextVO.StopCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void LstExecutions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var count = lstExecutions.SelectedItems.Count;
+            dataContextVO.IsAnyExecutionSelected = count > 0;
+        }
+
+        private void LstExecutions_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            HitTestResult hitResult = VisualTreeHelper.HitTest(this, e.GetPosition(this));
+            if (hitResult.VisualHit.GetType() != typeof(ExecutionListItemVO))
+            {
+                lstExecutions.UnselectAll();
+            }
         }
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)
         {
-            var tag = (sender as Button).Tag;
-            var executionName = tag as string;
-            executor.Terminate(executionName);
+            var tag = (sender as Button)?.Tag;
+            var executionName = (tag as string)!;
+            executor?.Terminate(executionName);
+        }
+
+        private void ForEachSelectedItem(Action<ExecutionListItemVO> action)
+        {
+            List<ExecutionListItemVO> itemVOs = [];
+            foreach (var selectedItem in lstExecutions.SelectedItems)
+            {
+                if (selectedItem is ExecutionListItemVO itemVO)
+                {
+                    itemVOs.Add(itemVO);
+                }
+            }
+
+            itemVOs.ForEach(action);
+        }
+
+        private void StopSelectedExecutions()
+        {
+            ForEachSelectedItem(StopExecution);
+        }
+
+        private void StopExecution(ExecutionListItemVO itemVO)
+        {
+            executor?.Terminate(itemVO.Name);
         }
 
         private void UpdateExecutionInfo(ExecutionInfoEventArgs executionInfoEvent)
@@ -61,7 +123,7 @@ namespace TerminalMonitor.Windows.Controls
                 var executionName = executionInfoEvent.Execution.Name;
                 Debug.WriteLine($"Remove {executionName} from list.");
 
-                ExecutionListItemVO item = executionVOs
+                ExecutionListItemVO? item = executionVOs
                     .FirstOrDefault(execution => execution.Name == executionName);
                 if (item != null)
                 {
@@ -74,7 +136,7 @@ namespace TerminalMonitor.Windows.Controls
                 var executionName = executionInfoEvent.Execution.Name;
                 Debug.WriteLine($"Remove {executionName} from list.");
 
-                ExecutionListItemVO item = executionVOs
+                ExecutionListItemVO? item = executionVOs
                     .FirstOrDefault(execution => execution.Name == executionName);
                 if (item != null)
                 {
@@ -102,7 +164,7 @@ namespace TerminalMonitor.Windows.Controls
             this.Dispatcher.Invoke(() => this.UpdateExecutionInfo(e));
         }
 
-        public IExecutor Executor
+        public IExecutor? Executor
         {
             get => executor;
             set

@@ -17,12 +17,12 @@ namespace TerminalMonitor.Windows.ValidationRules
 
             if (String.IsNullOrEmpty(currentValue))
             {
-                return new ValidationResult(false, ErrorMessage ?? "Value should not be empty");
+                return new ValidationResult(false, ErrorMessage);
             }
 
             return ValidationResult.ValidResult;
         }
 
-        public string ErrorMessage { get; set; }
+        public required string ErrorMessage { get; set; }
     }
 }

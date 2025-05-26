@@ -16,9 +16,9 @@ namespace TerminalMonitor.Execution
 
         private bool started = false;
 
-        private Process process;
+        private Process? process;
 
-        private Task processTask;
+        private Task? processTask;
 
         internal string Id { get; init; }
 
@@ -36,8 +36,9 @@ namespace TerminalMonitor.Execution
             }
 
             started = true;
-            processTask = Start(commandConfig.StartFile, commandConfig.Arguments, commandConfig.WorkDirectory);
-            processTask.ContinueWith(task => {                
+            processTask = Task.Run(() => Start(commandConfig.StartFile, commandConfig.Arguments, commandConfig.WorkDirectory));
+            processTask.ContinueWith(task =>
+            {
                 OnExited(task.Exception);
             });
         }
@@ -49,54 +50,56 @@ namespace TerminalMonitor.Execution
                 throw new InvalidOperationException("It is not running.");
             }
 
-            process.Kill();
+            process?.Kill();
         }
 
-        private async Task Start(string startFile, string arguments = null, string workingDirectory = null)
+        private async Task Start(string? startFile, string? arguments = null, string? workingDirectory = null)
         {
-            if (!String.IsNullOrEmpty(startFile))
+            if (String.IsNullOrEmpty(startFile))
             {
-                process = new Process();
-                process.StartInfo.FileName = startFile;
-                if (!String.IsNullOrWhiteSpace(arguments))
-                {
-                    process.StartInfo.Arguments = arguments;
-                }
-                if (!String.IsNullOrWhiteSpace(workingDirectory))
-                {
-                    process.StartInfo.WorkingDirectory = workingDirectory;
-                }
-
-                process.StartInfo.UseShellExecute = false;
-
-                process.StartInfo.RedirectStandardOutput = true;
-                process.OutputDataReceived += (sender, e) =>
-                {
-                    if (!String.IsNullOrEmpty(e.Data))
-                    {
-                        OnLineReceived(e.Data);
-                    }
-                };
-
-                process.StartInfo.RedirectStandardError = true;
-                process.ErrorDataReceived += (sender, e) =>
-                {
-                    if (!String.IsNullOrEmpty(e.Data))
-                    {
-                        OnLineReceived(e.Data);
-                    }
-                };
-
-                process.StartInfo.CreateNoWindow = true;
-
-                process.Start();
-
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
-                await process.WaitForExitAsync();
-                process.Close();
+                return;
             }
+
+            process = new Process();
+            process.StartInfo.FileName = startFile;
+            if (!String.IsNullOrWhiteSpace(arguments))
+            {
+                process.StartInfo.Arguments = arguments;
+            }
+            if (!String.IsNullOrWhiteSpace(workingDirectory))
+            {
+                process.StartInfo.WorkingDirectory = workingDirectory;
+            }
+
+            process.StartInfo.UseShellExecute = false;
+
+            process.StartInfo.RedirectStandardOutput = true;
+            process.OutputDataReceived += (sender, e) =>
+            {
+                if (!String.IsNullOrEmpty(e.Data))
+                {
+                    OnLineReceived(e.Data);
+                }
+            };
+
+            process.StartInfo.RedirectStandardError = true;
+            process.ErrorDataReceived += (sender, e) =>
+            {
+                if (!String.IsNullOrEmpty(e.Data))
+                {
+                    OnLineReceived(e.Data);
+                }
+            };
+
+            process.StartInfo.CreateNoWindow = true;
+
+            process.Start();
+
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
+            await process.WaitForExitAsync();
+            process.Close();
         }
 
         protected void OnLineReceived(string line)
@@ -108,7 +111,7 @@ namespace TerminalMonitor.Execution
             LineReceived?.Invoke(this, e);
         }
 
-        protected void OnExited(Exception exception)
+        protected void OnExited(Exception? exception)
         {
             ProcessInfoEventArgs e = new()
             {
@@ -117,15 +120,15 @@ namespace TerminalMonitor.Execution
             Exited?.Invoke(this, e);
         }
 
-        public event TerminalLineEventHandler LineReceived;
+        public event TerminalLineEventHandler? LineReceived;
 
-        public event ProcessInfoEventHandler Exited;
+        public event ProcessInfoEventHandler? Exited;
 
         public bool IsCompleted
         {
             get
             {
-                return processTask.IsCompleted;
+                return processTask?.IsCompleted ?? false;
             }
         }
     }

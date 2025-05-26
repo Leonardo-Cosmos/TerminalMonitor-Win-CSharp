@@ -24,9 +24,16 @@ namespace TerminalMonitor.Windows
     /// </summary>
     public partial class CommandDetailWindow : Window
     {
-        private readonly CommandDetailWindowDataContextVO dataContextVO = new();
+        private readonly CommandDetailWindowDataContextVO dataContextVO = new()
+        {
+            Name = String.Empty,
+        };
 
-        private readonly List<string> existingCommandNames = new();
+        private readonly List<string> existingCommandNames = [];
+
+        private IEnumerable<string>? latestExistingCommandNames;
+
+        private CommandConfig? command;
 
         public CommandDetailWindow()
         {
@@ -34,9 +41,11 @@ namespace TerminalMonitor.Windows
 
             DataContext = dataContextVO;
 
-            Binding commandNameBinding = new("Name");
-            commandNameBinding.Source = dataContextVO;
-            commandNameBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            Binding commandNameBinding = new("Name")
+            {
+                Source = dataContextVO,
+                UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+            };
             commandNameBinding.ValidationRules.Add(new UniqueItemRule()
             {
                 ExistingValues = existingCommandNames,
@@ -63,6 +72,12 @@ namespace TerminalMonitor.Windows
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
+            existingCommandNames.Clear();
+            if (latestExistingCommandNames != null)
+            {
+                existingCommandNames.AddRange(latestExistingCommandNames);
+            }
+
             txtBxName.GetBindingExpression(TextBox.TextProperty).UpdateSource();
             txtBxCommand.GetBindingExpression(TextBox.TextProperty).UpdateSource();
 
@@ -78,50 +93,65 @@ namespace TerminalMonitor.Windows
                 return;
             }
 
-            DialogResult = true;
+            SaveCommand();
+            IsSaved = true;
+            Close();
         }
 
-        public IEnumerable<string> ExistingCommandNames
+        private void LoadCommand(CommandConfig? command)
         {
-            get
-            {
-                return new ReadOnlyCollection<string>(existingCommandNames.ToArray());
-            }
+            this.command = command;
+            IsSaved = false;
 
-            set
+            if (command != null)
             {
-                existingCommandNames.Clear();
-                if (value != null)
+                dataContextVO.Name = command.Name;
+                dataContextVO.StartFile = command.StartFile;
+                dataContextVO.Arguments = command.Arguments;
+                dataContextVO.WorkDirectory = command.WorkDirectory;
+            }
+        }
+
+        private void SaveCommand()
+        {
+            if (command != null)
+            {
+                command.Name = dataContextVO.Name;
+                command.StartFile = dataContextVO.StartFile;
+                command.Arguments = dataContextVO.Arguments;
+                command.WorkDirectory = dataContextVO.WorkDirectory;
+            }
+            else
+            {
+                command = new()
                 {
-                    existingCommandNames.AddRange(value);
-                }
-            }
-        }
-
-        public CommandConfig Command
-        {
-            get
-            {
-                return new() { 
                     Name = dataContextVO.Name,
                     StartFile = dataContextVO.StartFile,
                     Arguments = dataContextVO.Arguments,
                     WorkDirectory = dataContextVO.WorkDirectory,
                 };
             }
+        }
+
+        public bool IsSaved { get; set; }
+
+        public IEnumerable<string> ExistingCommandNames
+        {
+            get
+            {
+                return new ReadOnlyCollection<string>([.. existingCommandNames]);
+            }
 
             set
             {
-                if (value == null)
-                {
-                    return;
-                }
-
-                dataContextVO.Name = value.Name;
-                dataContextVO.StartFile = value.StartFile;
-                dataContextVO.Arguments = value.Arguments;
-                dataContextVO.WorkDirectory = value.WorkDirectory;
+                latestExistingCommandNames = value;
             }
+        }
+
+        public CommandConfig? Command
+        {
+            get => command;
+            set => LoadCommand(value);
         }
     }
 }

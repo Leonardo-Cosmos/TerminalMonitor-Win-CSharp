@@ -1,6 +1,8 @@
 ﻿/* 2021/10/10 */
 using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,15 +15,70 @@ namespace TerminalMonitor.Windows.Controls
 {
     static class TerminalViewHelper
     {
+        public record RoutedEventHandlerRecord(RoutedEvent RoutedEvent, Delegate Handler);
+
         private static readonly IntToHorizontalAlignmentConverter horizontalAlignmentConverter = new();
 
         private static readonly IntToVerticalAlignmentConverter verticalAlignmentConverter = new();
 
         private static readonly IntToTextAlignmentConverter textAlignmentConverter = new();
 
-        private static readonly Func<object, object> convertColorToBrush = color => new SolidColorBrush((Color)color);
+        private static readonly IntToTextWrappingConverter textWrappingConverter = new();
 
-        public static DataTemplate BuildFieldDataTemplate(FieldDisplayDetail visibleField, DataTable terminalDataTable)
+        private static object ConvertColorToBrush(object color) => new SolidColorBrush((Color)color);
+
+        private static Color GenerateColorByHash(object value)
+        {
+            int hashCode = value?.GetHashCode() ?? 0;
+
+            byte red = (byte)hashCode;
+            byte green = (byte)(hashCode >> 8);
+            byte blue = (byte)(hashCode >> 16);
+
+            return Color.FromRgb(red, green, blue);
+        }
+
+        private static Color ToInvertedColor(Color color)
+        {
+            byte red = color.R;
+            byte green = color.G;
+            byte blue = color.B;
+
+            red ^= 0xFF;
+            green ^= 0xFF;
+            blue ^= 0xFF;
+
+            return Color.FromRgb(red, green, blue);
+        }
+
+        private static Color ToSymmetricColor(Color color)
+        {
+            byte red = color.R;
+            byte green = color.G;
+            byte blue = color.B;
+
+            red -= 0x80;
+            green -= 0x80;
+            blue -= 0x80;
+
+            return Color.FromRgb(red, green, blue);
+        }
+
+        private static object ConvertTextColorToBrush(object textColor, object value)
+        {
+            object? color = ((TextColorConfig)textColor).Mode switch
+            {
+                TextColorMode.Static => ((TextColorConfig)textColor).Color,
+                TextColorMode.Hash => GenerateColorByHash(value),
+                TextColorMode.HashInverted => ToInvertedColor(GenerateColorByHash(value)),
+                TextColorMode.HashSymmetric => ToSymmetricColor(GenerateColorByHash(value)),
+                _ => throw new NotImplementedException(),
+            };
+            return ConvertColorToBrush(color!);
+        }
+
+        public static DataTemplate BuildFieldDataTemplate(FieldDisplayDetail visibleField, DataTable terminalDataTable,
+            IEnumerable<RoutedEventHandlerRecord> eventHandlerRecords)
         {
             string fieldId = visibleField.Id;
             SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(Brush), GetForegroundColumnName);
@@ -30,43 +87,70 @@ namespace TerminalMonitor.Windows.Controls
             SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(HorizontalAlignment), GetHorizontalAlignmentColumnName);
             SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(VerticalAlignment), GetVertialAlignmentColumnName);
             SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(TextAlignment), GetTextAlignmentColumnName);
+            SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(double), GetMaxWidthColumnName);
+            SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(double), GetMaxHeightColumnName);
+            SetStyleDataColumn(fieldId, terminalDataTable.Columns, typeof(TextWrapping), GetTextWrappingColumnName);
 
             FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
 
-            Binding textBinding = new();
-            textBinding.Path = new PropertyPath(visibleField.Id, Array.Empty<object>());
+            Binding textBinding = new()
+            {
+                Path = new PropertyPath(visibleField.Id, [])
+            };
             textBlockElement.SetBinding(TextBlock.TextProperty, textBinding);
 
-            SetStyleElelmentProperty(visibleField, textBlockElement, TextBlock.ForegroundProperty,
-                null, convertColorToBrush,
-                textStyle => textStyle.Foreground, GetForegroundColumnName);
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.ForegroundProperty,
+                null, ConvertColorToBrush,
+                textStyle => textStyle.Foreground?.Color, GetForegroundColumnName);
 
-            SetStyleElelmentProperty(visibleField, textBlockElement, TextBlock.BackgroundProperty,
-                null, convertColorToBrush,
-                textStyle => textStyle.Background, GetBackgroundColumnName);
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.BackgroundProperty,
+                null, ConvertColorToBrush,
+                textStyle => textStyle.Background?.Color, GetBackgroundColumnName);
 
-            SetStyleElelmentProperty(visibleField, textBlockElement, TextBlock.HorizontalAlignmentProperty,
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.HorizontalAlignmentProperty,
                 horizontalAlignmentConverter, null,
                 textStyle => textStyle.HorizontalAlignment, GetHorizontalAlignmentColumnName);
 
-            SetStyleElelmentProperty(visibleField, textBlockElement, TextBlock.VerticalAlignmentProperty,
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.VerticalAlignmentProperty,
                 verticalAlignmentConverter, null,
                 textStyle => textStyle.VerticalAlignment, GetVertialAlignmentColumnName);
 
-            SetStyleElelmentProperty(visibleField, textBlockElement, TextBlock.TextAlignmentProperty,
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.TextAlignmentProperty,
                 textAlignmentConverter, null,
                 textStyle => textStyle.TextAlignment, GetTextAlignmentColumnName);
 
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.MaxWidthProperty,
+                null, null,
+                textStyle => textStyle.MaxWidth, GetMaxWidthColumnName);
+
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.MaxHeightProperty,
+                null, null,
+                textStyle => textStyle.MaxHeight, GetMaxHeightColumnName);
+
+            SetElementStyleProperty(visibleField, textBlockElement, TextBlock.TextWrappingProperty,
+                textWrappingConverter, null,
+                textStyle => textStyle.TextWrapping, GetTextWrappingColumnName);
+
             FrameworkElementFactory panelElement = new(typeof(DockPanel));
 
-            SetStyleElelmentProperty(visibleField, panelElement, DockPanel.BackgroundProperty,
-                null, convertColorToBrush,
-                textStyle => textStyle.CellBackground, GetCellBackgroundColumnName);
+            SetElementStyleProperty(visibleField, panelElement, Panel.BackgroundProperty,
+                null, ConvertColorToBrush,
+                textStyle => textStyle.CellBackground?.Color, GetCellBackgroundColumnName);
+
+            if (eventHandlerRecords != null)
+            {
+                foreach (var eventHandlerRecord in eventHandlerRecords)
+                {
+                    panelElement.AddHandler(eventHandlerRecord.RoutedEvent, eventHandlerRecord.Handler);
+                }
+            }
 
             panelElement.AppendChild(textBlockElement);
 
-            DataTemplate dataTemplate = new();
-            dataTemplate.VisualTree = panelElement;
+            DataTemplate dataTemplate = new()
+            {
+                VisualTree = panelElement
+            };
             return dataTemplate;
         }
 
@@ -100,54 +184,79 @@ namespace TerminalMonitor.Windows.Controls
             return $"{columnName!}__TextAlignment";
         }
 
+        private static string GetMaxWidthColumnName(string columnName)
+        {
+            return $"{columnName!}__MaxWidth";
+        }
+
+        private static string GetMaxHeightColumnName(string columnName)
+        {
+            return $"{columnName!}__MaxHeight";
+        }
+
+        private static string GetTextWrappingColumnName(string columnName)
+        {
+            return $"{columnName!}__TextWrapping";
+        }
+
         private static void SetStyleDataColumn(string fieldId, DataColumnCollection columns, Type dataType,
             Func<string, string> getStyleColumnName)
         {
-            DataColumn styleColumn = new(getStyleColumnName(fieldId));
-            styleColumn.DataType = dataType;
+            DataColumn styleColumn = new(getStyleColumnName(fieldId))
+            {
+                DataType = dataType
+            };
             columns.Add(styleColumn);
         }
 
-        private static void SetStyleElelmentProperty(FieldDisplayDetail visibleField, FrameworkElementFactory elementFactory,
-            DependencyProperty dependencyProperty, IValueConverter bindingConverter, Func<object, object> convertToValue,
-            Func<TextStyle, object> getStyleProperty, Func<string, string> getStyleColumnName)
+        private static void SetElementStyleProperty(FieldDisplayDetail visibleField, FrameworkElementFactory elementFactory,
+            DependencyProperty dependencyProperty, IValueConverter? bindingConverter, Func<object, object>? convertToValue,
+            Func<TextStyle, object?> getStyleProperty, Func<string, string> getStyleColumnName)
         {
-            object styleProperty = GetStaticStyleProperty(visibleField, getStyleProperty);
-            if (styleProperty == null)
+            object? staticStyleProperty = GetStaticStyleProperty(visibleField, getStyleProperty);
+            if (staticStyleProperty != null)
             {
-                Binding binding = new();
-                binding.Path = new PropertyPath(getStyleColumnName(visibleField.Id), Array.Empty<object>());
+                /*
+                 * No conditional style, set default style as static style.
+                 */
+                if (convertToValue == null)
+                {
+                    elementFactory.SetValue(dependencyProperty, staticStyleProperty);
+                }
+                else
+                {
+                    elementFactory.SetValue(dependencyProperty, convertToValue(staticStyleProperty));
+                }
+            }
+            else
+            {
+                /*
+                 * Set binding to apply conditional style.
+                 */
+                Binding binding = new()
+                {
+                    Path = new PropertyPath(getStyleColumnName(visibleField.Id), [])
+                };
                 if (bindingConverter != null)
                 {
                     binding.Converter = bindingConverter;
                 }
                 elementFactory.SetBinding(dependencyProperty, binding);
             }
-            else
-            {
-                if (convertToValue == null)
-                {
-                    elementFactory.SetValue(dependencyProperty, styleProperty);
-                }
-                else
-                {
-                    elementFactory.SetValue(dependencyProperty, convertToValue(styleProperty));
-                }
-            }
         }
 
-        private static object GetStaticStyleProperty(FieldDisplayDetail visibleField,
-            Func<TextStyle, object> getStyleProperty)
+        private static object? GetStaticStyleProperty(FieldDisplayDetail visibleField,
+            Func<TextStyle, object?> getStyleProperty)
         {
-            object defaultStyle = getStyleProperty(visibleField.Style);
+            object? defaultStyle = getStyleProperty(visibleField.Style);
             if (defaultStyle == null)
             {
                 return null;
             }
 
-            bool anyConditionalStyle = (visibleField.Conditions ?? Array.Empty<TextStyleCondition>())
+            bool anyConditionalStyle = (visibleField.Conditions ?? [])
                 .Select(textStyleCondition => textStyleCondition.Style)
-                .Any(style => getStyleProperty(style) != null);
+                .Any(style => style != null && getStyleProperty(style) != null);
 
             if (anyConditionalStyle)
             {
@@ -160,40 +269,47 @@ namespace TerminalMonitor.Windows.Controls
         }
 
         public static void BuildDataRowStyleCells(DataRow row, FieldDisplayDetail visibleField,
-            TextStyle matchedTextStyle)
+            TextStyle? matchedTextStyle)
         {
             var fieldId = visibleField.Id;
-            GetFinalStyleProperty(fieldId, visibleField.Style, matchedTextStyle,
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.Foreground, GetForegroundColumnName, row,
-                convertColorToBrush);
-            GetFinalStyleProperty(fieldId, visibleField.Style, matchedTextStyle,
+                textColor => ConvertTextColorToBrush(textColor, row[fieldId]));
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.Background, GetBackgroundColumnName, row,
-                convertColorToBrush);
-            GetFinalStyleProperty(fieldId, visibleField.Style, matchedTextStyle,
+                textColor => ConvertTextColorToBrush(textColor, row[fieldId]));
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.CellBackground, GetCellBackgroundColumnName, row,
-                convertColorToBrush);
+                textColor => ConvertTextColorToBrush(textColor, row[fieldId]));
 
-            GetFinalStyleProperty(fieldId, visibleField.Style, matchedTextStyle,
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.HorizontalAlignment, GetHorizontalAlignmentColumnName, row, null);
-            GetFinalStyleProperty(fieldId, visibleField.Style, matchedTextStyle,
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.VerticalAlignment, GetVertialAlignmentColumnName, row, null);
-            GetFinalStyleProperty(fieldId, visibleField.Style, matchedTextStyle,
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
                 textStyle => textStyle.TextAlignment, GetTextAlignmentColumnName, row, null);
+
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
+                textStyle => textStyle.MaxWidth, GetMaxWidthColumnName, row, null);
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
+                textStyle => textStyle.MaxHeight, GetMaxHeightColumnName, row, null);
+            BuildFinalStyleCell(fieldId, visibleField.Style, matchedTextStyle,
+                textStyle => textStyle.TextWrapping, GetTextWrappingColumnName, row, null);
         }
 
-        private static void GetFinalStyleProperty(string fieldId, TextStyle defaultStyle, TextStyle conditionalStyle,
-            Func<TextStyle, object> getStyleProperty, Func<string, string> getStyleColumnName, DataRow dataRow,
-            Func<object, object> convert)
+        private static void BuildFinalStyleCell(string fieldId, TextStyle defaultStyle, TextStyle? conditionalStyle,
+            Func<TextStyle, object?> getStyleProperty, Func<string, string> getStyleColumnName, DataRow dataRow,
+            Func<object, object>? convert)
         {
-            object finalStyleProperty;
-            object defaultStyleProperty = getStyleProperty(defaultStyle);
+            object? finalStyleProperty;
+            object? defaultStyleProperty = getStyleProperty(defaultStyle);
             if (conditionalStyle == null)
             {
                 finalStyleProperty = defaultStyleProperty;
             }
             else
             {
-                object conditionalStyleProperty = getStyleProperty(conditionalStyle);
+                object? conditionalStyleProperty = getStyleProperty(conditionalStyle);
                 if (conditionalStyleProperty == null)
                 {
                     finalStyleProperty = defaultStyleProperty;
@@ -217,6 +333,73 @@ namespace TerminalMonitor.Windows.Controls
             {
                 dataRow[getStyleColumnName(fieldId)] = convert(finalStyleProperty);
             }
+        }
+
+        public static DataTemplate BuildColumnHeaderTemplate(FieldDisplayDetail visibleField)
+        {
+            string columnHeader = visibleField.HeaderName ?? visibleField.FieldKey;
+
+            FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
+            textBlockElement.SetValue(TextBlock.TextProperty, columnHeader);
+
+            var headerStyle = visibleField.HeaderStyle;
+
+            if (headerStyle.Foreground != null)
+            {
+                textBlockElement.SetValue(TextBlock.ForegroundProperty, ConvertColorToBrush(headerStyle.Foreground));
+            }
+
+            if (headerStyle.Background != null)
+            {
+                textBlockElement.SetValue(TextBlock.BackgroundProperty, ConvertColorToBrush(headerStyle.Background));
+            }
+
+            if (headerStyle.HorizontalAlignment != null)
+            {
+                textBlockElement.SetValue(TextBlock.HorizontalAlignmentProperty, headerStyle.HorizontalAlignment);
+            }
+
+            if (headerStyle.VerticalAlignment != null)
+            {
+                textBlockElement.SetValue(TextBlock.VerticalAlignmentProperty, headerStyle.VerticalAlignment);
+            }
+
+            if (headerStyle.TextAlignment != null)
+            {
+                textBlockElement.SetValue(TextBlock.TextAlignmentProperty, headerStyle.TextAlignment);
+            }
+
+            FrameworkElementFactory panelElement = new(typeof(DockPanel));
+            if (headerStyle.CellBackground != null)
+            {
+                panelElement.SetValue(Panel.BackgroundProperty, ConvertColorToBrush(headerStyle.CellBackground));
+            }
+
+            panelElement.AppendChild(textBlockElement);
+
+            DataTemplate dataTemplate = new()
+            {
+                VisualTree = panelElement
+            };
+            return dataTemplate;
+        }
+
+        public static DataTemplate BuildDefaultColumnHeaderTemplate(FieldDisplayDetail visibleField)
+        {
+            string columnHeader = visibleField.HeaderName ?? visibleField.FieldKey;
+
+            FrameworkElementFactory textBlockElement = new(typeof(TextBlock));
+            textBlockElement.SetValue(TextBlock.TextProperty, columnHeader);
+            textBlockElement.SetValue(TextBlock.TextAlignmentProperty, TextAlignment.Center);
+
+            FrameworkElementFactory panelElement = new(typeof(DockPanel));
+            panelElement.AppendChild(textBlockElement);
+
+            DataTemplate dataTemplate = new()
+            {
+                VisualTree = panelElement
+            };
+            return dataTemplate;
         }
     }
 }

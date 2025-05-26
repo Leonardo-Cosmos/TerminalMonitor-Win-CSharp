@@ -1,12 +1,12 @@
-﻿<UserControl x:Class="TerminalMonitor.Windows.Controls.FilterListView"
+﻿<UserControl x:Class="TerminalMonitor.Windows.Controls.ConditionListView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TerminalMonitor.Windows.Controls"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=local:FilterListViewDataContextVO}"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DataContext="{d:DesignInstance Type=local:ConditionListViewDataContextVO}"
+             d:DesignHeight="150" d:DesignWidth="800">
     <Grid>
         <Grid.Resources>
             <ResourceDictionary>
@@ -128,8 +128,21 @@
 
         </StackPanel>
         
-        <ListView Name="lstFilters" Grid.Row="1" Grid.RowSpan="1" Grid.Column="0" Grid.ColumnSpan="3" MinHeight="20"
-                  SelectionMode="Single">
+        <ListView Name="lstConditions" Grid.Row="1" Grid.RowSpan="1" Grid.Column="0" Grid.ColumnSpan="3" MinHeight="20"
+                  SelectionChanged="LstConditions_SelectionChanged"
+                  MouseDown="LstConditions_MouseDown" MouseDoubleClick="LstConditions_MouseDoubleClick">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Edit" Icon="✏" Command="{Binding Path=EditCommand}" />
+                    <Separator />
+                    <MenuItem Header="Cut" Icon="✂" Command="{Binding Path=CutCommand}" />
+                    <MenuItem Header="Copy" Icon="📄" Command="{Binding Path=CopyCommand}" />
+                    <MenuItem Header="Paste" Icon="📋" Command="{Binding Path=PasteCommnad}" />
+                    <Separator />
+                    <MenuItem Header="Add" Icon="➕" Command="{Binding Path=AddCommand}" />
+                    <MenuItem Header="Remove" Icon="➖" Command="{Binding Path=RemoveCommand}" />
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel></WrapPanel>
@@ -137,7 +150,7 @@
             </ListView.ItemsPanel>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border BorderBrush="SkyBlue" BorderThickness="1">
+                    <Border BorderThickness="1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
                         <StackPanel Orientation="Horizontal">
                             <StackPanel.Resources>
                                 <ResourceDictionary>
@@ -170,23 +183,20 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <Grid Name="grdButton" Grid.Row="2" Grid.Column="2">
+        <Grid Name="grdButton" Grid.Row="2" Grid.Column="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Click="BtnAdd_Click" />
-            <Button Name="btnDelete" Grid.Column="1" Width="20" Content="➖" ToolTip="Delete" Click="BtnDelete_Click" />
-            <Button Name="btnModify" Grid.Column="2" Width="20" Content="⚙" ToolTip="Modify" Click="BtnModify_Click" />
-            <Button Name="btnCopy" Grid.Column="3" Width="20" Content="📄" ToolTip="Copy" Click="btnCopy_Click" />
-            <Button Name="btnPaste" Grid.Column="4" Width="20" Content="📋" ToolTip="Paste" Click="btnPaste_Click" />
-            <Button Name="btnMoveLeft" Grid.Column="5" Width="20" Content="←" ToolTip="Move Left" Click="btnMoveLeft_Click" />
-            <Button Name="btnMoveRight" Grid.Column="6" Width="20" Content="→" ToolTip="Move Right" Click="btnMoveRight_Click" />
+            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Command="{Binding Path=AddCommand}" />
+            <Button Name="btnRemove" Grid.Column="1" Width="20" Content="➖" ToolTip="Remove" Command="{Binding Path=RemoveCommand}" />
+            <Button Name="btnEdit" Grid.Column="2" Width="20" Content="✏" ToolTip="Edit" Command="{Binding Path=EditCommand}" />
+            <Button Name="btnMoveLeft" Grid.Column="3" Width="20" Content="←" ToolTip="Move Left" Command="{Binding Path=MoveLeftCommand}" />
+            <Button Name="btnMoveRight" Grid.Column="4" Width="20" Content="→" ToolTip="Move Right" Command="{Binding Path=MoveRightCommand}" />
         </Grid>
     </Grid>
 </UserControl>

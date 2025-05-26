@@ -11,8 +11,8 @@ namespace TerminalMonitor.Windows.Controls
 {
     class TerminalViewDataContextVO : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string? name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
@@ -21,11 +21,37 @@ namespace TerminalMonitor.Windows.Controls
 
         public bool AutoScroll
         {
-            get { return autoScroll; }
+            get => autoScroll;
 
             set
             {
                 autoScroll = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int foundCount;
+
+        public int FoundCount
+        {
+            get => foundCount;
+
+            set
+            {
+                foundCount = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string? foundSelectedNumber;
+
+        public required string FoundSelectedNumber
+        {
+            get => foundSelectedNumber!;
+
+            set
+            {
+                foundSelectedNumber = value;
                 OnPropertyChanged();
             }
         }

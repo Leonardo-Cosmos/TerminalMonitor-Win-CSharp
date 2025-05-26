@@ -10,8 +10,8 @@ namespace TerminalMonitor.Execution
 
         void Terminate(string executionName);
 
-        event ExecutionInfoEventHandler ExecutionStarted;
+        event ExecutionInfoEventHandler? ExecutionStarted;
 
-        event ExecutionInfoEventHandler ExecutionExited;
+        event ExecutionInfoEventHandler? ExecutionExited;
     }
 }

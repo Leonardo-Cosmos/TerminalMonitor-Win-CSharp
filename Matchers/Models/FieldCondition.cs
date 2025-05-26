@@ -6,16 +6,38 @@ namespace TerminalMonitor.Matchers.Models
 {
     public class FieldCondition : Condition, ICloneable
     {
-        public FieldCondition()
-        {
+        private string _fieldKey;
 
+        private TextMatchOperator _matchOperator;
+
+        private string _targetValue;
+
+        public FieldCondition(string id, string? name, string fieldKey, TextMatchOperator matchOperator, string targetValue) : base(id, name)
+        {
+            _fieldKey = fieldKey;
+            _matchOperator = matchOperator;
+            _targetValue = targetValue;
+        }
+
+        public FieldCondition(string? name, string fieldKey, TextMatchOperator matchOperator, string targetValue) : base(name)
+        {
+            _fieldKey = fieldKey;
+            _matchOperator = matchOperator;
+            _targetValue = targetValue;
+        }
+
+        public FieldCondition(string fieldKey, TextMatchOperator matchOperator, string targetValue) : base()
+        {
+            _fieldKey = fieldKey;
+            _matchOperator = matchOperator;
+            _targetValue = targetValue;
         }
 
         protected FieldCondition(FieldCondition obj) : base(obj)
         {
-            FieldKey = obj.FieldKey;
-            MatchOperator = obj.MatchOperator;
-            TargetValue = obj.TargetValue;
+            _fieldKey = obj.FieldKey;
+            _matchOperator = obj.MatchOperator;
+            _targetValue = obj.TargetValue;
         }
 
         public override object Clone()
@@ -23,17 +45,28 @@ namespace TerminalMonitor.Matchers.Models
             return new FieldCondition(this);
         }
 
-        public static FieldCondition Empty => new()
+        public static FieldCondition Empty => new(
+            String.Empty,
+            TextMatchOperator.None,
+            String.Empty
+        );
+
+        public string FieldKey
         {
-            FieldKey = String.Empty,
-            MatchOperator = TextMatchOperator.None,
-            TargetValue = String.Empty,
-        };
+            get => _fieldKey;
+            set => _fieldKey = value;
+        }
 
-        public string FieldKey { get; set; }
+        public TextMatchOperator MatchOperator
+        {
+            get => _matchOperator;
+            set => _matchOperator = value;
+        }
 
-        public TextMatchOperator MatchOperator { get; set; }
-
-        public string TargetValue { get; set; }
+        public string TargetValue
+        {
+            get => _targetValue;
+            set => _targetValue = value;
+        }
     }
 }
