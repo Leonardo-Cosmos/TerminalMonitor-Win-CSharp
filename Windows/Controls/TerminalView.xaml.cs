@@ -61,9 +61,9 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly Dictionary<string, bool> lineFilterDict = [];
 
-        private readonly List<TerminalLineDto> shownLines = [];
+        private readonly List<TerminalLine> shownLines = [];
 
-        private readonly List<(TerminalLineDto terminalLine, int shownIndex)> foundLines = [];
+        private readonly List<(TerminalLine terminalLine, int shownIndex)> foundLines = [];
 
         private string? clickedColumnFieldKey;
 
@@ -246,7 +246,7 @@ namespace TerminalMonitor.Windows.Controls
             }
 
             var terminalLineFieldDict = terminalLine.LineFieldDict;
-            if (!terminalLineFieldDict.TryGetValue(clickedColumnFieldKey, out TerminalLineFieldDto? lineFieldValue))
+            if (!terminalLineFieldDict.TryGetValue(clickedColumnFieldKey, out TerminalLineField? lineFieldValue))
             {
                 return null;
             }
@@ -309,7 +309,7 @@ namespace TerminalMonitor.Windows.Controls
             conditionListView.AddCondition(condition);
         }
 
-        public void AddNewTerminalLines(IEnumerable<TerminalLineDto> terminalLineDtos)
+        public void AddNewTerminalLines(IEnumerable<TerminalLine> terminalLineDtos)
         {
             var isAnyAdded = false;
             foreach (var terminalLineDto in terminalLineDtos)
@@ -658,7 +658,7 @@ namespace TerminalMonitor.Windows.Controls
             listTerminal.SetBinding(ItemsControl.ItemsSourceProperty, binding);
         }
 
-        private void AddTerminalLine(TerminalLineDto terminalLineDto)
+        private void AddTerminalLine(TerminalLine terminalLineDto)
         {
             DataRow row = terminalDataTable.NewRow();
 
@@ -673,7 +673,7 @@ namespace TerminalMonitor.Windows.Controls
                         continue;
                     }
 
-                    var fieldValue = terminalLineDto.LineFieldDict.TryGetValue(visibleField.FieldKey, out TerminalLineFieldDto? value) ? value.Text : "";
+                    var fieldValue = terminalLineDto.LineFieldDict.TryGetValue(visibleField.FieldKey, out TerminalLineField? value) ? value.Text : "";
 
                     row[visibleField.Id] = fieldValue;
 

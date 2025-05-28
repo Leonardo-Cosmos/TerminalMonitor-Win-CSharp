@@ -8,7 +8,7 @@ namespace TerminalMonitor.Terminal
 {
     public interface ITerminalSupervisor
     {
-        public void AddTerminalLines(IEnumerable<TerminalLineDto> terminalLineDtoCollection);
+        public void AddTerminalLines(IEnumerable<TerminalLine> terminalLineDtoCollection);
 
         public void RemoveTerminalLinesUntil(string terminalLineId);
 

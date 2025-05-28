@@ -104,25 +104,25 @@ namespace TerminalMonitor.Execution
 
         protected void OnLineReceived(string line)
         {
-            TerminalLineEventArgs e = new()
+            ProcessOutputEventArgs e = new()
             {
-                Line = line,
+                Text = line,
             };
             LineReceived?.Invoke(this, e);
         }
 
         protected void OnExited(Exception? exception)
         {
-            ProcessInfoEventArgs e = new()
+            ProcessExitedEventArgs e = new()
             {
                 Exception = exception,
             };
             Exited?.Invoke(this, e);
         }
 
-        public event TerminalLineEventHandler? LineReceived;
+        public event ProcessOutputEventHandler? LineReceived;
 
-        public event ProcessInfoEventHandler? Exited;
+        public event ProcessExitedEventHandler? Exited;
 
         public bool IsCompleted
         {

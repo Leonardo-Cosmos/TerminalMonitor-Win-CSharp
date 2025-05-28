@@ -10,7 +10,7 @@ namespace TerminalMonitor.Terminal
 {
     public class TerminalLineDtosEventArgs : EventArgs
     {
-        public required IEnumerable<TerminalLineDto> TerminalLines { get; set; }
+        public required IEnumerable<TerminalLine> TerminalLines { get; set; }
     }
 
     public delegate void TerminalLineDtosEventHandler(object sender, TerminalLineDtosEventArgs e);

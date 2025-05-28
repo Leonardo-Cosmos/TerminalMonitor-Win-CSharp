@@ -9,13 +9,13 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Terminal
 {
-    public class TerminalLineDtoCollection : IReadOnlyList<TerminalLineDto>
+    public class TerminalLineDtoCollection : IReadOnlyList<TerminalLine>
     {
-        private readonly IReadOnlyList<TerminalLineDto> terminalLines;
+        private readonly IReadOnlyList<TerminalLine> terminalLines;
 
-        public TerminalLineDtoCollection(IEnumerable<TerminalLineDto> terminalLines)
+        public TerminalLineDtoCollection(IEnumerable<TerminalLine> terminalLines)
         {
-            if (terminalLines is IReadOnlyList<TerminalLineDto> terminalLineList)
+            if (terminalLines is IReadOnlyList<TerminalLine> terminalLineList)
             {
                 this.terminalLines = terminalLineList;
             }
@@ -25,14 +25,14 @@ namespace TerminalMonitor.Terminal
             }
         }
 
-        public TerminalLineDto? this[string id] =>
+        public TerminalLine? this[string id] =>
             terminalLines.FirstOrDefault(terminalLine => terminalLine.Id == id!);
 
-        public TerminalLineDto this[int index] => terminalLines[index];
+        public TerminalLine this[int index] => terminalLines[index];
 
         public int Count => terminalLines.Count;
 
-        public IEnumerator<TerminalLineDto> GetEnumerator()
+        public IEnumerator<TerminalLine> GetEnumerator()
         {
             return terminalLines.GetEnumerator();
         }

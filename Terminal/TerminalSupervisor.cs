@@ -8,7 +8,7 @@ namespace TerminalMonitor.Terminal
 {
     class TerminalSupervisor : ITerminalSupervisor
     {
-        private readonly List<TerminalLineDto> terminalLineDtos = [];
+        private readonly List<TerminalLine> terminalLineDtos = [];
 
         private readonly TerminalLineDtoCollection terminalLineCollection;
 
@@ -17,7 +17,7 @@ namespace TerminalMonitor.Terminal
             terminalLineCollection = new(terminalLineDtos);
         }
 
-        public void AddTerminalLines(IEnumerable<TerminalLineDto> terminalLineDtoCollection)
+        public void AddTerminalLines(IEnumerable<TerminalLine> terminalLineDtoCollection)
         {
             terminalLineDtos.AddRange(terminalLineDtoCollection);
 
@@ -34,7 +34,7 @@ namespace TerminalMonitor.Terminal
             OnTerminalLinesRemoved(removedTerminalLineDtos);
         }
 
-        protected void OnTerminalLinesAdded(TerminalLineDto[] terminalLineDtos)
+        protected void OnTerminalLinesAdded(TerminalLine[] terminalLineDtos)
         {
             TerminalLineDtosEventArgs e = new()
             {
@@ -44,7 +44,7 @@ namespace TerminalMonitor.Terminal
             TerminalLinesAdded?.Invoke(this, e);
         }
 
-        protected void OnTerminalLinesRemoved(TerminalLineDto[] terminalLineDtos)
+        protected void OnTerminalLinesRemoved(TerminalLine[] terminalLineDtos)
         {
             TerminalLineDtosEventArgs e = new()
             {

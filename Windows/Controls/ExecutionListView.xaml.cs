@@ -117,31 +117,40 @@ namespace TerminalMonitor.Windows.Controls
                     Name = executionName,
                 };
                 executionVOs.Add(item);
+                Debug.WriteLine($"Added {executionName} to list");
             }
             else if (executionInfoEvent.Execution.Status == ExecutionStatus.Completed)
             {
                 var executionName = executionInfoEvent.Execution.Name;
-                Debug.WriteLine($"Remove {executionName} from list.");
+                Debug.WriteLine($"Remove {executionName} (normal) from list.");
 
                 ExecutionListItemVO? item = executionVOs
                     .FirstOrDefault(execution => execution.Name == executionName);
                 if (item != null)
                 {
                     executionVOs.Remove(item);
-                    Debug.WriteLine($"Removed {executionName} from list.");
+                    Debug.WriteLine($"Removed {executionName} (normal) from list.");
+                }
+                else
+                {
+                    Debug.WriteLine($"Remove {executionName} (normal) skipped because it is not found.");
                 }
             }
             else if (executionInfoEvent.Execution.Status == ExecutionStatus.Error)
             {
                 var executionName = executionInfoEvent.Execution.Name;
-                Debug.WriteLine($"Remove {executionName} from list.");
+                Debug.WriteLine($"Remove {executionName} (error) from list.");
 
                 ExecutionListItemVO? item = executionVOs
                     .FirstOrDefault(execution => execution.Name == executionName);
                 if (item != null)
                 {
                     executionVOs.Remove(item);
-                    Debug.WriteLine($"Removed {executionName} from list.");
+                    Debug.WriteLine($"Removed {executionName} (error) from list.");
+                }
+                else
+                {
+                    Debug.WriteLine($"Remove {executionName} (error) skipped because it is not found.");
                 }
 
                 if (executionInfoEvent.Exception != null)

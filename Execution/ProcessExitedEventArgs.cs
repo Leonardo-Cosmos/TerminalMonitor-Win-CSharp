@@ -3,10 +3,10 @@ using System;
 
 namespace TerminalMonitor.Execution
 {
-    class ProcessInfoEventArgs : EventArgs
+    class ProcessExitedEventArgs : EventArgs
     {
         public Exception? Exception { get; init; }
     }
 
-    delegate void ProcessInfoEventHandler(object sender, ProcessInfoEventArgs e);
+    delegate void ProcessExitedEventHandler(object sender, ProcessExitedEventArgs e);
 }

@@ -9,7 +9,7 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Models
 {
-    public class TerminalLineDto
+    public class TerminalLine
     {
         public required string Id { get; init; }
 
@@ -23,9 +23,8 @@ namespace TerminalMonitor.Models
         public required Dictionary<string, object> JsonObjectDict { get; set; }
 
         /// <summary>
-        /// Line fields with full path as key.
+        /// A dictionary of line fields with full path as the key.
         /// </summary>
-        public required Dictionary<string, TerminalLineFieldDto> LineFieldDict { get; set; }
-
+        public required Dictionary<string, TerminalLineField> LineFieldDict { get; set; }
     }
 }

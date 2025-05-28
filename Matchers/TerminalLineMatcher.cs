@@ -14,12 +14,12 @@ namespace TerminalMonitor.Matchers
     {
         private readonly Condition matchCondition = matchCondition;
 
-        public bool IsMatch(TerminalLineDto terminalLineDto)
+        public bool IsMatch(TerminalLine terminalLineDto)
         {
             return IsMatch(terminalLineDto, matchCondition);
         }
 
-        public static bool IsMatch(TerminalLineDto terminalLineDto, Condition matchCondition)
+        public static bool IsMatch(TerminalLine terminalLineDto, Condition matchCondition)
         {
             if (matchCondition is GroupCondition groupCondition)
             {
@@ -35,7 +35,7 @@ namespace TerminalMonitor.Matchers
             }
         }
 
-        public static bool IsMatch(TerminalLineDto terminalLineDto, GroupCondition groupCondition)
+        public static bool IsMatch(TerminalLine terminalLineDto, GroupCondition groupCondition)
         {
             ArgumentNullException.ThrowIfNull(groupCondition);
 
@@ -63,7 +63,7 @@ namespace TerminalMonitor.Matchers
             return groupMatched ^ groupCondition.IsInverted;
         }
 
-        public static bool IsMatch(TerminalLineDto terminalLineDto, FieldCondition fieldCondition)
+        public static bool IsMatch(TerminalLine terminalLineDto, FieldCondition fieldCondition)
         {
             ArgumentNullException.ThrowIfNull(fieldCondition);
 
@@ -72,7 +72,7 @@ namespace TerminalMonitor.Matchers
             {
                 fieldMatched = false;
             }
-            else if (!terminalLineDto.LineFieldDict.TryGetValue(fieldCondition.FieldKey, out TerminalLineFieldDto? jsonProperty))
+            else if (!terminalLineDto.LineFieldDict.TryGetValue(fieldCondition.FieldKey, out TerminalLineField? jsonProperty))
             {
                 fieldMatched = fieldCondition.DefaultResult;
             }
