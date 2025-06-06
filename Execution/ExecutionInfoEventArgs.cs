@@ -6,9 +6,9 @@ namespace TerminalMonitor.Execution
 {
     public class ExecutionInfoEventArgs : EventArgs
     {
-        public required ExecutionInfo Execution { get; set; }
+        public required ExecutionInfo Execution { get; init; }
 
-        public Exception? Exception { get; set; }
+        public Exception? Exception { get; init; }
     }
 
     public delegate void ExecutionInfoEventHandler(object sender, ExecutionInfoEventArgs e);

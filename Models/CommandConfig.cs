@@ -1,5 +1,7 @@
 ﻿/* 2021/5/30 */
 
+using System;
+
 namespace TerminalMonitor.Models
 {
     public class CommandConfig
@@ -7,7 +9,7 @@ namespace TerminalMonitor.Models
         /// <summary>
         /// Unique ID of command.
         /// </summary>
-        public string Id { get; set; }
+        public Guid Id { get; set; }
 
         /// <summary>
         /// The name of command. This value is required and unique.

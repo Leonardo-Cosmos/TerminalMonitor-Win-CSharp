@@ -6,9 +6,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using TerminalMonitor.Models;
 using TerminalMonitor.Parsers;
-using static TerminalMonitor.Execution.ITerminalLineProducer;
 
 namespace TerminalMonitor.Execution
 {
@@ -16,15 +16,7 @@ namespace TerminalMonitor.Execution
     {
         private record ExecutionText(string Text, string ExecutionName);
 
-        /// <summary>
-        /// A list of names of running executions.
-        /// </summary>
-        private readonly List<string> executionNames = [];
-
-        /// <summary>
-        /// A dictionary from execution name to execution detail.
-        /// </summary>
-        private readonly Dictionary<string, Execution> executionDict = [];
+        private readonly CommandExecutorData executorData = new();
 
         private readonly BlockingCollection<ExecutionText> executionTextCollection = [];
 
@@ -35,36 +27,56 @@ namespace TerminalMonitor.Execution
             _ = Task.Run(ParseTerminalLine);
         }
 
-        public void Execute(CommandConfig commandConfig)
+        public Task? Execute(CommandConfig commandConfig)
         {
+            Debug.WriteLine($"Executing command (name: {commandConfig.Name}, id: {commandConfig.Id})");
+
             Execution execution = new(commandConfig);
-            var uniqueExecutionName = GetUniqueExecutionName(commandConfig.Name);
+
+            var uniqueExecutionName = executorData.GetUniqueExecutionName(commandConfig.Name);
 
             execution.LineReceived += (sender, e) =>
             {
                 ExecutionText executionText = new(Text: e.Text, ExecutionName: uniqueExecutionName);
-                executionTextCollection.Add(executionText);
+                Task.Run(() =>
+                {
+                    executionTextCollection.Add(executionText);
+                });
             };
 
             execution.Exited += (sender, e) =>
             {
-                RemoveExecution(uniqueExecutionName, execution.Id, e.Exception);
+                RemoveExecution(execution.Id, e.Exception);
 
-                Debug.Print($"Execution {uniqueExecutionName} completed.");
+                Debug.WriteLine($"Execution (name: {uniqueExecutionName}, id: {execution.Id}) completed.");
             };
 
-            AddExecution(uniqueExecutionName, execution);
+            var added = AddExecution(uniqueExecutionName, execution);
+            if (!added)
+            {
+                return null;
+            }
 
-            execution.Start();
-
-            Debug.Print($"Execution {uniqueExecutionName} is started");
+            return Task.Run(() =>
+            {
+                try
+                {
+                    execution.Start().Wait();
+                    Debug.WriteLine($"Execution (name: {uniqueExecutionName}, id: {execution.Id}) is started");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error when start execution (name: {uniqueExecutionName}, id: {execution.Id}). {ex}");
+                    RemoveExecution(execution.Id, ex);
+                }
+            });
         }
 
         public void Terminate(string executionName)
         {
             if (!executionDict.TryGetValue(executionName, out Execution? execution))
             {
-                Debug.Print($"Execution {executionName} doesn't exist when terminate it.");
+                Debug.WriteLine($"Execution {executionName} doesn't exist when terminate it.");
                 return;
             }
 
@@ -114,55 +126,63 @@ namespace TerminalMonitor.Execution
             return terminalLines.AsEnumerable();
         }
 
-        private void AddExecution(string name, Execution execution)
+        private bool AddExecution(string executionName, Execution execution)
         {
             // Emit event when the first execution started.
-            if (executionNames.Count == 0)
+            if (executorData.IsEmpty)
             {
                 OnStarted();
             }
 
-            executionNames.Add(name);
-            executionDict.Add(name, execution);
+            var commandConfig = execution.CommandConfig;
+            if (executorData.GetExecutionIds(commandConfig.Id) == null)
+            {
+                OnCommandFirstExecutionStarted(commandConfig.Name, commandConfig.Id);
+            }
 
-            OnExecutionStarted(name, execution.Id);
+            try
+            {
+                executorData.AddExecution(executionName, execution);
+
+                OnExecutionStarted(executionName, execution.Id);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error when add execution (name: {executionName}, id: {execution.Id}). {ex}");
+                return false;
+            }
         }
 
-        private void RemoveExecution(string name, string id, Exception? exception = null)
+        private bool RemoveExecution(Guid executionId, Exception? exception = null)
         {
-            executionNames.Remove(name);
-            executionDict.Remove(name);
+            try
+            {
+                var (executionName, execution) = executorData.RemoveExecution(executionId);
 
-            OnExecutionExited(name, id, exception);
+                OnExecutionExited(executionName, executionId, exception);
+
+                var commandConfig = execution.CommandConfig;
+                if (executorData.GetExecutionIds(commandConfig.Id) == null)
+                {
+                    OnCommandLastExecutionExited(commandConfig.Name, commandConfig.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error when remove execution (id: {executionId}). {ex}");
+                return false;
+            }
+
 
             // Emit event when the last execution ended.
-            if (executionNames.Count == 0)
+            if (executorData.IsEmpty)
             {
                 OnCompleted();
             }
-        }
 
-        /// <summary>
-        /// By default, the execution takes command's name,
-        /// but when there are multiple executions from same command,
-        /// each execution should have a unique name.
-        /// </summary>
-        private string GetUniqueExecutionName(string configName)
-        {
-            if (!executionDict.ContainsKey(configName))
-            {
-                return configName;
-            }
-
-            var number = 0;
-            string name;
-            do
-            {
-                number++;
-                name = $"{configName} {number}";
-            } while (executionDict.ContainsKey(name));
-
-            return name;
+            return true;
         }
 
         private void ParseTerminalLine()
@@ -186,7 +206,7 @@ namespace TerminalMonitor.Execution
             }
         }
 
-        protected void OnExecutionStarted(string name, string id)
+        protected void OnExecutionStarted(string name, Guid id)
         {
             ExecutionInfoEventArgs e = new()
             {
@@ -200,7 +220,7 @@ namespace TerminalMonitor.Execution
             ExecutionStarted?.Invoke(this, e);
         }
 
-        protected void OnExecutionExited(string name, string id, Exception? exception)
+        protected void OnExecutionExited(string name, Guid id, Exception? exception)
         {
             var status = exception == null ? ExecutionStatus.Completed : ExecutionStatus.Error;
             ExecutionInfoEventArgs e = new()
@@ -215,6 +235,32 @@ namespace TerminalMonitor.Execution
                 Exception = exception,
             };
             ExecutionExited?.Invoke(this, e);
+        }
+
+        protected void OnCommandFirstExecutionStarted(string name, Guid id)
+        {
+            CommandInfoEventArgs e = new()
+            {
+                Command = new()
+                {
+                    Id = id,
+                    Name = name,
+                },
+            };
+            CommandFirstExecutionStarted?.Invoke(this, e);
+        }
+
+        protected void OnCommandLastExecutionExited(string name, Guid id)
+        {
+            CommandInfoEventArgs e = new()
+            {
+                Command = new()
+                {
+                    Id = id,
+                    Name = name,
+                },
+            };
+            CommandLastExecutionExited?.Invoke(this, e);
         }
 
         protected void OnStarted()
@@ -232,6 +278,10 @@ namespace TerminalMonitor.Execution
         public event ExecutionInfoEventHandler? ExecutionStarted;
 
         public event ExecutionInfoEventHandler? ExecutionExited;
+
+        public event CommandInfoEventHandler? CommandFirstExecutionStarted;
+
+        public event CommandInfoEventHandler? CommandLastExecutionExited;
 
         public event EventHandler? Started;
 

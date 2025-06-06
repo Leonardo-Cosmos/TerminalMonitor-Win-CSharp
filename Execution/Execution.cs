@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TerminalMonitor.Models;
 
@@ -12,51 +13,79 @@ namespace TerminalMonitor.Execution
 {
     class Execution
     {
-        private readonly CommandConfig commandConfig;
-
         private bool started = false;
+
+        private readonly object startLock = new();
 
         private Process? process;
 
-        private Task? processTask;
+        public Guid Id { get; init; }
 
-        internal string Id { get; init; }
+        public CommandConfig CommandConfig { get; init; }
+
+        public bool IsCompleted { get; private set; }
 
         internal Execution(CommandConfig commandConfig)
         {
-            this.commandConfig = commandConfig;
-            Id = Guid.NewGuid().ToString();
+            Id = Guid.NewGuid();
+            CommandConfig = commandConfig;
+            IsCompleted = false;
         }
 
-        public void Start()
+        public Task Start()
         {
+            Debug.WriteLine($"Execution (id: {Id}) is starting");
+
+            Monitor.Enter(startLock);
             if (started)
             {
+                Monitor.Exit(startLock);
                 throw new InvalidOperationException("It has been started already.");
             }
 
             started = true;
-            processTask = Task.Run(() => Start(commandConfig.StartFile, commandConfig.Arguments, commandConfig.WorkDirectory));
-            processTask.ContinueWith(task =>
-            {
-                OnExited(task.Exception);
+
+            return Task.Run(() => {
+                try
+                {
+                    Start(CommandConfig.StartFile,
+                        CommandConfig.Arguments,
+                        CommandConfig.WorkDirectory);
+                }
+                catch (Exception ex)
+                {
+                    OnExited(ex);
+                }
+                finally
+                {
+                    Monitor.Exit(startLock);
+                }
             });
         }
 
-        public void Kill()
+        public Task Kill()
         {
+            Debug.WriteLine($"Execution (id: {Id}) is terminating");
+
+            Monitor.Enter(startLock);
             if (!started)
             {
+                Monitor.Exit(startLock);
                 throw new InvalidOperationException("It is not running.");
             }
+            Monitor.Exit(startLock);
 
-            process?.Kill();
+            return Task.Run(() =>
+            {
+                process?.Kill();
+            });
         }
 
-        private async Task Start(string? startFile, string? arguments = null, string? workingDirectory = null)
+        private void Start(string? startFile, string? arguments = null, string? workingDirectory = null)
         {
             if (String.IsNullOrEmpty(startFile))
             {
+                OnExited(null);
                 return;
             }
 
@@ -91,6 +120,13 @@ namespace TerminalMonitor.Execution
                 }
             };
 
+            process.Exited += (sender, e) =>
+            {
+                process.Close();
+
+                OnExited(null);
+            };
+
             process.StartInfo.CreateNoWindow = true;
 
             process.Start();
@@ -98,8 +134,9 @@ namespace TerminalMonitor.Execution
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
-            await process.WaitForExitAsync();
-            process.Close();
+            Debug.WriteLine($"Execution (id: {Id}) is started");
+
+            //await process.WaitForExitAsync();
         }
 
         protected void OnLineReceived(string line)
@@ -113,24 +150,19 @@ namespace TerminalMonitor.Execution
 
         protected void OnExited(Exception? exception)
         {
+            process = null;
+
             ProcessExitedEventArgs e = new()
             {
                 Exception = exception,
             };
             Exited?.Invoke(this, e);
+
+            IsCompleted = true;
         }
 
         public event ProcessOutputEventHandler? LineReceived;
 
         public event ProcessExitedEventHandler? Exited;
-
-        public bool IsCompleted
-        {
-            get
-            {
-                return processTask?.IsCompleted ?? false;
-            }
-        }
     }
-    
 }
