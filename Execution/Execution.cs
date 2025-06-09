@@ -15,7 +15,7 @@ namespace TerminalMonitor.Execution
     {
         private bool started = false;
 
-        private readonly object startLock = new();
+        private readonly Semaphore startSemaphore = new(1, 1);
 
         private Process? process;
 
@@ -36,10 +36,10 @@ namespace TerminalMonitor.Execution
         {
             Debug.WriteLine($"Execution (id: {Id}) is starting");
 
-            Monitor.Enter(startLock);
+            startSemaphore.WaitOne();
             if (started)
             {
-                Monitor.Exit(startLock);
+                startSemaphore.Release();
                 throw new InvalidOperationException("It has been started already.");
             }
 
@@ -58,7 +58,7 @@ namespace TerminalMonitor.Execution
                 }
                 finally
                 {
-                    Monitor.Exit(startLock);
+                    startSemaphore.Release();
                 }
             });
         }
@@ -67,13 +67,13 @@ namespace TerminalMonitor.Execution
         {
             Debug.WriteLine($"Execution (id: {Id}) is terminating");
 
-            Monitor.Enter(startLock);
+           startSemaphore.WaitOne();
             if (!started)
             {
-                Monitor.Exit(startLock);
+                startSemaphore.Release();
                 throw new InvalidOperationException("It is not running.");
             }
-            Monitor.Exit(startLock);
+            startSemaphore.Release();
 
             return Task.Run(() =>
             {
@@ -120,6 +120,7 @@ namespace TerminalMonitor.Execution
                 }
             };
 
+            process.EnableRaisingEvents = true;
             process.Exited += (sender, e) =>
             {
                 process.Close();

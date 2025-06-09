@@ -20,6 +20,7 @@
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Stop" Icon="□" Command="{Binding Path=StopCommand}" />
+                    <MenuItem Header="Restart" Icon="↺" Command="{Binding Path=RestartCommand}" />
                 </ContextMenu>
             </ListView.ContextMenu>
             
@@ -36,10 +37,12 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding Name}" />
-                        <Button Name="btnStop" Grid.Column="2" Width="20" Content="□" Tag="{Binding Name}" Click="BtnStop_Click" />
+                        <Button Name="btnRestart" Grid.Column="2" Width="20" Content="↺" Tag="{Binding Id}" Click="BtnRestart_Click" />
+                        <Button Name="btnStop" Grid.Column="3" Width="20" Content="□" Tag="{Binding Id}" Click="BtnStop_Click" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

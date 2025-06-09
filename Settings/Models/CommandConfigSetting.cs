@@ -16,7 +16,7 @@ namespace TerminalMonitor.Settings.Models
             }
 
             return new CommandConfigSetting(
-                Id: obj.Id,
+                Id: obj.Id.ToString(),
                 Name: obj.Name,
                 StartFile: obj.StartFile,
                 Arguments: obj.Arguments,
@@ -33,7 +33,7 @@ namespace TerminalMonitor.Settings.Models
 
             return new CommandConfig()
             {
-                Id = setting.Id ?? Guid.NewGuid().ToString(),
+                Id = Guid.TryParse(setting.Id, out Guid result) ? result : Guid.NewGuid(),
                 Name = setting.Name,
                 StartFile = setting.StartFile,
                 Arguments = setting.Arguments,

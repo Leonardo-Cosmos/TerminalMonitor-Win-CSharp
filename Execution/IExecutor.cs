@@ -1,6 +1,7 @@
 ﻿/* 2021/6/11 */
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TerminalMonitor.Models;
 
@@ -13,6 +14,8 @@ namespace TerminalMonitor.Execution
         Task Terminate(Guid executionId);
 
         Task Restart(Guid executionId);
+
+        Task TerminateAll(HashSet<Guid> executionIds);
 
         Task TerminateAll(Guid commandId);
 

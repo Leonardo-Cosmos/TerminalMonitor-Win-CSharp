@@ -27,7 +27,7 @@ namespace TerminalMonitor.Execution
             _ = Task.Run(ParseTerminalLine);
         }
 
-        public Task? Execute(CommandConfig commandConfig)
+        public Task Execute(CommandConfig commandConfig)
         {
             Debug.WriteLine($"Executing command (name: {commandConfig.Name}, id: {commandConfig.Id})");
 
@@ -54,14 +54,14 @@ namespace TerminalMonitor.Execution
             var added = AddExecution(uniqueExecutionName, execution);
             if (!added)
             {
-                return null;
+                return Task.CompletedTask;
             }
 
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 try
                 {
-                    execution.Start().Wait();
+                    await execution.Start();
                     Debug.WriteLine($"Execution (name: {uniqueExecutionName}, id: {execution.Id}) is started");
                 }
                 catch (Exception ex)
@@ -72,45 +72,101 @@ namespace TerminalMonitor.Execution
             });
         }
 
-        public void Terminate(string executionName)
+        public Task Terminate(Guid executionId)
         {
-            if (!executionDict.TryGetValue(executionName, out Execution? execution))
+            var executionName = executorData.GetExecutionName(executionId);
+            var execution = executorData.GetExecution(executionId);
+            if (executionName == null || execution == null)
             {
-                Debug.WriteLine($"Execution {executionName} doesn't exist when terminate it.");
-                return;
+                Debug.WriteLine($"Cannot find detail of execution (id: {executionId})");
+                return Task.CompletedTask;
             }
 
-            try
+            Debug.WriteLine($"Terminating execution (name: {executionName}, id: {executionId})");
+
+            return Task.Run(async () =>
             {
-                execution.Kill();
-            }
-            catch (Exception ex)
-            {
-                RemoveExecution(executionName, execution.Id, ex);
-            }
+                try
+                {
+                    await execution.Kill();
+                    Debug.WriteLine($"Execution (name: {executionName}, id: {executionId}) is terminated");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error when terminate execution (name: {executionName}, id: {executionId}). {ex}");
+                    RemoveExecution(executionId, ex);
+                }
+            });
         }
 
-        public void TerminateAll(Guid commandId)
+        public Task Restart(Guid executionId)
         {
-
-        }
-
-        public void TerminateAll()
-        {
-            foreach (var executionName in executionNames)
+            var execution = executorData.GetExecution(executionId);
+            if (execution == null)
             {
-                var execution = executionDict[executionName];
-                execution.Kill();
+                Debug.WriteLine($"Cannot find detail of execution (id: {executionId})");
+                return Task.CompletedTask;
             }
 
-            executionNames.Clear();
-            executionDict.Clear();
+            return Task.Run(async () =>
+            {
+                var terminateTask = Terminate(executionId);
+                if (terminateTask == null)
+                {
+                    return;
+                }
+                await terminateTask;
+
+                var executeTask = Execute(execution.CommandConfig);
+                if (executeTask == null)
+                {
+                    return;
+                }
+                await executeTask;
+            });
         }
 
-        public void Shutdown()
+        public Task TerminateAll(HashSet<Guid> executionIds)
         {
-            TerminateAll();
-            executionTextCollection.CompleteAdding();
+            List<Task> tasks = [];
+            foreach (var executionId in executionIds)
+            {
+                tasks.Add(Terminate(executionId));
+            }
+
+            if (tasks.Count == 0)
+            {
+                return Task.CompletedTask;
+            }
+
+            return Task.WhenAll(tasks);
+        }
+
+        public Task TerminateAll(Guid commandId)
+        {
+            var executionIds = executorData.GetExecutionIds(commandId);
+            if (executionIds == null)
+            {
+                Debug.WriteLine($"Cannot find execution set of command (id: {commandId})");
+                return Task.CompletedTask;
+            }
+
+            return TerminateAll(executionIds);
+        }
+
+        public Task TerminateAll()
+        {
+            var executionIds = executorData.GetExecutionIds();
+            return TerminateAll(executionIds);
+        }
+
+        public Task Shutdown()
+        {
+            return Task.Run(async () =>
+            {
+                await TerminateAll();
+                executionTextCollection.CompleteAdding();
+            });
         }
 
         public IEnumerable<TerminalLine> ReadTerminalLines()

@@ -119,7 +119,7 @@ namespace TerminalMonitor.Execution
 
         public HashSet<Guid>? GetExecutionIds(Guid commandId)
         {
-            return commandExecutionsDict[commandId];
+            return commandExecutionsDict.TryGetValue(commandId, out var executionIds) ? executionIds : null;
         }
 
         /// <summary>

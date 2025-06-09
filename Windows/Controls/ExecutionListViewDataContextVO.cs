@@ -27,5 +27,7 @@ namespace TerminalMonitor.Windows.Controls
         }
 
         public required ICommand StopCommand { get; init; }
+
+        public required ICommand RestartCommand { get; init; }
     }
 }

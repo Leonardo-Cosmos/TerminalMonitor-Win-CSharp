@@ -20,6 +20,7 @@
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Start" Icon="▷" Command="{Binding Path=StartCommand}" />
+                    <MenuItem Header="Stop" Icon="□" Command="{Binding Path=StopCommand}" />
                     <Separator />
                     <MenuItem Header="Edit" Icon="✏" Command="{Binding Path=EditCommand}" />
                     <Separator />
@@ -37,14 +38,38 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Grid>
+                        <Grid.Resources>
+                            <ResourceDictionary>
+                                <Style x:Key="stopWhenRunning" TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                            <Setter Property="Visibility" Value="Hidden" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ResourceDictionary>
+                        </Grid.Resources>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         
                         <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding Name}" />
-                        <Button Name="btnStart" Grid.Column="2" Width="20" Content="▷" Tag="{Binding Name}" Click="BtnStart_Click" />
+                        <Button Name="btnStop" Grid.Column="2" Width="20" Content="□" Tag="{Binding Id}" Click="BtnStop_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Visibility" Value="Hidden" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button Name="btnStart" Grid.Column="3" Width="20" Content="▷" Tag="{Binding Id}" Click="BtnStart_Click" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
