@@ -136,8 +136,6 @@ namespace TerminalMonitor.Execution
             process.BeginErrorReadLine();
 
             Debug.WriteLine($"Execution (id: {Id}) is started");
-
-            //await process.WaitForExitAsync();
         }
 
         protected void OnLineReceived(string line)

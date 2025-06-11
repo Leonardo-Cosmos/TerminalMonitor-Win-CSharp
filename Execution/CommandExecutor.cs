@@ -14,7 +14,7 @@ namespace TerminalMonitor.Execution
 {
     class CommandExecutor : IExecutor, ITerminalLineProducer
     {
-        private record ExecutionText(string Text, string ExecutionName);
+        private sealed record ExecutionText(string Text, string ExecutionName);
 
         private readonly CommandExecutorData executorData = new();
 
@@ -110,19 +110,8 @@ namespace TerminalMonitor.Execution
 
             return Task.Run(async () =>
             {
-                var terminateTask = Terminate(executionId);
-                if (terminateTask == null)
-                {
-                    return;
-                }
-                await terminateTask;
-
-                var executeTask = Execute(execution.CommandConfig);
-                if (executeTask == null)
-                {
-                    return;
-                }
-                await executeTask;
+                await Terminate(executionId);
+                await Execute(execution.CommandConfig);
             });
         }
 
@@ -211,7 +200,7 @@ namespace TerminalMonitor.Execution
             }
         }
 
-        private bool RemoveExecution(Guid executionId, Exception? exception = null)
+        private void RemoveExecution(Guid executionId, Exception? exception = null)
         {
             try
             {
@@ -228,7 +217,7 @@ namespace TerminalMonitor.Execution
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error when remove execution (id: {executionId}). {ex}");
-                return false;
+                return;
             }
 
 
@@ -237,8 +226,6 @@ namespace TerminalMonitor.Execution
             {
                 OnCompleted();
             }
-
-            return true;
         }
 
         private void ParseTerminalLine()
