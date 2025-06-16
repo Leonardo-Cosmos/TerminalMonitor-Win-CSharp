@@ -9,11 +9,11 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Terminal
 {
-    public class TerminalLineDtoCollection : IReadOnlyList<TerminalLine>
+    public class TerminalLineCollection : IReadOnlyList<TerminalLine>
     {
         private readonly IReadOnlyList<TerminalLine> terminalLines;
 
-        public TerminalLineDtoCollection(IEnumerable<TerminalLine> terminalLines)
+        public TerminalLineCollection(IEnumerable<TerminalLine> terminalLines)
         {
             if (terminalLines is IReadOnlyList<TerminalLine> terminalLineList)
             {

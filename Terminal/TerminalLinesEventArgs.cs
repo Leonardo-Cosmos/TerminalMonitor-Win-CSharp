@@ -8,10 +8,10 @@ using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Terminal
 {
-    public class TerminalLineDtosEventArgs : EventArgs
+    public class TerminalLinesEventArgs : EventArgs
     {
         public required IEnumerable<TerminalLine> TerminalLines { get; set; }
     }
 
-    public delegate void TerminalLineDtosEventHandler(object sender, TerminalLineDtosEventArgs e);
+    public delegate void TerminalLinesEventHandler(object sender, TerminalLinesEventArgs e);
 }

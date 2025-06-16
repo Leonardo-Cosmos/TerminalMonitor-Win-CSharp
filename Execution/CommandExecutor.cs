@@ -243,9 +243,9 @@ namespace TerminalMonitor.Execution
                     break;
                 }
 
-                TerminalLine terminalLineDto =
+                TerminalLine terminalLine =
                     TerminalLineParser.ParseTerminalLine(executionText.Text, executionText.ExecutionName);
-                terminalLineQueue.Enqueue(terminalLineDto);
+                terminalLineQueue.Enqueue(terminalLine);
             }
         }
 

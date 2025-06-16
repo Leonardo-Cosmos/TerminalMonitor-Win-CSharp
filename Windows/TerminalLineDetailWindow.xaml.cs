@@ -27,7 +27,7 @@ namespace TerminalMonitor.Windows
     /// </summary>
     public partial class TerminalLineDetailWindow : Window
     {
-        private TerminalLine? terminalLineDto;
+        private TerminalLine? terminalLine;
 
         private readonly GridView gridView;
 
@@ -129,13 +129,13 @@ namespace TerminalMonitor.Windows
 
         public TerminalLine? TerminalLine
         {
-            get => terminalLineDto;
+            get => terminalLine;
             set
             {
-                terminalLineDto = value;
-                if (terminalLineDto != null)
+                terminalLine = value;
+                if (terminalLine != null)
                 {
-                    SetTerminalLineFields(terminalLineDto.LineFieldDict);
+                    SetTerminalLineFields(terminalLine.LineFieldDict);
                 }
             }
         }

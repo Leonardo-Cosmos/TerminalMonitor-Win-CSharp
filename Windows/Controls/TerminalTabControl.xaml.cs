@@ -189,9 +189,9 @@ namespace TerminalMonitor.Windows.Controls
             readTerminalTimer = new();
             readTerminalTimer.Tick += (sender, e) =>
             {
-                var readTerminalLineDtos = producer.ReadTerminalLines();
+                var readTerminalLines = producer.ReadTerminalLines();
 
-                terminalLineSupervisor.AddTerminalLines(readTerminalLineDtos);
+                terminalLineSupervisor.AddTerminalLines(readTerminalLines);
 
                 if (producer.IsCompleted)
                 {
