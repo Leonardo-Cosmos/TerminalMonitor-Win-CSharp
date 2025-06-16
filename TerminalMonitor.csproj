@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
-    <VersionPrefix>1.7.0</VersionPrefix>
+    <VersionPrefix>1.7.1</VersionPrefix>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>TerminalMonitor.ico</ApplicationIcon>
     <Nullable>enable</Nullable>

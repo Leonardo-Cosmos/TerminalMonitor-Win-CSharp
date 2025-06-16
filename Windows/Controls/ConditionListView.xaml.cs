@@ -462,7 +462,7 @@ namespace TerminalMonitor.Windows.Controls
 
             set
             {
-                if (conditionListClipboard == value)
+                if (Object.ReferenceEquals(conditionListClipboard, value))
                 {
                     return;
                 }

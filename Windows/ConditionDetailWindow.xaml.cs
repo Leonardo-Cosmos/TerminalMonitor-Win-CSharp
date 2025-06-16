@@ -523,7 +523,7 @@ namespace TerminalMonitor.Windows
 
             set
             {
-                if (conditionClipboard == value)
+                if (Object.ReferenceEquals(conditionClipboard, value))
                 {
                     return;
                 }

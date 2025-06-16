@@ -367,7 +367,7 @@ namespace TerminalMonitor.Windows.Controls
             get => executor;
             set
             {
-                if (executor == value)
+                if (Object.ReferenceEquals(executor, value))
                 {
                     return;
                 }

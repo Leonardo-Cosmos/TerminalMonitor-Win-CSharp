@@ -377,7 +377,7 @@ namespace TerminalMonitor.Windows.Controls
 
             set
             {
-                if (fieldClipboard == value)
+                if (Object.ReferenceEquals(fieldClipboard, value))
                 {
                     return;
                 }

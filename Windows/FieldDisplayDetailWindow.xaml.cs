@@ -390,7 +390,7 @@ namespace TerminalMonitor.Windows
 
             set
             {
-                if (styleConditionClipboard == value)
+                if (Object.ReferenceEquals(styleConditionClipboard, value))
                 {
                     return;
                 }
