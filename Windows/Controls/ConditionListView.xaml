@@ -192,11 +192,16 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Name="btnAdd" Grid.Column="0" Width="20" Content="➕" ToolTip="Add" Command="{Binding Path=AddCommand}" />
-            <Button Name="btnRemove" Grid.Column="1" Width="20" Content="➖" ToolTip="Remove" Command="{Binding Path=RemoveCommand}" />
-            <Button Name="btnEdit" Grid.Column="2" Width="20" Content="✏" ToolTip="Edit" Command="{Binding Path=EditCommand}" />
-            <Button Name="btnMoveLeft" Grid.Column="3" Width="20" Content="←" ToolTip="Move Left" Command="{Binding Path=MoveLeftCommand}" />
-            <Button Name="btnMoveRight" Grid.Column="4" Width="20" Content="→" ToolTip="Move Right" Command="{Binding Path=MoveRightCommand}" />
+            <Button Name="btnAdd" Grid.Column="0" Width="24" Content="➕" ToolTip="Add" Command="{Binding Path=AddCommand}"
+                    Style="{StaticResource buttonIcon}" />
+            <Button Name="btnRemove" Grid.Column="1" Width="24" Content="➖" ToolTip="Remove" Command="{Binding Path=RemoveCommand}"
+                    Style="{StaticResource buttonIcon}" />
+            <Button Name="btnEdit" Grid.Column="2" Width="24" Content="✏" ToolTip="Edit" Command="{Binding Path=EditCommand}"
+                    Style="{StaticResource buttonIcon}" />
+            <Button Name="btnMoveLeft" Grid.Column="3" Width="24" Content="←" ToolTip="Move Left" Command="{Binding Path=MoveLeftCommand}"
+                    Style="{StaticResource buttonIcon}" />
+            <Button Name="btnMoveRight" Grid.Column="4" Width="24" Content="→" ToolTip="Move Right" Command="{Binding Path=MoveRightCommand}"
+                    Style="{StaticResource buttonIcon}" />
         </Grid>
     </Grid>
 </UserControl>

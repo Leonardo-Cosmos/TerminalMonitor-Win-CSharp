@@ -320,7 +320,7 @@ namespace TerminalMonitor.Windows.Controls
 
             if (commandVO != null)
             {
-                this.Dispatcher.Invoke(() => commandVO.IsRunning = true);
+                this.Dispatcher.Invoke(() => commandVO.StopButtonVisibility = Visibility.Visible);
             }
         }
 
@@ -332,7 +332,7 @@ namespace TerminalMonitor.Windows.Controls
 
             if (commandVO != null)
             {
-                this.Dispatcher.Invoke(() => commandVO.IsRunning = false);
+                this.Dispatcher.Invoke(() => commandVO.StopButtonVisibility = Visibility.Hidden);
             }
         }
 

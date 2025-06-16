@@ -33,7 +33,8 @@
 
                 <controls:FieldListView x:Name="fieldListView" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" />
 
-                <Button Name="buttonApplyFields" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" Content="Apply" Click="ButtonApplyFields_Click" />
+                <Button Name="buttonApplyFields" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" Content="✔️" ToolTip="Apply" Click="ButtonApplyFields_Click"
+                        Style="{StaticResource buttonIcon}" Foreground="Green" />
             </Grid>
         </Expander>
 
@@ -53,7 +54,8 @@
 
                 <controls:ConditionListView x:Name="filterConditionListView" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" />
 
-                <Button Name="buttonFilter" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" Content="Filter" Click="ButtonFilter_Click" />
+                <Button Name="buttonFilter" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" Content="🥛" ToolTip="Filter" Click="ButtonFilter_Click"
+                        Style="{StaticResource buttonIcon}" Foreground="Blue" />
             </Grid>
         </Expander>
 
@@ -91,11 +93,16 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Button Name="buttonFind" Grid.Column="0" Content="Find" ToolTip="Find" Click="ButtonFind_Click" />
-                    <Button Name="buttonFindFirst" Grid.Column="1" Width="20" Content="⬆" ToolTip="Find First" Click="ButtonFindFirst_Click" />
-                    <Button Name="buttonFindPrevious" Grid.Column="2" Width="20" Content="↑" ToolTip="Find Previous" Click="ButtonFindPrevious_Click" />
-                    <Button Name="buttonFindNext" Grid.Column="3" Width="20" Content="↓" ToolTip="Find Next" Click="ButtonFindNext_Click" />
-                    <Button Name="buttonFindLast" Grid.Column="4" Width="20" Content="⬇" ToolTip="Find Last" Click="ButtonFindLast_Click" />
+                    <Button Name="buttonFind" Grid.Column="0" Width="24" Content="🔍" ToolTip="Find" Click="ButtonFind_Click"
+                            Style="{StaticResource buttonIcon}" Foreground="DimGray" />
+                    <Button Name="buttonFindFirst" Grid.Column="1" Width="24" Content="⬆" ToolTip="Find First" Click="ButtonFindFirst_Click"
+                            Style="{StaticResource buttonIcon}" />
+                    <Button Name="buttonFindPrevious" Grid.Column="2" Width="24" Content="↑" ToolTip="Find Previous" Click="ButtonFindPrevious_Click"
+                            Style="{StaticResource buttonIcon}" />
+                    <Button Name="buttonFindNext" Grid.Column="3" Width="24" Content="↓" ToolTip="Find Next" Click="ButtonFindNext_Click"
+                            Style="{StaticResource buttonIcon}" />
+                    <Button Name="buttonFindLast" Grid.Column="4" Width="24" Content="⬇" ToolTip="Find Last" Click="ButtonFindLast_Click"
+                            Style="{StaticResource buttonIcon}" />
                 </Grid>
             </Grid>
         </Expander>
