@@ -1,9 +1,10 @@
 ﻿/* 2021/5/30 */
+using System;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Settings.Models
 {
-    record CommandConfigSetting(string Name, string? StartFile, string? Arguments, string? WorkDirectory);
+    record CommandConfigSetting(string Id, string Name, string? StartFile, string? Arguments, string? WorkDirectory);
 
     static class CommandConfigSettings
     {
@@ -15,6 +16,7 @@ namespace TerminalMonitor.Settings.Models
             }
 
             return new CommandConfigSetting(
+                Id: obj.Id.ToString(),
                 Name: obj.Name,
                 StartFile: obj.StartFile,
                 Arguments: obj.Arguments,
@@ -31,6 +33,7 @@ namespace TerminalMonitor.Settings.Models
 
             return new CommandConfig()
             {
+                Id = Guid.TryParse(setting.Id, out Guid result) ? result : Guid.NewGuid(),
                 Name = setting.Name,
                 StartFile = setting.StartFile,
                 Arguments = setting.Arguments,

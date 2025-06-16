@@ -7,9 +7,7 @@ namespace TerminalMonitor.Execution
 {
     public interface ITerminalLineProducer
     {
-        public record TerminalLine(string Text, string ExecutionName);
-
-        IEnumerable<TerminalLineDto> ReadTerminalLines();
+        IEnumerable<TerminalLine> ReadTerminalLines();
 
         event EventHandler? Started;
 

@@ -32,11 +32,7 @@ namespace TerminalMonitor.Windows
         {
             InitializeComponent();
 
-            commandListView.CommandStarted += (sender, e) =>
-            {
-                commandExecutor.Execute(e.Command);
-            };
-
+            commandListView.Executor = commandExecutor;
             executionListView.Executor = commandExecutor;
             terminalTabControl.TerminalLineProducer = commandExecutor;
         }
@@ -54,7 +50,7 @@ namespace TerminalMonitor.Windows
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            commandExecutor.Shutdown();
+            commandExecutor.Shutdown().Wait();
 
             if (setting == null)
             {

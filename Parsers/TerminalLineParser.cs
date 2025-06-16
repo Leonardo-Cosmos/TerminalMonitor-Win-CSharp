@@ -11,7 +11,9 @@ namespace TerminalMonitor.Parsers
 {
     static class TerminalLineParser
     {
-        public static TerminalLineDto ParseTerminalLine(string text, string execution)
+        private const string keySeparator = ".";
+
+        public static TerminalLine ParseTerminalLine(string text, string execution)
         {
             var id = Guid.NewGuid().ToString();
             var timestamp = DateTime.Now;
@@ -39,9 +41,9 @@ namespace TerminalMonitor.Parsers
                 { "plainText", text },
             };
 
-            Dictionary<string, TerminalLineFieldDto> lineFields = [];
-            MergeKeyValuePairs(lineFields, systemFieldDict, "system.");
-            MergeKeyValuePairs(lineFields, jsonProperties, "json.");
+            Dictionary<string, TerminalLineField> lineFields = [];
+            MergeKeyValuePairs(lineFields, systemFieldDict, "system");
+            MergeKeyValuePairs(lineFields, jsonProperties, "json");
 
             return new()
             {
@@ -53,18 +55,25 @@ namespace TerminalMonitor.Parsers
             };
         }
 
-        private static void MergeKeyValuePairs(Dictionary<string, TerminalLineFieldDto> unionDict, Dictionary<string, object> partialDict, string keyPrefix)
+        private static void MergeKeyValuePairs(Dictionary<string, TerminalLineField> unionDict,
+            Dictionary<string, object> partialDict, string keyPrefix)
         {
             foreach (var kvPair in partialDict!)
             {
-                unionDict!.Add($"{keyPrefix!}{kvPair.Key}", new TerminalLineFieldDto()
+                var mergedFieldKey = $"{keyPrefix}{keySeparator}{kvPair.Key}";
+                unionDict.Add(mergedFieldKey, new TerminalLineField()
                 {
                     Key = kvPair.Key,
-                    FieldKey = $"{keyPrefix!}{kvPair.Key}",
+                    FieldKey = mergedFieldKey,
                     Value = kvPair.Value,
-                    Text = kvPair.Value?.ToString() ?? "%null%",
+                    Text = ToValueString(kvPair.Value),
                 });
             }
+        }
+
+        private static string ToValueString(object? value)
+        {
+            return value?.ToString() ?? "%null%";
         }
     }
 }

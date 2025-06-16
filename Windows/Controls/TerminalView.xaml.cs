@@ -61,9 +61,9 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly Dictionary<string, bool> lineFilterDict = [];
 
-        private readonly List<TerminalLineDto> shownLines = [];
+        private readonly List<TerminalLine> shownLines = [];
 
-        private readonly List<(TerminalLineDto terminalLine, int shownIndex)> foundLines = [];
+        private readonly List<(TerminalLine terminalLine, int shownIndex)> foundLines = [];
 
         private string? clickedColumnFieldKey;
 
@@ -246,7 +246,7 @@ namespace TerminalMonitor.Windows.Controls
             }
 
             var terminalLineFieldDict = terminalLine.LineFieldDict;
-            if (!terminalLineFieldDict.TryGetValue(clickedColumnFieldKey, out TerminalLineFieldDto? lineFieldValue))
+            if (!terminalLineFieldDict.TryGetValue(clickedColumnFieldKey, out TerminalLineField? lineFieldValue))
             {
                 return null;
             }
@@ -309,18 +309,18 @@ namespace TerminalMonitor.Windows.Controls
             conditionListView.AddCondition(condition);
         }
 
-        public void AddNewTerminalLines(IEnumerable<TerminalLineDto> terminalLineDtos)
+        public void AddNewTerminalLines(IEnumerable<TerminalLine> terminalLines)
         {
             var isAnyAdded = false;
-            foreach (var terminalLineDto in terminalLineDtos)
+            foreach (var terminalLine in terminalLines)
             {
-                var matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterCondition);
-                lineFilterDict.Add(terminalLineDto.Id, matched);
+                var matched = TerminalLineMatcher.IsMatch(terminalLine, filterCondition);
+                lineFilterDict.Add(terminalLine.Id, matched);
 
                 if (matched)
                 {
-                    shownLines.Add(terminalLineDto);
-                    AddTerminalLine(terminalLineDto);
+                    shownLines.Add(terminalLine);
+                    AddTerminalLine(terminalLine);
                     isAnyAdded = true;
                 }
             }
@@ -347,14 +347,14 @@ namespace TerminalMonitor.Windows.Controls
             lineFilterDict.Clear();
             shownLines.Clear();
             TerminalLineMatcher matcher = new(filterCondition);
-            foreach (var terminalLineDto in terminalLineSupervisor.TerminalLines)
+            foreach (var terminalLine in terminalLineSupervisor.TerminalLines)
             {
-                var matched = matcher.IsMatch(terminalLineDto);
-                lineFilterDict.Add(terminalLineDto.Id, matched);
+                var matched = matcher.IsMatch(terminalLine);
+                lineFilterDict.Add(terminalLine.Id, matched);
 
                 if (matched)
                 {
-                    shownLines.Add(terminalLineDto);
+                    shownLines.Add(terminalLine);
                 }
             }
 
@@ -371,11 +371,11 @@ namespace TerminalMonitor.Windows.Controls
             TerminalLineMatcher matcher = new(findCondition);
             for (var i = 0; i < shownLines.Count; i++)
             {
-                var terminalLineDto = shownLines[i];
-                var found = matcher.IsMatch(terminalLineDto);
+                var terminalLine = shownLines[i];
+                var found = matcher.IsMatch(terminalLine);
                 if (found)
                 {
-                    foundLines.Add((terminalLine: terminalLineDto, shownIndex: i));
+                    foundLines.Add((terminalLine: terminalLine, shownIndex: i));
                 }
             }
 
@@ -658,11 +658,11 @@ namespace TerminalMonitor.Windows.Controls
             listTerminal.SetBinding(ItemsControl.ItemsSourceProperty, binding);
         }
 
-        private void AddTerminalLine(TerminalLineDto terminalLineDto)
+        private void AddTerminalLine(TerminalLine terminalLine)
         {
             DataRow row = terminalDataTable.NewRow();
 
-            row[idColumnName] = terminalLineDto.Id;
+            row[idColumnName] = terminalLine.Id;
 
             if (visibleFields.Count != 0)
             {
@@ -673,14 +673,14 @@ namespace TerminalMonitor.Windows.Controls
                         continue;
                     }
 
-                    var fieldValue = terminalLineDto.LineFieldDict.TryGetValue(visibleField.FieldKey, out TerminalLineFieldDto? value) ? value.Text : "";
+                    var fieldValue = terminalLine.LineFieldDict.TryGetValue(visibleField.FieldKey, out TerminalLineField? value) ? value.Text : "";
 
                     row[visibleField.Id] = fieldValue;
 
                     if (visibleField.CustomizeStyle)
                     {
                         var matchedTextStyleCondition = visibleField.Conditions?.FirstOrDefault(
-                            textStyleCondition => TerminalLineMatcher.IsMatch(terminalLineDto, textStyleCondition.Condition));
+                            textStyleCondition => TerminalLineMatcher.IsMatch(terminalLine, textStyleCondition.Condition));
 
                         TerminalViewHelper.BuildDataRowStyleCells(row, visibleField, matchedTextStyleCondition?.Style);
                     }
@@ -688,7 +688,7 @@ namespace TerminalMonitor.Windows.Controls
             }
             else
             {
-                row[plaintextColumnName] = terminalLineDto.PlainText;
+                row[plaintextColumnName] = terminalLine.PlainText;
             }
 
             terminalDataTable.Rows.Add(row);
@@ -701,36 +701,36 @@ namespace TerminalMonitor.Windows.Controls
                 return;
             }
 
-            foreach (var terminalLineDto in terminalLineSupervisor.TerminalLines)
+            foreach (var terminalLine in terminalLineSupervisor.TerminalLines)
             {
                 bool matched;
-                if (lineFilterDict.TryGetValue(terminalLineDto.Id, out bool value))
+                if (lineFilterDict.TryGetValue(terminalLine.Id, out bool value))
                 {
                     matched = value;
                 }
                 else
                 {
-                    matched = TerminalLineMatcher.IsMatch(terminalLineDto, filterCondition);
-                    lineFilterDict.Add(terminalLineDto.Id, matched);
+                    matched = TerminalLineMatcher.IsMatch(terminalLine, filterCondition);
+                    lineFilterDict.Add(terminalLine.Id, matched);
                     if (matched)
                     {
-                        shownLines.Add(terminalLineDto);
+                        shownLines.Add(terminalLine);
                     }
                 }
 
                 if (matched)
                 {
-                    AddTerminalLine(terminalLineDto);
+                    AddTerminalLine(terminalLine);
                 }
             }
         }
 
-        private void Supervisor_TerminalLinesAdded(object sender, TerminalLineDtosEventArgs e)
+        private void Supervisor_TerminalLinesAdded(object sender, TerminalLinesEventArgs e)
         {
             AddNewTerminalLines(e.TerminalLines);
         }
 
-        private void Supervisor_TerminalLinesRemoved(object sender, TerminalLineDtosEventArgs e)
+        private void Supervisor_TerminalLinesRemoved(object sender, TerminalLinesEventArgs e)
         {
             FilterTerminal();
         }

@@ -27,7 +27,7 @@ namespace TerminalMonitor.Windows
     /// </summary>
     public partial class TerminalLineDetailWindow : Window
     {
-        private TerminalLineDto? terminalLineDto;
+        private TerminalLine? terminalLine;
 
         private readonly GridView gridView;
 
@@ -77,7 +77,7 @@ namespace TerminalMonitor.Windows
             List<Condition> conditions = [];
             foreach (var selectedItem in lstFields.SelectedItems)
             {
-                if (selectedItem is TerminalLineFieldDto lineField)
+                if (selectedItem is TerminalLineField lineField)
                 {
                     Condition fieldCondition = new FieldCondition(
                         lineField.FieldKey,
@@ -90,7 +90,7 @@ namespace TerminalMonitor.Windows
             return conditions;
         }
 
-        private void SetTerminalLineFields(Dictionary<string, TerminalLineFieldDto> lineFieldsDict)
+        private void SetTerminalLineFields(Dictionary<string, TerminalLineField> lineFieldsDict)
         {
             var fields = lineFieldsDict.OrderBy(kvPair => kvPair.Key)
                 .Select(kvPair => kvPair.Value)
@@ -127,15 +127,15 @@ namespace TerminalMonitor.Windows
                 });
         }
 
-        public TerminalLineDto? TerminalLine
+        public TerminalLine? TerminalLine
         {
-            get => terminalLineDto;
+            get => terminalLine;
             set
             {
-                terminalLineDto = value;
-                if (terminalLineDto != null)
+                terminalLine = value;
+                if (terminalLine != null)
                 {
-                    SetTerminalLineFields(terminalLineDto.LineFieldDict);
+                    SetTerminalLineFields(terminalLine.LineFieldDict);
                 }
             }
         }

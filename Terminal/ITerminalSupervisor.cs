@@ -8,14 +8,14 @@ namespace TerminalMonitor.Terminal
 {
     public interface ITerminalSupervisor
     {
-        public void AddTerminalLines(IEnumerable<TerminalLineDto> terminalLineDtoCollection);
+        public void AddTerminalLines(IEnumerable<TerminalLine> terminalLineCollection);
 
         public void RemoveTerminalLinesUntil(string terminalLineId);
 
-        TerminalLineDtoCollection TerminalLines { get; }
+        TerminalLineCollection TerminalLines { get; }
 
-        event TerminalLineDtosEventHandler? TerminalLinesAdded;
+        event TerminalLinesEventHandler? TerminalLinesAdded;
 
-        event TerminalLineDtosEventHandler? TerminalLinesRemoved;
+        event TerminalLinesEventHandler? TerminalLinesRemoved;
     }
 }

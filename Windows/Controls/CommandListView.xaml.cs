@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TerminalMonitor.Execution;
 using TerminalMonitor.Models;
 
 namespace TerminalMonitor.Windows.Controls
@@ -31,6 +32,8 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly List<CommandConfig> commands = [];
 
+        private IExecutor? executor;
+
         public CommandListView()
         {
             InitializeComponent();
@@ -43,6 +46,7 @@ namespace TerminalMonitor.Windows.Controls
                 MoveUpCommand = new RelayCommand(MoveSelectedCommandsUp, () => dataContextVO!.IsAnyCommandSelected),
                 MoveDownCommand = new RelayCommand(MoveSelectedCommandsDown, () => dataContextVO!.IsAnyCommandSelected),
                 StartCommand = new RelayCommand(StartSelectedCommands, () => dataContextVO!.IsAnyCommandSelected),
+                StopCommand = new RelayCommand(StopSelectedCommands, () => dataContextVO!.IsAnyCommandSelected),
             };
 
             dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
@@ -61,6 +65,7 @@ namespace TerminalMonitor.Windows.Controls
                     (dataContextVO.MoveUpCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.MoveDownCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.StartCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.StopCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     break;
                 default:
                     break;
@@ -89,10 +94,18 @@ namespace TerminalMonitor.Windows.Controls
 
         private void BtnStart_Click(object sender, RoutedEventArgs e)
         {
-            var tag = (sender as Button)?.Tag;
-            var commandName = (tag as string)!;
-            var commandVO = commandVOs.First(itemVO => itemVO.Name == commandName);
+            var tag = (sender as Button)?.Tag!;
+            var commandId = (Guid)tag;
+            var commandVO = commandVOs.First(itemVO => itemVO.Id == commandId);
             StartCommand(commandVO);
+        }
+
+        private void BtnStop_Click(object sender, RoutedEventArgs e)
+        {
+            var tag = (sender as Button)?.Tag!;
+            var commandId = (Guid)tag;
+            var commandVO = commandVOs.First(itemVO => itemVO.Id == commandId);
+            StopCommand(commandVO);
         }
 
         private void ForSelectedItem(Action<CommandListItemVO> action)
@@ -179,6 +192,7 @@ namespace TerminalMonitor.Windows.Controls
                     CommandListItemVO itemVO = new()
                     {
                         Name = commandConfig.Name,
+                        Id = commandConfig.Id,
                     };
 
                     InsertAtSelectedItem((commandConfig, itemVO));
@@ -282,18 +296,45 @@ namespace TerminalMonitor.Windows.Controls
             var index = commandVOs.IndexOf(itemVO);
 
             var command = commands[index];
-            OnCommandStarted(new()
-            {
-                Command = command
-            });
+            executor?.Execute(command);
         }
 
-        protected void OnCommandStarted(CommandRunEventArgs e)
+        private void StopSelectedCommands()
         {
-            CommandStarted?.Invoke(this, e);
+            ForEachSelectedItem(StopCommand);
         }
 
-        public event CommandRunEventHandler? CommandStarted;
+        private void StopCommand(CommandListItemVO itemVO)
+        {
+            var index = commandVOs.IndexOf(itemVO);
+
+            var command = commands[index];
+            executor?.TerminateAll(command.Id);
+        }
+
+        private void Executor_CommandFirstExecutionStarted(object sender, CommandInfoEventArgs e)
+        {
+            var commandId = e.Command.Id;
+            var commandVO = commandVOs
+                .First(commandVO => commandVO.Id == commandId);
+
+            if (commandVO != null)
+            {
+                this.Dispatcher.Invoke(() => commandVO.IsRunning = true);
+            }
+        }
+
+        private void Executor_CommandLastExecutionExited(object sender, CommandInfoEventArgs e)
+        {
+            var commandId = e.Command.Id;
+            var commandVO = commandVOs
+                .First(commandVO => commandVO.Id == commandId);
+
+            if (commandVO != null)
+            {
+                this.Dispatcher.Invoke(() => commandVO.IsRunning = false);
+            }
+        }
 
         public IEnumerable<CommandConfig>? Commands
         {
@@ -315,8 +356,35 @@ namespace TerminalMonitor.Windows.Controls
                 value.Select(command => new CommandListItemVO()
                 {
                     Name = command.Name,
+                    Id = command.Id,
                 }).ToList()
                 .ForEach(commandVO => commandVOs.Add(commandVO));
+            }
+        }
+
+        public IExecutor? Executor
+        {
+            get => executor;
+            set
+            {
+                if (executor == value)
+                {
+                    return;
+                }
+                
+                if (executor != null)
+                {
+                    executor.CommandFirstExecutionStarted -= Executor_CommandFirstExecutionStarted;
+                    executor.CommandLastExecutionExited -= Executor_CommandLastExecutionExited;
+                }
+
+                executor = value;
+
+                if (executor != null)
+                {
+                    executor.CommandFirstExecutionStarted += Executor_CommandFirstExecutionStarted;
+                    executor.CommandLastExecutionExited += Executor_CommandLastExecutionExited;
+                }
             }
         }
     }

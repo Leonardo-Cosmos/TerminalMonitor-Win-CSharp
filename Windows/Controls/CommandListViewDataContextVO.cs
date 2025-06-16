@@ -37,5 +37,7 @@ namespace TerminalMonitor.Windows.Controls
         public required ICommand MoveDownCommand { get; init; }
 
         public required ICommand StartCommand { get; init; }
+
+        public required ICommand StopCommand { get; init; }
     }
 }

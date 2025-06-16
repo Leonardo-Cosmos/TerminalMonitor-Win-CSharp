@@ -39,6 +39,7 @@ namespace TerminalMonitor.Windows.Controls
             dataContextVO = new()
             {
                 StopCommand = new RelayCommand(StopSelectedExecutions, () => dataContextVO!.IsAnyExecutionSelected),
+                RestartCommand = new RelayCommand(RestartSelectedExecutions, () => dataContextVO!.IsAnyExecutionSelected),
             };
 
             dataContextVO.PropertyChanged += DataContextVO_PropertyChanged;
@@ -76,9 +77,16 @@ namespace TerminalMonitor.Windows.Controls
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)
         {
-            var tag = (sender as Button)?.Tag;
-            var executionName = (tag as string)!;
-            executor?.Terminate(executionName);
+            var tag = (sender as Button)?.Tag!;
+            var executionId = (Guid)tag;
+            executor?.Terminate(executionId);
+        }
+
+        private void BtnRestart_Click(object sender, RoutedEventArgs e)
+        {
+            var tag = (sender as Button)?.Tag!;
+            var executionId = (Guid)tag;
+            executor?.Restart(executionId);
         }
 
         private void ForEachSelectedItem(Action<ExecutionListItemVO> action)
@@ -102,7 +110,17 @@ namespace TerminalMonitor.Windows.Controls
 
         private void StopExecution(ExecutionListItemVO itemVO)
         {
-            executor?.Terminate(itemVO.Name);
+            executor?.Terminate(itemVO.Id);
+        }
+
+        private void RestartSelectedExecutions()
+        {
+            ForEachSelectedItem(RestartExecution);
+        }
+
+        private void RestartExecution(ExecutionListItemVO itemVO)
+        {
+            executor?.Restart(itemVO.Id);
         }
 
         private void UpdateExecutionInfo(ExecutionInfoEventArgs executionInfoEvent)
@@ -110,38 +128,51 @@ namespace TerminalMonitor.Windows.Controls
             if (executionInfoEvent.Execution.Status == ExecutionStatus.Started)
             {
                 var executionName = executionInfoEvent.Execution.Name;
-                Debug.WriteLine($"Add {executionName} to list.");
+                var executionId = executionInfoEvent.Execution.Id;
+                Debug.WriteLine($"Add execution (name: {executionName}, id: {executionId}) to list.");
 
                 ExecutionListItemVO item = new()
                 {
                     Name = executionName,
+                    Id = executionId,
                 };
                 executionVOs.Add(item);
+                Debug.WriteLine($"Added execution (name: {executionName}, id: {executionId}) to list");
             }
             else if (executionInfoEvent.Execution.Status == ExecutionStatus.Completed)
             {
                 var executionName = executionInfoEvent.Execution.Name;
-                Debug.WriteLine($"Remove {executionName} from list.");
+                var executionId = executionInfoEvent.Execution.Id;
+                Debug.WriteLine($"Remove execution (name: {executionName}, id: {executionId}) (normal) from list.");
 
                 ExecutionListItemVO? item = executionVOs
-                    .FirstOrDefault(execution => execution.Name == executionName);
+                    .FirstOrDefault(execution => execution.Id == executionId);
                 if (item != null)
                 {
                     executionVOs.Remove(item);
-                    Debug.WriteLine($"Removed {executionName} from list.");
+                    Debug.WriteLine($"Removed execution (name: {executionName}, id: {executionId}) (normal) from list.");
+                }
+                else
+                {
+                    Debug.WriteLine($"Remove execution (name: {executionName}, id: {executionId}) (normal) skipped because it is not found.");
                 }
             }
             else if (executionInfoEvent.Execution.Status == ExecutionStatus.Error)
             {
                 var executionName = executionInfoEvent.Execution.Name;
-                Debug.WriteLine($"Remove {executionName} from list.");
+                var executionId = executionInfoEvent.Execution.Id;
+                Debug.WriteLine($"Remove execution (name: {executionName}, id: {executionId}) (error) from list.");
 
                 ExecutionListItemVO? item = executionVOs
-                    .FirstOrDefault(execution => execution.Name == executionName);
+                    .FirstOrDefault(execution => execution.Id == executionId);
                 if (item != null)
                 {
                     executionVOs.Remove(item);
-                    Debug.WriteLine($"Removed {executionName} from list.");
+                    Debug.WriteLine($"Removed execution (name: {executionName}, id: {executionId}) (error) from list.");
+                }
+                else
+                {
+                    Debug.WriteLine($"Remove execution (name: {executionName}, id: {executionId}) (error) skipped because it is not found.");
                 }
 
                 if (executionInfoEvent.Exception != null)
@@ -169,7 +200,12 @@ namespace TerminalMonitor.Windows.Controls
             get => executor;
             set
             {
-                if (executor != value && executor != null)
+                if (executor == value)
+                {
+                    return;
+                }
+
+                if (executor != null)
                 {
                     executor.ExecutionStarted -= Executor_ExecutionStarted;
                     executor.ExecutionExited -= Executor_ExecutionExited;

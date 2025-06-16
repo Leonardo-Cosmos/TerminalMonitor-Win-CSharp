@@ -8,56 +8,56 @@ namespace TerminalMonitor.Terminal
 {
     class TerminalSupervisor : ITerminalSupervisor
     {
-        private readonly List<TerminalLineDto> terminalLineDtos = [];
+        private readonly List<TerminalLine> terminalLines = [];
 
-        private readonly TerminalLineDtoCollection terminalLineCollection;
+        private readonly TerminalLineCollection terminalLineCollection;
 
         public TerminalSupervisor()
         {
-            terminalLineCollection = new(terminalLineDtos);
+            terminalLineCollection = new(terminalLines);
         }
 
-        public void AddTerminalLines(IEnumerable<TerminalLineDto> terminalLineDtoCollection)
+        public void AddTerminalLines(IEnumerable<TerminalLine> terminalLineCollection)
         {
-            terminalLineDtos.AddRange(terminalLineDtoCollection);
+            terminalLines.AddRange(terminalLineCollection);
 
-            OnTerminalLinesAdded([.. terminalLineDtoCollection]);
+            OnTerminalLinesAdded([.. terminalLineCollection]);
         }
 
         public void RemoveTerminalLinesUntil(string terminalLineId)
         {
-            var index = terminalLineDtos.FindIndex(terminalLine => terminalLine.Id == terminalLineId);
+            var index = terminalLines.FindIndex(terminalLine => terminalLine.Id == terminalLineId);
 
-            var removedTerminalLineDtos = terminalLineDtos.GetRange(0, index + 1).ToArray();
-            terminalLineDtos.RemoveRange(0, index + 1);
+            var removedTerminalLines = terminalLines.GetRange(0, index + 1).ToArray();
+            terminalLines.RemoveRange(0, index + 1);
 
-            OnTerminalLinesRemoved(removedTerminalLineDtos);
+            OnTerminalLinesRemoved(removedTerminalLines);
         }
 
-        protected void OnTerminalLinesAdded(TerminalLineDto[] terminalLineDtos)
+        protected void OnTerminalLinesAdded(TerminalLine[] terminalLines)
         {
-            TerminalLineDtosEventArgs e = new()
+            TerminalLinesEventArgs e = new()
             {
-                TerminalLines = terminalLineDtos,
+                TerminalLines = terminalLines,
             };
 
             TerminalLinesAdded?.Invoke(this, e);
         }
 
-        protected void OnTerminalLinesRemoved(TerminalLineDto[] terminalLineDtos)
+        protected void OnTerminalLinesRemoved(TerminalLine[] terminalLines)
         {
-            TerminalLineDtosEventArgs e = new()
+            TerminalLinesEventArgs e = new()
             {
-                TerminalLines = terminalLineDtos,
+                TerminalLines = terminalLines,
             };
 
             TerminalLinesRemoved?.Invoke(this, e);
         }
 
-        public TerminalLineDtoCollection TerminalLines => terminalLineCollection;
+        public TerminalLineCollection TerminalLines => terminalLineCollection;
 
-        public event TerminalLineDtosEventHandler? TerminalLinesAdded;
+        public event TerminalLinesEventHandler? TerminalLinesAdded;
 
-        public event TerminalLineDtosEventHandler? TerminalLinesRemoved;
+        public event TerminalLinesEventHandler? TerminalLinesRemoved;
     }
 }

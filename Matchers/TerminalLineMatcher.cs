@@ -14,20 +14,20 @@ namespace TerminalMonitor.Matchers
     {
         private readonly Condition matchCondition = matchCondition;
 
-        public bool IsMatch(TerminalLineDto terminalLineDto)
+        public bool IsMatch(TerminalLine terminalLine)
         {
-            return IsMatch(terminalLineDto, matchCondition);
+            return IsMatch(terminalLine, matchCondition);
         }
 
-        public static bool IsMatch(TerminalLineDto terminalLineDto, Condition matchCondition)
+        public static bool IsMatch(TerminalLine terminalLine, Condition matchCondition)
         {
             if (matchCondition is GroupCondition groupCondition)
             {
-                return IsMatch(terminalLineDto, groupCondition);
+                return IsMatch(terminalLine, groupCondition);
             }
             else if (matchCondition is FieldCondition fieldCondition)
             {
-                return IsMatch(terminalLineDto, fieldCondition);
+                return IsMatch(terminalLine, fieldCondition);
             }
             else
             {
@@ -35,7 +35,7 @@ namespace TerminalMonitor.Matchers
             }
         }
 
-        public static bool IsMatch(TerminalLineDto terminalLineDto, GroupCondition groupCondition)
+        public static bool IsMatch(TerminalLine terminalLine, GroupCondition groupCondition)
         {
             ArgumentNullException.ThrowIfNull(groupCondition);
 
@@ -54,8 +54,8 @@ namespace TerminalMonitor.Matchers
             {
                 groupMatched = groupCondition.MatchMode switch
                 {
-                    GroupMatchMode.All => conditions.All(condition => IsMatch(terminalLineDto, condition)),
-                    GroupMatchMode.Any => conditions.Any(condition => IsMatch(terminalLineDto, condition)),
+                    GroupMatchMode.All => conditions.All(condition => IsMatch(terminalLine, condition)),
+                    GroupMatchMode.Any => conditions.Any(condition => IsMatch(terminalLine, condition)),
                     _ => false
                 };
             }
@@ -63,7 +63,7 @@ namespace TerminalMonitor.Matchers
             return groupMatched ^ groupCondition.IsInverted;
         }
 
-        public static bool IsMatch(TerminalLineDto terminalLineDto, FieldCondition fieldCondition)
+        public static bool IsMatch(TerminalLine terminalLine, FieldCondition fieldCondition)
         {
             ArgumentNullException.ThrowIfNull(fieldCondition);
 
@@ -72,7 +72,7 @@ namespace TerminalMonitor.Matchers
             {
                 fieldMatched = false;
             }
-            else if (!terminalLineDto.LineFieldDict.TryGetValue(fieldCondition.FieldKey, out TerminalLineFieldDto? jsonProperty))
+            else if (!terminalLine.LineFieldDict.TryGetValue(fieldCondition.FieldKey, out TerminalLineField? jsonProperty))
             {
                 fieldMatched = fieldCondition.DefaultResult;
             }
