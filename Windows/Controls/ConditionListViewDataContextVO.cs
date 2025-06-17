@@ -98,5 +98,11 @@ namespace TerminalMonitor.Windows.Controls
         public required ICommand CopyCommand { get; init; }
 
         public required ICommand PasteCommnad { get; init; }
+
+        public required ICommand ToggleInvertedCommnad { get; init; }
+
+        public required ICommand ToggleDefaultResultCommnad { get; init; }
+
+        public required ICommand ToggleDisabledCommnad { get; init; }
     }
 }
