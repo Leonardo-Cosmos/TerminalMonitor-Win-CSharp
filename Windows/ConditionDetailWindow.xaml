@@ -17,6 +17,10 @@
             <Style TargetType="RadioButton">
                 <Setter Property="Margin" Value="3,4" />
             </Style>
+            <x:Array x:Key="designConditions" Type="local:ConditionNodeVO">
+                <local:GroupConditionNodeVO MatchMode="All" />
+                <local:FieldConditionNodeVO FieldKey="key0" MatchOperator="Equals" TargetValue="value0" />
+            </x:Array>
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
@@ -110,7 +114,8 @@
                     </Grid>
                 </Grid>
 
-                <TreeView Name="trConditions" Grid.Row="2" MinHeight="50" SelectedItemChanged="TrConditions_SelectedItemChanged" MouseDown="TrConditions_MouseDown">
+                <TreeView Name="trConditions" Grid.Row="2" MinHeight="50" SelectedItemChanged="TrConditions_SelectedItemChanged" MouseDown="TrConditions_MouseDown"
+                          d:ItemsSource="{StaticResource designConditions}">
                     <TreeView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Cut" Icon="✂" Command="{Binding Path=CutCommand}" />

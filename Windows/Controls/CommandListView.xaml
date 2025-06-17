@@ -7,7 +7,15 @@
              xmlns:helpers="clr-namespace:TerminalMonitor.Windows.Helpers"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=local:CommandListViewDataContextVO}"
-             d:DesignHeight="150" d:DesignWidth="800">
+             d:DesignHeight="250" d:DesignWidth="200">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <x:Array x:Key="designCommands" Type="local:CommandListItemVO">
+                <local:CommandListItemVO Name="Command0" />
+                <local:CommandListItemVO Name="Command1" StopButtonVisibility="Visible" />
+            </x:Array>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -16,7 +24,8 @@
         
         <ListView Name="lstCommands" Grid.Row="1" MinHeight="30" SelectionChanged="LstCommands_SelectionChanged"
                   MouseDown="LstCommands_MouseDown" MouseDoubleClick="LstCommands_MouseDoubleClick"
-                  helpers:MouseHorizontalWheelScroller.ScrollingEnabled="True">
+                  helpers:MouseHorizontalWheelScroller.ScrollingEnabled="True"
+                  d:ItemsSource="{StaticResource designCommands}">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Start" Command="{Binding Path=StartCommand}">

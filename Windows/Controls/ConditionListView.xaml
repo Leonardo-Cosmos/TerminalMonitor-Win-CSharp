@@ -7,6 +7,14 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=local:ConditionListViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <x:Array x:Key="designConditions" Type="{x:Type local:ConditionItemVO}">
+                <local:ConditionItemVO FieldKey="key" MatchOperator="Equals" TargetValue="value0" IsInverted="False" DefaultResult="False" IsDisabled="False" />
+                <local:ConditionItemVO FieldKey="key" MatchOperator="Contains" TargetValue="value1" IsInverted="True" DefaultResult="True" IsDisabled="True" />
+            </x:Array>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -40,7 +48,8 @@
         
         <ListView Name="lstConditions" Grid.Row="1" Grid.RowSpan="1" Grid.Column="0" Grid.ColumnSpan="3" MinHeight="20"
                   SelectionChanged="LstConditions_SelectionChanged"
-                  MouseDown="LstConditions_MouseDown" MouseDoubleClick="LstConditions_MouseDoubleClick">
+                  MouseDown="LstConditions_MouseDown" MouseDoubleClick="LstConditions_MouseDoubleClick"
+                  d:ItemsSource="{StaticResource designConditions}">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Edit" Icon="✏" Command="{Binding Path=EditCommand}" />

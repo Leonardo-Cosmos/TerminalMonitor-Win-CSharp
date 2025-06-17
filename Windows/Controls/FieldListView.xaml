@@ -7,6 +7,15 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=local:FieldListViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <x:Array x:Key="designFields" Type="{x:Type local:FieldListItemVO}">
+                <local:FieldListItemVO FieldKey="key0" />
+                <local:FieldListItemVO FieldKey="key1" HeaderName="Name1" />
+                <local:FieldListItemVO FieldKey="key2" Hidden="True" />
+            </x:Array>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -40,7 +49,8 @@
         <ListView Name="lstFields" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" MinHeight="25"
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                   SelectionChanged="LstFields_SelectionChanged"
-                  MouseDown="LstFields_MouseDown" MouseDoubleClick="LstFields_MouseDoubleClick">
+                  MouseDown="LstFields_MouseDown" MouseDoubleClick="LstFields_MouseDoubleClick"
+                  d:ItemsSource="{StaticResource designFields}">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Edit" Icon="✏" Command="{Binding Path=EditCommand}" />
