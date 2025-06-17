@@ -63,4 +63,142 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="checkBoxInvert" TargetType="CheckBox">
+        <Setter Property="ToolTip" Value="Invert match result" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsInverted}" Value="False">
+                <Setter Property="Content" Value="🛑" />
+                <Setter Property="Foreground" Value="Green" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsInverted}" Value="True">
+                <Setter Property="Content" Value="⛔" />
+                <Setter Property="Foreground" Value="Red" />
+            </DataTrigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="Gray" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="checkBoxInvertDesign" TargetType="CheckBox" BasedOn="{StaticResource checkBoxInvert}">
+        <Setter Property="Content" Value="🛑" />
+        <Setter Property="Foreground" Value="Green" />
+    </Style>
+
+    <Style x:Key="checkBoxDefault" TargetType="CheckBox">
+        <Setter Property="ToolTip" Value="Match by Default" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,-1,0,1" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding DefaultResult}" Value="False">
+                <Setter Property="Content" Value="☆" />
+                <Setter Property="Foreground" Value="Orange" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding DefaultResult}" Value="True">
+                <Setter Property="Content" Value="★" />
+                <Setter Property="Foreground" Value="Gold" />
+            </DataTrigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="Gray" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="checkBoxDefaultDesign" TargetType="CheckBox" BasedOn="{StaticResource checkBoxDefault}">
+        <Setter Property="Content" Value="☆" />
+        <Setter Property="Foreground" Value="Orange" />
+    </Style>
+
+    <Style x:Key="checkBoxDismiss" TargetType="CheckBox">
+        <Setter Property="ToolTip" Value="Dismiss this condition in match" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsDisabled}" Value="False">
+                <Setter Property="Content" Value="⏺" />
+                <Setter Property="Foreground" Value="Green" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsDisabled}" Value="True">
+                <Setter Property="Content" Value="⏸" />
+                <Setter Property="Foreground" Value="Red" />
+            </DataTrigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="Gray" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="checkBoxDismissDesign" TargetType="CheckBox" BasedOn="{StaticResource checkBoxDismiss}">
+        <Setter Property="Content" Value="⏺" />
+        <Setter Property="Foreground" Value="Green" />
+    </Style>
+
+
+    <Style x:Key="textBlockInvert" TargetType="TextBlock">
+        <Setter Property="ToolTip" Value="Invert match result" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsInverted}" Value="False">
+                <Setter Property="Text" Value="🛑" />
+                <Setter Property="Foreground" Value="Green" />
+                <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsInverted}" Value="True">
+                <Setter Property="Text" Value="⛔" />
+                <Setter Property="Foreground" Value="Red" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="textBlockDefault" TargetType="TextBlock">
+        <Setter Property="ToolTip" Value="Match by Default" />
+        <Setter Property="FontSize" Value="20" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding DefaultResult}" Value="False">
+                <Setter Property="Text" Value="☆" />
+                <Setter Property="Foreground" Value="Orange" />
+                <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding DefaultResult}" Value="True">
+                <Setter Property="Text" Value="★" />
+                <Setter Property="Foreground" Value="Gold" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="textBlockDismiss" TargetType="TextBlock">
+        <Setter Property="ToolTip" Value="Dismiss this condition in match" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsDisabled}" Value="False">
+                <Setter Property="Text" Value="⏺" />
+                <Setter Property="Foreground" Value="Green" />
+                <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsDisabled}" Value="True">
+                <Setter Property="Text" Value="⏸" />
+                <Setter Property="Foreground" Value="Red" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
 </ResourceDictionary>

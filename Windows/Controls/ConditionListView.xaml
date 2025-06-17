@@ -8,99 +8,6 @@
              d:DataContext="{d:DesignInstance Type=local:ConditionListViewDataContextVO}"
              d:DesignHeight="150" d:DesignWidth="800">
     <Grid>
-        <Grid.Resources>
-            <ResourceDictionary>
-                <Style x:Key="checkBoxInvert" TargetType="CheckBox">
-                    <Setter Property="ToolTip" Value="Invert match result" />
-                    <Setter Property="VerticalAlignment" Value="Center" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsInverted}" Value="False">
-                            <Setter Property="Content" Value="🛑" />
-                            <Setter Property="Foreground" Value="Green" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding IsInverted}" Value="True">
-                            <Setter Property="Content" Value="⛔" />
-                            <Setter Property="Foreground" Value="Red" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-
-                <Style x:Key="checkBoxDefault" TargetType="CheckBox">
-                    <Setter Property="ToolTip" Value="Match by Default" />
-                    <Setter Property="VerticalAlignment" Value="Center" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding DefaultResult}" Value="False">
-                            <Setter Property="Content" Value="☆" />
-                            <Setter Property="Foreground" Value="Orange" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding DefaultResult}" Value="True">
-                            <Setter Property="Content" Value="★" />
-                            <Setter Property="Foreground" Value="Gold" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-                <Style x:Key="checkBoxDismiss" TargetType="CheckBox">
-                    <Setter Property="ToolTip" Value="Dismiss this condition in match" />
-                    <Setter Property="VerticalAlignment" Value="Center" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsDisabled}" Value="False">
-                            <Setter Property="Content" Value="⏺" />
-                            <Setter Property="Foreground" Value="Green" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding IsDisabled}" Value="True">
-                            <Setter Property="Content" Value="⏸" />
-                            <Setter Property="Foreground" Value="Red" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-
-                <Style x:Key="textInvert" TargetType="TextBlock">
-                    <Setter Property="ToolTip" Value="Invert match result" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsInverted}" Value="False">
-                            <Setter Property="Text" Value="🛑" />
-                            <Setter Property="Foreground" Value="Green" />
-                            <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding IsInverted}" Value="True">
-                            <Setter Property="Text" Value="⛔" />
-                            <Setter Property="Foreground" Value="Red" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-
-                <Style x:Key="textDefault" TargetType="TextBlock">
-                    <Setter Property="ToolTip" Value="Match by Default" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding DefaultResult}" Value="False">
-                            <Setter Property="Text" Value="☆" />
-                            <Setter Property="Foreground" Value="Orange" />
-                            <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding DefaultResult}" Value="True">
-                            <Setter Property="Text" Value="★" />
-                            <Setter Property="Foreground" Value="Gold" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-
-                <Style x:Key="textDismiss" TargetType="TextBlock">
-                    <Setter Property="ToolTip" Value="Dismiss this condition in match" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsDisabled}" Value="False">
-                            <Setter Property="Text" Value="⏺" />
-                            <Setter Property="Foreground" Value="Green" />
-                            <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding IsDisabled}" Value="True">
-                            <Setter Property="Text" Value="⏸" />
-                            <Setter Property="Foreground" Value="Red" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </ResourceDictionary>
-        </Grid.Resources>
-        
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -122,9 +29,12 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <CheckBox Name="chkBxNegative" Margin="2, 0" Style="{StaticResource checkBoxInvert}" IsChecked="{Binding IsInverted}" />
-            <CheckBox Name="chkBxDefault" Margin="2, 0" Style="{StaticResource checkBoxDefault}" IsChecked="{Binding DefaultResult}" />
-            <CheckBox Name="chkBxDismiss" Margin="2, 0" Style="{StaticResource checkBoxDismiss}" IsChecked="{Binding IsDisabled}" />
+            <CheckBox Name="chkBxNegative" Margin="2, 0" IsChecked="{Binding IsInverted}"
+                      Style="{StaticResource checkBoxInvert}" d:Style="{StaticResource checkBoxInvertDesign}" />
+            <CheckBox Name="chkBxDefault" Margin="2, 0" IsChecked="{Binding DefaultResult}"
+                      Style="{StaticResource checkBoxDefault}" d:Style="{StaticResource checkBoxDefaultDesign}" />
+            <CheckBox Name="chkBxDismiss" Margin="2, 0" IsChecked="{Binding IsDisabled}"
+                      Style="{StaticResource checkBoxDismiss}" d:Style="{StaticResource checkBoxDismissDesign}" />
 
         </StackPanel>
         
@@ -174,9 +84,9 @@
                             <TextBlock Text="{Binding FieldKey}" Margin="3" Style="{StaticResource textWhenNoName}" />
                             <TextBlock Text="{Binding MatchOperator, Converter={StaticResource MatchOperatorToStringConverter}}" Margin="3" Style="{StaticResource textWhenNoName}" />
                             <TextBlock Text="{Binding TargetValue}" Margin="3" Style="{StaticResource textWhenNoName}" />
-                            <TextBlock Margin="3" Style="{StaticResource textInvert}" />
-                            <TextBlock Margin="3" Style="{StaticResource textDefault}" />
-                            <TextBlock Margin="3" Style="{StaticResource textDismiss}" />
+                            <TextBlock Margin="3" Style="{StaticResource textBlockInvert}" />
+                            <TextBlock Margin="3,-3,3,-3" Style="{StaticResource textBlockDefault}" />
+                            <TextBlock Margin="3" Style="{StaticResource textBlockDismiss}" />
                         </StackPanel>
                     </Border>
                 </DataTemplate>
