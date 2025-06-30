@@ -1,5 +1,6 @@
 ﻿/* 2021/5/9 */
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -59,8 +60,14 @@ namespace TerminalMonitor.Windows.Controls
 
         private readonly TerminalViewDataContextVO dataContextVO;
 
+        /// <summary>
+        /// A dictionary containing matching result of each line.
+        /// </summary>
         private readonly Dictionary<string, bool> lineFilterDict = [];
 
+        /// <summary>
+        /// A list of all matched lines.
+        /// </summary>
         private readonly List<TerminalLine> shownLines = [];
 
         private readonly List<(TerminalLine terminalLine, int shownIndex)> foundLines = [];
@@ -331,6 +338,32 @@ namespace TerminalMonitor.Windows.Controls
                 var lastItem = listTerminal.Items[itemCount - 1];
                 listTerminal.ScrollIntoView(lastItem);
             }
+        }
+
+        public void RemoveClearedTerminalLines(IEnumerable<TerminalLine> terminalLines)
+        {
+            FrozenSet<string> removedLineIdSet = terminalLines
+                .Select(terminalLine => terminalLine.Id)
+                .ToFrozenSet();
+
+            foreach (var lineId in removedLineIdSet)
+            {
+                lineFilterDict.Remove(lineId);
+            }
+
+            var remainingLines = shownLines
+                .Where(terminalLine => !removedLineIdSet.Contains(terminalLine.Id))
+                .ToList();
+            shownLines.Clear();
+            shownLines.AddRange(remainingLines);
+
+            terminalDataTable.Rows.Clear();
+            foreach (var line in remainingLines)
+            {
+                AddTerminalLine(line);
+            }
+
+            FindInTerminal();
         }
 
         private void FilterTerminal()
@@ -732,7 +765,7 @@ namespace TerminalMonitor.Windows.Controls
 
         private void Supervisor_TerminalLinesRemoved(object sender, TerminalLinesEventArgs e)
         {
-            FilterTerminal();
+            RemoveClearedTerminalLines(e.TerminalLines);
         }
 
         public ITerminalSupervisor? TerminalLineSupervisor
