@@ -54,8 +54,20 @@
 
                 <controls:ConditionListView x:Name="filterConditionListView" Grid.RowSpan="2" Grid.ColumnSpan="2" Panel.ZIndex="0" />
 
-                <Button Name="buttonFilter" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" Content="🥛" ToolTip="Filter" Click="ButtonFilter_Click"
-                        Style="{StaticResource buttonIcon}" Foreground="Blue" />
+                <Button Name="buttonFilter" Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" ToolTip="Filter" Click="ButtonFilter_Click"
+                        Style="{StaticResource buttonIcon}">
+                    <Viewbox>
+                        <Canvas Width="20" Height="20">
+                            <Polygon Points="4,3 16,3, 10,12"
+                                     Fill="Transparent"
+                                     Stroke="Blue"
+                                     StrokeThickness="2"/>
+                            <Line X1="10" Y1="12" X2="10" Y2="17"
+                                  Stroke="Blue"
+                                  StrokeThickness="2" />
+                        </Canvas>
+                    </Viewbox>
+                </Button>
             </Grid>
         </Expander>
 
@@ -93,8 +105,20 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Button Name="buttonFind" Grid.Column="0" Width="24" Content="🔍" ToolTip="Find" Click="ButtonFind_Click"
-                            Style="{StaticResource buttonIcon}" Foreground="DimGray" />
+                    <Button Name="buttonFind" Grid.Column="0" Width="24" ToolTip="Find" Click="ButtonFind_Click"
+                            Style="{StaticResource buttonIcon}">
+                        <Viewbox>
+                            <Canvas Width="24" Height="24">
+                                <Ellipse Width="10" Height="10" Canvas.Left="5" Canvas.Top="6"
+                                         Fill="Transparent"
+                                         Stroke="Black"
+                                         StrokeThickness="2" />
+                                <Line X1="13" Y1="14" X2="18" Y2="19"
+                                      Stroke="Black"
+                                      StrokeThickness="2" />
+                            </Canvas>
+                        </Viewbox>
+                    </Button>
                     <Button Name="buttonFindFirst" Grid.Column="1" Width="24" Content="⬆" ToolTip="Find First" Click="ButtonFindFirst_Click"
                             Style="{StaticResource buttonIcon}" />
                     <Button Name="buttonFindPrevious" Grid.Column="2" Width="24" Content="↑" ToolTip="Find Previous" Click="ButtonFindPrevious_Click"
