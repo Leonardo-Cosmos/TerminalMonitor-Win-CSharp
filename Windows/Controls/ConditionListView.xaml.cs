@@ -56,6 +56,9 @@ namespace TerminalMonitor.Windows.Controls
                 AddCommand = new RelayCommand(AddCondition, () => true),
                 RemoveCommand = new RelayCommand(RemoveSelectedConditions, () => dataContextVO!.IsAnyConditionSelected),
                 EditCommand = new RelayCommand(EditSelectedConditions, () => dataContextVO!.IsAnyConditionSelected),
+                ToggleInvertedCommnad = new RelayCommand(ToggleSelectedConditionsInverted, () => dataContextVO!.IsAnyConditionSelected),
+                ToggleDefaultResultCommnad = new RelayCommand(ToggleSelectedConditionsDefaultResult, () => dataContextVO!.IsAnyConditionSelected),
+                ToggleDisabledCommnad = new RelayCommand(ToggleSelectedConditionsDisabled, () => dataContextVO!.IsAnyConditionSelected),
                 MoveLeftCommand = new RelayCommand(MoveSelectedConditionsLeft, () => dataContextVO!.IsAnyConditionSelected),
                 MoveRightCommand = new RelayCommand(MoveSelectedConditionsRight, () => dataContextVO!.IsAnyConditionSelected),
                 CutCommand = new RelayCommand(CutSelectedConditions,
@@ -90,6 +93,9 @@ namespace TerminalMonitor.Windows.Controls
                 case nameof(ConditionListViewDataContextVO.IsAnyConditionSelected):
                     (dataContextVO.RemoveCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.EditCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.ToggleInvertedCommnad as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.ToggleDefaultResultCommnad as RelayCommand)?.NotifyCanExecuteChanged();
+                    (dataContextVO.ToggleDisabledCommnad as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.MoveLeftCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.MoveRightCommand as RelayCommand)?.NotifyCanExecuteChanged();
                     (dataContextVO.CutCommand as RelayCommand)?.NotifyCanExecuteChanged();
@@ -283,6 +289,48 @@ namespace TerminalMonitor.Windows.Controls
             };
 
             window.Show();
+        }
+
+        private void ToggleSelectedConditionsInverted()
+        {
+            ForEachSelectedItem(ToggleConditionInverted);
+        }
+
+        private void ToggleConditionInverted(ConditionItemVO itemVO)
+        {
+            var index = conditionVOs.IndexOf(itemVO);
+            var condition = conditions[index];
+
+            condition.IsInverted = !condition.IsInverted;
+            itemVO.IsInverted = condition.IsInverted;
+        }
+
+        private void ToggleSelectedConditionsDefaultResult()
+        {
+            ForEachSelectedItem(ToggleConditionDefaultResult);
+        }
+
+        private void ToggleConditionDefaultResult(ConditionItemVO itemVO)
+        {
+            var index = conditionVOs.IndexOf(itemVO);
+            var condition = conditions[index];
+
+            condition.DefaultResult = !condition.DefaultResult;
+            itemVO.DefaultResult = condition.DefaultResult;
+        }
+
+        private void ToggleSelectedConditionsDisabled()
+        {
+            ForEachSelectedItem(ToggleConditionDisabled);
+        }
+
+        private void ToggleConditionDisabled(ConditionItemVO itemVO)
+        {
+            var index = conditionVOs.IndexOf(itemVO);
+            var condition = conditions[index];
+
+            condition.IsDisabled = !condition.IsDisabled;
+            itemVO.IsDisabled = condition.IsDisabled;
         }
 
         private void MoveSelectedConditionsLeft()

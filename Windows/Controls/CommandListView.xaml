@@ -7,7 +7,15 @@
              xmlns:helpers="clr-namespace:TerminalMonitor.Windows.Helpers"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=local:CommandListViewDataContextVO}"
-             d:DesignHeight="150" d:DesignWidth="800">
+             d:DesignHeight="250" d:DesignWidth="200">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <x:Array x:Key="designCommands" Type="local:CommandListItemVO">
+                <local:CommandListItemVO Name="Command0" />
+                <local:CommandListItemVO Name="Command1" StopButtonVisibility="Visible" />
+            </x:Array>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -16,11 +24,24 @@
         
         <ListView Name="lstCommands" Grid.Row="1" MinHeight="30" SelectionChanged="LstCommands_SelectionChanged"
                   MouseDown="LstCommands_MouseDown" MouseDoubleClick="LstCommands_MouseDoubleClick"
-                  helpers:MouseHorizontalWheelScroller.ScrollingEnabled="True">
+                  helpers:MouseHorizontalWheelScroller.ScrollingEnabled="True"
+                  d:ItemsSource="{StaticResource designCommands}">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Start" Icon="▷" Command="{Binding Path=StartCommand}" />
-                    <MenuItem Header="Stop" Icon="□" Command="{Binding Path=StopCommand}" />
+                    <MenuItem Header="Start" Command="{Binding Path=StartCommand}">
+                        <MenuItem.Icon>
+                            <Viewbox Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="▶" Foreground="Green" />
+                            </Viewbox>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Stop" Command="{Binding Path=StopCommand}">
+                        <MenuItem.Icon>
+                            <Viewbox Width="20" Height="20">
+                                <TextBlock Text="■" Foreground="Red" />
+                            </Viewbox>
+                        </MenuItem.Icon>
+                    </MenuItem>
                     <Separator />
                     <MenuItem Header="Edit" Icon="✏" Command="{Binding Path=EditCommand}" />
                     <Separator />
@@ -57,30 +78,26 @@
                         </Grid.ColumnDefinitions>
                         
                         <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding Name}" />
-                        <Button Name="btnStop" Grid.Column="2" Width="20" Content="□" Tag="{Binding Id}" Click="BtnStop_Click">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Visibility" Value="Hidden" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
-                        <Button Name="btnStart" Grid.Column="3" Width="20" Content="▷" Tag="{Binding Id}" Click="BtnStart_Click" />
+                        <Button Name="btnStop" Grid.Column="2" Width="24" Height="24" Content="■" ToolTip="Stop" Tag="{Binding Id}" Click="BtnStop_Click"
+                                Style="{StaticResource buttonIcon}" Foreground="Red" Visibility="{Binding StopButtonVisibility}" />
+                        <Button Name="btnStart" Grid.Column="3" Width="24" Height="24" Content="▶" ToolTip="Start" Tag="{Binding Id}" Click="BtnStart_Click"
+                                Style="{StaticResource buttonIcon}" Foreground="Green" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
         
         <WrapPanel Grid.Row="0" Orientation="Horizontal">
-            <Button Name="btnAdd" Width="20" Content="➕" ToolTip="Add" Command="{Binding Path=AddCommand}" />
-            <Button Name="btnRemove" Width="20" Content="➖" ToolTip="Delete" Command="{Binding Path=RemoveCommand}" />
-            <Button Name="btnEdit" Width="20" Content="✏" ToolTip="Edit" Command="{Binding Path=EditCommand}" />
-            <Button Name="btnMoveUp" Width="20" Content="↑" ToolTip="Move Up" Command="{Binding Path=MoveUpCommand}" />
-            <Button Name="btnMoveDown" Width="20" Content="↓" ToolTip="Move Down" Command="{Binding Path=MoveDownCommand}" />
+            <Button Name="btnAdd" Width="24" Content="➕" ToolTip="Add" Command="{Binding Path=AddCommand}"
+                    Style="{StaticResource buttonIcon}" />
+            <Button Name="btnRemove" Width="24" Content="➖" ToolTip="Delete" Command="{Binding Path=RemoveCommand}"
+                    Style="{StaticResource buttonIcon}" />
+            <Button Name="btnEdit" Width="24" Content="✏" ToolTip="Edit" Command="{Binding Path=EditCommand}"
+                    Style="{StaticResource buttonIcon}" />
+            <Button Name="btnMoveUp" Width="24" Content="↑" ToolTip="Move Up" Command="{Binding Path=MoveUpCommand}"
+                    Style="{StaticResource buttonIcon}" />
+            <Button Name="btnMoveDown" Width="24" Content="↓" ToolTip="Move Down" Command="{Binding Path=MoveDownCommand}"
+                    Style="{StaticResource buttonIcon}"/>
         </WrapPanel>
         
     </Grid>

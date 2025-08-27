@@ -7,7 +7,15 @@
              xmlns:helpers="clr-namespace:TerminalMonitor.Windows.Helpers"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=local:ExecutionListViewDataContextVO}"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="250" d:DesignWidth="200">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <x:Array x:Key="designExecutions" Type="local:ExecutionListItemVO">
+                <local:ExecutionListItemVO Name="Execution0" />
+                <local:ExecutionListItemVO Name="Execution1" />
+            </x:Array>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -16,11 +24,24 @@
         <ListView Name="lstExecutions" Grid.Row="0" MinHeight="30"
                   SelectionChanged="LstExecutions_SelectionChanged"
                   MouseDown="LstExecutions_MouseDown"
-                  helpers:MouseHorizontalWheelScroller.ScrollingEnabled="True">
+                  helpers:MouseHorizontalWheelScroller.ScrollingEnabled="True"
+                  d:ItemsSource="{StaticResource designExecutions}">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Stop" Icon="□" Command="{Binding Path=StopCommand}" />
-                    <MenuItem Header="Restart" Icon="↺" Command="{Binding Path=RestartCommand}" />
+                    <MenuItem Header="Stop" Command="{Binding Path=StopCommand}">
+                        <MenuItem.Icon>
+                            <Viewbox Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="■" Foreground="Red" />
+                            </Viewbox>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Restart" Command="{Binding Path=RestartCommand}">
+                        <MenuItem.Icon>
+                            <Viewbox Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="↺" Foreground="Blue" />
+                            </Viewbox>
+                        </MenuItem.Icon>
+                    </MenuItem>
                 </ContextMenu>
             </ListView.ContextMenu>
             
@@ -41,8 +62,10 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding Name}" />
-                        <Button Name="btnRestart" Grid.Column="2" Width="20" Content="↺" Tag="{Binding Id}" Click="BtnRestart_Click" />
-                        <Button Name="btnStop" Grid.Column="3" Width="20" Content="□" Tag="{Binding Id}" Click="BtnStop_Click" />
+                        <Button Name="btnRestart" Grid.Column="2" Width="24" Height="24" Content="↺" ToolTip="Restart" Tag="{Binding Id}" Click="BtnRestart_Click"
+                                Style="{StaticResource buttonIcon}" Foreground="Blue" FontSize="20" Padding="0,-3,0,0" />
+                        <Button Name="btnStop" Grid.Column="3" Width="24" Height="24" Content="■" ToolTip="Stop" Tag="{Binding Id}" Click="BtnStop_Click"
+                                Style="{StaticResource buttonIcon}" Foreground="Red" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

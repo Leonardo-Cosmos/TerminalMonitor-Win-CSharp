@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 
 namespace TerminalMonitor.Windows.Controls
 {
@@ -29,12 +30,12 @@ namespace TerminalMonitor.Windows.Controls
             set { id = value; OnPropertyChanged(); }
         }
 
-        private bool isRunning = false;
+        private Visibility stopButtonVisibility = Visibility.Hidden;
 
-        public bool IsRunning
+        public Visibility StopButtonVisibility
         {
-            get => isRunning;
-            set { isRunning = value; OnPropertyChanged(); }
+            get => stopButtonVisibility;
+            set { stopButtonVisibility = value; OnPropertyChanged(); }
         }
     }
 }
